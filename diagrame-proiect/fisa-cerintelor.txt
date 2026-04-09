@@ -1,0 +1,60 @@
+Din ce este formată fizic o centrală nucleara?
+1. Reactorul (Inima centralei): Aici vei monitoriza cele mai critice date: temperatura miezului, presiunea, nivelul de radiații.
+2. Sistemul de racire si Generare a Aburului: presiunea apelor si debitul pompei.
+3. Sala Turbinelor (Generatorul):  Metrici de interes: turația turbinelor (RPM), energia electrică produsă (Megawați - MW).
+4. Sursa de Răcire / Turnurile de Răcire: De monitorizat temperatura apei evacuate 
+!!! Centralele stau mereu pe langa un rau, lac sau ocean
+
+Interfata de monitorizare este pentru o singura centrala (cea selectata) sau pentru toate centralele existente? 
+
+Macro-uri: 
+-Vizualizarea de detalii cu privire la centralele nucleare. (Glob - toate centralele -> Centrala selectata - coordonate, sursa de apa, alte informatii -> Camera de control a centralei selectate) 
+
+-Studiu de fezabilitate: pe baza informatiilor procurate, platforma decide daca este o idee buna sau nu sa amplasezi acolo o centrala nucleara. 
+
+-Statistici cu privire la centralele deja construite 
+
+-Monitorizarea in timp real a reactoarelor centralei
+
+-Trimitere de notificari RSS 
+
+
+Macro1 
+Vizualizarea detaliilor
+Descriere: Utilizatorul intra pe platforma si vede lista cu toate centralele disponibile (lista / harta). Urmeaza mai apoi sa poata vedea detalii despre ce centrala doreste. Daca intra mai apoi in cadrul camerei de control, are date legate de reactoarele centralei nucleare
+
+Actori 
+1. Utilizatorul 
+
+Scenarii de utilizare
+- Vizualizeaza date legate de lista de centrale disponibile pe platforma 
+- Vizualizeaza date legate de o anume centrala dorita
+- Vizualizeaza camera de control a centralei 
+
+Exceptii: 
+-Baza de date nu functioneaza si nu sunt primite date despre centralele in cauza 
+-Un reactor este oprit si nu furnizeaza niciun fel de date
+-Doi alti utilizatori vor sa puna o centrala in acelasi timp la aceleasi coordonate iar ce vede utilizatorul este neclar (race condition)
+
+Macro2
+Crearea studiului de fezabilitate pentru o centrala viitoare 
+Descriere: Se introduc mai multe date cu privire la construirea centralei. Pe baza acestora se va face un studiu de fezabilitate si platforma se va asigura ca centrala este construita intr-un mediu sigur. 
+
+Actori
+1. Managerul / Cel numit de manager
+Scenarii de utilizare
+- Creeaza studiul de fezabilitate (initializarea formularului) 
+- Introduce date elementare despre viitoarea centrala: nume, descriere, coordonate, latitudine, longitudine, judet, regiune 
+
+Exceptii: 
+- Nu se poate creea o centrala in zona stabilita 
+
+2. Geologul 
+Scenarii de utilizare
+- Introduce urmatoarele date in partea a doua a formularului: tipul de sol, gradul de risc seismic al zonei, altitudine fata de nivelul marii 
+- Introduce date legate de apa: tipul sursei de apa de racire, distanta pana la sursa de apa 
+
+3. Seful de proiect de centrala 
+Scenarii de utilizare
+- Introduce date legate de orasul din apropiere: distanta fata de cel mai apropiat oras mare, populatia orasului
+- Introduce configuratia centralei: numarul de reactoare propuse, tipul tehnologiei nucleare 

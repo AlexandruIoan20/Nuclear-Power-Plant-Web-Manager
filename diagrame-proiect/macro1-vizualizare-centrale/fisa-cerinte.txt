@@ -1,0 +1,32 @@
+Macro1 
+Vizualizarea detaliilor
+Descriere: Utilizatorul intra pe platforma si vede lista cu toate centralele disponibile (lista / harta). Urmeaza mai apoi sa poata vedea detalii despre ce centrala doreste. Daca intra mai apoi in cadrul camerei de control, are date legate de reactoarele centralei nucleare
+
+Actori 
+1. Utilizatorul 
+
+Scenarii de utilizare
+- Vizualizeaza date legate de lista de centrale disponibile pe platforma 
+- Vizualizeaza date legate de o anume centrala dorita
+- Vizualizeaza camera de control a centralei 
+
+____________________________________________________________________________________________________________________________________________________________________________________________
+
+Exceptii
+. Eroare de conectare la baza de date (Server-side)
+
+    Declanșator: Când utilizatorul accesează platforma, scriptul PHP nu reușește să se conecteze la baza de date MySQL (server picat sau credențiale greșite).
+
+    Comportamentul sistemului: Sistemul blochează afișarea erorilor brute de PHP pe ecran (pentru securitate). În schimb, încarcă un ecran de eroare (păstrând tema dark) cu mesajul „Conexiunea cu centrul de comandă a eșuat. Vă rugăm reîncercați.”
+
+2. Pierderea conexiunii live a utilizatorului (Client-side)
+
+    Declanșator: În timp ce utilizatorul se află în „Camera de control”, conexiunea lui la internet pică, iar scriptul de JavaScript nu mai poate prelua noul fișier JSON cu date de la server.
+
+    Comportamentul sistemului: Interfața detectează eșecul apelului (timeout). Ultimele valori cunoscute îngheață pe ecran, dar sistemul afișează imediat un banner de alertă foarte vizibil: „CONEXIUNE PIERDUTĂ: Datele afișate nu mai sunt în timp real.”
+
+3. Lipsă date senzori / Reactor intrat în mentenanță
+
+    Declanșator: Utilizatorul vizualizează camera de control, dar un anumit reactor este setat în baza de date pe statusul „Oprit/Mentenanță”, nedifuzând date noi pentru temperatură/presiune.
+
+    Comportamentul sistemului: Sistemul previne erorile de tip „valoare nulă” (care ar strica barele de progres din HTML). Cardul vizual al acelui reactor este estompat (culoare gri), indicatoarele sunt puse la 0, iar un mesaj clar indică „REACTOR OPRIT - MENTENANȚĂ”.w

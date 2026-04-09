@@ -1,0 +1,12 @@
+Macro3: Crearea de statistici privind centralele 
+Descriere: Statistici dupa mai multe filtre, pentru o lista selectata de centrale
+
+Actori: 
+1. Managerul unei centrale 
+- Poate cere sistemului sa ii transmita un raport cu statisticile centralei sale 
+- Poate filtra raportul in functie de timp - ultimele x zile 
+- Poate adauga filtre cu privire la ce statistici cauta 
+
+2. Administrator de platforma 
+- Poate cere sistemului statistici cu privire la toate centralele 
+- Acelasi lucru cu filtrele 

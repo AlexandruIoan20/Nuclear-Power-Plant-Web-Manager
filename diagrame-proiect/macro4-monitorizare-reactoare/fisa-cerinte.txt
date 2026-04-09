@@ -1,0 +1,44 @@
+Macro 3: Monitorizarea în timp real a reactoarelor
+
+Descriere: Utilizatorul accesează panoul de comandă al unei centrale specifice pentru a supraveghea starea de funcționare a reactoarelor. Sistemul preia continuu, la intervale regulate, datele telemetrice (temperatură, presiune, nivel de răcire, putere generată) și actualizează interfața grafică fără a reîncărca pagina. Orice deviație de la parametrii normali declanșează alerte vizuale și actualizează fluxul de date RSS.
+
+Actori:
+-Operatorul de Cameră de Control (Actor principal - citește și reacționează la date)
+-Sistemul Backend / Simulatorul (Actor secundar - generează și livrează datele)
+
+Precondiții:
+Utilizatorul este autentificat în sistem și are rolul necesar pentru accesarea modulului live (operator sau admin).
+Reactorul selectat are statusul „Activ” în baza de date (nu este în construcție sau dezafectat).
+
+Postcondiții:
+Datele de pe ecran reflectă starea reactorului cu o întârziere maximă de câteva secunde.
+Orice alertă critică este înregistrată automat în tabelul alerts și este disponibilă în fișierul rss_feed.php.
+
+Scenarii de utilizare (Fluxul Principal / Happy Path)
+    Operatorul selectează un reactor din lista centralei pentru a intra în „Camera de Control”.
+    Sistemul (prin PHP) generează structura paginii web (HTML/CSS) și afișează ultima stare cunoscută a parametrilor (Temperatură, Presiune, Turație Pompe, Bare de Control, Putere).
+    Modulul de interfață (JavaScript) inițiază o conexiune asincronă (polling) către server la fiecare 3 secunde.
+    Sistemul (Backend-ul) interoghează baza de date, extrage noile valori și le returnează în format JSON.
+    Interfața actualizează vizual datele (modifică lățimea barelor de progres, actualizează cifrele și culorile semafoarelor de stare) fără să dea refresh paginii.
+    Valorile se încadrează în limitele normale, iar sistemul afișează statusul „FUNCȚIONARE NORMALĂ” (Verde).
+
+Excepții (Fluxuri Alternative)
+
+1. Depășirea pragurilor critice de siguranță (Alertă de Pericol)
+    Declanșator: Datele primite de la server indică o valoare care depășește limita de siguranță (ex: Temperatura miezului trece de 350°C sau presiunea scade brusc).
+    Comportamentul sistemului: * UI-ul schimbă imediat tema vizuală a cardului respectiv (ex: contur roșu intermitent).
+        Sistemul afișează statusul „AVERTISMENT / CRITIC”
+        Backend-ul PHP generează o înregistrare nouă în tabelul de alerte și trimite (sau pregătește pentru trimitere) un e-mail către managerul centralei.
+        Fluxul RSS este actualizat instantaneu cu noul incident pentru a notifica abonații externi.
+
+2. Pierderea conexiunii client-server (Client-side Timeout)
+    Declanșator: Conexiunea la internet a operatorului cade sau serverul durează prea mult să răspundă la cererea JavaScript (fetch timeout).
+    Comportamentul sistemului: Interfața îngheață ultimele valori cunoscute pe ecran pentru a preveni dispariția lor, dar afișează deasupra un banner de avertizare clar: „CONEXIUNE PIERDUTĂ: Datele afișate nu mai sunt în timp real. Se încearcă reconectarea...”.
+
+3. Lipsa datelor de la senzori (Server-side Null Data)
+    Declanșator: Conexiunea web funcționează, dar scriptul PHP returnează date goale/nule din baza de date pentru un anumit reactor (ex: scriptul de simulare a picat sau baza de date e blocată).
+    Comportamentul sistemului: JavaScript-ul previne afișarea unor erori de tip "NaN" (Not a Number) sau spargerea barelor de progres HTML. Afișează cardul reactorului cu o tematică gri/estompată și mesajul „EROARE SENZORI - DATE INDISPONIBILE”.
+
+4. Reactor intrat în procedură de mentenanță / Oprire planificată
+    Declanșator: În timp ce operatorul monitorizează panoul, directorul centralei schimbă statusul reactorului în "Mentenanță" din modulul de administrare.
+    Comportamentul sistemului: La următoarea interogare live (peste 3 secunde), interfața primește noul status. Parametrii de putere generată devin "0 MW", iar statusul vizual general se schimbă în Galben ("OPRIRE PLANIFICATĂ / MENTENANȚĂ"), anulând alertele false de "presiune scăzută" care altfel s-ar declanșa.

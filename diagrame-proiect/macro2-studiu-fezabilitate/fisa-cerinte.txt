@@ -1,0 +1,51 @@
+Macro2
+Crearea studiului de fezabilitate pentru o centrala viitoare 
+Descriere: Se introduc mai multe date cu privire la construirea centralei. Pe baza acestora se va face un studiu de fezabilitate si platforma se va asigura ca centrala este construita intr-un mediu sigur. 
+
+Actori
+1. Managerul / Cel numit de manager
+Scenarii de utilizare
+- Creeaza studiul de fezabilitate (initializarea formularului) 
+- Introduce date elementare despre viitoarea centrala: nume, descriere, coordonate, latitudine, longitudine, judet, regiune 
+- Managerul seteaza studiul ca si terminat iar platforma ia o decizie pe baza datelor propuse de angajati. 
+
+Exceptii: 
+- Nu se poate creea o centrala in zona stabilita 
+
+2. Geologul 
+Scenarii de utilizare
+- Introduce urmatoarele date in partea a doua a formularului: tipul de sol, gradul de risc seismic al zonei, altitudine fata de nivelul marii 
+- Introduce date legate de apa: tipul sursei de apa de racire, distanta pana la sursa de apa 
+
+3. Seful de proiect de centrala 
+Scenarii de utilizare
+- Introduce date legate de orasul din apropiere: distanta fata de cel mai apropiat oras mare, populatia orasului
+- Introduce configuratia centralei: numarul de reactoare propuse, tipul tehnologiei nucleare 
+
+____________________________________________________________________________________________________________________________________________________________________________________________
+
+Exceptii
+
+1. Erori de validare a datelor (Input Validation Error)
+
+    Declanșator: Unul dintre actori (Manager, Geolog sau Șef de proiect) introduce date într-un format greșit, lasă un câmp obligatoriu gol sau introduce valori imposibile (ex: distanță negativă, coordonate inexistente).
+
+    Comportamentul sistemului: Sistemul interceptează eroarea înainte de a trece la pasul următor (sau înainte de a salva în baza de date). Formularul este reîncărcat, păstrând datele deja completate, dar evidențiază câmpul problematic cu roșu și afișează un mesaj de eroare specific (ex: „Acest câmp acceptă doar valori numerice pozitive”).
+
+2. Expirarea sesiunii de lucru (Session Timeout)
+
+    Declanșator: Deoarece completarea formularului se face în pași succesivi (folosind $_SESSION în PHP), dacă un actor lasă pagina deschisă o perioadă lungă de timp fără să interacționeze, serverul distruge sesiunea din motive de securitate.
+
+    Comportamentul sistemului: La următoarea încercare de a salva sau de a trece la pasul următor, sistemul nu crapă, ci redirecționează utilizatorul către primul pas al formularului (sau la ecranul de autentificare), afișând mesajul: „Sesiunea a expirat. Vă rugăm să reluați procesul.”
+
+3. Conflict de amplasament (Suprapunere de coordonate)
+
+    Declanșator: Managerul introduce datele de identificare (latitudine/longitudine), dar baza de date conține deja o altă centrală (aprobată sau în stadiu de planificare) la exact aceleași coordonate sau într-o rază mai mică de siguranță.
+
+    Comportamentul sistemului: Sistemul blochează crearea dosarului la Pasul 1 și afișează o alertă critică: „Eroare: Există deja o facilitate înregistrată în această locație. Nu se pot iniția două studii pe același perimetru.”
+
+4. Respingerea studiului de fezabilitate (Business Logic Exception)
+
+    Declanșator: Toți pașii sunt parcurși cu succes, toate datele sunt valide, dar la finalul evaluării, algoritmul de backend calculează un scor de risc prea mare (de exemplu: sol instabil combinat cu o distanță prea mică față de un oraș mare).
+
+    Comportamentul sistemului: Centrala NU este introdusă în baza de date pentru monitorizare. Sistemul afișează un ecran de respingere a proiectului, listând cu roșu factorii de risc care au dus la neaprobarea locației.
