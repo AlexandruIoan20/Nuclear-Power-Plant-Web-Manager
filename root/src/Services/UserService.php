@@ -8,7 +8,7 @@ class UserService {
     }
 
     public function registerUser(array $data): void { 
-        if(empty($data['name']) || empty($data['email']) || empty($data['pasword'])) { 
+        if(empty($data['name']) || empty($data['email']) || empty($data['password'])) { 
             throw new Exception('All fields are required!');
         }
 

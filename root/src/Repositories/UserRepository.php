@@ -23,7 +23,7 @@ class UserRepository {
         $users = []; 
 
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { 
-            $users[] = new User($row['name'], $row['email'], $row['passowrd_hash'], $row['id']); 
+            $users[] = new User($row['name'], $row['email'], $row['password_hash'], $row['id']); 
         }
 
         return $users; 
