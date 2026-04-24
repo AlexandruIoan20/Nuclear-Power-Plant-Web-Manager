@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS admin_data_entries (
     planned_maintenance BOOLEAN NOT NULL DEFAULT false,
     unplanned_stop BOOLEAN NOT NULL DEFAULT false,
     notes TEXT,
-    metrics JSONB NOT NULL DEFAULT '[]'::jsonb,
+    metrics CLOB NOT NULL CHECK (metrics IS JSON),
     created_by VARCHAR(100) NOT NULL DEFAULT 'admin',
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
