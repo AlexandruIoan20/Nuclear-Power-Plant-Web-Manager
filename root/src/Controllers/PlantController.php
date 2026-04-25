@@ -12,6 +12,22 @@ class PlantController {
         require __DIR__ . '/../Views/PlantViews/plant-details-form.view.php'; 
     }
 
+    public function showDetailsFormForUpdate($id) { 
+        $plant = $this->plantService->findById($id); 
+
+        if(!$plant) { 
+            header("Location: /power-plant-list"); 
+            exit; 
+        }
+
+        require_once __DIR__ . "/../Views/PlantViews/plant-details-update-form.view.php"; 
+    }
+
+    public function showPowerPlantsList() { 
+        $powerPlants = $this->plantService->getAllPowerPlants(); 
+        require __DIR__ . '/../Views/UserPlantViews/plant-list.view.php'; 
+    }
+
     public function handleSavePlantDetails() { 
         $dateFormular = $_POST; 
 
@@ -23,7 +39,23 @@ class PlantController {
             header("Location /power-plant-list"); 
             exit; 
         } catch(Exception $e) { 
-            echo "Error at register: " . htmlspecialchars($e->getMessage()); 
+            echo "Error at POST for the new plant: " . htmlspecialchars($e->getMessage()); 
+        }
+    }
+
+    public function handleUpdatePlantDetails(string $id) { 
+        $dateFormular = $_POST; 
+        error_log("[DEBUG] Date Formular"); 
+        error_log(print_r($dateFormular, true));
+
+        try { 
+            error_log("[DEBUG] Incearca update la date Formular"); 
+            $this->plantService->updatePlantDetails($_POST, $id); 
+            
+            header("Location: /power-plant-list"); 
+            exit; 
+        } catch(Exception $e) { 
+            echo "[ERROR] Update the details for a plant: " . htmlspecialchars($e->getMessage()); 
         }
     }
 

@@ -62,6 +62,22 @@ elseif ($uri === '/power-plant-create') {
     }
 }
 
+elseif ($uri === '/power-plant-list') { 
+    if($method === 'GET') { 
+        $plantController->showPowerPlantsList(); 
+    } 
+}
+
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/details$#', $uri, $matches)) {
+    $plantUuid = $matches[1]; 
+
+    if ($method === 'GET') { 
+        $plantController->showDetailsFormForUpdate($plantUuid);
+    } else if($method === 'POST') { 
+        $plantController->handleUpdatePlantDetails($plantUuid);
+    }
+}
+
 elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/basics$#', $uri, $matches)) {
     $plantUuid = $matches[1]; 
 
