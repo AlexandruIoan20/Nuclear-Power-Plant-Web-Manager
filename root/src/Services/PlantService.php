@@ -1,5 +1,9 @@
 <?php
 
+require_once __DIR__ . '/../Helpers/generateUUID.php'; 
+require_once __DIR__ . '/../Entities/PlantStatus.php'; 
+require_once __DIR__ . '/../Entities/Plant.php'; 
+
 class PlantService { 
     private PlantRepository $plantRepository; 
 
@@ -8,6 +12,22 @@ class PlantService {
     }
 
     public function savePlantDetails(array $data) { 
-        // to do: from POST request to valid Plant.php entity
+        $name = $data['name'] ?? ''; 
+        $name = ($name !== '') ? $name : null; 
+
+        $country = $data['country'] ?? ''; 
+        $country = ($country !== '') ? $country : null; 
+
+        $latitude = $data['latitude'] ?? ''; 
+        $latitude = ($latitude !== '') ? $latitude : null; 
+
+        $longitude = $data['longitude'] ?? ''; 
+        $longitude = ($longitude !== '') ? $longitude : null;
+
+        $status = PlantStatus::DRAFT; 
+        $id = generateUUID(); 
+
+        $plant = new Plant($country, $id, $name, $status, $latitude, $longitude); 
+        $this->plantRepository->save($plant); 
     }
 }

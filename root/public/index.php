@@ -57,6 +57,8 @@ elseif ($uri === '/users') {
 elseif ($uri === '/power-plant-create') { 
     if($method === 'GET') { 
         $plantController->showDetailsForm(); 
+    } else if($method === 'POST') { 
+        $plantController->handleSavePlantDetails(); 
     }
 }
 

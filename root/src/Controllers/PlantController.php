@@ -12,11 +12,15 @@ class PlantController {
         require __DIR__ . '/../Views/PlantViews/plant-details-form.view.php'; 
     }
 
-    // TO DO: parse the command over in index.php
     public function handleSavePlantDetails() { 
+        $dateFormular = $_POST; 
+
+        error_log("[DEBUG] Date Formular"); 
+        error_log(print_r($dateFormular, true));
         try { 
             $this->plantService->savePlantDetails($_POST); 
             
+            header("Location /power-plant-list"); 
             exit; 
         } catch(Exception $e) { 
             echo "Error at register: " . htmlspecialchars($e->getMessage()); 
