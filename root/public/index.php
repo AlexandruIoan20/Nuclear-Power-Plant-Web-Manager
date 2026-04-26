@@ -17,6 +17,10 @@ require_once __DIR__ . '/../src/Controllers/GeologicalPlantController.php';
 require_once __DIR__ . '/../src/Services/GeologicalPlantService.php'; 
 require_once __DIR__ . '/../src/Repositories/GeologicalPlantRepository.php'; 
 
+require_once __DIR__ . '/../src/Controllers/TechnicalPlantController.php'; 
+require_once __DIR__ . '/../src/Services/TechnicalPlantService.php'; 
+require_once __DIR__ . '/../src/Repositories/TechnicalPlantRepository.php'; 
+
 
 $host = getenv('DB_HOST') ?: 'db';
 $port = getenv('DB_PORT') ?: '5432';
@@ -52,6 +56,10 @@ $basicPlantController = new BasicPlantController($basicPlantService);
 $geologicalPlantRepository = new GeologicalPlantRepository($pdo); 
 $geologicalPlantService = new GeologicalPlantService($geologicalPlantRepository); 
 $geologicalPlantController = new GeologicalPlantController($geologicalPlantService); 
+
+$technicalPlantController = new TechnicalPlantController($technicalPlantService); 
+$technicalPlantService = new TechnicalPlantService($technicalPlantRepository); 
+$technicalPlantRepository = new TechnicalPlantRepository($pdo); 
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
