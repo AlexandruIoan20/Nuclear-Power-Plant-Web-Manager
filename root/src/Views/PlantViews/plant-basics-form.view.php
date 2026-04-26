@@ -6,6 +6,8 @@
     <title>Plant Basics Form</title>
 </head>
 <body>
-    
+    <p>
+        <?= htmlspecialchars($formAction) ?> 
+    </p>
 </body>
 </html>

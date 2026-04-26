@@ -67,5 +67,14 @@
 
         <button type="submit"> Save Changes </button>
     </form>
+
+    <footer>
+        <a disabled> Back </a>
+        <a
+            href = "/power-plants/<?= $plant->getId(); ?>/basics"
+        > 
+            Next 
+        </a>
+    </footer>
 </body>
 </html> 

@@ -9,6 +9,10 @@ require_once __DIR__ . '/../src/Controllers/PlantController.php';
 require_once __DIR__ .  '/../src/Services/PlantService.php'; 
 require_once __DIR__ . '/../src/Repositories/PlantRepository.php'; 
 
+require_once __DIR__ . '/../src/Controllers/BasicPlantController.php'; 
+require_once __DIR__ . '/../src/Services/BasicPlantService.php'; 
+require_once __DIR__ . '/../src/Repositories/BasicPlantRepository.php'; 
+
 
 $host = getenv('DB_HOST') ?: 'db';
 $port = getenv('DB_PORT') ?: '5432';
@@ -36,6 +40,10 @@ $userController = new UserController($userService);
 $plantRepository = new PlantRepository($pdo); 
 $plantService = new PlantService($plantRepository); 
 $plantController = new PlantController($plantService); 
+
+$basicPlantRepository = new BasicPlantRepository($pdo); 
+$basicPlantService = new BasicPlantService($basicPlantRepository); 
+$basicPlantController = new BasicPlantController($basicPlantService); 
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
@@ -79,11 +87,12 @@ elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/details$#', $uri, $match
     }
 }
 
+
 elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/basics$#', $uri, $matches)) {
     $plantUuid = $matches[1]; 
 
     if ($method === 'GET') { 
-        $plantController->showBasicsForm($plantUuid);
+        $basicPlantController->showForm($plantUuid);
     }
 }
 

@@ -61,7 +61,7 @@ class PlantService {
     }
 
     public function findById(string $plantId) { 
-        $plant = $this->plantRepository->getPlantById($plantId); 
+        $plant = $this->plantRepository->findById($plantId); 
 
         if($plant === null) { 
             echo "[ERROR] Plant with this id was not found"; 

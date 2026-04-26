@@ -50,6 +50,7 @@ CREATE TABLE reactor (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     power_plant_id UUID NOT NULL,
     reactor_code VARCHAR(100) NOT NULL,
+    reactor_type reactor_types NOT NULL, 
     status VARCHAR(50),
     commissioning_date DATE,
     CONSTRAINT fk_reactor_powerplant
@@ -60,7 +61,6 @@ CREATE TABLE reactor (
 CREATE TABLE basic_data (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     power_plant_id UUID NOT NULL,
-    reactor_type reactor_types NOT NULL,
     capacity_mw DECIMAL,
     construction_duration_years INT,
     description TEXT,
@@ -99,6 +99,7 @@ CREATE TABLE geological_data (
 CREATE TABLE technical_data (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     power_plant_id UUID NOT NULL,
+    reactor_type reactor_types NOT NULL,
     number_of_reactors INT,
     cooling_type VARCHAR(100),
     estimated_efficiency DECIMAL,

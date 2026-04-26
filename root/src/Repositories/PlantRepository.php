@@ -19,7 +19,7 @@ class PlantRepository {
         return $powerPlants; 
     }
 
-    public function getPlantById(string $plantId) { 
+    public function findById(string $plantId) { 
         $statement = $this->db->prepare("SELECT * FROM power_plants WHERE id = :plantId"); 
         $statement->execute([ 
             'plantId' => $plantId

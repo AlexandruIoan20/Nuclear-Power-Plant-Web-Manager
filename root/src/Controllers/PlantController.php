@@ -1,6 +1,7 @@
 <?php 
 
 require_once __DIR__ . '/../Services/PlantService.php'; 
+require_once __DIR__ . '/../Controllers/BasicPlantController.php'; 
 
 class PlantController { 
     private PlantService $plantService; 
@@ -54,7 +55,6 @@ class PlantController {
             error_log("[DEBUG] Incearca update la date Formular"); 
             $this->plantService->updatePlantDetails($_POST, $id); 
             
-            header("Location: /power-plant-list"); 
             exit; 
         } catch(Exception $e) { 
             echo "[ERROR] Update the details for a plant: " . htmlspecialchars($e->getMessage()); 
