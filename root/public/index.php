@@ -96,6 +96,14 @@ elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/basics$#', $uri, $matche
     }
 }
 
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/basic-save$#', $uri, $matches)) {
+    $plantUuid = $matches[1]; 
+
+    if ($method === 'POST') { 
+        $basicPlantController->createBasicPlantData($plantUuid);
+    }
+}
+
 elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/geological$#', $uri, $matches)) {
     $plantUuid = $matches[1];
 

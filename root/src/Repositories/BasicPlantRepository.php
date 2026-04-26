@@ -21,4 +21,30 @@ class BasicPlantRepository {
         $basicPlantData = new BasicPlantData($row['power_plant_id'], $row['id'], $row['capacity_mw'], $row['construction_duration_years'], $row['description']); 
         return $basicPlantData; 
     }
+
+    public function save(BasicPlantData $basicPlantData): void { 
+        $statement = $this->pdo->prepare("
+            INSERT INTO basic_data (
+                id, 
+                power_plant_id, 
+                capacity_mw, 
+                construction_duration_years, 
+                description
+            ) VALUES (
+                :id, 
+                :powerPlantId, 
+                :capacity, 
+                :constructionDurationYears, 
+                :description 
+            )
+        "); 
+
+        $statement->execute([
+            'id' => $basicPlantData->getId(), 
+            'powerPlantId' => $basicPlantData->getPowerPlantId(), 
+            'capacity' => $basicPlantData->getCapacity(), 
+            'constructionDurationYears' => $basicPlantData->getConstructionDurationYears(), 
+            'description' => $basicPlantData->getDescription()
+        ]); 
+    }
 }
