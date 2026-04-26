@@ -116,16 +116,45 @@ CREATE TABLE geological_data (
         ON DELETE CASCADE
 );
 
+CREATE TYPE cooling_types AS ENUM (
+    'ONCE_THROUGH_FRESH',     
+    'ONCE_THROUGH_SALT',       
+    'NATURAL_DRAFT_WET',       
+    'MECHANICAL_DRAFT_WET',    
+    'DRY_COOLING',            
+    'HYBRID',                  
+    'COOLING_POND'             
+);
+
 CREATE TABLE technical_data (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     power_plant_id UUID NOT NULL,
-    reactor_type reactor_types NOT NULL,
     number_of_reactors INT,
-    cooling_type VARCHAR(100),
     estimated_efficiency DECIMAL,
     operational_risk_level DECIMAL,
-    safety_systems JSONB,
+    safety_systems JSONB, -- TODO
     CONSTRAINT fk_technical_powerplant
         FOREIGN KEY (power_plant_id) REFERENCES power_plants(id)
         ON DELETE CASCADE
+);  
+
+CREATE TABLE reactor_schema (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), 
+    reactor_type reactor_types NOT NULL, 
+    cooling_type cooling_types
+); 
+
+CREATE TABLE reactor_plant_data (
+    technical_data_id UUID NOT NULL,
+    reactor_schema_id UUID NOT NULL,
+    
+    PRIMARY KEY (technical_data_id, reactor_schema_id), 
+    
+    CONSTRAINT fk_config_technical 
+        FOREIGN KEY (technical_data_id) REFERENCES technical_data(id) 
+        ON DELETE CASCADE,
+        
+    CONSTRAINT fk_config_schema 
+        FOREIGN KEY (reactor_schema_id) REFERENCES reactor_schema(id) 
+        ON DELETE RESTRICT 
 );
