@@ -47,4 +47,26 @@ class BasicPlantRepository {
             'description' => $basicPlantData->getDescription()
         ]); 
     }
+
+    public function update(BasicPlantData $basicPlantData): void {
+        $statement = $this->pdo->prepare("
+            UPDATE basic_data 
+            SET 
+                capacity_mw = :capacity, 
+                construction_duration_years = :constructionDurationYears, 
+                description = :description
+            WHERE id = :id
+        "); 
+    
+        $statement->execute([ 
+            'id' => $basicPlantData->getId(), 
+            'capacity' => $basicPlantData->getCapacity(), 
+            'constructionDurationYears' => $basicPlantData->getConstructionDurationYears(), 
+            'description' => $basicPlantData->getDescription()
+        ]);
+
+        $randuriModificate = $statement->rowCount();
+        error_log("[DEBUG DB] ID centrala cautata pentru update basics: " . $basicPlantData->getPowerPlantId());
+        error_log("[DEBUG DB] Randuri modificate efectiv in basic_data: " . $randuriModificate);
+    }
 }

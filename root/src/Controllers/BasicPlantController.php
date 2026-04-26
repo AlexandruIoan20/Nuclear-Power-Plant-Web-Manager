@@ -33,7 +33,19 @@ class BasicPlantController {
         try { 
             $this->basicPlantService->save($dateFormular, $plantId); 
         } catch(Exception $e) { 
-            echo "Error at POST for the new plant: " . htmlspecialchars($e->getMessage()); 
+            echo "Error at POST for the new basic plant data: " . htmlspecialchars($e->getMessage()); 
+        }
+    }
+
+    public function updateBasicPlantData(string $plantId) { 
+        $dateFormular = $_POST; 
+
+        error_log("[DEBUG] Date Formular"); 
+        error_log(print_r($dateFormular, true));
+        try { 
+            $this->basicPlantService->update($dateFormular, $plantId); 
+        } catch(Exception $e) { 
+            echo "Error at POST for updating the basic plant data: " . htmlspecialchars($e->getMessage()); 
         }
     }
 }
