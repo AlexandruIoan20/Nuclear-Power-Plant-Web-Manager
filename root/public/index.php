@@ -74,6 +74,7 @@ elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/details$#', $uri, $match
     if ($method === 'GET') { 
         $plantController->showDetailsFormForUpdate($plantUuid);
     } else if($method === 'POST') { 
+        error_log("[DEBUG] Start la update details for power plant"); 
         $plantController->handleUpdatePlantDetails($plantUuid);
     }
 }

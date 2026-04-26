@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../Helpers/generateUUID.php'; 
 require_once __DIR__ . '/../Entities/PlantStatus.php'; 
 require_once __DIR__ . '/../Entities/Plant.php'; 
+require_once __DIR__ . '/../Repositories/PlantRepository.php'; 
 
 class PlantService { 
     private PlantRepository $plantRepository; 
@@ -49,7 +50,9 @@ class PlantService {
         $status = PlantStatus::DRAFT; 
 
         $plant = new Plant($country, $id, $name, $status, $latitude, $longitude); 
-        $plant->setId($id); 
+
+        error_log("[DEBUG] A power plant was built successfully"); 
+        error_log("[DEBUG]" . print_r($plant, true)); 
         $this->plantRepository->update($plant); 
     }
 

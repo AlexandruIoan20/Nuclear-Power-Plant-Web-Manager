@@ -1,5 +1,7 @@
 <?php 
 
+require_once __DIR__ . '/../Services/PlantService.php'; 
+
 class PlantController { 
     private PlantService $plantService; 
 

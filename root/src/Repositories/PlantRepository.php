@@ -89,5 +89,9 @@ class PlantRepository {
             'longitude' => $plant->getLongitude(), 
             'status' => $plant->getStatus()->value 
         ]);
+
+        $randuriModificate = $stmt->rowCount();
+        error_log("[DEBUG] ID cautat pentru update: " . $plant->getId());
+        error_log("[DEBUG] Randuri modificate efectiv: " . $randuriModificate);
     }
 }
