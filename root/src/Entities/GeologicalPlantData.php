@@ -1,7 +1,7 @@
 <?php 
 
 require_once __DIR__ . '/../Helpers/generateUUID.php'; 
-require_once __DIR__ . '/../Enums/SoilType.php'; 
+require_once __DIR__ . '/../Entities/SoilType.php'; 
 
 class GeologicalPlantData { 
     private string $id; 

@@ -124,7 +124,23 @@ elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/geological$#', $uri, $ma
     $plantUuid = $matches[1];
 
     if ($method === 'GET') { 
-        $plantController->showGeologicalForm($plantUuid);
+        $geologicalPlantController->showForm($plantUuid);
+    }
+}
+
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/geological-save$#', $uri, $matches)) {
+    $plantUuid = $matches[1]; 
+
+    if ($method === 'POST') { 
+        $geologicalPlantController->createGeologicalPlantData($plantUuid);
+    }
+}
+
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/geological-update$#', $uri, $matches)) {
+    $plantUuid = $matches[1]; 
+
+    if ($method === 'POST') { 
+        $geologicalPlantController->updateGeologicalPlantData($plantUuid);
     }
 }
 
