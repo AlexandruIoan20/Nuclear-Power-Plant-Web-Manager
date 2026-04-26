@@ -82,10 +82,30 @@ CREATE TABLE measurements (
         ON DELETE CASCADE
 );
 
+CREATE TYPE soil_types AS ENUM (
+    -- Soluri ideale pentru NPP (Nuclear Power Plants)
+    'BEDROCK',      
+    'STIFF_CLAY',   
+    'DENSE_SAND',   
+    'GRAVEL',       
+
+    -- Soluri sedimentare/mixte (întâlnite des)
+    'SHALE',        
+    'LIMESTONE',    
+    'SANDSTONE',    
+
+    -- Soluri pe care NU s-ar construi în mod normal (Riscant)
+    'SOFT_CLAY',    
+    'LOOSE_SAND',  
+    'SILT',         
+    'LOAM',         
+    'PEAT'          
+);
+
 CREATE TABLE geological_data (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     power_plant_id UUID NOT NULL,
-    soil_type VARCHAR(100),
+    soil_type soil_types, 
     seismic_stability DECIMAL,
     flood_risk DECIMAL,
     groundwater_level DECIMAL,
