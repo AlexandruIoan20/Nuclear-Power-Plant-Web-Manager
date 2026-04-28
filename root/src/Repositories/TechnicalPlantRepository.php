@@ -120,12 +120,8 @@ class TechnicalPlantRepository {
         $deleteConfigurations = array_diff_key($dictCurrent, $dictNew); 
         $insertConfigurations = array_diff_key($dictNew, $dictCurrent); 
 
-        $findRelationStatement = $this->pdo->prepare(" 
-            SELECT * FROM reactor_plant_data WHERE reactor_schema_id = :reactor_schema_id AND technical_data_id = :technical_data_id 
-        ");
-
         $deleteRelationStatement = $this->pdo->prepare("
-            DELETE FROM reactor_plant_data WHERE id = :id 
+            DELETE FROM reactor_plant_data WHERE technical_data_id = :technical_data_id AND reactor_schema_id = :reactor_schema_id; 
         "); 
 
         $insertRelationStatement = $this->pdo->prepare("
@@ -139,15 +135,9 @@ class TechnicalPlantRepository {
         "); 
 
         foreach($deleteConfigurations as $config) { 
-            $findRelationStatement->execute([ 
+            $deleteRelationStatement->execute([ 
                 'technical_data_id' => $technicalPlantData->getId(), 
                 'reactor_schema_id' => $config->getId()
-            ]); 
-
-            $row = $findRelationStatement->fetch(PDO::FETCH_ASSOC); 
-
-            $deleteRelationStatement->execute([
-                'id' => $row['id']
             ]); 
         }
 
