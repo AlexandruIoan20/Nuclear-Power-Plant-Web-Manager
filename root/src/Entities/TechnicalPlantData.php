@@ -39,6 +39,10 @@ class TechnicalPlantData {
         );
     }
 
+    public function clearReactorConfiguration(): void { 
+        $this->reactorConfigurations = [];
+    }
+
     public function getReactorConfigurations(): array {
         return $this->reactorConfigurations;
     }
