@@ -25,7 +25,7 @@ class TechnicalPlantData {
         $this->safetySystems = $safetySystems;
     }
 
-    public function addReactorConfiguration($schema): void {
+    public function addReactorConfiguration(ReactorSchema $schema): void {
         foreach ($this->reactorConfigurations as $existing) {
             if ($existing->getId() === $schema->getId()) return;
         }

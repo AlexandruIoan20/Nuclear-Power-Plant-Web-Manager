@@ -56,7 +56,7 @@ class TechnicalPlantRepository {
             :estimated_efficiency, 
             :operational_risk_level
         )"); 
-
+    
         $statement->execute([
             'id' => $technicalPlantData->getId(), 
             'power_plant_id' => $technicalPlantData->getPowerPlantId(), 
@@ -64,7 +64,19 @@ class TechnicalPlantRepository {
             'estimated_efficiency' => $technicalPlantData->getEstimatedEfficiency(), 
             'operational_risk_level' => $technicalPlantData->getOperationalRiskLevel()
         ]);
-
+    
+        $schemaStatement = $this->pdo->prepare("
+            INSERT INTO reactor_schema (
+                id, 
+                reactor_type, 
+                cooling_type
+            ) VALUES (
+                :id, 
+                :reactor_type, 
+                :cooling_type
+            )
+        ");
+    
         $relationalStatement = $this->pdo->prepare("
             INSERT INTO reactor_plant_data (
                 technical_data_id, 
@@ -74,9 +86,15 @@ class TechnicalPlantRepository {
                 :reactor_schema_id  
             )
         "); 
-
+    
         $reactorConfigurations = $technicalPlantData->getReactorConfigurations(); 
         foreach($reactorConfigurations as $reactorConfiguration) { 
+            $schemaStatement->execute([
+                'id' => $reactorConfiguration->getId(),
+                'reactor_type' => $reactorConfiguration->getType()->value,
+                'cooling_type' => $reactorConfiguration->getCooling()->value
+            ]);
+    
             $relationalStatement->execute([
                 'technical_data_id' => $technicalPlantData->getId(),  
                 'reactor_schema_id' => $reactorConfiguration->getId() 

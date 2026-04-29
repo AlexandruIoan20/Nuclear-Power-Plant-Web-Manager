@@ -1,3 +1,10 @@
+<?php
+/**
+ *  @var array $countries
+ *  @var Plant $plant
+ */
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

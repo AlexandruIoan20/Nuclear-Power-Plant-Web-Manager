@@ -15,7 +15,7 @@ class PlantController {
         require __DIR__ . '/../Views/PlantViews/plant-details-form.view.php'; 
     }
 
-    public function showDetailsFormForUpdate($id) { 
+    public function showDetailsFormForUpdate(string $id) { 
         $plant = $this->plantService->findById($id); 
 
         if(!$plant) { 
@@ -23,6 +23,7 @@ class PlantController {
             exit; 
         }
 
+        $countries = require __DIR__ . '/../Constants/countries.php';
         require_once __DIR__ . "/../Views/PlantViews/plant-details-update-form.view.php"; 
     }
 

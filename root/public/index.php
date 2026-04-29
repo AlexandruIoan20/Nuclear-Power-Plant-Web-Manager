@@ -57,9 +57,9 @@ $geologicalPlantRepository = new GeologicalPlantRepository($pdo);
 $geologicalPlantService = new GeologicalPlantService($geologicalPlantRepository); 
 $geologicalPlantController = new GeologicalPlantController($geologicalPlantService); 
 
-$technicalPlantController = new TechnicalPlantController($technicalPlantService); 
-$technicalPlantService = new TechnicalPlantService($technicalPlantRepository); 
 $technicalPlantRepository = new TechnicalPlantRepository($pdo); 
+$technicalPlantService = new TechnicalPlantService($technicalPlantRepository); 
+$technicalPlantController = new TechnicalPlantController($technicalPlantService); 
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
@@ -151,6 +151,31 @@ elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/geological-update$#', $u
         $geologicalPlantController->updateGeologicalPlantData($plantUuid);
     }
 }
+
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/technical$#', $uri, $matches)) {
+    $plantUuid = $matches[1];
+
+    if ($method === 'GET') { 
+        $technicalPlantController->showForm($plantUuid);
+    }
+}
+
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/technical-save$#', $uri, $matches)) {
+    $plantUuid = $matches[1]; 
+
+    if ($method === 'POST') { 
+        $technicalPlantController->createTechnicalPlantData($plantUuid);
+    }
+}
+
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/technical-update$#', $uri, $matches)) {
+    $plantUuid = $matches[1]; 
+
+    if ($method === 'POST') { 
+        $technicalPlantController->updateTechnicalPlantData($plantUuid);
+    }
+}
+
 
 else {
     http_response_code(404);

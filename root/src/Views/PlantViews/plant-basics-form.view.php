@@ -1,3 +1,12 @@
+<?php 
+/**
+ *  @var string $formAction
+ *  @var string $plantId 
+ *  @var boolean $isUpdate
+ *  @var BasicPlantData $basicPlantData
+ */
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

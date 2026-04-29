@@ -1,3 +1,12 @@
+<?php 
+/**
+ *  @var string $formAction
+ *  @var string $plantId 
+ *  @var boolean $isUpdate
+ *  @var GeologicalPlantData $geologicalPlantData
+ */
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

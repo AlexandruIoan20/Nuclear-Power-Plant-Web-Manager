@@ -1,3 +1,10 @@
+<?php
+/**
+ *  @var array $countries
+ * 
+ */
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -74,9 +81,5 @@
             type = "submit" 
         > Save </button>
     </form>
-
-    <footer>
-        <a disabled> Back </a>
-    </footer>
 </body>
 </html>
