@@ -152,6 +152,8 @@ class TechnicalPlantRepository {
             )
         "); 
 
+        $schemaInsertStatement = $this->pdo->prepare("\n            INSERT INTO reactor_schema (id, reactor_type, cooling_type)\n            VALUES (:id, :reactor_type, :cooling_type)\n            ON CONFLICT (id) DO NOTHING\n        ");
+
         foreach($deleteConfigurations as $config) { 
             $deleteRelationStatement->execute([ 
                 'technical_data_id' => $technicalPlantData->getId(), 
@@ -160,6 +162,13 @@ class TechnicalPlantRepository {
         }
 
         foreach($insertConfigurations as $config) { 
+            // ensure reactor schema row exists before inserting relation
+            $schemaInsertStatement->execute([
+                'id' => $config->getId(),
+                'reactor_type' => $config->getType()->value,
+                'cooling_type' => $config->getCooling()->value,
+            ]);
+
             $insertRelationStatement->execute([ 
                 'technical_data_id' => $technicalPlantData->getId(), 
                 'reactor_schema_id' => $config->getId()

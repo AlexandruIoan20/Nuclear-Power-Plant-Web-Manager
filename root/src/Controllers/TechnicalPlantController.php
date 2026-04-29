@@ -31,6 +31,8 @@ class TechnicalPlantController {
 
         try { 
             $this->technicalPlantService->save($dateFormular, $plantId);
+            header("Location: /power-plants/{$plantId}/technical");
+            exit;
         } catch(Exception $e) { 
             echo "Error at POST for the new technical plant data " . htmlspecialchars($e->getMessage()); 
         }
@@ -44,6 +46,8 @@ class TechnicalPlantController {
 
         try { 
             $this->technicalPlantService->update($dateFormular, $plantId); 
+            header("Location: /power-plants/{$plantId}/technical");
+            exit;
         } catch(Exception $e) { 
             echo "Error at POST for updating the technical plant data" . htmlspecialchars($e->getMessage()); 
         }

@@ -12,7 +12,7 @@ class PlantService {
         $this->plantRepository = $plantRepository; 
     }
 
-    public function savePlantDetails(array $data) { 
+    public function savePlantDetails(array $data): string { 
         $name = $data['name'] ?? ''; 
         $name = ($name !== '') ? $name : null; 
 
@@ -32,6 +32,8 @@ class PlantService {
         error_log("PLANT: "); 
         error_log(print_r($plant, true)); 
         $this->plantRepository->save($plant); 
+
+        return $id;
     }
 
     public function updatePlantDetails(array $data, string $id) { 

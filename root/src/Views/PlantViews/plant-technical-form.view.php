@@ -108,7 +108,7 @@
         <a href="/power-plants/<?= htmlspecialchars($plantId); ?>/geological"> 
             &larr; Back 
         </a>
-        <a href="/power-plants/<?= htmlspecialchars($plantId); ?>/summary"> 
+        <a href="/"> 
             Next &rarr;
         </a>
     </footer>

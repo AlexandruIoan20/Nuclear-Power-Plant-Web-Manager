@@ -38,10 +38,9 @@ class PlantController {
         error_log("[DEBUG] Date Formular"); 
         error_log(print_r($dateFormular, true));
         try { 
-            $this->plantService->savePlantDetails($_POST); 
-            
-            header("Location /power-plant-list"); 
-            exit; 
+            $plantId = $this->plantService->savePlantDetails($_POST);
+            header("Location: /power-plants/{$plantId}/details");
+            exit;
         } catch(Exception $e) { 
             echo "Error at POST for the new plant: " . htmlspecialchars($e->getMessage()); 
         }
@@ -55,8 +54,8 @@ class PlantController {
         try { 
             error_log("[DEBUG] Incearca update la date Formular"); 
             $this->plantService->updatePlantDetails($_POST, $id); 
-            
-            exit; 
+            header("Location: /power-plants/{$id}/details");
+            exit;
         } catch(Exception $e) { 
             echo "[ERROR] Update the details for a plant: " . htmlspecialchars($e->getMessage()); 
         }
