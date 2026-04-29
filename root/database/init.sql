@@ -33,7 +33,7 @@ CREATE TYPE power_plant_status AS ENUM (
 );
 
 CREATE TABLE power_plants (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), 
     name VARCHAR(255) NOT NULL,
     country VARCHAR(100) NOT NULL,
     latitude DECIMAL(9,6),
@@ -83,18 +83,13 @@ CREATE TABLE measurements (
 );
 
 CREATE TYPE soil_types AS ENUM (
-    -- Soluri ideale pentru NPP (Nuclear Power Plants)
     'BEDROCK',      
     'STIFF_CLAY',   
     'DENSE_SAND',   
     'GRAVEL',       
-
-    -- Soluri sedimentare/mixte (întâlnite des)
     'SHALE',        
     'LIMESTONE',    
     'SANDSTONE',    
-
-    -- Soluri pe care NU s-ar construi în mod normal (Riscant)
     'SOFT_CLAY',    
     'LOOSE_SAND',  
     'SILT',         
@@ -102,14 +97,25 @@ CREATE TYPE soil_types AS ENUM (
     'PEAT'          
 );
 
+-- Corectat virgula de la final
+CREATE TYPE water_source_types AS ENUM (
+    'FRESH_WATER',
+    'SALT_WATER',
+    'BRACKISH_WATER'
+);
+
 CREATE TABLE geological_data (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     power_plant_id UUID NOT NULL,
-    soil_type soil_types, 
+    soil_type soil_types,
+    water_source_type water_source_types,
     seismic_stability DECIMAL,
     flood_risk DECIMAL,
     groundwater_level DECIMAL,
     water_proximity DECIMAL,
+    water_flow_rate DECIMAL,
+    population_density DECIMAL,
+    transport_infrastructure_score DECIMAL,
     geological_risk_score DECIMAL,
     CONSTRAINT fk_geological_powerplant
         FOREIGN KEY (power_plant_id) REFERENCES power_plants(id)
@@ -132,7 +138,7 @@ CREATE TABLE technical_data (
     number_of_reactors INT,
     estimated_efficiency DECIMAL,
     operational_risk_level DECIMAL,
-    safety_systems JSONB, -- TODO
+    safety_systems JSONB,
     CONSTRAINT fk_technical_powerplant
         FOREIGN KEY (power_plant_id) REFERENCES power_plants(id)
         ON DELETE CASCADE
@@ -147,13 +153,10 @@ CREATE TABLE reactor_schema (
 CREATE TABLE reactor_plant_data (
     technical_data_id UUID NOT NULL,
     reactor_schema_id UUID NOT NULL,
-    
     PRIMARY KEY (technical_data_id, reactor_schema_id), 
-    
     CONSTRAINT fk_config_technical 
         FOREIGN KEY (technical_data_id) REFERENCES technical_data(id) 
         ON DELETE CASCADE,
-        
     CONSTRAINT fk_config_schema 
         FOREIGN KEY (reactor_schema_id) REFERENCES reactor_schema(id) 
         ON DELETE RESTRICT 

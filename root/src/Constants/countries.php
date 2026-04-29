@@ -1,5 +1,5 @@
 <?php
-// src/Helpers/countries.php
+
 return [
     "Afghanistan", "Albania", "Algeria", "Andorra", "Angola",
     "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria",
