@@ -72,12 +72,6 @@ $technicalPlantController = new TechnicalPlantController($technicalPlantService)
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
-if ($uri === '/start') {
-    if ($method === 'GET') {
-        readfile(__DIR__ . '/index.html');
-        exit;
-    }
-}
 
 if ($uri === '/' || $uri === '/register') {
     if ($method === 'GET') {
@@ -86,7 +80,11 @@ if ($uri === '/' || $uri === '/register') {
         $userController->handleRegister();
     }
 } 
-
+else if($uri === '/login') {
+    if ($method === 'GET') {
+        $userController->showLoginForm();
+    } 
+}
 elseif ($uri === '/users') {
     if ($method === 'GET') {
         $userController->listUsers();
