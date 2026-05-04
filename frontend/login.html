@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id =  "app-container">
+
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById("app-container");
+
+            // Facem call către ruta definită în index.php
+            fetch("http://localhost:8081/login")
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Eroare de server: ${response.status}`);
+                    }
+                    // Extragem răspunsul sub formă de text (HTML)
+                    return response.text();
+                })
+                .then(html => {
+                    // Injectăm view-ul primit în containerul nostru
+                    container.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error("Eroare la încărcarea modulului Start:", error);
+                    container.innerHTML = "<p style='color: red;'>Eroare critică: Nu s-a putut contacta serverul central.</p>";
+                });
+        });
+    </script>
+</body>
+</html>
