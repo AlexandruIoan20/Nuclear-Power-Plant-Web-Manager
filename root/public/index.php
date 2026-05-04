@@ -5,21 +5,21 @@ require_once __DIR__ . '/../src/Repositories/UserRepository.php';
 require_once __DIR__ . '/../src/Services/UserService.php';
 require_once __DIR__ . '/../src/Controllers/UserController.php';
 
-require_once __DIR__ . '/../src/Controllers/PlantController.php'; 
-require_once __DIR__ .  '/../src/Services/PlantService.php'; 
-require_once __DIR__ . '/../src/Repositories/PlantRepository.php'; 
+require_once __DIR__ . '/../src/Controllers/PlantController/PlantController.php'; 
+require_once __DIR__ .  '/../src/Services/PlantService/PlantService.php'; 
+require_once __DIR__ . '/../src/Repositories/PlantRepository/PlantRepository.php'; 
 
-require_once __DIR__ . '/../src/Controllers/BasicPlantController.php'; 
-require_once __DIR__ . '/../src/Services/BasicPlantService.php'; 
-require_once __DIR__ . '/../src/Repositories/BasicPlantRepository.php'; 
+require_once __DIR__ . '/../src/Controllers/PlantController/BasicPlantController.php'; 
+require_once __DIR__ . '/../src/Services/PlantService/BasicPlantService.php'; 
+require_once __DIR__ . '/../src/Repositories/PlantRepository/BasicPlantRepository.php'; 
 
-require_once __DIR__ . '/../src/Controllers/GeologicalPlantController.php'; 
-require_once __DIR__ . '/../src/Services/GeologicalPlantService.php'; 
-require_once __DIR__ . '/../src/Repositories/GeologicalPlantRepository.php'; 
+require_once __DIR__ . '/../src/Controllers/PlantController/GeologicalPlantController.php'; 
+require_once __DIR__ . '/../src/Services/PlantService/GeologicalPlantService.php'; 
+require_once __DIR__ . '/../src/Repositories/PlantRepository/GeologicalPlantRepository.php'; 
 
-require_once __DIR__ . '/../src/Controllers/TechnicalPlantController.php'; 
-require_once __DIR__ . '/../src/Services/TechnicalPlantService.php'; 
-require_once __DIR__ . '/../src/Repositories/TechnicalPlantRepository.php'; 
+require_once __DIR__ . '/../src/Controllers/PlantController/TechnicalPlantController.php'; 
+require_once __DIR__ . '/../src/Services/PlantService/TechnicalPlantService.php'; 
+require_once __DIR__ . '/../src/Repositories/PlantRepository/TechnicalPlantRepository.php'; 
 
 
 $host = getenv('DB_HOST') ?: 'db';
@@ -63,6 +63,13 @@ $technicalPlantController = new TechnicalPlantController($technicalPlantService)
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
+
+if ($uri === '/start') {
+    if ($method === 'GET') {
+        readfile(__DIR__ . '/index.html');
+        exit;
+    }
+}
 
 if ($uri === '/' || $uri === '/register') {
     if ($method === 'GET') {

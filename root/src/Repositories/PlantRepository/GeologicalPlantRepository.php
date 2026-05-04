@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../Entities/GeologicalPlantData.php';
-require_once __DIR__ . '/../Entities/SoilType.php';
-require_once __DIR__ . '/../Entities/WaterSourceType.php';
+require_once __DIR__ . '/../../Entities/GeologicalPlantData.php';
+require_once __DIR__ . '/../../Entities/SoilType.php';
+require_once __DIR__ . '/../../Entities/WaterSourceType.php';
 
 class GeologicalPlantRepository {
     private PDO $pdo;

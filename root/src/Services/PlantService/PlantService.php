@@ -1,9 +1,9 @@
 <?php
 
-require_once __DIR__ . '/../Helpers/generateUUID.php'; 
-require_once __DIR__ . '/../Entities/PlantStatus.php'; 
-require_once __DIR__ . '/../Entities/Plant.php'; 
-require_once __DIR__ . '/../Repositories/PlantRepository.php'; 
+require_once __DIR__ . '/../../Helpers/generateUUID.php'; 
+require_once __DIR__ . '/../../Entities/PlantStatus.php'; 
+require_once __DIR__ . '/../../Entities/Plant.php'; 
+require_once __DIR__ . '/../../Repositories/PlantRepository/PlantRepository.php'; 
 
 class PlantService { 
     private PlantRepository $plantRepository; 

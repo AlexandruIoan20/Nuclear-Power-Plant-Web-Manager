@@ -1,9 +1,9 @@
 <?php 
 
-require_once __DIR__ . '/../Entities/TechnicalPlantData.php'; 
-require_once __DIR__ . '/../Entities/ReactorSchema.php'; 
-require_once __DIR__ . '/../Entities/ReactorType.php'; 
-require_once __DIR__ . '/../Entities/CoolingType.php'; 
+require_once __DIR__ . '/../../Entities/TechnicalPlantData.php'; 
+require_once __DIR__ . '/../../Entities/ReactorSchema.php'; 
+require_once __DIR__ . '/../../Entities/ReactorType.php'; 
+require_once __DIR__ . '/../../Entities/CoolingType.php'; 
 
 class TechnicalPlantService { 
     private TechnicalPlantRepository $technicalPlantRepository; 

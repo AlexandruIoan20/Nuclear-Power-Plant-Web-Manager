@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../Services/GeologicalPlantService.php';
+require_once __DIR__ . '/../../Services/PlantService/GeologicalPlantService.php';
 
 class GeologicalPlantController { 
     private GeologicalPlantService $geologicalPlantService; 
@@ -19,7 +19,7 @@ class GeologicalPlantController {
             $formAction = "/power-plants/{$plantId}/geological-save";
         }
 
-        require_once __DIR__ . '/../Views/PlantViews/plant-geological-form.view.php'; 
+        require_once __DIR__ . '/../../Views/PlantViews/plant-geological-form.view.php'; 
     }
 
     public function createGeologicalPlantData(string $plantId): void { 

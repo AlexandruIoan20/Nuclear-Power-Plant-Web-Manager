@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../Entities/BasicPlantData.php'; 
+require_once __DIR__ . '/../../Entities/BasicPlantData.php'; 
 
 class BasicPlantRepository {
     private PDO $pdo; 

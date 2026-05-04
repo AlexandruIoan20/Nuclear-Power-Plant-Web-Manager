@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../Repositories/GeologicalPlantRepository.php'; 
-require_once __DIR__ . '/../Entities/SoilType.php';
-require_once __DIR__ . '/../Entities/WaterSourceType.php';
+require_once __DIR__ . '/../../Repositories/PlantRepository/GeologicalPlantRepository.php'; 
+require_once __DIR__ . '/../../Entities/SoilType.php';
+require_once __DIR__ . '/../../Entities/WaterSourceType.php';
 
 class GeologicalPlantService { 
     private GeologicalPlantRepository $geologicalPlantRepository; 
