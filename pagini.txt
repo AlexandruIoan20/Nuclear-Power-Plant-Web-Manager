@@ -1,0 +1,4 @@
+Specificatii:
+
+DASHBOARD -> contine imaginea cu toate centralele amplasate pe harta.
+
