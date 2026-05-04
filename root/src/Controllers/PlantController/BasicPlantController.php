@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../Services/BasicPlantService.php'; 
+require_once __DIR__ . '/../../Services/PlantService/BasicPlantService.php'; 
 
 class BasicPlantController { 
     private BasicPlantService $basicPlantService; 
@@ -21,7 +21,7 @@ class BasicPlantController {
             $formAction = "/power-plants/{$plantId}/basic-save";
         }
 
-        require_once __DIR__ . '/../Views/PlantViews/plant-basics-form.view.php'; 
+        require_once __DIR__ . '/../../Views/PlantViews/plant-basics-form.view.php'; 
     }
 
     public function createBasicPlantData (string $plantId) { 

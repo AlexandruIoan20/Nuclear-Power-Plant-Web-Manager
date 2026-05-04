@@ -1,25 +1,33 @@
 <?php
 
+header("Access-Control-Allow-Origin: http://127.0.0.1:5500");
+
+// 2. Permite metodele HTTP de care ai nevoie
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+
+// 3. Permite anumite headere pe care frontend-ul le-ar putea trimite (ex: pentru JSON)
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+
 require_once __DIR__ . '/../src/Entities/User.php'; 
 require_once __DIR__ . '/../src/Repositories/UserRepository.php';
 require_once __DIR__ . '/../src/Services/UserService.php';
 require_once __DIR__ . '/../src/Controllers/UserController.php';
 
-require_once __DIR__ . '/../src/Controllers/PlantController.php'; 
-require_once __DIR__ .  '/../src/Services/PlantService.php'; 
-require_once __DIR__ . '/../src/Repositories/PlantRepository.php'; 
+require_once __DIR__ . '/../src/Controllers/PlantController/PlantController.php'; 
+require_once __DIR__ .  '/../src/Services/PlantService/PlantService.php'; 
+require_once __DIR__ . '/../src/Repositories/PlantRepository/PlantRepository.php'; 
 
-require_once __DIR__ . '/../src/Controllers/BasicPlantController.php'; 
-require_once __DIR__ . '/../src/Services/BasicPlantService.php'; 
-require_once __DIR__ . '/../src/Repositories/BasicPlantRepository.php'; 
+require_once __DIR__ . '/../src/Controllers/PlantController/BasicPlantController.php'; 
+require_once __DIR__ . '/../src/Services/PlantService/BasicPlantService.php'; 
+require_once __DIR__ . '/../src/Repositories/PlantRepository/BasicPlantRepository.php'; 
 
-require_once __DIR__ . '/../src/Controllers/GeologicalPlantController.php'; 
-require_once __DIR__ . '/../src/Services/GeologicalPlantService.php'; 
-require_once __DIR__ . '/../src/Repositories/GeologicalPlantRepository.php'; 
+require_once __DIR__ . '/../src/Controllers/PlantController/GeologicalPlantController.php'; 
+require_once __DIR__ . '/../src/Services/PlantService/GeologicalPlantService.php'; 
+require_once __DIR__ . '/../src/Repositories/PlantRepository/GeologicalPlantRepository.php'; 
 
-require_once __DIR__ . '/../src/Controllers/TechnicalPlantController.php'; 
-require_once __DIR__ . '/../src/Services/TechnicalPlantService.php'; 
-require_once __DIR__ . '/../src/Repositories/TechnicalPlantRepository.php'; 
+require_once __DIR__ . '/../src/Controllers/PlantController/TechnicalPlantController.php'; 
+require_once __DIR__ . '/../src/Services/PlantService/TechnicalPlantService.php'; 
+require_once __DIR__ . '/../src/Repositories/PlantRepository/TechnicalPlantRepository.php'; 
 
 
 $host = getenv('DB_HOST') ?: 'db';
@@ -64,6 +72,13 @@ $technicalPlantController = new TechnicalPlantController($technicalPlantService)
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
+if ($uri === '/start') {
+    if ($method === 'GET') {
+        readfile(__DIR__ . '/index.html');
+        exit;
+    }
+}
+
 if ($uri === '/' || $uri === '/register') {
     if ($method === 'GET') {
         $userController->showRegisterForm();
@@ -77,6 +92,13 @@ elseif ($uri === '/users') {
         $userController->listUsers();
     }
 }
+
+elseif ($uri === '/start') {
+    if ($method === 'GET') {
+        $userController->showStart();
+    }
+}
+
 
 elseif ($uri === '/power-plant-create') { 
     if($method === 'GET') { 

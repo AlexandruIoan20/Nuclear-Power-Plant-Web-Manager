@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../../Services/PlantService/TechnicalPlantService.php';
+
 class TechnicalPlantController { 
     private TechnicalPlantService $technicalPlantService; 
 
@@ -17,10 +19,10 @@ class TechnicalPlantController {
             $formAction = "/power-plants/{$plantId}/technical-save"; 
         }
 
-        require_once __DIR__ . '/../Entities/ReactorType.php'; 
-        require_once __DIR__ . '/../Entities/CoolingType.php'; 
+        require_once __DIR__ . '/../../Entities/ReactorType.php'; 
+        require_once __DIR__ . '/../../Entities/CoolingType.php'; 
 
-        require_once __DIR__ . '/../Views/PlantViews/plant-technical-form.view.php'; 
+        require_once __DIR__ . '/../../Views/PlantViews/plant-technical-form.view.php'; 
     }
 
     public function createTechnicalPlantData(string $plantId): void { 

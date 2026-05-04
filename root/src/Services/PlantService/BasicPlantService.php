@@ -1,6 +1,6 @@
 <?php 
 
-require_once __DIR__ . '/../Repositories/BasicPlantRepository.php'; 
+require_once __DIR__ . '/../../Repositories/PlantRepository/BasicPlantRepository.php'; 
 
 class BasicPlantService { 
     private BasicPlantRepository $basicPlantRepository; 

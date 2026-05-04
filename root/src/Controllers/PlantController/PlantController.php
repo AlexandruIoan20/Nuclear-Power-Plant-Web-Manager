@@ -1,7 +1,6 @@
 <?php 
 
-require_once __DIR__ . '/../Services/PlantService.php'; 
-require_once __DIR__ . '/../Controllers/BasicPlantController.php'; 
+require_once __DIR__ . '/../../Services/PlantService/PlantService.php'; 
 
 class PlantController { 
     private PlantService $plantService; 
@@ -11,8 +10,8 @@ class PlantController {
     }
 
     public function showDetailsForm() { 
-        $countries = require __DIR__ . '/../Constants/countries.php';
-        require __DIR__ . '/../Views/PlantViews/plant-details-form.view.php'; 
+        $countries = require __DIR__ . '/../../Constants/countries.php';
+        require __DIR__ . '/../../Views/PlantViews/plant-details-form.view.php'; 
     }
 
     public function showDetailsFormForUpdate(string $id) { 
@@ -23,13 +22,13 @@ class PlantController {
             exit; 
         }
 
-        $countries = require __DIR__ . '/../Constants/countries.php';
-        require_once __DIR__ . "/../Views/PlantViews/plant-details-update-form.view.php"; 
+        $countries = require __DIR__ . '/../../Constants/countries.php';
+        require_once __DIR__ . "/../../Views/PlantViews/plant-details-update-form.view.php"; 
     }
 
     public function showPowerPlantsList() { 
         $powerPlants = $this->plantService->getAllPowerPlants(); 
-        require __DIR__ . '/../Views/UserPlantViews/plant-list.view.php'; 
+        require __DIR__ . '/../../Views/UserPlantViews/plant-list.view.php'; 
     }
 
     public function handleSavePlantDetails() { 
@@ -63,14 +62,14 @@ class PlantController {
     }
 
     public function showBasicsForm() { 
-        require __DIR__ . '/../Views/PlantViews/plant-basics-form.view.php'; 
+        require __DIR__ . '/../../Views/PlantViews/plant-basics-form.view.php'; 
     }
 
     public function showGeologicalForm() { 
-        require __DIR__ . '/../Views/PlantViews/plant-geological-form.view.php'; 
+        require __DIR__ . '/../../Views/PlantViews/plant-geological-form.view.php'; 
     }
 
     public function showTechnologicalForm() { 
-        require __DIR__ . '/../Views/PlantViews/plant-technical-form.view.php'; 
+        require __DIR__ . '/../../Views/PlantViews/plant-technical-form.view.php'; 
     }
 }
