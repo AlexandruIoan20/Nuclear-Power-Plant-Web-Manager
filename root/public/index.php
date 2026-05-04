@@ -1,5 +1,13 @@
 <?php
 
+header("Access-Control-Allow-Origin: http://127.0.0.1:5500");
+
+// 2. Permite metodele HTTP de care ai nevoie
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+
+// 3. Permite anumite headere pe care frontend-ul le-ar putea trimite (ex: pentru JSON)
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+
 require_once __DIR__ . '/../src/Entities/User.php'; 
 require_once __DIR__ . '/../src/Repositories/UserRepository.php';
 require_once __DIR__ . '/../src/Services/UserService.php';
