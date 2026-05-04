@@ -1,0 +1,41 @@
+1. routing cu headere in functie de privilegii
+2. login cu : admin, employee, plant-admin
+3. statistici : -> pentru centrala. fiecare centrala va detine o lista de
+		   reactoare pe langa statisticile de amplasament
+		-> pentru reactoare. fiecare reactor va prezenta metrici 
+		   in functie de tip, valori hard-codate/luate din surse	
+		   stiintifice
+		-> pentru reactoarele unei centrale: statistici tip: 
+			- cel mai productiv reactor
+			- cel mai stricacios reactor
+4. integrare 4API-uri (seismica si geologica)
+		      (risc climatic)
+		      (eficienta racirii naturale)
+	 	      (distanta de siguranta si populatie) 
+   care tin de latitudine si ofera datele nevoite pentru
+   statisticile noastre
+4.1 serviciu de instantiere a reactoarelor in functie de tip ( BWR, RBMK,etc)
+5. implementare pseudorandom in timp real a metricilor reactoarelor bazate pe
+	- combustibil
+	- apa
+	- output electric
+5.1 gestionare a senzorilor pseudorandom, dupa modele reale ( x / 2x )
+6. implementarea unui algoritm care scoate din valorile senzorilor un output
+   de MW, eficienta (0.00-1.00) si combustibil/MW si o constanta de operare
+6.1 implementarea unei metrici pe 1/7/30 de zile pentru outputuri.
+6.2 toate metricile (input/output) tin de faptul daca reactorul este activ sau nu.
+7. implementare detinator de centrala (semi-legat de login)
+8. serviciu de email cu logica: proprietarul primeste email in momentul in 
+   care jumatate din senzori "crapa", iar reactorul este instant pus pe
+   standby.
+9. butonul magic de repornire/pornire/mentenanta.
+10. logging pentru senzori, legat de reactor.
+
+FRONTEND
+
+11. interfata grafica cu harta, simbolul de centrala pus pe mapa globala.
+12. vizualizare sugestiva pentru statisticile reactorului populate cu
+    informatiile generate si calculate de noi, asemenea unui bord dintr-o
+    centrala nucleara.
+13. notificari in-app in cazul in care crapa ceva (pentru admini de centrala)
+14(FACEM ACUM 4.05.2026) toata structura frontend, lucram top-down.

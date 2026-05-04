@@ -7,6 +7,8 @@
     <style>table, th, td { border: 1px solid black; border-collapse: collapse; padding: 8px; }</style>
 </head>
 <body>
+    <?php require_once __DIR__ . '/header.php'; ?>
+
     <h1>Registered Users </h1>
     <a href = "/register"> Adauga utilizator nou</a> <br><br> 
 
