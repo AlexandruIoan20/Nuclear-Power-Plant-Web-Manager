@@ -7,6 +7,10 @@ class UserController {
         $this->userService = $userService; 
     }
 
+    public function showStart(): void { 
+        require __DIR__ . '/../Views/start.view.php'; 
+    }
+
     public function showRegisterForm(): void { 
         require __DIR__ . '/../Views/register.view.php'; 
     }

@@ -85,6 +85,13 @@ elseif ($uri === '/users') {
     }
 }
 
+elseif ($uri === '/start') {
+    if ($method === 'GET') {
+        $userController->showStart();
+    }
+}
+
+
 elseif ($uri === '/power-plant-create') { 
     if($method === 'GET') { 
         $plantController->showDetailsForm(); 
