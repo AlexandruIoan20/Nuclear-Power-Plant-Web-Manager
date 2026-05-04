@@ -5,6 +5,23 @@ require_once __DIR__ . '/../src/Repositories/UserRepository.php';
 require_once __DIR__ . '/../src/Services/UserService.php';
 require_once __DIR__ . '/../src/Controllers/UserController.php';
 
+require_once __DIR__ . '/../src/Controllers/PlantController.php'; 
+require_once __DIR__ .  '/../src/Services/PlantService.php'; 
+require_once __DIR__ . '/../src/Repositories/PlantRepository.php'; 
+
+require_once __DIR__ . '/../src/Controllers/BasicPlantController.php'; 
+require_once __DIR__ . '/../src/Services/BasicPlantService.php'; 
+require_once __DIR__ . '/../src/Repositories/BasicPlantRepository.php'; 
+
+require_once __DIR__ . '/../src/Controllers/GeologicalPlantController.php'; 
+require_once __DIR__ . '/../src/Services/GeologicalPlantService.php'; 
+require_once __DIR__ . '/../src/Repositories/GeologicalPlantRepository.php'; 
+
+require_once __DIR__ . '/../src/Controllers/TechnicalPlantController.php'; 
+require_once __DIR__ . '/../src/Services/TechnicalPlantService.php'; 
+require_once __DIR__ . '/../src/Repositories/TechnicalPlantRepository.php'; 
+
+
 $host = getenv('DB_HOST') ?: 'db';
 $port = getenv('DB_PORT') ?: '5432';
 $dbname = getenv('DB_NAME') ?: 'proiect_db';
@@ -28,27 +45,139 @@ $userRepository = new UserRepository($pdo);
 $userService = new UserService($userRepository);
 $userController = new UserController($userService);
 
+$plantRepository = new PlantRepository($pdo); 
+$plantService = new PlantService($plantRepository); 
+$plantController = new PlantController($plantService); 
+
+$basicPlantRepository = new BasicPlantRepository($pdo); 
+$basicPlantService = new BasicPlantService($basicPlantRepository); 
+$basicPlantController = new BasicPlantController($basicPlantService); 
+
+$geologicalPlantRepository = new GeologicalPlantRepository($pdo); 
+$geologicalPlantService = new GeologicalPlantService($geologicalPlantRepository); 
+$geologicalPlantController = new GeologicalPlantController($geologicalPlantService); 
+
+$technicalPlantRepository = new TechnicalPlantRepository($pdo); 
+$technicalPlantService = new TechnicalPlantService($technicalPlantRepository); 
+$technicalPlantController = new TechnicalPlantController($technicalPlantService); 
+
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
-switch ($uri) {
-    case '/':
-    case '/register':
-        if ($method === 'GET') {
-            $userController->showRegisterForm();
-        } elseif ($method === 'POST') {
-            $userController->handleRegister();
-        }
-        break;
+if ($uri === '/' || $uri === '/register') {
+    if ($method === 'GET') {
+        $userController->showRegisterForm();
+    } elseif ($method === 'POST') {
+        $userController->handleRegister();
+    }
+} 
 
-    case '/users':
-        if ($method === 'GET') {
-            $userController->listUsers();
-        }
-        break;
+elseif ($uri === '/users') {
+    if ($method === 'GET') {
+        $userController->listUsers();
+    }
+}
 
-    default:
-        http_response_code(404);
-        echo "404 Not Found";
-        break;
+elseif ($uri === '/power-plant-create') { 
+    if($method === 'GET') { 
+        $plantController->showDetailsForm(); 
+    } else if($method === 'POST') { 
+        $plantController->handleSavePlantDetails(); 
+    }
+}
+
+elseif ($uri === '/power-plant-list') { 
+    if($method === 'GET') { 
+        $plantController->showPowerPlantsList(); 
+    } 
+}
+
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/details$#', $uri, $matches)) {
+    $plantUuid = $matches[1]; 
+
+    if ($method === 'GET') { 
+        $plantController->showDetailsFormForUpdate($plantUuid);
+    } else if($method === 'POST') { 
+        error_log("[DEBUG] Start la update details for power plant"); 
+        $plantController->handleUpdatePlantDetails($plantUuid);
+    }
+}
+
+
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/basics$#', $uri, $matches)) {
+    $plantUuid = $matches[1]; 
+
+    if ($method === 'GET') { 
+        $basicPlantController->showForm($plantUuid);
+    }
+}
+
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/basic-save$#', $uri, $matches)) {
+    $plantUuid = $matches[1]; 
+
+    if ($method === 'POST') { 
+        $basicPlantController->createBasicPlantData($plantUuid);
+    }
+}
+
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/basic-update$#', $uri, $matches)) {
+    $plantUuid = $matches[1]; 
+
+    if ($method === 'POST') { 
+        $basicPlantController->updateBasicPlantData($plantUuid);
+    }
+}
+
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/geological$#', $uri, $matches)) {
+    $plantUuid = $matches[1];
+
+    if ($method === 'GET') { 
+        $geologicalPlantController->showForm($plantUuid);
+    }
+}
+
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/geological-save$#', $uri, $matches)) {
+    $plantUuid = $matches[1]; 
+
+    if ($method === 'POST') { 
+        $geologicalPlantController->createGeologicalPlantData($plantUuid);
+    }
+}
+
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/geological-update$#', $uri, $matches)) {
+    $plantUuid = $matches[1]; 
+
+    if ($method === 'POST') { 
+        $geologicalPlantController->updateGeologicalPlantData($plantUuid);
+    }
+}
+
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/technical$#', $uri, $matches)) {
+    $plantUuid = $matches[1];
+
+    if ($method === 'GET') { 
+        $technicalPlantController->showForm($plantUuid);
+    }
+}
+
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/technical-save$#', $uri, $matches)) {
+    $plantUuid = $matches[1]; 
+
+    if ($method === 'POST') { 
+        $technicalPlantController->createTechnicalPlantData($plantUuid);
+    }
+}
+
+elseif (preg_match('#^/power-plants/([0-9a-fA-F\-]{36})/technical-update$#', $uri, $matches)) {
+    $plantUuid = $matches[1]; 
+
+    if ($method === 'POST') { 
+        $technicalPlantController->updateTechnicalPlantData($plantUuid);
+    }
+}
+
+
+else {
+    http_response_code(404);
+    echo "404 Not Found";
 }

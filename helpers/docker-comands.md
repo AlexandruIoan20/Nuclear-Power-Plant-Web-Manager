@@ -1,0 +1,2 @@
+docker logs -f <nume-container-web> | grep "DEBUG" - COMAMNDA DE debug - print in consola
+docker exec -it <nume_container> psql -U <user> -d <database> - COMANDA de deschidere psql in terminal (pentru BD)
