@@ -1,16 +1,12 @@
 <?php
 
-require_once __DIR__ . '/../../Services/PlantService/TechnicalPlantService.php';
-
 class TechnicalPlantController { 
-    private TechnicalPlantService $technicalPlantService; 
-
-    public function __construct(TechnicalPlantService $technicalPlantService) { 
-        $this->technicalPlantService = $technicalPlantService; 
-    }
+    public function __construct(
+        private PlantServiceFacade $plantServiceFacade
+    ) {}
 
     public function showForm(string $plantId): void { 
-        $technicalPlantData = $this->technicalPlantService->findByPlantId($plantId); 
+        $technicalPlantData = $this->plantServiceFacade->getTechnicalDataByPlantId($plantId); 
         $isUpdate = ($technicalPlantData !== null); 
 
         if($isUpdate) { 
@@ -32,7 +28,7 @@ class TechnicalPlantController {
         error_log(print_r($dateFormular, true));
 
         try { 
-            $this->technicalPlantService->save($dateFormular, $plantId);
+            $this->plantServiceFacade->saveTechnicalData($dateFormular, $plantId);
         } catch(Exception $e) { 
             echo "Error at POST for the new technical plant data " . htmlspecialchars($e->getMessage()); 
         }
@@ -45,10 +41,9 @@ class TechnicalPlantController {
         error_log(print_r($dateFormular, true));
 
         try { 
-            $this->technicalPlantService->update($dateFormular, $plantId); 
+            $this->plantServiceFacade->updateTechnicalData($dateFormular, $plantId); 
         } catch(Exception $e) { 
             echo "Error at POST for updating the technical plant data" . htmlspecialchars($e->getMessage()); 
         }
-
     }
 }

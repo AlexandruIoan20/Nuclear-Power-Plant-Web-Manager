@@ -17,7 +17,7 @@
         Details for the Power Plant
     </h2>
 
-    <form action = "/power-plant-create" method = "POST">
+    <form action = "/power-plants/create" method = "POST">
         <div>
             <label>
                 Name:

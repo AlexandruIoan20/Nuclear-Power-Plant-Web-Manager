@@ -6,14 +6,14 @@ require_once __DIR__ . '/../../Entities/ReactorType.php';
 require_once __DIR__ . '/../../Entities/CoolingType.php'; 
 
 class TechnicalPlantService { 
-    private TechnicalPlantRepository $technicalPlantRepository; 
+    private PlantRepositoryFacade $plantRepositoryFacade; 
 
-    public function __construct(TechnicalPlantRepository $technicalPlantRepository) { 
-        $this->technicalPlantRepository = $technicalPlantRepository; 
+    public function __construct(PlantRepositoryFacade $plantRepositoryFacade) { 
+        $this->plantRepositoryFacade = $plantRepositoryFacade; 
     }
 
     public function findByPlantId(string $plantId): ?TechnicalPlantData { 
-        return $this->technicalPlantRepository->findByPlantId($plantId); 
+        return $this->plantRepositoryFacade->getTechnicalDataByPlantId($plantId); 
     }
 
     public function save(array $data, string $plantId): void { 
@@ -39,11 +39,11 @@ class TechnicalPlantService {
             $technicalPlantData->addReactorConfiguration($currentReactorSchema); 
         }
 
-        $this->technicalPlantRepository->save($technicalPlantData); 
+        $this->plantRepositoryFacade->saveTechnicalData($technicalPlantData); 
     }
 
     public function update(array $data, string $plantId): void { 
-        $currentPlantData = $this->technicalPlantRepository->findByPlantId($plantId); 
+        $currentPlantData = $this->plantRepositoryFacade->getTechnicalDataByPlantId($plantId); 
 
         $numberOfReactors = $data['number_of_reactors'] ?? ''; 
         $numberOfReactors = ($numberOfReactors !== '') ? $numberOfReactors : null; 
@@ -67,6 +67,6 @@ class TechnicalPlantService {
             $technicalPlantData->addReactorConfiguration($currentReactorSchema); 
         }
 
-        $this->technicalPlantRepository->update($technicalPlantData); 
+        $this->plantRepositoryFacade->updateTechnicalData($technicalPlantData); 
     }
 }

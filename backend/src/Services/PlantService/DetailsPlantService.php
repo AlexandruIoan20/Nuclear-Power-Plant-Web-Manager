@@ -3,13 +3,12 @@
 require_once __DIR__ . '/../../Helpers/generateUUID.php'; 
 require_once __DIR__ . '/../../Entities/PlantStatus.php'; 
 require_once __DIR__ . '/../../Entities/Plant.php'; 
-require_once __DIR__ . '/../../Repositories/PlantRepository/PlantRepository.php'; 
 
-class PlantService { 
-    private PlantRepository $plantRepository; 
+class DetailsPlantService { 
+    private PlantRepositoryFacade $plantRepositoryFacade; 
 
-    public function __construct(PlantRepository $plantRepository) { 
-        $this->plantRepository = $plantRepository; 
+    public function __construct(PlantRepositoryFacade $plantRepositoryFacade) { 
+        $this->plantRepositoryFacade = $plantRepositoryFacade; 
     }
 
     public function savePlantDetails(array $data) { 
@@ -31,7 +30,7 @@ class PlantService {
         $plant = new Plant($country, $id, $name, $status, $latitude, $longitude); 
         error_log("PLANT: "); 
         error_log(print_r($plant, true)); 
-        $this->plantRepository->save($plant); 
+        $this->plantRepositoryFacade->savePlantDetails($plant); 
     }
 
     public function updatePlantDetails(array $data, string $id) { 
@@ -53,15 +52,15 @@ class PlantService {
 
         error_log("[DEBUG] A power plant was built successfully"); 
         error_log("[DEBUG]" . print_r($plant, true)); 
-        $this->plantRepository->update($plant); 
+        $this->plantRepositoryFacade->updatePlantDetails($plant); 
     }
 
     public function getAllPowerPlants(): array { 
-        return $this->plantRepository->findAll(); 
+        return $this->plantRepositoryFacade->getAllPowerPlants(); 
     }
 
     public function findById(string $plantId) { 
-        $plant = $this->plantRepository->findById($plantId); 
+        $plant = $this->plantRepositoryFacade->getPlantDetailsById($plantId); 
 
         if($plant === null) { 
             echo "[ERROR] Plant with this id was not found"; 

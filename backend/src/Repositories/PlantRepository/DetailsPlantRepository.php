@@ -1,6 +1,6 @@
 <?php 
 
-class PlantRepository {
+class DetailsPlantRepository {
     private PDO $db; 
 
     public function __construct(PDO $db) { 
@@ -94,4 +94,5 @@ class PlantRepository {
         error_log("[DEBUG] ID cautat pentru update: " . $plant->getId());
         error_log("[DEBUG] Randuri modificate efectiv: " . $randuriModificate);
     }
+
 }

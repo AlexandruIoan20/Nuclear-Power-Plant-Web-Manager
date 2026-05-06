@@ -1,18 +1,17 @@
 <?php
 
-require_once __DIR__ . '/../../Repositories/PlantRepository/GeologicalPlantRepository.php'; 
 require_once __DIR__ . '/../../Entities/SoilType.php';
 require_once __DIR__ . '/../../Entities/WaterSourceType.php';
 
 class GeologicalPlantService { 
-    private GeologicalPlantRepository $geologicalPlantRepository; 
+    private PlantRepositoryFacade $plantRepositoryFacade; 
 
-    public function __construct(GeologicalPlantRepository $geologicalPlantRepository) { 
-        $this->geologicalPlantRepository = $geologicalPlantRepository; 
+    public function __construct(PlantRepositoryFacade $plantRepositoryFacade) { 
+        $this->plantRepositoryFacade = $plantRepositoryFacade; 
     }
 
     public function findByPlantId(string $plantId) { 
-        return $this->geologicalPlantRepository->findByPlantId($plantId); 
+        return $this->plantRepositoryFacade->getGeologicalDataByPlantId($plantId); 
     }
 
     public function save(array $data, string $plantId): void { 
@@ -61,11 +60,11 @@ class GeologicalPlantService {
             $geologicalRiskScore
         ); 
 
-        $this->geologicalPlantRepository->save($geologicalPlantData); 
+        $this->plantRepositoryFacade->saveGeologicalData($geologicalPlantData); 
     }
 
     public function update(array $data, string $plantId): void { 
-        $currentData = $this->geologicalPlantRepository->findByPlantId($plantId); 
+        $currentData = $this->plantRepositoryFacade->getGeologicalDataByPlantId($plantId); 
         
         $soilTypeRaw = $data['soil_type'] ?? '';
         $soilType = ($soilTypeRaw !== '') ? SoilType::from($soilTypeRaw) : null;
@@ -112,6 +111,6 @@ class GeologicalPlantService {
             $geologicalRiskScore
         ); 
 
-        $this->geologicalPlantRepository->update($geologicalPlantData); 
+        $this->plantRepositoryFacade->updateGeologicalData($geologicalPlantData); 
     }
 }

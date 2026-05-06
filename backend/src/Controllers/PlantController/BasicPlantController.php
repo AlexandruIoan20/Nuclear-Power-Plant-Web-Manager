@@ -3,14 +3,12 @@
 require_once __DIR__ . '/../../Services/PlantService/BasicPlantService.php'; 
 
 class BasicPlantController { 
-    private BasicPlantService $basicPlantService; 
-
-    public function __construct(BasicPlantService $basicPlantService) { 
-        $this->basicPlantService = $basicPlantService; 
-    }
+    public function __construct(
+        private PlantServiceFacade $plantServiceFacade
+    ) {}
 
     public function showForm(string $plantId): void { 
-        $basicPlantData = $this->basicPlantService->findByPlantId($plantId); 
+        $basicPlantData = $this->plantServiceFacade->getBasicDataByPlantId($plantId); 
         $isUpdate = ($basicPlantData !== null); 
 
         $formAction = "/power-plants/{$plantId}/basics";
@@ -31,7 +29,7 @@ class BasicPlantController {
         error_log(print_r($dateFormular, true));
 
         try { 
-            $this->basicPlantService->save($dateFormular, $plantId); 
+            $this->plantServiceFacade->saveBasicData($dateFormular, $plantId); 
         } catch(Exception $e) { 
             echo "Error at POST for the new basic plant data: " . htmlspecialchars($e->getMessage()); 
         }
@@ -43,7 +41,7 @@ class BasicPlantController {
         error_log("[DEBUG] Date Formular"); 
         error_log(print_r($dateFormular, true));
         try { 
-            $this->basicPlantService->update($dateFormular, $plantId); 
+            $this->plantServiceFacade->updateBasicData($dateFormular, $plantId); 
         } catch(Exception $e) { 
             echo "Error at POST for updating the basic plant data: " . htmlspecialchars($e->getMessage()); 
         }

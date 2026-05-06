@@ -1,16 +1,12 @@
 <?php
 
-require_once __DIR__ . '/../../Services/PlantService/GeologicalPlantService.php';
-
 class GeologicalPlantController { 
-    private GeologicalPlantService $geologicalPlantService; 
-
-    public function __construct(GeologicalPlantService $geologicalPlantService) { 
-        $this->geologicalPlantService = $geologicalPlantService; 
-    }
+    public function __construct(
+        private PlantServiceFacade $plantServiceFacade
+    ) {}
 
     public function showForm(string $plantId): void { 
-        $geologicalPlantData = $this->geologicalPlantService->findByPlantId($plantId); 
+        $geologicalPlantData = $this->plantServiceFacade->getGeologicalDataByPlantId($plantId); 
         $isUpdate = ($geologicalPlantData !== null); 
 
         if ($isUpdate) {
@@ -29,7 +25,7 @@ class GeologicalPlantController {
         error_log(print_r($dateFormular, true));
 
         try { 
-            $this->geologicalPlantService->save($dateFormular, $plantId); 
+            $this->plantServiceFacade->saveGeologicalData($dateFormular, $plantId); 
             header("Location: /power-plants/{$plantId}/geological");
             exit;
         } catch(Exception $e) { 
@@ -44,7 +40,7 @@ class GeologicalPlantController {
         error_log(print_r($dateFormular, true));
         
         try { 
-            $this->geologicalPlantService->update($dateFormular, $plantId); 
+            $this->plantServiceFacade->updateGeologicalData($dateFormular, $plantId); 
             header("Location: /power-plants/{$plantId}/geological");
             exit;
         } catch(Exception $e) { 

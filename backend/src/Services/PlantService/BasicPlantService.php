@@ -3,14 +3,14 @@
 require_once __DIR__ . '/../../Repositories/PlantRepository/BasicPlantRepository.php'; 
 
 class BasicPlantService { 
-    private BasicPlantRepository $basicPlantRepository; 
+    private PlantRepositoryFacade $plantRepositoryFacade; 
 
-    public function __construct(BasicPlantRepository $basicPlantRepository) { 
-        $this->basicPlantRepository = $basicPlantRepository; 
+    public function __construct(PlantRepositoryFacade $plantRepositoryFacade) { 
+        $this->plantRepositoryFacade = $plantRepositoryFacade; 
     }
 
     public function findByPlantId(string $plantId) { 
-        return $this->basicPlantRepository->findByPlantId($plantId); 
+        return $this->plantRepositoryFacade->getBasicDataByPlantId($plantId); 
     }
 
     public function save(array $data, string $plantId) { 
@@ -24,11 +24,11 @@ class BasicPlantService {
         $description = ($description !== '') ? $description : null; 
 
         $basicPlantData = new BasicPlantData($plantId, null, $capacity, $constructionDurationYears, $description); 
-        $this->basicPlantRepository->save($basicPlantData); 
+        $this->plantRepositoryFacade->saveBasicData($basicPlantData); 
     }
 
     public function update(array $data, string $plantId) { 
-        $currentPlantData = $this->basicPlantRepository->findByPlantId($plantId); 
+        $currentPlantData = $this->plantRepositoryFacade->getBasicDataByPlantId($plantId); 
         $capacity = $data['capacity'] ?? ''; 
         $capacity = ($capacity !== '') ? $capacity : null; 
 
@@ -39,6 +39,6 @@ class BasicPlantService {
         $description = ($description !== '') ? $description : null; 
 
         $basicPlantData = new BasicPlantData($plantId, $currentPlantData->getId(), $capacity, $constructionDurationYears, $description); 
-        $this->basicPlantRepository->update($basicPlantData); 
+        $this->plantRepositoryFacade->updateBasicData($basicPlantData); 
     }
 }
