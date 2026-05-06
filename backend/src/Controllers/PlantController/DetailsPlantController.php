@@ -1,6 +1,7 @@
 <?php 
 
-require __DIR__ . '/../../Dto/PlantDTO.php';
+require_once __DIR__ . '/../../Dto/PlantDTO.php';
+require_once __DIR__ . '/../../Dto/PlantDetailsDTO.php'; 
 
 class DetailsPlantController { 
     public function __construct(
@@ -28,8 +29,10 @@ class DetailsPlantController {
             exit; 
         }
 
+        $plantDTO = PlantDetailsDTO::fromEntity($plant);
+
         http_response_code(200);
-        echo json_encode(["status" => "success", "data" => $plant]);
+        echo json_encode(["status" => "success", "data" => $plantDTO]);
         exit;
     }
 
