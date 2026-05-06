@@ -1,60 +1,99 @@
 <?php 
 
-
 class DetailsPlantController { 
     public function __construct(
         private PlantServiceFacade $plantServiceFacade
     ) {}
 
-    public function showDetailsForm() { 
+    public function getCountries() { 
+        header('Content-Type: application/json; charset=UTF-8');
+        
         $countries = require __DIR__ . '/../../Constants/countries.php';
-        require __DIR__ . '/../../Views/PlantViews/plant-details-form.view.php'; 
+        
+        http_response_code(200);
+        echo json_encode($countries);
+        exit;
     }
 
-    public function showDetailsFormForUpdate(string $id) { 
+    public function getPlantDetails(string $id) { 
+        header('Content-Type: application/json; charset=UTF-8');
+        
         $plant = $this->plantServiceFacade->getPlantDetailsById($id); 
 
         if(!$plant) { 
-            header("Location: /power-plants/list"); 
+            http_response_code(404); 
+            echo json_encode(["status" => "error", "message" => "Centrala nu a fost găsită."]);
             exit; 
         }
 
-        $countries = require __DIR__ . '/../../Constants/countries.php';
-        require_once __DIR__ . "/../../Views/PlantViews/plant-details-update-form.view.php"; 
+        http_response_code(200);
+        echo json_encode(["status" => "success", "data" => $plant]);
+        exit;
     }
 
-    public function showPowerPlantsList() { 
+    public function getPowerPlantsList() { 
+        header('Content-Type: application/json; charset=UTF-8');
+        
         $powerPlants = $this->plantServiceFacade->getAllPowerPlants(); 
-        require __DIR__ . '/../../Views/UserPlantViews/plant-list.view.php'; 
+        
+        http_response_code(200);
+        echo json_encode(["status" => "success", "data" => $powerPlants]);
+        exit;
     }
 
     public function handleSavePlantDetails() { 
-        $dateFormular = $_POST; 
+        header('Content-Type: application/json; charset=UTF-8');
 
-        error_log("[DEBUG] Date Formular"); 
-        error_log(print_r($dateFormular, true));
+        $jsonPayload = file_get_contents("php://input");
+        $dateFormular = json_decode($jsonPayload, true); 
+
+        error_log("[DEBUG] Date Formular API Creare: " . print_r($dateFormular, true));
+        
+        if (empty($dateFormular)) {
+            http_response_code(400); 
+            echo json_encode(["status" => "error", "message" => "Nu s-au primit date."]);
+            exit;
+        }
+
         try { 
-            $this->plantServiceFacade->savePlantDetails($_POST); 
+            $this->plantServiceFacade->savePlantDetails($dateFormular); 
             
-            header("Location /power-plant-list"); 
+            http_response_code(201); 
+            echo json_encode(["status" => "success", "message" => "Centrala a fost salvată cu succes."]);
             exit; 
         } catch(Exception $e) { 
-            echo "Error at POST for the new plant: " . htmlspecialchars($e->getMessage()); 
+            error_log("[ERROR] Save Plant: " . $e->getMessage());
+            http_response_code(500); 
+            echo json_encode(["status" => "error", "message" => "Eroare la salvare: " . $e->getMessage()]);
+            exit;
         }
     }
 
     public function handleUpdatePlantDetails(string $id) { 
-        $dateFormular = $_POST; 
-        error_log("[DEBUG] Date Formular"); 
-        error_log(print_r($dateFormular, true));
+        header('Content-Type: application/json; charset=UTF-8');
+        
+        $jsonPayload = file_get_contents("php://input");
+        $dateFormular = json_decode($jsonPayload, true); 
+
+        error_log("[DEBUG] Date Formular API Update pt ID {$id}: " . print_r($dateFormular, true));
+
+        if (empty($dateFormular)) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Date incomplete pentru actualizare."]);
+            exit;
+        }
 
         try { 
-            error_log("[DEBUG] Incearca update la date Formular"); 
-            $this->plantServiceFacade->updatePlantDetails($_POST, $id); 
+            $this->plantServiceFacade->updatePlantDetails($dateFormular, $id); 
             
+            http_response_code(200); 
+            echo json_encode(["status" => "success", "message" => "Detaliile au fost actualizate cu succes."]);
             exit; 
         } catch(Exception $e) { 
-            echo "[ERROR] Update the details for a plant: " . htmlspecialchars($e->getMessage()); 
+            error_log("[ERROR] Update Plant: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => "Eroare la actualizare: " . $e->getMessage()]);
+            exit;
         }
     }
 }

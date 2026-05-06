@@ -1,6 +1,5 @@
 <?php
 
-
 header("Access-Control-Allow-Origin: http://127.0.0.1:5500");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
@@ -51,71 +50,69 @@ try {
     ]);
 } catch (PDOException $e) {
     http_response_code(500);
-    die("Eroare critică: Nu se poate conecta la baza de date. (" . $e->getMessage() . ")");
+    die(json_encode(["status" => "error", "message" => "Conexiune la baza de date esuata."]));
 }
 
 $plantRepositoryFacade = new PlantRepositoryFacade($pdo); 
 $plantServiceFacade = new PlantServiceFacade($plantRepositoryFacade); 
 
-
 $router = new Router();
 
-$router->get('/power-plants/list', function() use ($plantServiceFacade) { 
-    (new DetailsPlantController($plantServiceFacade))->showPowerPlantsList(); 
+$router->get('/api/power-plants/list', function() use ($plantServiceFacade) { 
+    (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList(); 
 }); 
 
-$router->get('/power-plants/create', function() use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->showDetailsForm();
+$router->get('/api/countries', function() use ($plantServiceFacade) {
+    (new DetailsPlantController($plantServiceFacade))->getCountries();
 });
 
-$router->post('/power-plants/create', function() use ($plantServiceFacade) {
+$router->post('/api/power-plants/create', function() use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->handleSavePlantDetails();
 });
 
-$router->get('/power-plants/{id}/details', function($id) use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->showDetailsFormForUpdate($id);
+$router->get('/api/power-plants/{id}/details', function($id) use ($plantServiceFacade) {
+    (new DetailsPlantController($plantServiceFacade))->getPlantDetails($id);
 });
 
-$router->post('/power-plants/{id}/details', function($id) use ($plantServiceFacade) {
+$router->post('/api/power-plants/{id}/details-update', function($id) use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->handleUpdatePlantDetails($id);
 });
 
-$router->get('/power-plants/{id}/basics', function($id) use ($plantServiceFacade) {
-    (new BasicPlantController($plantServiceFacade))->showForm($id);
-});
+//$router->get('/api/power-plants/{id}/basics', function($id) use ($plantServiceFacade) {
+//    (new BasicPlantController($plantServiceFacade))->getBasicPlantData($id);
+//});
 
-$router->post('/power-plants/{id}/basic-update', function($id) use ($plantServiceFacade) {
+$router->post('/api/power-plants/{id}/basic-update', function($id) use ($plantServiceFacade) {
     (new BasicPlantController($plantServiceFacade))->updateBasicPlantData($id);
 });
 
-$router->post('/power-plants/{id}/basic-save', function($id) use ($plantServiceFacade) {
+$router->post('/api/power-plants/{id}/basic-save', function($id) use ($plantServiceFacade) {
     (new BasicPlantController($plantServiceFacade))->createBasicPlantData($id);
 });
 
-$router->get('/power-plants/{id}/geological', function($id) use ($plantServiceFacade) {
-    (new GeologicalPlantController($plantServiceFacade))->showForm($id);
-});
+//$router->get('/api/power-plants/{id}/geological', function($id) use ($plantServiceFacade) {
+//    (new GeologicalPlantController($plantServiceFacade))->getGeologicalPlantData($id);
+//});
 
-$router->post('/power-plants/{id}/geological-save', function($id) use ($plantServiceFacade) {
+$router->post('/api/power-plants/{id}/geological-save', function($id) use ($plantServiceFacade) {
     (new GeologicalPlantController($plantServiceFacade))->createGeologicalPlantData($id);
 });
 
-$router->post('/power-plants/{id}/geological-update', function($id) use ($plantServiceFacade) {
+$router->post('/api/power-plants/{id}/geological-update', function($id) use ($plantServiceFacade) {
     (new GeologicalPlantController($plantServiceFacade))->updateGeologicalPlantData($id);
 });
 
-$router->get('/power-plants/{id}/technical', function($id) use ($plantServiceFacade) {
-    (new TechnicalPlantController($plantServiceFacade))->showForm($id);
-});
+//$router->get('/api/power-plants/{id}/technical', function($id) use ($plantServiceFacade) {
+//    (new TechnicalPlantController($plantServiceFacade))->getTechnicalPlantData($id);
+//});
 
-$router->post('/power-plants/{id}/technical-save', function($id) use ($plantServiceFacade) {
+$router->post('/api/power-plants/{id}/technical-save', function($id) use ($plantServiceFacade) {
     (new TechnicalPlantController($plantServiceFacade))->createTechnicalPlantData($id);
 });
 
-$router->post('/power-plants/{id}/technical-update', function($id) use ($plantServiceFacade) {
+$router->post('/api/power-plants/{id}/technical-update', function($id) use ($plantServiceFacade) {
     (new TechnicalPlantController($plantServiceFacade))->updateTechnicalPlantData($id);
 });
-
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
