@@ -1,5 +1,7 @@
 <?php 
 
+require __DIR__ . '/../../Dto/PlantDTO.php';
+
 class DetailsPlantController { 
     public function __construct(
         private PlantServiceFacade $plantServiceFacade
@@ -33,11 +35,14 @@ class DetailsPlantController {
 
     public function getPowerPlantsList() { 
         header('Content-Type: application/json; charset=UTF-8');
-        
         $powerPlants = $this->plantServiceFacade->getAllPowerPlants(); 
         
+        $dtos = array_map(function($plant) {
+            return PlantDTO::fromEntity($plant);
+        }, $powerPlants);
+        
         http_response_code(200);
-        echo json_encode(["status" => "success", "data" => $powerPlants]);
+        echo json_encode(["status" => "success", "data" => $dtos]);
         exit;
     }
 
