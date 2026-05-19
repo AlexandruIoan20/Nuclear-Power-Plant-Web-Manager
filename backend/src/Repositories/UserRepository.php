@@ -29,4 +29,18 @@ class UserRepository {
         return $users; 
     }
 
+    public function findByEmail(string $email): ?array {
+        $stmt = $this->db->prepare("SELECT id, username, email, password_hash, role FROM users WHERE email = :email LIMIT 1");
+        $stmt->execute(['email' => $email]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
+    }
+
+    public function findById($id): ?array {
+        $stmt = $this->db->prepare("SELECT id, username, first_name, last_name, email, role FROM users WHERE id = :id LIMIT 1");
+        $stmt->execute(['id' => $id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
+    }
+
 }

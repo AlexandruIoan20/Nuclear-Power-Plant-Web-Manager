@@ -1,5 +1,7 @@
 <?php
 
+session_start();
+
 header("Access-Control-Allow-Origin: http://127.0.0.1:5500");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
@@ -15,6 +17,7 @@ require_once __DIR__ . '/../src/Entities/User.php';
 require_once __DIR__ . '/../src/Repositories/UserRepository.php';
 require_once __DIR__ . '/../src/Services/UserService.php';
 require_once __DIR__ . '/../src/Controllers/UserController.php';
+require_once __DIR__ . '/../src/Helpers/AuthHelper.php';
 
 require_once __DIR__ . '/../src/Repositories/PlantRepository/DetailsPlantRepository.php'; 
 require_once __DIR__ . '/../src/Repositories/PlantRepository/BasicPlantRepository.php'; 
@@ -55,6 +58,9 @@ try {
 
 $plantRepositoryFacade = new PlantRepositoryFacade($pdo); 
 $plantServiceFacade = new PlantServiceFacade($plantRepositoryFacade); 
+
+$userRepository = new UserRepository($pdo);
+$userService = new UserService($userRepository);
 
 $router = new Router();
 
@@ -111,7 +117,32 @@ $router->post('/api/power-plants/{id}/technical-save', function($id) use ($plant
 });
 
 $router->post('/api/power-plants/{id}/technical-update', function($id) use ($plantServiceFacade) {
-    (new TechnicalPlantController($plantServiceFacade))->updateTechnicalPlantData($id);
+     (new TechnicalPlantController($plantServiceFacade))->updateTechnicalPlantData($id);
+});
+
+// Authentication Routes
+$router->get('/login', function() use ($userService) {
+    (new UserController($userService))->handleLogin();
+});
+
+$router->post('/login', function() use ($userService) {
+    (new UserController($userService))->handleLogin();
+});
+
+$router->get('/logout', function() use ($userService) {
+    (new UserController($userService))->handleLogout();
+});
+
+$router->get('/start', function() use ($userService) {
+    (new UserController($userService))->showStart();
+});
+
+$router->get('/api/user/status', function() use ($userService) {
+    (new UserController($userService))->getUserStatus();
+});
+
+$router->get('/dashboard', function() use ($userService) {
+    (new UserController($userService))->showDashboard();
 });
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

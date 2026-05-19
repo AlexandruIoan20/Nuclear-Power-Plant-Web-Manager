@@ -21,4 +21,23 @@ class UserService {
     public function getAllUsers(): array { 
         return $this->userRepository->findAll(); 
     }
+
+    public function authenticateUser(string $email, string $password): ?array {
+        $user = $this->userRepository->findByEmail($email);
+        
+        if (!$user) {
+            return null;
+        }
+
+        if (!password_verify($password, $user['password_hash'])) {
+            return null;
+        }
+
+        return $user;
+    }
+
+    public function getUserById($id): ?array {
+        return $this->userRepository->findById($id);
+    }
+
 }
