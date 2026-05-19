@@ -59,7 +59,7 @@ class UserController {
             $_SESSION['user_role'] = $user['role'];
             $_SESSION['username'] = $user['username'];
 
-            header('Location: /start');
+            header('Location: http://127.0.0.1:8081/start', true, 302);
             exit;
         }
 
@@ -68,7 +68,7 @@ class UserController {
 
     public function handleLogout(): void {
         session_destroy();
-        header('Location: /start');
+        header('Location: http://127.0.0.1:8081/start', true, 302);
         exit;
     }
 

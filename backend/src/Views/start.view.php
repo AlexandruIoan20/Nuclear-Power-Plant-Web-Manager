@@ -19,9 +19,9 @@
                         <?php echo htmlspecialchars($_SESSION['username']); ?> 
                         <small>(<?php echo htmlspecialchars($_SESSION['user_role']); ?>)</small>
                     </span>
-                    <a href="/logout">Logout</a>
+                    <a href="http://localhost:8081/logout">Logout</a>
                 <?php else: ?>
-                    <a href="/login">Login</a>
+                    <a href="http://localhost:8081/login">Login</a>
                 <?php endif; ?>
                 <a href="#overview">Overview</a>
             </nav>
@@ -40,11 +40,11 @@
 
                 <div class="hero-actions">
                     <?php if (isset($_SESSION['user_id'])): ?>
-                        <a class="button" href="/dashboard">Accesează dashboard</a>
-                        <a class="button secondary" href="/logout">Logout</a>
+                        <a class="button" href="http://localhost:8081/dashboard">Accesează dashboard</a>
+                        <a class="button secondary" href="http://localhost:8081/logout">Logout</a>
                     <?php else: ?>
-                        <a class="button" href="/login">Accesează login</a>
-                        <a class="button secondary" href="/login">Intrare operator</a>
+                        <a class="button" href="http://localhost:8081/login">Accesează login</a>
+                        <a class="button secondary" href="http://localhost:8081/login">Intrare operator</a>
                     <?php endif; ?>
                 </div>
 

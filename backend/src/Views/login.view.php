@@ -22,7 +22,7 @@
                 <?php unset($_SESSION['login_error']); ?>
             <?php endif; ?>
 
-            <form class="field-grid" method="post" action="/login" id="loginForm">
+            <form class="field-grid" method="post" action="http://localhost:8081/login" id="loginForm">
                 <div class="field">
                     <label for="email">Email</label>
                     <input id="email" name="email" type="email" placeholder="operator@nuclear.ro" autocomplete="email" required>
@@ -35,7 +35,7 @@
 
                 <div class="button-row">
                     <input type="submit" value="Conectare">
-                    <a class="button secondary" href="/start">Înapoi la start</a>
+                    <a class="button secondary" href="http://localhost:8081/start">Înapoi la start</a>
                 </div>
             </form>
 
