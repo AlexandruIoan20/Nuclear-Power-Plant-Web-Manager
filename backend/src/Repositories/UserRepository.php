@@ -8,14 +8,15 @@ class UserRepository {
     }
 
     public function save (User $user): void { 
-        $stmt = $this->db->prepare("INSERT INTO users (name, email, password_hash) VALUES (:name, :email, :password_hash)"); 
+        $stmt = $this->db->prepare("INSERT INTO users (username, first_name, last_name, email, password_hash, role) VALUES (:username, :first_name, :last_name, :email, :password_hash, :role)"); 
         $stmt->execute([
-            'name' => $user->getName(), 
+            'username' => $user->getName(),
+            'first_name' => $user->getName(),
+            'last_name' => 'User',
             'email' => $user->getEmail(), 
-            'password_hash' => $user->getPasswordHash() 
+            'password_hash' => $user->getPasswordHash(),
+            'role' => 'OPERATOR'
         ]); 
-
-        $user->setId((int)$this->db->lastInsertId()); 
     }
 
     public function findAll(): array { 

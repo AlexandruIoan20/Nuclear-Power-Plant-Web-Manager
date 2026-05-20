@@ -134,6 +134,14 @@ $router->post('/login', function() use ($userService) {
     (new UserController($userService))->handleLogin();
 });
 
+$router->get('/register', function() use ($userService) {
+    (new UserController($userService))->handleRegister();
+});
+
+$router->post('/register', function() use ($userService) {
+    (new UserController($userService))->handleRegister();
+});
+
 $router->get('/logout', function() use ($userService) {
     (new UserController($userService))->handleLogout();
 });

@@ -44,7 +44,7 @@
                         <a class="button secondary" href="http://localhost:8081/logout">Logout</a>
                     <?php else: ?>
                         <a class="button" href="http://localhost:8081/login">Accesează login</a>
-                        <a class="button secondary" href="http://localhost:8081/login">Intrare operator</a>
+                        <a class="button secondary" href="http://localhost:8081/register">Crează cont</a>
                     <?php endif; ?>
                 </div>
 

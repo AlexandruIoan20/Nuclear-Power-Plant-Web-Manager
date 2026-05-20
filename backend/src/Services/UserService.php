@@ -9,7 +9,16 @@ class UserService {
 
     public function registerUser(array $data): void { 
         if(empty($data['name']) || empty($data['email']) || empty($data['password'])) { 
-            throw new Exception('All fields are required!');
+            throw new Exception('Toate câmpurile sunt necesare!');
+        }
+
+        if (strlen($data['password']) < 6) {
+            throw new Exception('Parola trebuie să aibă cel puțin 6 caractere!');
+        }
+
+        $existingUser = $this->userRepository->findByEmail($data['email']);
+        if ($existingUser) {
+            throw new Exception('Email-ul este deja înregistrat!');
         }
 
         $hashedPassword = password_hash($data['password'], PASSWORD_BCRYPT); 

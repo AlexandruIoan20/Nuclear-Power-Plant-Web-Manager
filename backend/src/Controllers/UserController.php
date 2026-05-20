@@ -19,15 +19,43 @@ class UserController {
         require __DIR__ . '/../Views/register.view.php'; 
     }
 
-    public function handleRegister(): void { 
-        try { 
-            $this->userService->registerUser($_POST); 
+    public function handleRegister(): void {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = $_POST['name'] ?? '';
+            $email = $_POST['email'] ?? '';
+            $password = $_POST['password'] ?? '';
+            $password_confirm = $_POST['password_confirm'] ?? '';
 
-            header("Location: /users"); 
-            exit; 
-        } catch(Exception $e) { 
-            echo "Error at register: " . htmlspecialchars($e->getMessage()); 
+            if (empty($name) || empty($email) || empty($password) || empty($password_confirm)) {
+                $_SESSION['register_error'] = 'Toate câmpurile sunt necesare.';
+                require __DIR__ . '/../Views/register.view.php';
+                return;
+            }
+
+            if ($password !== $password_confirm) {
+                $_SESSION['register_error'] = 'Parolele nu se potrivesc.';
+                require __DIR__ . '/../Views/register.view.php';
+                return;
+            }
+
+            try {
+                $this->userService->registerUser([
+                    'name' => $name,
+                    'email' => $email,
+                    'password' => $password
+                ]);
+
+                $_SESSION['register_success'] = 'Cont creat cu succes! Poți să te conectezi acum.';
+                header('Location: http://127.0.0.1:8081/login', true, 302);
+                exit;
+            } catch (Exception $e) {
+                $_SESSION['register_error'] = $e->getMessage();
+                require __DIR__ . '/../Views/register.view.php';
+                return;
+            }
         }
+
+        require __DIR__ . '/../Views/register.view.php';
     }
 
     public function listUsers(): void {

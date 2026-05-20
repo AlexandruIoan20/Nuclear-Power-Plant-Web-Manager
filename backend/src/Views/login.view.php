@@ -22,6 +22,13 @@
                 <?php unset($_SESSION['login_error']); ?>
             <?php endif; ?>
 
+            <?php if (isset($_SESSION['register_success'])): ?>
+                <div class="success-message" style="color: #00ff00; padding: 12px; background: rgba(0, 255, 0, 0.1); border-radius: 4px; margin-bottom: 16px;">
+                    <strong>Succes:</strong> <?php echo htmlspecialchars($_SESSION['register_success']); ?>
+                </div>
+                <?php unset($_SESSION['register_success']); ?>
+            <?php endif; ?>
+
             <form class="field-grid" method="post" action="http://localhost:8081/login" id="loginForm">
                 <div class="field">
                     <label for="email">Email</label>
@@ -35,7 +42,7 @@
 
                 <div class="button-row">
                     <input type="submit" value="Conectare">
-                    <a class="button secondary" href="http://localhost:8081/start">Înapoi la start</a>
+                    <a class="button secondary" href="http://localhost:8081/register">Crează cont</a>
                 </div>
             </form>
 
