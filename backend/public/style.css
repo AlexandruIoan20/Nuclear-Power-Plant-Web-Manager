@@ -21,6 +21,10 @@ body {
     min-height: 100%;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     margin: 0;
     background:
@@ -29,6 +33,8 @@ body {
     color: var(--text);
     font-family: "Courier New", Courier, monospace;
     letter-spacing: 0.02em;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
 }
 
 body::before {
@@ -56,6 +62,46 @@ a:hover {
     text-decoration: underline;
 }
 
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.button:focus-visible,
+input[type="submit"]:focus-visible {
+    outline: 3px solid var(--green);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 3px rgba(57, 255, 20, 0.12);
+}
+
+.skip-link {
+    position: absolute;
+    left: 16px;
+    top: -80px;
+    z-index: 1000;
+    padding: 10px 14px;
+    background: #000;
+    border: 1px solid var(--green);
+    color: var(--green);
+    transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+    top: 16px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .page-shell {
     width: min(1180px, calc(100% - 32px));
     margin: 0 auto;
@@ -69,7 +115,8 @@ a:hover {
 .status-card,
 .image-frame,
 .notice,
-.login-card {
+.login-card,
+.card {
     border: 1px solid var(--border);
     background: linear-gradient(180deg, rgba(10, 10, 10, 0.98), rgba(4, 4, 4, 0.98));
     box-shadow:
@@ -119,6 +166,17 @@ a:hover {
     padding: 8px 10px;
     border: 1px solid rgba(255, 215, 0, 0.25);
     background: rgba(255, 215, 0, 0.04);
+}
+
+.nav-links a:hover {
+    background: rgba(255, 215, 0, 0.12);
+}
+
+.nav-links a.active {
+    border-color: var(--green);
+    color: var(--green);
+    background: rgba(57, 255, 20, 0.12);
+    box-shadow: 0 0 0 1px rgba(57, 255, 20, 0.18) inset;
 }
 
 .hero {
@@ -243,7 +301,24 @@ input[type="submit"]:hover {
     font: inherit;
 }
 
-.field input:focus {
+.field input::placeholder,
+.field textarea::placeholder {
+    color: rgba(244, 241, 201, 0.45);
+}
+
+.field select,
+.field textarea {
+    width: 100%;
+    border: 1px solid rgba(255, 215, 0, 0.45);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text);
+    padding: 13px 14px;
+    font: inherit;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
     outline: none;
     border-color: var(--green);
     box-shadow: 0 0 0 3px rgba(57, 255, 20, 0.12);
@@ -294,6 +369,29 @@ input[type="submit"]:hover {
     font-size: 0.92rem;
 }
 
+.field-grid,
+.grid-2,
+.grid-3 {
+    align-items: start;
+}
+
+.card {
+    border-radius: 18px;
+}
+
+.card h3,
+.status-card h3,
+.panel h1,
+.form-panel h1 {
+    margin-top: 0;
+}
+
+.button-row input[type="submit"],
+.hero-actions .button,
+.hero-actions input[type="submit"] {
+    min-width: 160px;
+}
+
 @media (max-width: 900px) {
     .hero {
         grid-template-columns: 1fr;
@@ -306,5 +404,17 @@ input[type="submit"]:hover {
 
     .stats {
         grid-template-columns: 1fr;
+    }
+
+    .grid-2,
+    .grid-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .button,
+    button,
+    input[type="submit"] {
+        width: 100%;
+        justify-content: center;
     }
 }

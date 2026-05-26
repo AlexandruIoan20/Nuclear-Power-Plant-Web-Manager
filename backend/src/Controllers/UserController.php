@@ -46,7 +46,7 @@ class UserController {
                 ]);
 
                 $_SESSION['register_success'] = 'Cont creat cu succes! Poți să te conectezi acum.';
-                header('Location: http://127.0.0.1:8081/login', true, 302);
+                header('Location: /login.html', true, 302);
                 exit;
             } catch (Exception $e) {
                 $_SESSION['register_error'] = $e->getMessage();
@@ -87,7 +87,7 @@ class UserController {
             $_SESSION['user_role'] = $user['role'];
             $_SESSION['username'] = $user['username'];
 
-            header('Location: http://127.0.0.1:8081/start', true, 302);
+            header('Location: /dashboard.html', true, 302);
             exit;
         }
 
@@ -96,7 +96,7 @@ class UserController {
 
     public function handleLogout(): void {
         session_destroy();
-        header('Location: http://127.0.0.1:8081/start', true, 302);
+        header('Location: /start.html', true, 302);
         exit;
     }
 

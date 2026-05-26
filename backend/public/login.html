@@ -27,7 +27,7 @@
                     try {
                         const formData = new FormData(loginForm);
 
-                        const resp = await fetch('http://localhost:8081/login', {
+                        const resp = await fetch('/login', {
                             method: 'POST',
                             body: formData,
                             credentials: 'include',
@@ -39,14 +39,14 @@
                         const text = await resp.text();
 
                         if (resp.redirected || resp.url.includes('/dashboard')) {
-                            window.location.href = 'http://localhost:8081/dashboard.html';
+                            window.location.href = '/dashboard.html';
                             return;
                         }
 
                         container.innerHTML = text;
                         attachLoginHandler();
-                    } catch (error) {
-                        console.error('Eroare la autentificare:', error);
+                    } catch (err) {
+                        console.error('Login submit failed', err);
                         container.innerHTML = "<p style='color:red;'>Eroare la conectare — verifica serverul.</p>";
                     } finally {
                         if (submitButton) submitButton.disabled = false;

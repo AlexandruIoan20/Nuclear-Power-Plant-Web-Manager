@@ -16,20 +16,20 @@
             </p>
 
             <?php if (isset($_SESSION['login_error'])): ?>
-                <div class="error-message" style="color: #ff6b6b; padding: 12px; background: rgba(255, 107, 107, 0.1); border-radius: 4px; margin-bottom: 16px;">
+                <div class="error-message" role="alert" aria-live="assertive" style="color: #ff6b6b; padding: 12px; background: rgba(255, 107, 107, 0.1); border-radius: 4px; margin-bottom: 16px;">
                     <strong>Eroare:</strong> <?php echo htmlspecialchars($_SESSION['login_error']); ?>
                 </div>
                 <?php unset($_SESSION['login_error']); ?>
             <?php endif; ?>
 
             <?php if (isset($_SESSION['register_success'])): ?>
-                <div class="success-message" style="color: #00ff00; padding: 12px; background: rgba(0, 255, 0, 0.1); border-radius: 4px; margin-bottom: 16px;">
+                <div class="success-message" role="status" aria-live="polite" style="color: #00ff00; padding: 12px; background: rgba(0, 255, 0, 0.1); border-radius: 4px; margin-bottom: 16px;">
                     <strong>Succes:</strong> <?php echo htmlspecialchars($_SESSION['register_success']); ?>
                 </div>
                 <?php unset($_SESSION['register_success']); ?>
             <?php endif; ?>
 
-            <form class="field-grid" method="post" action="http://localhost:8081/login" id="loginForm">
+            <form class="field-grid" method="post" action="/login" id="loginForm">
                 <div class="field">
                     <label for="email">Email</label>
                     <input id="email" name="email" type="email" placeholder="operator@nuclear.ro" autocomplete="email" required>
@@ -42,7 +42,7 @@
 
                 <div class="button-row">
                     <input type="submit" value="Conectare">
-                    <a class="button secondary" href="http://localhost:8081/register">Crează cont</a>
+                    <a class="button secondary" href="/register">Nu ai cont? Creează cont</a>
                 </div>
             </form>
 

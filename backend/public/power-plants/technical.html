@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear Plant Control | Technical</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="page-shell narrow">
+        <header class="topbar">
+            <div class="brand">
+                <strong>Nuclear Plant Control</strong>
+                <span>Date tehnice și configurații reactor</span>
+            </div>
+            <nav class="nav-links">
+                <a href="../dashboard.html">Dashboard</a>
+                <a href="list.html">Lista</a>
+                <a href="basics.html">Basics</a>
+                <a href="geological.html">Geological</a>
+                <a href="technical.html" class="active">Technical</a>
+                <a href="../reactor-log.html">Log reactor</a>
+            </nav>
+        </header>
+
+        <main class="form-panel login-card">
+            <p class="eyebrow">TECHNICAL DATA</p>
+            <h1>Date tehnice pentru centrală</h1>
+            <p>Include numărul de reactoare, eficiența și configurațiile de reactor.</p>
+
+            <form id="tech-form" class="field-grid">
+                <div class="grid-3">
+                    <div class="field"><label for="number_of_reactors">Număr reactoare</label><input type="number" id="number_of_reactors" min="0"></div>
+                    <div class="field"><label for="estimated_efficiency">Eficiență estimată (%)</label><input type="number" id="estimated_efficiency" step="0.01" min="0" max="100"></div>
+                    <div class="field"><label for="operational_risk_level">Risc operațional</label><input type="number" id="operational_risk_level" step="0.01" min="0" max="1"></div>
+                </div>
+
+                <div id="reactor-configurations-container" class="field-grid"></div>
+
+                <div class="button-row">
+                    <button type="button" class="button secondary" id="add-reactor">+ Adaugă reactor</button>
+                    <input type="submit" value="Salvează">
+                </div>
+            </form>
+
+            <div id="status-message" class="footer-note"></div>
+        </main>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const plantId = params.get('id') || 'demo-plant';
+        const isUpdate = params.get('mode') === 'update';
+        const container = document.getElementById('reactor-configurations-container');
+
+        const reactorTypeOptions = ['PWR', 'BWR', 'PHWR', 'SMR'];
+        const coolingTypeOptions = ['WATER', 'GAS', 'MOLTEN_SALT', 'AIR'];
+        let reactorIndex = 0;
+
+        function addReactorBlock() {
+            const block = document.createElement('div');
+            block.className = 'card';
+            block.innerHTML = `
+                <h3>Configurație reactor ${reactorIndex + 1}</h3>
+                <div class="grid-2">
+                    <div class="field">
+                        <label>Tip reactor</label>
+                        <select name="reactor_type">
+                            ${reactorTypeOptions.map((type) => `<option value="${type}">${type}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Tip răcire</label>
+                        <select name="cooling_type">
+                            ${coolingTypeOptions.map((type) => `<option value="${type}">${type}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
+                <div class="button-row" style="margin-top: 12px;">
+                    <button type="button" class="button secondary">Elimină</button>
+                </div>
+            `;
+
+            block.querySelector('button').addEventListener('click', () => block.remove());
+            container.appendChild(block);
+            reactorIndex += 1;
+        }
+
+        document.getElementById('add-reactor').addEventListener('click', addReactorBlock);
+        addReactorBlock();
+
+        document.getElementById('tech-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const payload = {
+                number_of_reactors: document.getElementById('number_of_reactors').value,
+                estimated_efficiency: document.getElementById('estimated_efficiency').value,
+                operational_risk_level: document.getElementById('operational_risk_level').value,
+                reactor_configurations: Array.from(container.querySelectorAll('.card')).map((card) => ({
+                    reactor_type: card.querySelector('select[name="reactor_type"]').value,
+                    cooling_type: card.querySelector('select[name="cooling_type"]').value,
+                })),
+            };
+
+            const endpoint = isUpdate
+                ? `http://localhost:8081/api/power-plants/${plantId}/technical-update`
+                : `http://localhost:8081/api/power-plants/${plantId}/technical-save`;
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                document.getElementById('status-message').innerHTML = '<span class="inline-status">Date tehnice salvate.</span>';
+            } catch (error) {
+                document.getElementById('status-message').innerHTML = `<span style="color: var(--danger);">Eroare: ${error.message}</span>`;
+            }
+        });
+    </script>
+</body>
+</html>

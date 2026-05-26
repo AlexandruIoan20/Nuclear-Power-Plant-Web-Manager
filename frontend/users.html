@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear Plant Control | Users</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page-shell">
+        <div id="app-container" class="panel">
+            <p class="inline-status">Se încarcă lista utilizatorilor...</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('http://localhost:8081/users')
+                .then((response) => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.text();
+                })
+                .then((html) => {
+                    document.getElementById('app-container').innerHTML = html;
+                })
+                .catch((error) => {
+                    document.getElementById('app-container').innerHTML =
+                        `<p style="color: var(--danger);">Nu am putut încărca utilizatorii: ${error.message}</p>`;
+                });
+        });
+    </script>
+</body>
+</html>

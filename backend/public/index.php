@@ -1,18 +1,40 @@
 <?php
 
+// Session cookie settings: for local dev we use 'Lax' to avoid Secure requirement
+// with SameSite=None which modern browsers block on non-HTTPS origins.
 session_start([
-    'cookie_samesite' => 'None',
+    'cookie_samesite' => 'Lax',
     'cookie_secure' => false,
     'cookie_httponly' => true,
 ]);
 
-header("Access-Control-Allow-Origin: http://localhost:5500");
+// Allow specific local origins (needed for fetch from frontend dev servers)
+$allowedOrigins = [
+    'http://localhost:5500',
+    'http://localhost:8081',
+];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin && in_array($origin, $allowedOrigins, true)) {
+    header("Access-Control-Allow-Origin: $origin");
+} else {
+    // fallback to first allowed origin to be explicit when none provided
+    header("Access-Control-Allow-Origin: {$allowedOrigins[0]}");
+}
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 header("Access-Control-Allow-Credentials: true");
+// Allow frontend to read the redirect Location header when following login redirects
+header("Access-Control-Expose-Headers: Location");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
+    exit();
+}
+
+// Lightweight healthcheck for smoke tests that doesn't require DB
+if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/health') {
+    header('Content-Type: application/json');
+    echo json_encode(['status' => 'ok']);
     exit();
 }
 
@@ -60,6 +82,21 @@ try {
     http_response_code(500);
     die(json_encode(["status" => "error", "message" => "Conexiune la baza de date esuata."]));
 }
+
+$adminEmail = 'admin@nuclear.ro';
+$adminPasswordHash = '$2y$12$pLgjMWjlhKbYoAAvRByCMuLnj3l5JlYl03QHgkgZwHci6c8Q59U.i';
+
+$adminInsert = $pdo->prepare(
+    'INSERT INTO users (username, first_name, last_name, email, password_hash, role) VALUES (:username, :first_name, :last_name, :email, :password_hash, :role) ON CONFLICT (email) DO UPDATE SET username = EXCLUDED.username, first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, password_hash = EXCLUDED.password_hash, role = EXCLUDED.role'
+);
+$adminInsert->execute([
+    'username' => 'admin',
+    'first_name' => 'Admin',
+    'last_name' => 'System',
+    'email' => $adminEmail,
+    'password_hash' => $adminPasswordHash,
+    'role' => 'ADMIN',
+]);
 
 $plantRepositoryFacade = new PlantRepositoryFacade($pdo); 
 $plantServiceFacade = new PlantServiceFacade($plantRepositoryFacade); 
@@ -156,6 +193,10 @@ $router->get('/api/user/status', function() use ($userService) {
 
 $router->get('/dashboard', function() use ($userService) {
     (new UserController($userService))->showDashboard();
+});
+
+$router->get('/users', function() use ($userService) {
+    (new UserController($userService))->listUsers();
 });
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

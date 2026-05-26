@@ -16,13 +16,13 @@
             </p>
 
             <?php if (isset($_SESSION['register_error'])): ?>
-                <div class="error-message" style="color: #ff6b6b; padding: 12px; background: rgba(255, 107, 107, 0.1); border-radius: 4px; margin-bottom: 16px;">
+                <div class="error-message" role="alert" aria-live="assertive" style="color: #ff6b6b; padding: 12px; background: rgba(255, 107, 107, 0.1); border-radius: 4px; margin-bottom: 16px;">
                     <strong>Eroare:</strong> <?php echo htmlspecialchars($_SESSION['register_error']); ?>
                 </div>
                 <?php unset($_SESSION['register_error']); ?>
             <?php endif; ?>
 
-            <form class="field-grid" method="post" action="http://localhost:8081/register" id="registerForm">
+            <form class="field-grid" method="post" action="/register" id="registerForm">
                 <div class="field">
                     <label for="name">Nume complet</label>
                     <input id="name" name="name" type="text" placeholder="Ion Popescu" autocomplete="name" required>
@@ -45,7 +45,7 @@
 
                 <div class="button-row">
                     <input type="submit" value="Creare cont">
-                    <a class="button secondary" href="http://localhost:8081/login">Ai deja cont?</a>
+                    <a class="button secondary" href="/login">Ai deja cont?</a>
                 </div>
             </form>
 
