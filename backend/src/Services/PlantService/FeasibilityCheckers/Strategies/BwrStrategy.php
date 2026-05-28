@@ -38,7 +38,7 @@ class BwrStrategy implements ScoringStrategy {
             $totalPenalty += $penalty; 
         }
 
-        // Verificare deficienta transportului pentru constructie 
+        // Verificare deficienta scorului transportului pentru constructie 
         $transportScore = $geologicalData['transport_infrastructure_score']; 
         if($transportScore < 6.0) { 
             $penalty = (6.0 - $transportScore) * 3.5; 
