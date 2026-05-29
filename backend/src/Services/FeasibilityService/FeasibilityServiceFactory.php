@@ -1,5 +1,9 @@
 <?php 
 
+require_once __DIR__ . '/FeasibilityCheckers/GeologicalCriticalChecker.php'; 
+require_once __DIR__ . '/FeasibilityCheckers/TechnicalCriticalChecker.php' ; 
+require_once __DIR__ . '/FeasibilityCheckers/ScoringChecker.php'; 
+
 class FeasibilityServiceFactory { 
     public static function create(PDO $db, PlantRepositoryFacade $plantRepositoryFacade): FeasibilityService { 
         $feasibilityRepository = new FeasibilityRepository($db); 

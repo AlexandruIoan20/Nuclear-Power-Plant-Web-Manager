@@ -26,10 +26,11 @@ require_once __DIR__ . '/../src/Services/PlantService/DetailsPlantService.php';
 require_once __DIR__ . '/../src/Services/PlantService/BasicPlantService.php'; 
 require_once __DIR__ . '/../src/Services/PlantService/GeologicalPlantService.php'; 
 require_once __DIR__ . '/../src/Services/PlantService/TechnicalPlantService.php'; 
-require_once __DIR__ . '/../src/Services/FeasibilityService.php'; 
+require_once __DIR__ . '/../src/Services/FeasibilityService/FeasibilityService.php'; 
 
 require_once __DIR__ . '/../src/Repositories/PlantRepositoryFacade.php'; 
 require_once __DIR__ . '/../src/Services/PlantServiceFacade.php'; 
+require_once __DIR__ . '/../src/Services/FeasibilityService/FeasibilityServiceFactory.php'; 
 
 require_once __DIR__ . '/../src/Controllers/PlantController/DetailsPlantController.php'; 
 require_once __DIR__ . '/../src/Controllers/PlantController/BasicPlantController.php'; 

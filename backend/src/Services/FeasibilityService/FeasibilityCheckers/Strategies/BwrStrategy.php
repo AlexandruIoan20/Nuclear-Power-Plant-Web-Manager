@@ -1,5 +1,7 @@
 <?php 
 
+require_once __DIR__ . '/ScoringStrategy.php'; 
+
 class BwrStrategy implements ScoringStrategy { 
     public function calculate(array $plantData): array { 
         $geologicalData = $plantData['geological_data']; 
@@ -12,7 +14,7 @@ class BwrStrategy implements ScoringStrategy {
 
         // Verificare deficienta seismica specifica BWR 
         // Este mult mai sensibil la cutremure din cauza sistemului de oprire 
-        $seismicStability = $geologicalData['seismic_stability']; 
+        $seismicStability = $geologicalData->getSeismicStability(); 
         if($seismicStability < 6.5) { 
             $penalty = (6.5 - $seismicStability) * 4.0; 
             $deductions[] = [ 
@@ -26,7 +28,7 @@ class BwrStrategy implements ScoringStrategy {
 
         // Verificare deficienta operationaal si de evacuare
         // Aburul iesit din turbina BWR este radioactiv. O densitate mare a populatiei amplifica riscul de expunere la radiatii.
-        $population = $geologicalData['population_density']; 
+        $population = $geologicalData->getPopulationDensity(); 
         if($population > 150) { 
             $penalty = ($population - 150) * 0.08;
             $deductions[] = [ 
@@ -39,7 +41,7 @@ class BwrStrategy implements ScoringStrategy {
         }
 
         // Verificare deficienta scorului transportului pentru constructiee
-        $transportScore = $geologicalData['transport_infrastructure_score']; 
+        $transportScore = $geologicalData->getTransportInfrastructureScore(); 
         if($transportScore < 6.0) { 
             $penalty = (6.0 - $transportScore) * 3.5; 
             $deductions[] = [ 
@@ -52,20 +54,20 @@ class BwrStrategy implements ScoringStrategy {
         }
 
         // Verificari de eficienta 
-        $efficiency = $technicalData['estimated_efficiency']; 
+        $efficiency = $technicalData->getEstimatedEfficiency(); 
         if($efficiency < 33.0) { 
             $penalty = (30.0 - $efficiency) * 2.0; 
             $deductions[] = [ 
                 'parameter' => 'estimated_efficiency', 
                 'penalty' => -$penalty, 
-                'reason' => 'Eficienta estimata ({$efficiency}) este sub media tehnologica de 33%.'
+                'reason' => "Eficienta estimata ({$efficiency}) este sub media tehnologica de 33%."
             ]; 
 
             $totalPenalty += $penalty; 
         }
 
         // Verificare economica
-        $duration = $basicData['construction_duration_years'];
+        $duration = $basicData->getConstructionDurationYears();
         if ($duration > 5) {
             $penalty = ($duration - 5) * 4.5; 
             $deductions[] = [
@@ -76,7 +78,6 @@ class BwrStrategy implements ScoringStrategy {
             $totalPenalty += $penalty;
         }
         
-
         $finalScore = max(0, $baseScore - $totalPenalty);
 
         return [

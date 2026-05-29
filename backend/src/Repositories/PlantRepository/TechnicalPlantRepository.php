@@ -45,7 +45,7 @@ class TechnicalPlantRepository {
     public function save(TechnicalPlantData $technicalPlantData): void { 
         try {
             $this->pdo->beginTransaction();
-
+            
             $statement = $this->pdo->prepare("INSERT INTO technical_data (
                 id, power_plant_id, number_of_reactors, estimated_efficiency, operational_risk_level
             ) VALUES (
@@ -59,107 +59,173 @@ class TechnicalPlantRepository {
                 'estimated_efficiency' => $technicalPlantData->getEstimatedEfficiency(), 
                 'operational_risk_level' => $technicalPlantData->getOperationalRiskLevel()
             ]);
+
+            $reactorConfigurations = $technicalPlantData->getReactorConfigurations(); 
+            $groupedConfigurations = [];
+
+            foreach ($reactorConfigurations as $config) {
+                $key = $config->getType()->value . '_' . $config->getCooling()->value;
+                
+                if (!isset($groupedConfigurations[$key])) {
+                    $groupedConfigurations[$key] = [
+                        'type' => $config->getType()->value,
+                        'cooling' => $config->getCooling()->value,
+                        'quantity' => 0
+                    ];
+                }
+                
+                $groupedConfigurations[$key]['quantity']++;
+            }
         
             $relationalStatement = $this->pdo->prepare("
-                INSERT INTO reactor_plant_data (
-                    technical_data_id, reactor_schema_id
-                ) VALUES (
-                    :technical_data_id, :reactor_schema_id  
-                )
+                INSERT INTO reactor_plant_data (technical_data_id, reactor_schema_id, number_of_reactors)
+                SELECT :technical_data_id, id, :number_of_reactors 
+                FROM reactor_schema 
+                WHERE reactor_type = :reactor_type AND cooling_type = :cooling_type
             "); 
         
-            $reactorConfigurations = $technicalPlantData->getReactorConfigurations(); 
-            foreach($reactorConfigurations as $reactorConfiguration) { 
+            foreach ($groupedConfigurations as $group) { 
                 $relationalStatement->execute([
                     'technical_data_id' => $technicalPlantData->getId(),
-                    'reactor_schema_id' => $reactorConfiguration->getId() 
+                    'reactor_type' => $group['type'],
+                    'cooling_type' => $group['cooling'],
+                    'number_of_reactors' => $group['quantity'] 
                 ]); 
+                
+                if ($relationalStatement->rowCount() === 0) {
+                    throw new Exception("Configurația reactorului (" . $group['type'] . " - " . $group['cooling'] . ") nu există în catalog.");
+                }
             }
 
             $this->pdo->commit();
 
-        } catch (PDOException $e) {
+        } catch (Exception $e) { 
             $this->pdo->rollBack();
-            error_log("[TechnicalPlantRepository] Eroare la salvare pentru TechnicalData: " . $e->getMessage());
-            throw new Exception("Eroare la salvarea datelor tehnice");
+            error_log("[TechnicalPlantRepository] Eroare la salvare: " . $e->getMessage());
+            throw new Exception("Eroare la salvarea datelor tehnice: " . $e->getMessage());
         }
     }
 
     public function update(TechnicalPlantData $technicalPlantData): void { 
-        $statement = $this->pdo->prepare("
-            UPDATE technical_data 
-            SET 
-                number_of_reactors = :number_of_reactors, 
-                estimated_efficiency = :estimated_efficiency, 
-                operational_risk_level = :operational_risk_level
-            WHERE id = :id
-        "); 
+        try {
+            $this->pdo->beginTransaction();
+
+            $statement = $this->pdo->prepare("
+                UPDATE technical_data 
+                SET 
+                    number_of_reactors = :number_of_reactors, 
+                    estimated_efficiency = :estimated_efficiency, 
+                    operational_risk_level = :operational_risk_level
+                WHERE id = :id
+            "); 
+
+            $statement->execute([
+                'id' => $technicalPlantData->getId(), 
+                'number_of_reactors' => $technicalPlantData->getNumberOfReactors(), 
+                'estimated_efficiency' => $technicalPlantData->getEstimatedEfficiency(), 
+                'operational_risk_level' => $technicalPlantData->getOperationalRiskLevel()
+            ]);
+
+            $newReactorConfigurations = $technicalPlantData->getReactorConfigurations(); 
+            $groupedConfigurations = [];
+
+            foreach ($newReactorConfigurations as $config) {
+                $key = $config->getType()->value . '_' . $config->getCooling()->value;
+                
+                if (!isset($groupedConfigurations[$key])) {
+                    $groupedConfigurations[$key] = [
+                        'type' => $config->getType()->value,
+                        'cooling' => $config->getCooling()->value,
+                        'quantity' => 0
+                    ];
+                }
+                
+                $groupedConfigurations[$key]['quantity']++;
+            }
+
+            $deleteRelationStatement = $this->pdo->prepare("
+                DELETE FROM reactor_plant_data 
+                WHERE technical_data_id = :technical_data_id
+            "); 
+            $deleteRelationStatement->execute([
+                'technical_data_id' => $technicalPlantData->getId()
+            ]);
+
+            $insertRelationStatement = $this->pdo->prepare("
+                INSERT INTO reactor_plant_data (technical_data_id, reactor_schema_id, number_of_reactors)
+                SELECT :technical_data_id, id, :number_of_reactors 
+                FROM reactor_schema 
+                WHERE reactor_type = :reactor_type AND cooling_type = :cooling_type
+            "); 
+
+            foreach ($groupedConfigurations as $group) { 
+                $insertRelationStatement->execute([ 
+                    'technical_data_id' => $technicalPlantData->getId(), 
+                    'reactor_type' => $group['type'],
+                    'cooling_type' => $group['cooling'],
+                    'number_of_reactors' => $group['quantity']
+                ]); 
+
+                if ($insertRelationStatement->rowCount() === 0) {
+                    throw new Exception("Configurația reactorului (" . $group['type'] . " - " . $group['cooling'] . ") nu există în catalog.");
+                }
+            }
+
+            $this->pdo->commit();
+
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            error_log("[TechnicalPlantRepository] Eroare la actualizare: " . $e->getMessage());
+            throw new Exception("Eroare la actualizarea datelor tehnice: " . $e->getMessage());
+        }
+    }
+
+    public function getReactorSchemaByDetails(string $reactorType, string $coolingType): ReactorSchema { 
+        $statement = $this->pdo->prepare( 
+            "SELECT * FROM reactor_schema WHERE reactor_type = :reactorType AND cooling_type = :coolingType"
+        ); 
 
         $statement->execute([
-            'id' => $technicalPlantData->getId(), 
-            'number_of_reactors' => $technicalPlantData->getNumberOfReactors(), 
-            'estimated_efficiency' => $technicalPlantData->getEstimatedEfficiency(), 
-            'operational_risk_level' => $technicalPlantData->getOperationalRiskLevel()
-        ]);
+            ':reactorType' => $reactorType, 
+            ':coolingType' => $coolingType, 
+        ]); 
 
-        $currentPlantData = $this->findByPlantId($technicalPlantData->getPowerPlantId()); 
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
 
-        $currentReactorConfigurations = $currentPlantData->getReactorConfigurations();  
-        $newReactorConfigurations = $technicalPlantData->getReactorConfigurations(); 
-
-        // Tabele de dispersie => cautare in O(1)
-        $dictCurrent = []; 
-        foreach($currentReactorConfigurations as $currentConfig) { 
-            $dictCurrent[$currentConfig->getId()] = $currentConfig; 
+        if (!$row) {
+            throw new Exception("Schema de reactor pentru tipul {$reactorType} cu răcirea {$coolingType} nu a fost găsită în catalog.");
         }
 
-        $dictNew = []; 
-        foreach($newReactorConfigurations as $newConfig) { 
-            $dictNew[$newConfig->getId()] = $newConfig; 
-        }
-
-        $deleteConfigurations = array_diff_key($dictCurrent, $dictNew); 
-        $insertConfigurations = array_diff_key($dictNew, $dictCurrent); 
-
-        $deleteRelationStatement = $this->pdo->prepare("
-            DELETE FROM reactor_plant_data WHERE technical_data_id = :technical_data_id AND reactor_schema_id = :reactor_schema_id; 
-        "); 
-
-        $insertRelationStatement = $this->pdo->prepare("
-            INSERT INTO reactor_plant_data (
-                technical_data_id, 
-                reactor_schema_id
-            ) VALUES (
-                :technical_data_id, 
-                :reactor_schema_id 
-            )
-        "); 
-
-        foreach($deleteConfigurations as $config) { 
-            $deleteRelationStatement->execute([ 
-                'technical_data_id' => $technicalPlantData->getId(), 
-                'reactor_schema_id' => $config->getId()
-            ]); 
-        }
-
-        foreach($insertConfigurations as $config) { 
-            $insertRelationStatement->execute([ 
-                'technical_data_id' => $technicalPlantData->getId(), 
-                'reactor_schema_id' => $config->getId()
-            ]); 
-
-        }
+        return new ReactorSchema(
+            $row['id'],
+            ReactorType::from($row['reactor_type']),
+            CoolingType::from($row['cooling_type'])
+        );
     }
 
     public function getSchemasByTechnicalDataId(string $technicalDataId): array  {
         $statement = $this->pdo->prepare(
-            "SELECT rs.reactor_type, rs.cooling_type FROM reactor_plant_data rpd JOIN reactor_schema rs ON rpd.reactor_schema_id = rs.id WHERE rpd.technical_data_id = :tech_id"
+            "SELECT rs.id, rs.reactor_type, rs.cooling_type 
+             FROM reactor_plant_data rpd 
+             JOIN reactor_schema rs ON rpd.reactor_schema_id = rs.id 
+             WHERE rpd.technical_data_id = :tech_id"
         ); 
 
         $statement->execute([
             ':tech_id' => $technicalDataId
         ]); 
 
-        return $statement->fetchAll(PDO::FETCH_ASSOC) ?: []; 
+        $rows = $statement->fetchAll(PDO::FETCH_ASSOC); 
+        $schemas = [];
+
+        foreach ($rows as $row) {
+            $schemas[] = new ReactorSchema(
+                $row['id'],
+                ReactorType::from($row['reactor_type']),
+                CoolingType::from($row['cooling_type'])
+            );
+        }
+
+        return $schemas;
     }
 }

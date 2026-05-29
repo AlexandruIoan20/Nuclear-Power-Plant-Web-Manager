@@ -1,5 +1,7 @@
 <?php 
 
+require_once __DIR__ . '/ScoringStrategy.php'; 
+
 class PhwrStrategy implements ScoringStrategy { 
     public function calculate (array $plantData): array { 
         $geologicalData = $plantData['geological_data']; 
@@ -11,7 +13,7 @@ class PhwrStrategy implements ScoringStrategy {
         $totalPenalty = 0.0; 
 
         // Verificare panza freatica
-        $groundWater = $geologicalData['groundwater_level']; 
+        $groundWater = $geologicalData->getGroundwaterLevel(); 
         if($groundWater < 5.0) { 
             $penalty = 12.0;
             $deductions[] = [ 
@@ -24,7 +26,7 @@ class PhwrStrategy implements ScoringStrategy {
         }
 
         // Verificari financiare
-        $duration = $basicData['construction_duration_years']; 
+        $duration = $basicData->getConstructionDurationYears(); 
         if($duration > 5) { 
             $penalty = ($duration - 5) * 6.0; 
             $deductions[] = [ 
@@ -37,7 +39,7 @@ class PhwrStrategy implements ScoringStrategy {
         }
 
         // Verificari de eficienta 
-        $efficiency = $technicalData['estimated_efficiency']; 
+        $efficiency = $technicalData->getEstimatedEfficiency(); 
         if($efficiency < 30.0) { 
             $penalty = (30.0 - $efficiency) * 2.0; 
             $deductions[] = [ 
@@ -50,7 +52,7 @@ class PhwrStrategy implements ScoringStrategy {
         }
 
         // Verificare deficienta Calandria (stabilitatea seismica)
-        $seismicStability = $geologicalData['seismic_stability']; 
+        $seismicStability = $geologicalData->getSeismicStability(); 
         if($seismicStability < 6.0) { 
             $penalty = (6.0 - $seismicStability) * 3.5; 
             $deductions[] = [  
@@ -58,6 +60,8 @@ class PhwrStrategy implements ScoringStrategy {
                 'penalty' => -$penalty, 
                 'reason' => "Stabilitatea seismică de {$seismicStability}/10 prezintă risc pentru arhitectura PHWR. Tancul orizontal (Calandria) este extrem de vulnerabil la forfecarea seismică laterală."
             ];
+            
+            $totalPenalty += $penalty;
         }
 
         $finalScore = max(0, $baseScore - $totalPenalty); 

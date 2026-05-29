@@ -35,17 +35,10 @@ class DetailsPlantService {
 
     public function updatePlantDetails(array $data, string $id) { 
         $name = $data['name'] ?? ''; 
-        $name = ($name !== '') ? $name : null; 
-
         $country = $data['country'] ?? ''; 
-        $country = ($country !== '') ? $country : null; 
 
-        $latitude = $data['latitude'] ?? ''; 
-        $latitude = ($latitude !== '') ? $latitude : null; 
-
-        $longitude = $data['longitude'] ?? ''; 
-        $longitude = ($longitude !== '') ? $longitude : null;
-
+        $latitude = (isset($data['latitude']) && $data['latitude'] !== '') ? (float) $data['latitude'] : null;         
+        $longitude = (isset($data['longitude']) && $data['longitude'] !== '') ? (float) $data['longitude'] : null;
         $status = PlantStatus::DRAFT; 
 
         $plant = new Plant($country, $id, $name, $status, $latitude, $longitude); 

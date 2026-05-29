@@ -165,6 +165,7 @@ CREATE TABLE reactor_schema (
 CREATE TABLE reactor_plant_data (
     technical_data_id UUID NOT NULL,
     reactor_schema_id UUID NOT NULL,
+    number_of_reactors INT NOT NULL, 
     PRIMARY KEY (technical_data_id, reactor_schema_id), 
     CONSTRAINT fk_config_technical 
         FOREIGN KEY (technical_data_id) REFERENCES technical_data(id) 

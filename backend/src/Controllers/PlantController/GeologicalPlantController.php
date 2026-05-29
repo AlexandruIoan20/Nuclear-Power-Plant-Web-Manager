@@ -19,32 +19,58 @@ class GeologicalPlantController {
     }
 
     public function createGeologicalPlantData(string $plantId): void { 
-        $dateFormular = $_POST; 
+        $jsonPayload = file_get_contents('php://input');
+        $dateFormular = json_decode($jsonPayload, true) ?? [];
 
-        error_log("[DEBUG] Date Formular Geological"); 
+        error_log("[DEBUG] Date Formular Geological (Create)"); 
         error_log(print_r($dateFormular, true));
 
         try { 
             $this->plantServiceFacade->saveGeologicalData($dateFormular, $plantId); 
-            header("Location: /power-plants/{$plantId}/geological");
-            exit;
+            
+            http_response_code(200);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => true,
+                'message' => 'Datele geologice au fost salvate cu succes.'
+            ]);
         } catch(Exception $e) { 
-            echo "Error at POST for the new geological plant data: " . htmlspecialchars($e->getMessage()); 
+            error_log("[ERROR] POST Geo Data Create: " . $e->getMessage());
+            
+            http_response_code(400);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Eroare la salvarea datelor geologice: ' . $e->getMessage()
+            ]); 
         }
     }
 
     public function updateGeologicalPlantData(string $plantId): void { 
-        $dateFormular = $_POST; 
+        $jsonPayload = file_get_contents('php://input');
+        $dateFormular = json_decode($jsonPayload, true) ?? [];
 
-        error_log("[DEBUG] Date Formular Geological Update"); 
+        error_log("[DEBUG] Date Formular Geological (Update)"); 
         error_log(print_r($dateFormular, true));
         
         try { 
             $this->plantServiceFacade->updateGeologicalData($dateFormular, $plantId); 
-            header("Location: /power-plants/{$plantId}/geological");
-            exit;
+            
+            http_response_code(200);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => true,
+                'message' => 'Datele geologice au fost actualizate cu succes.'
+            ]);
         } catch(Exception $e) { 
-            echo "Error at POST for updating the geological plant data: " . htmlspecialchars($e->getMessage()); 
+            error_log("[ERROR] POST Geo Data Update: " . $e->getMessage());
+            
+            http_response_code(400);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Eroare la actualizarea datelor geologice: ' . $e->getMessage()
+            ]); 
         }
     }
 }

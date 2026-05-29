@@ -1,5 +1,10 @@
 <?php 
 
+require_once __DIR__ . '/Strategies/BwrStrategy.php'; 
+require_once __DIR__ . '/Strategies/FbrStrategy.php';
+require_once __DIR__ . '/Strategies/PhwrStrategy.php';
+require_once __DIR__ . '/Strategies/PwrStrategy.php'; 
+
 require_once __DIR__ . '/../../../Entities/PlantStatus.php'; 
 require_once __DIR__ . '/../../../Entities/ReactorType.php'; 
 
@@ -17,7 +22,7 @@ class ScoringChecker extends AbstractFeasibilityChecker {
         $allDeficiencies = []; 
         $totalWeightedScore = 0.0; 
 
-        $reactorTypesArray = array_column($schemas, 'reactor_type'); 
+        $reactorTypesArray = array_map(fn($schema) => $schema->getType()->value, $schemas);
         $typeCounts = array_count_values($reactorTypesArray); 
         $totalReactors = array_sum($typeCounts); 
 
@@ -27,7 +32,7 @@ class ScoringChecker extends AbstractFeasibilityChecker {
             $scoreReport = $strategy->calculate($plantData); 
             $totalWeightedScore += ($scoreReport['final_score'] * $count);
 
-            foreach($scoreReport['deficiences'] as $deficiency) { 
+            foreach($scoreReport['deficiencies'] as $deficiency) { 
                 $deficiency['reactor_source'] = $reactorType;
                 $allDeficiencies[] = $deficiency;  
             }

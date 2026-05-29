@@ -1,5 +1,7 @@
 <?php 
 
+require_once __DIR__ . '/ScoringStrategy.php'; 
+
 class FbrStrategy implements ScoringStrategy { 
     public function calculate (array $plantData): array { 
         $geologicalData = $plantData['geological_data']; 
@@ -11,7 +13,7 @@ class FbrStrategy implements ScoringStrategy {
         $totalPenalty = 0.0; 
 
         // Verificare deficienta hidrologica critica (???)
-        $floodRisk = $geologicalData['flood_risk']; 
+        $floodRisk = $geologicalData->getFloodRisk(); 
         if($floodRisk > 2.0) { 
             $penalty = ($floodRisk - 2.0) * 6.0; 
             $deductions[] = [ 
@@ -26,7 +28,7 @@ class FbrStrategy implements ScoringStrategy {
         // Verificare deficienta seismica
         // Necesita stabilitate perfecta. Orice valoare sub 7.0 este penalizata.
         
-        $seismicStability = $geologicalData['seismic_stability']; 
+        $seismicStability = $geologicalData->getSeismicStability(); 
         if($seismicStability < 7.0) { 
             $penalty = (7.0 - $seismicStability) * 5.0;     
             $deductions[] = [
@@ -39,7 +41,7 @@ class FbrStrategy implements ScoringStrategy {
         }
 
         // Verificare eficienta
-        $efficiency = $technicalData['estimated_efficiency']; 
+        $efficiency = $technicalData->getEstimatedEfficiency(); 
         if($efficiency < 38.0) { 
             $penalty = (38.0 - $efficiency) * 2.5;
             $deductions[] = [ 
@@ -52,7 +54,7 @@ class FbrStrategy implements ScoringStrategy {
         }
 
         // Verificare economica
-        $duration = $basicData['construction_duration_years'];
+        $duration = $basicData->getConstructionDurationYears();
         if ($duration > 6) {
             $penalty = ($duration - 6) * 4.0; 
             $deductions[] = [

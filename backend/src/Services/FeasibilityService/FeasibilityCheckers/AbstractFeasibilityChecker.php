@@ -1,5 +1,7 @@
 <?php 
 
+require_once __DIR__ . '/FeasibilityChecker.php'; 
+
 abstract class AbstractFeasibilityChecker implements FeasibilityChecker { 
     private ?FeasibilityChecker $nextChecker = null; 
 

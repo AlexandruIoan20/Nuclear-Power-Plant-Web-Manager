@@ -1,5 +1,7 @@
 <?php 
 
+require_once __DIR__ . '/ScoringStrategy.php'; 
+
 class PwrStrategy implements ScoringStrategy { 
     public function calculate(array $plantData): array { 
         $geologicalData = $plantData['geological_data']; 
@@ -11,7 +13,7 @@ class PwrStrategy implements ScoringStrategy {
         $totalPenalty = 0.0; 
 
         // Eficienta optima practica PWR ~ 35%
-        $efficiency = $technicalData['estimated_efficiency']; 
+        $efficiency = $technicalData->getEstimatedEfficiency(); 
         if($efficiency < 35.0) { 
             $penalty = (35.0 - $efficiency) * 2.0; 
             $deductions[] = [ 
@@ -23,21 +25,21 @@ class PwrStrategy implements ScoringStrategy {
             $totalPenalty += $penalty; 
         }
 
-
         // Lipsa apei din apropiere 
-        $waterProximity = $geologicalData['water_proximity']; 
+        $waterProximity = $geologicalData->getWaterProximity(); 
         if($waterProximity > 2.0) { 
             $penalty = ($waterProximity - 2.0) * 3.0;
             $deductions[] = [ 
                 'parameter' => 'water_proximity', 
                 'penalty' => -$penalty, 
-                'reason' => 'Distanta de {$waterProximity} km fata de sursa de apa necesita statii de pompare intermediare.'
+                // Corectat in ghilimele duble pentru a functiona corect interpolarea variabilei
+                'reason' => "Distanta de {$waterProximity} km fata de sursa de apa necesita statii de pompare intermediare."
             ]; 
 
             $totalPenalty += $penalty; 
         }
 
-        $waterFlow = $geologicalData['water_flow_rate'];
+        $waterFlow = $geologicalData->getWaterFlowRate();
         if($waterFlow < 50.0) { 
             $penalty = 10.0; 
             $deductions[] = [ 
@@ -49,20 +51,20 @@ class PwrStrategy implements ScoringStrategy {
         }
 
         // Deficiente financiare
-        $duration = $basicData['construction_duration_years']; 
+        $duration = $basicData->getConstructionDurationYears(); 
         if($duration > 5) { 
             $penalty = ($duration - 5) * 5.0; 
             $deductions[] = [ 
                 'parameter' => 'construction_duration_years', 
                 'penalty' => -$penalty, 
-                'reason' => "Durata de constructie estimata la {$duration} ani atrage costuri ridicate de finantare.", 
+                'reason' => "Durata de constructie estimata la {$duration} ani atrage costuri ridicate de finantare."
             ]; 
 
             $totalPenalty += $penalty; 
         }
 
         // Deficiente Geologice 
-        $geologicalRisk = $geologicalData['geological_risk_score']; 
+        $geologicalRisk = $geologicalData->getGeologicalRiskScore(); 
         if($geologicalRisk > 2.0) { 
             $penalty = $geologicalRisk * 2.5; 
             $deductions[] = [ 

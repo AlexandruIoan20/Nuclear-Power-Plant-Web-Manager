@@ -19,6 +19,11 @@ class PlantRepositoryFacade {
             $basicData = $this->basicPlantRepository->findByPlantId($plantId); 
             $geologicalData = $this->geologicalPlantRepository->findByPlantId($plantId); 
             $technicalData = $this->technicalPlantRepository->findByPlantId($plantId); 
+
+            error_log("[DEBUG] Testare Plant ID: " . $plantId);
+            error_log("[DEBUG] Basic Data: " . ($basicData ? 'GASIT' : 'LIPSESTE'));
+            error_log("[DEBUG] Geological Data: " . ($geologicalData ? 'GASIT' : 'LIPSESTE'));
+            error_log("[DEBUG] Technical Data: " . ($technicalData ? 'GASIT' : 'LIPSESTE'));
             
             if(!$basicData || !$geologicalData || !$technicalData) { 
                 return null; 
@@ -94,5 +99,9 @@ class PlantRepositoryFacade {
 
     public function updateTechnicalData(TechnicalPlantData $techData): void {
         $this->technicalPlantRepository->update($techData);
+    }
+
+    public function getReactorSchemaByDetails(string $reactorType, string $coolingType): ?ReactorSchema {
+        return $this->technicalPlantRepository->getReactorSchemaByDetails($reactorType, $coolingType);
     }
 }
