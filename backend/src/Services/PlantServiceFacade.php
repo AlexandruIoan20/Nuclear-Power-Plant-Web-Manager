@@ -74,10 +74,10 @@ class PlantServiceFacade {
 
     public function getCompletePlantProfile(string $plantId): array {
         return [
-            'details'    => $this->detailsPlantService->findById($plantId),
-            'basic'      => $this->basicPlantService->findByPlantId($plantId),
+            'details' => $this->detailsPlantService->findById($plantId),
+            'basic' => $this->basicPlantService->findByPlantId($plantId),
             'geological' => $this->geologicalPlantService->findByPlantId($plantId),
-            'technical'  => $this->technicalPlantService->findByPlantId($plantId),
+            'technical' => $this->technicalPlantService->findByPlantId($plantId),
         ];
     }
 }

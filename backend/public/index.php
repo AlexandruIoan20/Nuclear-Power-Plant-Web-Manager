@@ -20,11 +20,13 @@ require_once __DIR__ . '/../src/Repositories/PlantRepository/DetailsPlantReposit
 require_once __DIR__ . '/../src/Repositories/PlantRepository/BasicPlantRepository.php'; 
 require_once __DIR__ . '/../src/Repositories/PlantRepository/GeologicalPlantRepository.php'; 
 require_once __DIR__ . '/../src/Repositories/PlantRepository/TechnicalPlantRepository.php'; 
+require_once __DIR__ . '/../src/Repositories/FeasibiltyRepository.php'; 
 
 require_once __DIR__ . '/../src/Services/PlantService/DetailsPlantService.php'; 
 require_once __DIR__ . '/../src/Services/PlantService/BasicPlantService.php'; 
 require_once __DIR__ . '/../src/Services/PlantService/GeologicalPlantService.php'; 
 require_once __DIR__ . '/../src/Services/PlantService/TechnicalPlantService.php'; 
+require_once __DIR__ . '/../src/Services/FeasibilityService.php'; 
 
 require_once __DIR__ . '/../src/Repositories/PlantRepositoryFacade.php'; 
 require_once __DIR__ . '/../src/Services/PlantServiceFacade.php'; 
@@ -33,6 +35,7 @@ require_once __DIR__ . '/../src/Controllers/PlantController/DetailsPlantControll
 require_once __DIR__ . '/../src/Controllers/PlantController/BasicPlantController.php'; 
 require_once __DIR__ . '/../src/Controllers/PlantController/GeologicalPlantController.php'; 
 require_once __DIR__ . '/../src/Controllers/PlantController/TechnicalPlantController.php'; 
+require_once __DIR__ . '/../src/Controllers/FeasibilitController.php'; 
 
 $host = getenv('DB_HOST') ?: 'db';
 $port = getenv('DB_PORT') ?: '5432';
@@ -55,6 +58,8 @@ try {
 
 $plantRepositoryFacade = new PlantRepositoryFacade($pdo); 
 $plantServiceFacade = new PlantServiceFacade($plantRepositoryFacade); 
+
+$feasibilityService = FeasibilityServiceFactory::create($pdo, $plantRepositoryFacade);
 
 $router = new Router();
 
@@ -113,6 +118,14 @@ $router->post('/api/power-plants/{id}/technical-save', function($id) use ($plant
 $router->post('/api/power-plants/{id}/technical-update', function($id) use ($plantServiceFacade) {
     (new TechnicalPlantController($plantServiceFacade))->updateTechnicalPlantData($id);
 });
+
+$router->post('/api/power-plants/{id}/feasibility', function($id) use ($feasibilityService) { 
+    (new FeasibilityController($feasibilityService))->generate($id); 
+}); 
+
+$router->get('/api/power-plants/{id}/feasibility', function($id) use ($feasibilityService) { 
+    (new FeasibilityController($feasibilityService))->getLastByPlantId($id); 
+}); 
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];

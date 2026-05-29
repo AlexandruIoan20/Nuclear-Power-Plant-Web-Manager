@@ -27,7 +27,7 @@ class FbrStrategy implements ScoringStrategy {
         // Necesita stabilitate perfecta. Orice valoare sub 7.0 este penalizata.
         
         $seismicStability = $geologicalData['seismic_stability']; 
-        if($seismicStability >= 4.0  && $seismicStability < 7.0) { 
+        if($seismicStability < 7.0) { 
             $penalty = (7.0 - $seismicStability) * 5.0;     
             $deductions[] = [
                 'parameter' => 'seismic_stability', 
@@ -45,7 +45,7 @@ class FbrStrategy implements ScoringStrategy {
             $deductions[] = [ 
                 'parameter' => 'estimated_efficiency', 
                 'penalty' => -$penalty, 
-                'reason' => 'Eficienta estimata ({$efficiency}) este sub media tehnologica de 38%.'
+                'reason' => "Eficienta estimata ({$efficiency}) este sub media tehnologica de 38%."
             ]; 
 
             $totalPenalty += $penalty; 

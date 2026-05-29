@@ -12,7 +12,7 @@ class PhwrStrategy implements ScoringStrategy {
 
         // Verificare panza freatica
         $groundWater = $geologicalData['groundwater_level']; 
-        if($groundWater >= 2.0 && $groundWater < 5.0) { 
+        if($groundWater < 5.0) { 
             $penalty = 12.0;
             $deductions[] = [ 
                 'parameter' => 'groundwater_level', 
@@ -51,7 +51,7 @@ class PhwrStrategy implements ScoringStrategy {
 
         // Verificare deficienta Calandria (stabilitatea seismica)
         $seismicStability = $geologicalData['seismic_stability']; 
-        if($seismicStability >= 4.0 && $seismicStability < 6.0) { 
+        if($seismicStability < 6.0) { 
             $penalty = (6.0 - $seismicStability) * 3.5; 
             $deductions[] = [  
                 'parameter' => 'seismic_stability', 

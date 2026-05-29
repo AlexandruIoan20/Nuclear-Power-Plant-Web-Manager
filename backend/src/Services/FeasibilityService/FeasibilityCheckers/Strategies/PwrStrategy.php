@@ -38,7 +38,7 @@ class PwrStrategy implements ScoringStrategy {
         }
 
         $waterFlow = $geologicalData['water_flow_rate'];
-        if($waterFlow >= 20.0 && $waterFlow < 50.0) { 
+        if($waterFlow < 50.0) { 
             $penalty = 10.0; 
             $deductions[] = [ 
                 'parameter' => 'water_flow_rate', 

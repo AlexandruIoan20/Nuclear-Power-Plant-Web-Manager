@@ -43,62 +43,45 @@ class TechnicalPlantRepository {
     }
 
     public function save(TechnicalPlantData $technicalPlantData): void { 
-        $statement = $this->pdo->prepare("INSERT INTO technical_data (
-            id, 
-            power_plant_id,
-            number_of_reactors, 
-            estimated_efficiency, 
-            operational_risk_level
-        ) VALUES (
-            :id, 
-            :power_plant_id,
-            :number_of_reactors, 
-            :estimated_efficiency, 
-            :operational_risk_level
-        )"); 
-    
-        $statement->execute([
-            'id' => $technicalPlantData->getId(), 
-            'power_plant_id' => $technicalPlantData->getPowerPlantId(), 
-            'number_of_reactors' => $technicalPlantData->getNumberOfReactors(), 
-            'estimated_efficiency' => $technicalPlantData->getEstimatedEfficiency(), 
-            'operational_risk_level' => $technicalPlantData->getOperationalRiskLevel()
-        ]);
-    
-        $schemaStatement = $this->pdo->prepare("
-            INSERT INTO reactor_schema (
-                id, 
-                reactor_type, 
-                cooling_type
+        try {
+            $this->pdo->beginTransaction();
+
+            $statement = $this->pdo->prepare("INSERT INTO technical_data (
+                id, power_plant_id, number_of_reactors, estimated_efficiency, operational_risk_level
             ) VALUES (
-                :id, 
-                :reactor_type, 
-                :cooling_type
-            )
-        ");
-    
-        $relationalStatement = $this->pdo->prepare("
-            INSERT INTO reactor_plant_data (
-                technical_data_id, 
-                reactor_schema_id
-            ) VALUES (
-                :technical_data_id,
-                :reactor_schema_id  
-            )
-        "); 
-    
-        $reactorConfigurations = $technicalPlantData->getReactorConfigurations(); 
-        foreach($reactorConfigurations as $reactorConfiguration) { 
-            $schemaStatement->execute([
-                'id' => $reactorConfiguration->getId(),
-                'reactor_type' => $reactorConfiguration->getType()->value,
-                'cooling_type' => $reactorConfiguration->getCooling()->value
+                :id, :power_plant_id, :number_of_reactors, :estimated_efficiency, :operational_risk_level
+            )"); 
+        
+            $statement->execute([
+                'id' => $technicalPlantData->getId(), 
+                'power_plant_id' => $technicalPlantData->getPowerPlantId(), 
+                'number_of_reactors' => $technicalPlantData->getNumberOfReactors(), 
+                'estimated_efficiency' => $technicalPlantData->getEstimatedEfficiency(), 
+                'operational_risk_level' => $technicalPlantData->getOperationalRiskLevel()
             ]);
-    
-            $relationalStatement->execute([
-                'technical_data_id' => $technicalPlantData->getId(),  
-                'reactor_schema_id' => $reactorConfiguration->getId() 
-            ]); 
+        
+            $relationalStatement = $this->pdo->prepare("
+                INSERT INTO reactor_plant_data (
+                    technical_data_id, reactor_schema_id
+                ) VALUES (
+                    :technical_data_id, :reactor_schema_id  
+                )
+            "); 
+        
+            $reactorConfigurations = $technicalPlantData->getReactorConfigurations(); 
+            foreach($reactorConfigurations as $reactorConfiguration) { 
+                $relationalStatement->execute([
+                    'technical_data_id' => $technicalPlantData->getId(),
+                    'reactor_schema_id' => $reactorConfiguration->getId() 
+                ]); 
+            }
+
+            $this->pdo->commit();
+
+        } catch (PDOException $e) {
+            $this->pdo->rollBack();
+            error_log("[TechnicalPlantRepository] Eroare la salvare pentru TechnicalData: " . $e->getMessage());
+            throw new Exception("Eroare la salvarea datelor tehnice");
         }
     }
 
@@ -166,5 +149,17 @@ class TechnicalPlantRepository {
             ]); 
 
         }
+    }
+
+    public function getSchemasByTechnicalDataId(string $technicalDataId): array  {
+        $statement = $this->pdo->prepare(
+            "SELECT rs.reactor_type, rs.cooling_type FROM reactor_plant_data rpd JOIN reactor_schema rs ON rpd.reactor_schema_id = rs.id WHERE rpd.technical_data_id = :tech_id"
+        ); 
+
+        $statement->execute([
+            ':tech_id' => $technicalDataId
+        ]); 
+
+        return $statement->fetchAll(PDO::FETCH_ASSOC) ?: []; 
     }
 }

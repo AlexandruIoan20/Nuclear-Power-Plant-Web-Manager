@@ -13,6 +13,31 @@ class PlantRepositoryFacade {
         $this->technicalPlantRepository = new TechnicalPlantRepository($this->db);
     }
 
+    // Data for feasibility reports 
+    public function getPlantData(string $plantId): ?array { 
+        try { 
+            $basicData = $this->basicPlantRepository->findByPlantId($plantId); 
+            $geologicalData = $this->geologicalPlantRepository->findByPlantId($plantId); 
+            $technicalData = $this->technicalPlantRepository->findByPlantId($plantId); 
+            
+            if(!$basicData || !$geologicalData || !$technicalData) { 
+                return null; 
+            }
+
+            $reactorSchemas = $this->technicalPlantRepository->getSchemasByTechnicalDataId($technicalData->getId()); 
+
+            return [
+                'basic_data' => $basicData,
+                'geological_data' => $geologicalData,
+                'technical_data' => $technicalData,
+                'reactor_schemas' => $reactorSchemas
+            ];
+        } catch(Exception $e) { 
+            error_log("[PLANT FACADE ERROR] Eroare la asamblarea datelor centralei: " . $e->getMessage()); 
+            throw new Exception("Eroare la asamblarea datelor de fezabilitate.");
+        }
+    }
+
     // Details 
     public function getAllPowerPlants(): array {
         return $this->detailsPlantRepository->findAll();
