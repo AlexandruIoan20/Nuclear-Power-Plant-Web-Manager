@@ -14,6 +14,20 @@
     </div>
 
     <script>
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"]|'/g, (character) => {
+                const escapeMap = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                };
+
+                return escapeMap[character] || character;
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('app-container');
 
@@ -30,9 +44,9 @@
 
                     const rows = result.data.map((user) => `
                         <tr>
-                            <td>${user.id}</td>
-                            <td>${user.username}</td>
-                            <td>${user.email}</td>
+                            <td>${escapeHtml(user.id)}</td>
+                            <td>${escapeHtml(user.username)}</td>
+                            <td>${escapeHtml(user.email)}</td>
                         </tr>
                     `).join('');
 

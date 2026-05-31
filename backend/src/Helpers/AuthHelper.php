@@ -20,7 +20,7 @@ class AuthHelper {
 
     public static function requireLogin(): void {
         if (!self::isAuthenticated()) {
-            header('Location: /login');
+            header('Location: http://localhost:8081/login');
             exit;
         }
     }

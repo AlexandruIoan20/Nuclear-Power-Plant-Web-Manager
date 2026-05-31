@@ -14,6 +14,20 @@
     </div>
 
     <script>
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"]|'/g, (character) => {
+                const escapeMap = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                };
+
+                return escapeMap[character] || character;
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('app-container');
 
@@ -31,6 +45,10 @@
                     if (!result) return;
 
                     const user = result.data;
+                    const username = escapeHtml(user.username);
+                    const email = escapeHtml(user.email);
+                    const role = escapeHtml(user.role);
+
                     container.innerHTML = `
                         <header class="topbar">
                             <div class="brand">
@@ -46,22 +64,22 @@
 
                         <section>
                             <p class="eyebrow">CONTROL PANEL / OVERVIEW</p>
-                            <h1>Bun venit, ${user.username}!</h1>
+                            <h1>Bun venit, ${username}!</h1>
                             <p>Ești conectat cu succes. Aici pornește navigarea către notificări, aprobări, harta centralelor și lista de unități.</p>
 
-                            <div class="status-card" style="margin: 18px 0 26px;">
-                                <p class="inline-status" style="margin-bottom: 8px;">USER SESSION ACTIVE</p>
-                                <h2 style="margin: 0 0 6px;">${user.username}</h2>
-                                <p style="margin: 0; color: var(--muted);">${user.email} · Rol: ${user.role}</p>
+                            <div class="status-card session-card">
+                                <p class="inline-status">USER SESSION ACTIVE</p>
+                                <h2>${username}</h2>
+                                <p class="session-meta">${email} · Rol: ${role}</p>
                             </div>
 
                             <div class="stats" aria-label="Status utilizator">
-                                <div class="stat"><strong>${user.role}</strong><span>Rol utilizator</span></div>
-                                <div class="stat"><strong>${user.email}</strong><span>Email conectat</span></div>
+                                <div class="stat"><strong>${role}</strong><span>Rol utilizator</span></div>
+                                <div class="stat"><strong>${email}</strong><span>Email conectat</span></div>
                                 <div class="stat"><strong>ONLINE</strong><span>Status sesiune</span></div>
                             </div>
 
-                            <div class="hero-actions" style="margin-top: 30px; flex-wrap: wrap; gap: 12px;">
+                            <div class="hero-actions actions-spaced">
                                 <a class="button" href="notifications.html">Notificări</a>
                                 <a class="button" href="approvals.html">Aprobări</a>
                                 <a class="button" href="map.html">Harta centralelor</a>
@@ -72,7 +90,7 @@
                     `;
                 })
                 .catch((error) => {
-                    container.innerHTML = `<p style="color: var(--danger);">Nu am putut încărca dashboard-ul: ${error.message}</p>`;
+                    container.innerHTML = `<p class="error-banner">Nu am putut încărca dashboard-ul: ${error.message}</p>`;
                 });
         });
     </script>

@@ -73,7 +73,7 @@ class UserController {
                 }
 
                 $_SESSION['register_success'] = 'Cont creat cu succes! Poți să te conectezi acum.';
-                header('Location: http://localhost:5500/login.html', true, 302);
+                header('Location: http://localhost:8081/login', true, 302);
                 exit;
             } catch (Exception $e) {
                 if ($wantsJson) {
@@ -138,6 +138,8 @@ class UserController {
             $_SESSION['user_role'] = $user['role'];
             $_SESSION['username'] = $user['username'];
 
+            session_regenerate_id(true);
+
             if ($wantsJson) {
                 header('Content-Type: application/json; charset=UTF-8');
                 echo json_encode([
@@ -148,7 +150,7 @@ class UserController {
                 return;
             }
 
-            header('Location: http://localhost:5500/dashboard.html', true, 302);
+            header('Location: http://localhost:8081/dashboard', true, 302);
             exit;
         }
 
@@ -156,8 +158,21 @@ class UserController {
     }
 
     public function handleLogout(): void {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            $cookieParams = session_get_cookie_params();
+            setcookie(
+                session_name(),
+                '',
+                time() - 42000,
+                $cookieParams['path'],
+                $cookieParams['domain'],
+                $cookieParams['secure'],
+                $cookieParams['httponly']
+            );
+        }
+
         session_destroy();
-        header('Location: http://localhost:5500/start.html', true, 302);
+        header('Location: http://localhost:8081/start', true, 302);
         exit;
     }
 
@@ -167,6 +182,8 @@ class UserController {
     }
 
     public function getUserStatus(): void {
+        header('Content-Type: application/json; charset=UTF-8');
+
         if (!isset($_SESSION['user_id'])) {
             http_response_code(401);
             echo json_encode(['status' => 'error', 'message' => 'Utilizator neautentificat']);
@@ -193,4 +210,5 @@ class UserController {
             ]
         ]);
     }
+
 }

@@ -8,22 +8,34 @@ class UserService {
     }
 
     public function registerUser(array $data): void { 
-        if(empty($data['name']) || empty($data['email']) || empty($data['password'])) { 
+        $name = trim($data['name'] ?? '');
+        $email = trim($data['email'] ?? '');
+        $password = $data['password'] ?? '';
+
+        if ($name === '' || $email === '' || $password === '') {
             throw new Exception('Toate câmpurile sunt necesare!');
         }
 
-        if (strlen($data['password']) < 6) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new Exception('Adresa de email nu este validă!');
+        }
+
+        if (strlen($name) > 30) {
+            throw new Exception('Numele de utilizator este prea lung!');
+        }
+
+        if (strlen($password) < 6) {
             throw new Exception('Parola trebuie să aibă cel puțin 6 caractere!');
         }
 
-        $existingUser = $this->userRepository->findByEmail($data['email']);
+        $existingUser = $this->userRepository->findByEmail($email);
         if ($existingUser) {
             throw new Exception('Email-ul este deja înregistrat!');
         }
 
-        $hashedPassword = password_hash($data['password'], PASSWORD_BCRYPT); 
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT); 
 
-        $user = new User($data['name'], $data['email'], $hashedPassword); 
+        $user = new User($name, $email, $hashedPassword); 
         $this->userRepository->save($user); 
     }
 
@@ -45,7 +57,7 @@ class UserService {
         return $user;
     }
 
-    public function getUserById($id): ?array {
+    public function getUserById(string $id): ?array {
         return $this->userRepository->findById($id);
     }
 
