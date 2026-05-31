@@ -1,4 +1,4 @@
-import { API_BASE } from '../config/api.config'; 
+import { API_BASE } from '../config/api.config.js'; 
 
 async function request(method, endpoint, body = null) { 
     const options = { 
