@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuclear Plant Control | Login</title>
-    <link rel="stylesheet" href="http://localhost:8081/style.css">
+    <link rel="stylesheet" href="http://localhost:5500/style.css">
 </head>
 <body>
     <div class="page-shell login-layout">
@@ -29,7 +29,7 @@
                 <?php unset($_SESSION['register_success']); ?>
             <?php endif; ?>
 
-            <form class="field-grid" method="post" action="/login" id="loginForm">
+            <form class="field-grid" method="post" action="http://localhost:8081/login" id="loginForm">
                 <div class="field">
                     <label for="email">Email</label>
                     <input id="email" name="email" type="email" placeholder="operator@nuclear.ro" autocomplete="email" required>
@@ -42,7 +42,7 @@
 
                 <div class="button-row">
                     <input type="submit" value="Conectare">
-                    <a class="button secondary" href="/register">Nu ai cont? Creează cont</a>
+                    <a class="button secondary" href="http://localhost:5500/register.html">Nu ai cont? Creează cont</a>
                 </div>
             </form>
 

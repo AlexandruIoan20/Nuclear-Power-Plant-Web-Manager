@@ -59,11 +59,11 @@
     </form>
 
     <footer>
-        <a href="/power-plants/<?= htmlspecialchars($plantId); ?>/details"> 
+        <a href="http://localhost:5500/power-plants/<?= htmlspecialchars($plantId); ?>/details"> 
             Back 
         </a>
         
-        <a href="/power-plants/<?= htmlspecialchars($plantId); ?>/geological"> 
+        <a href="http://localhost:5500/power-plants/<?= htmlspecialchars($plantId); ?>/geological"> 
             Next 
         </a>
     </footer>

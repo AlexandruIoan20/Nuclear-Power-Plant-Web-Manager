@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuclear Plant Control | Register</title>
-    <link rel="stylesheet" href="http://localhost:8081/style.css">
+    <link rel="stylesheet" href="http://localhost:5500/style.css">
 </head>
 <body>
     <div class="page-shell login-layout">
@@ -22,7 +22,7 @@
                 <?php unset($_SESSION['register_error']); ?>
             <?php endif; ?>
 
-            <form class="field-grid" method="post" action="/register" id="registerForm">
+            <form class="field-grid" method="post" action="http://localhost:8081/register" id="registerForm">
                 <div class="field">
                     <label for="name">Nume complet</label>
                     <input id="name" name="name" type="text" placeholder="Ion Popescu" autocomplete="name" required>
@@ -45,7 +45,7 @@
 
                 <div class="button-row">
                     <input type="submit" value="Creare cont">
-                    <a class="button secondary" href="/login">Ai deja cont?</a>
+                    <a class="button secondary" href="http://localhost:5500/login.html">Ai deja cont?</a>
                 </div>
             </form>
 

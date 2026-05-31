@@ -1,13 +1,13 @@
 <header class="site-header">
     <div class="brand">
-        <a href="/">Nuclear Power Plant Manager</a>
+        <a href="http://localhost:5500/index.html">Nuclear Power Plant Manager</a>
     </div>
 
     <nav class="main-nav">
-        <a href="/">Start</a>
-        <a href="/register">Register</a>
-        <a href="/users">Users</a>
-        <a href="/power-plant-list">Power Plants</a>
-        <a href="/power-plant-create">Add Plant</a>
+        <a href="http://localhost:5500/index.html">Start</a>
+        <a href="http://localhost:5500/register.html">Register</a>
+        <a href="http://localhost:5500/users.html">Users</a>
+        <a href="http://localhost:5500/power-plants/list.html">Power Plants</a>
+        <a href="http://localhost:5500/power-plants/create.html">Add Plant</a>
     </nav>
 </header>

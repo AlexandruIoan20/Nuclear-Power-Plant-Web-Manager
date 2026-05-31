@@ -14,9 +14,9 @@
                 <span>Overview operațional pentru centralele nucleare</span>
             </div>
             <nav class="nav-links" aria-label="Navigare principală">
-                <a href="/start">Start</a>
-                <a href="/dashboard" class="active">Dashboard</a>
-                <a href="/logout">Logout</a>
+                <a href="http://localhost:5500/index.html">Start</a>
+                <a href="http://localhost:5500/dashboard.html" class="active">Dashboard</a>
+                <a href="http://localhost:8081/logout">Logout</a>
             </nav>
         </header>
 
@@ -59,7 +59,7 @@
                     <a class="button" href="http://localhost:5500/approvals.html">Aprobări</a>
                     <a class="button" href="http://localhost:5500/map.html">Harta centralelor</a>
                     <a class="button secondary" href="http://localhost:5500/power-plants/list.html">Lista centralelor</a>
-                    <a class="button secondary" href="/logout">Deconectare</a>
+                    <a class="button secondary" href="http://localhost:8081/logout">Deconectare</a>
                 </div>
 
                 <div class="field-grid" style="margin-top: 28px;">
