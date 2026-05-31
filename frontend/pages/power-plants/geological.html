@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Date Geologice Centrală</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+    <div class="page-shell">
+        <main class="form-panel login-card" style="margin: 0 auto;">
+            <h2 id="form-title">Date Geologice</h2>
+
+            <form id="geological-form">
+                <div class="field-grid">
+
+                    <div class="field">
+                    <div class="field">
+                        <label for="soil_type">Tip Sol:</label>
+                        <select id="soil_type" name="soil_type">
+                            <option value="">-- Selectează tipul de sol --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="field">
+                        <label for="water_source_type">Tip Sursă Apă:</label>
+                        <select id="water_source_type" name="water_source_type">
+                            <option value="">-- Selectează sursa de apă --</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="seismic_stability">Stabilitate Seismică (0.00 - 1.00):</label>
+                        <input type="number" id="seismic_stability" name="seismic_stability" step="0.01" min="0" max="1" />
+                    </div>
+
+                    <div class="field">
+                        <label for="flood_risk">Risc Inundații (0.00 - 1.00):</label>
+                        <input type="number" id="flood_risk" name="flood_risk" step="0.01" min="0" max="1" />
+                    </div>
+
+                    <div class="field">
+                        <label for="groundwater_level">Nivel Apă Freatică (metri):</label>
+                        <input type="number" id="groundwater_level" name="groundwater_level" step="0.1" />
+                    </div>
+
+                    <div class="field">
+                        <label for="water_proximity">Proximitate Apă (km):</label>
+                        <input type="number" id="water_proximity" name="water_proximity" step="0.1" />
+                    </div>
+
+                    <div class="field">
+                        <label for="water_flow_rate">Debit Apă (m³/s):</label>
+                        <input type="number" id="water_flow_rate" name="water_flow_rate" step="0.1" />
+                    </div>
+
+                    <div class="field">
+                        <label for="population_density">Densitate Populație (per km²):</label>
+                        <input type="number" id="population_density" name="population_density" step="0.1" />
+                    </div>
+
+                    <div class="field">
+                        <label for="transport_infrastructure_score">Scor Infrastructură Transport (0.00 - 1.00):</label>
+                        <input type="number" id="transport_infrastructure_score" name="transport_infrastructure_score" step="0.01" min="0" max="1" />
+                    </div>
+
+                    <div class="field">
+                        <label for="geological_risk_score">Scor Risc Geologic (0 - 100):</label>
+                        <input type="number" id="geological_risk_score" name="geological_risk_score" step="1" min="0" max="100" />
+                    </div>
+
+                </div>
+
+                <div class="card-actions">
+                    <button type="submit" class="button" id="submit-btn">Salvează</button>
+                </div>
+
+                <div id="status-message" style="margin-top: 18px;"></div>
+            </form>
+        </main>
+    </div>
+
+    <script type="module" src="../../modules/pages/geological.js"></script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 import { powerPlantService } from '../services/powerPlantService.js'
-import { CreatePlantRequestDTO } from '../dto/CreatePlantRequestDTO.js'; 
+import { PlantRequestDTO } from '../dto/PlantRequestDTO.js'; 
 import { showError, showSuccess, clearStatus } from '../ui/showMessage.js'; 
 
 document.addEventListener("DOMContentLoaded", async() => { 
@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async() => {
         e.preventDefault(); 
         clearStatus(statusElement); 
 
-        const dto = CreatePlantRequestDTO({ 
+        const dto = PlantRequestDTO({ 
             name: document.getElementById("name").value,    
             country: document.getElementById("country").value, 
             latitude: document.getElementById("latitude").value, 
@@ -18,11 +18,14 @@ document.addEventListener("DOMContentLoaded", async() => {
         }); 
 
         try { 
-            await powerPlantService.create(dto); 
+            const response = await powerPlantService.create(dto); 
             showSuccess(statusElement, "Datele au fost salvate cu succes!"); 
             form.reset(); 
+
+            window.location.href = `/pages/power-plants/basics.html?id=${response.plantId}`;
         } catch(error) { 
-            showError(statusElement, error.message || "Eroare la salvare"); 
+            console.error(error.message); 
+            showError(statusElement, "Eroare la salvarea informatiilor despre centrala."); 
         }
     })
 })

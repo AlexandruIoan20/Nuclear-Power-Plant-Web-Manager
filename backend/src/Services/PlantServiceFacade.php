@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../Dto/CreatePlantResponseDTO.php'; 
+
 class PlantServiceFacade {
     private DetailsPlantService $detailsPlantService;
     private BasicPlantService $basicPlantService;
@@ -24,8 +26,8 @@ class PlantServiceFacade {
         return $this->detailsPlantService->findById($plantId);
     }
 
-    public function savePlantDetails(array $data): void {
-        $this->detailsPlantService->savePlantDetails($data);
+    public function savePlantDetails(array $data): CreatePlantResponseDTO {
+        return $this->detailsPlantService->savePlantDetails($data);
     }
 
     public function updatePlantDetails(array $data, string $plantId): void {

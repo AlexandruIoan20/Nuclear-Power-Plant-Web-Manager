@@ -1,5 +1,4 @@
 <?php 
-
 require_once __DIR__ . '/../../Entities/TechnicalPlantData.php'; 
 require_once __DIR__ . '/../../Entities/ReactorSchema.php'; 
 require_once __DIR__ . '/../../Entities/ReactorType.php'; 
@@ -18,32 +17,33 @@ class TechnicalPlantService {
 
     public function save(array $data, string $plantId): void { 
         $existingData = $this->plantRepositoryFacade->getTechnicalDataByPlantId($plantId);
-    
+
         if ($existingData !== null) {
             throw new Exception("Există deja date tehnice pentru această centrală. Te rugăm să folosești metoda de UPDATE (PUT/PATCH).");
         }
 
-        $numberOfReactors = (isset($data['number_of_reactors']) && $data['number_of_reactors'] !== '') 
-        ? (int) $data['number_of_reactors'] 
-        : null;
-
-        $estimatedEfficiency = (isset($data['estimated_efficiency']) && $data['estimated_efficiency'] !== '') 
-            ? (float) $data['estimated_efficiency'] 
+        $numberOfReactors = (isset($data['numberOfReactors']) && $data['numberOfReactors'] !== '') 
+            ? (int) $data['numberOfReactors'] 
             : null;
 
-        $operationalRiskLevel = (isset($data['operational_risk_level']) && $data['operational_risk_level'] !== '') 
-            ? (float) $data['operational_risk_level'] 
+        $estimatedEfficiency = (isset($data['estimatedEfficiency']) && $data['estimatedEfficiency'] !== '') 
+            ? (float) $data['estimatedEfficiency'] 
             : null;
 
-        $reactorConfigurations = (isset($data['reactor_configurations']) && is_array($data['reactor_configurations'])) 
-            ? $data['reactor_configurations'] 
+        $operationalRiskLevel = (isset($data['operationalRiskLevel']) && $data['operationalRiskLevel'] !== '') 
+            ? (float) $data['operationalRiskLevel'] 
+            : null;
+
+        $reactorConfigurations = (isset($data['reactorConfigurations']) && is_array($data['reactorConfigurations'])) 
+            ? $data['reactorConfigurations'] 
             : [];
 
         $technicalPlantData = new TechnicalPlantData($plantId, null, $numberOfReactors, $estimatedEfficiency, $operationalRiskLevel); 
-        foreach($reactorConfigurations as $config) { 
+
+        foreach ($reactorConfigurations as $config) { 
             $currentReactorSchema = $this->plantRepositoryFacade->getReactorSchemaByDetails(
-                ReactorType::from($config['reactor_type'])->value,
-                 CoolingType::from($config['cooling_type'])->value
+                ReactorType::from($config['reactorType'])->value,
+                CoolingType::from($config['coolingType'])->value
             ); 
             $technicalPlantData->addReactorConfiguration($currentReactorSchema); 
         }
@@ -54,25 +54,25 @@ class TechnicalPlantService {
     public function update(array $data, string $plantId): void { 
         $currentPlantData = $this->plantRepositoryFacade->getTechnicalDataByPlantId($plantId); 
 
-        $numberOfReactors = $data['number_of_reactors'] ?? ''; 
+        $numberOfReactors = $data['numberOfReactors'] ?? ''; 
         $numberOfReactors = ($numberOfReactors !== '') ? $numberOfReactors : null; 
 
-        $estimatedEfficiency = $data['estimated_efficiency'] ?? ''; 
+        $estimatedEfficiency = $data['estimatedEfficiency'] ?? ''; 
         $estimatedEfficiency = ($estimatedEfficiency !== '') ? $estimatedEfficiency : null; 
 
-        $operationalRiskLevel = $data['operational_risk_level'] ?? ''; 
+        $operationalRiskLevel = $data['operationalRiskLevel'] ?? ''; 
         $operationalRiskLevel = ($operationalRiskLevel !== '') ? $operationalRiskLevel : null; 
 
-        $reactorConfigurations = $data['reactor_configurations'] ?? []; 
+        $reactorConfigurations = $data['reactorConfigurations'] ?? []; 
 
         $technicalPlantData = new TechnicalPlantData($plantId, $currentPlantData->getId(), $numberOfReactors, $estimatedEfficiency, $operationalRiskLevel); 
-        foreach($reactorConfigurations as $config) { 
+
+        foreach ($reactorConfigurations as $config) { 
             $currentReactorSchema = new ReactorSchema(
                 generateUUID(), 
-                ReactorType::from($config['reactor_type']), 
-                CoolingType::from($config['cooling_type']), 
+                ReactorType::from($config['reactorType']), 
+                CoolingType::from($config['coolingType']), 
             ); 
-
             $technicalPlantData->addReactorConfiguration($currentReactorSchema); 
         }
 

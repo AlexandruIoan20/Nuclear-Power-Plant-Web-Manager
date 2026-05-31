@@ -41,31 +41,41 @@ class TechnicalPlantRepository {
 
         return $technicalPlantData; 
     }
-
     public function save(TechnicalPlantData $technicalPlantData): void { 
         try {
+            error_log("[saveTechnicalData] START");
+            error_log("[saveTechnicalData] TechnicalPlantData: " . print_r($technicalPlantData, true));
+    
             $this->pdo->beginTransaction();
-            
+            error_log("[saveTechnicalData] Transaction started");
+    
             $statement = $this->pdo->prepare("INSERT INTO technical_data (
-                id, power_plant_id, number_of_reactors, estimated_efficiency, operational_risk_level
-            ) VALUES (
-                :id, :power_plant_id, :number_of_reactors, :estimated_efficiency, :operational_risk_level
-            )"); 
-        
-            $statement->execute([
+                    id, power_plant_id, number_of_reactors, estimated_efficiency, operational_risk_level
+                ) VALUES (
+                    :id, :power_plant_id, :number_of_reactors, :estimated_efficiency, :operational_risk_level
+                )");
+    
+            $insertParams = [
                 'id' => $technicalPlantData->getId(), 
                 'power_plant_id' => $technicalPlantData->getPowerPlantId(), 
                 'number_of_reactors' => $technicalPlantData->getNumberOfReactors(), 
                 'estimated_efficiency' => $technicalPlantData->getEstimatedEfficiency(), 
                 'operational_risk_level' => $technicalPlantData->getOperationalRiskLevel()
-            ]);
-
+            ];
+            error_log("[saveTechnicalData] INSERT technical_data params: " . print_r($insertParams, true));
+    
+            $statement->execute($insertParams);
+            error_log("[saveTechnicalData] technical_data inserted, rowCount: " . $statement->rowCount());
+    
             $reactorConfigurations = $technicalPlantData->getReactorConfigurations(); 
+            error_log("[saveTechnicalData] reactorConfigurations count: " . count($reactorConfigurations));
+            error_log("[saveTechnicalData] reactorConfigurations raw: " . print_r($reactorConfigurations, true));
+    
             $groupedConfigurations = [];
-
-            foreach ($reactorConfigurations as $config) {
+            foreach ($reactorConfigurations as $index => $config) {
                 $key = $config->getType()->value . '_' . $config->getCooling()->value;
-                
+                error_log("[saveTechnicalData] config[$index] key: $key | type: " . $config->getType()->value . " | cooling: " . $config->getCooling()->value);
+    
                 if (!isset($groupedConfigurations[$key])) {
                     $groupedConfigurations[$key] = [
                         'type' => $config->getType()->value,
@@ -73,35 +83,48 @@ class TechnicalPlantRepository {
                         'quantity' => 0
                     ];
                 }
-                
                 $groupedConfigurations[$key]['quantity']++;
+                error_log("[saveTechnicalData] config[$index] quantity for key '$key' now: " . $groupedConfigurations[$key]['quantity']);
             }
-        
+            error_log("[saveTechnicalData] groupedConfigurations final: " . print_r($groupedConfigurations, true));
+    
             $relationalStatement = $this->pdo->prepare("
-                INSERT INTO reactor_plant_data (technical_data_id, reactor_schema_id, number_of_reactors)
-                SELECT :technical_data_id, id, :number_of_reactors 
-                FROM reactor_schema 
-                WHERE reactor_type = :reactor_type AND cooling_type = :cooling_type
-            "); 
-        
-            foreach ($groupedConfigurations as $group) { 
-                $relationalStatement->execute([
+                    INSERT INTO reactor_plant_data (technical_data_id, reactor_schema_id, number_of_reactors)
+                    SELECT :technical_data_id, id, :number_of_reactors 
+                    FROM reactor_schema 
+                    WHERE reactor_type = :reactor_type AND cooling_type = :cooling_type
+            ");
+    
+            foreach ($groupedConfigurations as $key => $group) { 
+                $relationalParams = [
                     'technical_data_id' => $technicalPlantData->getId(),
                     'reactor_type' => $group['type'],
                     'cooling_type' => $group['cooling'],
-                    'number_of_reactors' => $group['quantity'] 
-                ]); 
-                
-                if ($relationalStatement->rowCount() === 0) {
+                    'number_of_reactors' => $group['quantity']
+                ];
+                error_log("[saveTechnicalData] INSERT reactor_plant_data for key '$key': " . print_r($relationalParams, true));
+    
+                $relationalStatement->execute($relationalParams); 
+    
+                $rowCount = $relationalStatement->rowCount();
+                error_log("[saveTechnicalData] reactor_plant_data rowCount for key '$key': $rowCount");
+    
+                if ($rowCount === 0) {
+                    error_log("[saveTechnicalData] ERROR - reactor_schema not found for type: " . $group['type'] . " | cooling: " . $group['cooling']);
                     throw new Exception("Configurația reactorului (" . $group['type'] . " - " . $group['cooling'] . ") nu există în catalog.");
                 }
+    
+                error_log("[saveTechnicalData] reactor_plant_data inserted successfully for key '$key'");
             }
-
+    
             $this->pdo->commit();
-
+            error_log("[saveTechnicalData] Transaction committed - DONE");
+    
         } catch (Exception $e) { 
             $this->pdo->rollBack();
-            error_log("[TechnicalPlantRepository] Eroare la salvare: " . $e->getMessage());
+            error_log("[saveTechnicalData] ROLLBACK triggered");
+            error_log("[saveTechnicalData] Eroare la salvare: " . $e->getMessage());
+            error_log("[saveTechnicalData] Stack trace: " . $e->getTraceAsString());
             throw new Exception("Eroare la salvarea datelor tehnice: " . $e->getMessage());
         }
     }

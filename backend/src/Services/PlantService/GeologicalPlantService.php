@@ -16,48 +16,48 @@ class GeologicalPlantService {
 
     public function save(array $data, string $plantId): void { 
         $existingData = $this->plantRepositoryFacade->getGeologicalDataByPlantId($plantId); 
-        if($existingData !== null) { 
+        if ($existingData !== null) { 
             throw new Exception("Există deja date geologice pentru această centrală. Te rugăm să folosești metoda de UPDATE (PUT/PATCH).");
         }
 
-        $soilType = (isset($data['soil_type']) && $data['soil_type'] !== '') 
-            ? SoilType::from($data['soil_type']) 
+        $soilType = (isset($data['soilType']) && $data['soilType'] !== '') 
+            ? SoilType::from($data['soilType']) 
             : null;
 
-        $waterSourceType = (isset($data['water_source_type']) && $data['water_source_type'] !== '') 
-            ? WaterSourceType::from($data['water_source_type']) 
+        $waterSourceType = (isset($data['waterSourceType']) && $data['waterSourceType'] !== '') 
+            ? WaterSourceType::from($data['waterSourceType']) 
             : null;
 
-        $seismicStability = (isset($data['seismic_stability']) && $data['seismic_stability'] !== '') 
-            ? (float) $data['seismic_stability'] 
+        $seismicStability = (isset($data['seismicStability']) && $data['seismicStability'] !== '') 
+            ? (float) $data['seismicStability'] 
             : null;
 
-        $floodRisk = (isset($data['flood_risk']) && $data['flood_risk'] !== '') 
-            ? (float) $data['flood_risk'] 
+        $floodRisk = (isset($data['floodRisk']) && $data['floodRisk'] !== '') 
+            ? (float) $data['floodRisk'] 
             : null;
 
-        $groundwaterLevel = (isset($data['groundwater_level']) && $data['groundwater_level'] !== '') 
-            ? (float) $data['groundwater_level'] 
+        $groundwaterLevel = (isset($data['groundwaterLevel']) && $data['groundwaterLevel'] !== '') 
+            ? (float) $data['groundwaterLevel'] 
             : null;
 
-        $waterProximity = (isset($data['water_proximity']) && $data['water_proximity'] !== '') 
-            ? (float) $data['water_proximity'] 
+        $waterProximity = (isset($data['waterProximity']) && $data['waterProximity'] !== '') 
+            ? (float) $data['waterProximity'] 
             : null;
 
-        $waterFlowRate = (isset($data['water_flow_rate']) && $data['water_flow_rate'] !== '') 
-            ? (float) $data['water_flow_rate'] 
+        $waterFlowRate = (isset($data['waterFlowRate']) && $data['waterFlowRate'] !== '') 
+            ? (float) $data['waterFlowRate'] 
             : null;
 
-        $populationDensity = (isset($data['population_density']) && $data['population_density'] !== '') 
-            ? (float) $data['population_density'] 
+        $populationDensity = (isset($data['populationDensity']) && $data['populationDensity'] !== '') 
+            ? (float) $data['populationDensity'] 
             : null;
 
-        $transportInfrastructureScore = (isset($data['transport_infrastructure_score']) && $data['transport_infrastructure_score'] !== '') 
-            ? (float) $data['transport_infrastructure_score'] 
+        $transportInfrastructureScore = (isset($data['transportInfrastructureScore']) && $data['transportInfrastructureScore'] !== '') 
+            ? (float) $data['transportInfrastructureScore'] 
             : null;
 
-        $geologicalRiskScore = (isset($data['geological_risk_score']) && $data['geological_risk_score'] !== '') 
-            ? (float) $data['geological_risk_score'] 
+        $geologicalRiskScore = (isset($data['geologicalRiskScore']) && $data['geologicalRiskScore'] !== '') 
+            ? (float) $data['geologicalRiskScore'] 
             : null;
 
         $geologicalPlantData = new GeologicalPlantData(
@@ -81,34 +81,34 @@ class GeologicalPlantService {
     public function update(array $data, string $plantId): void { 
         $currentData = $this->plantRepositoryFacade->getGeologicalDataByPlantId($plantId); 
         
-        $soilTypeRaw = $data['soil_type'] ?? '';
+        $soilTypeRaw = $data['soilType'] ?? '';
         $soilType = ($soilTypeRaw !== '') ? SoilType::from($soilTypeRaw) : null;
 
-        $waterSourceTypeRaw = $data['water_source_type'] ?? '';
+        $waterSourceTypeRaw = $data['waterSourceType'] ?? '';
         $waterSourceType = ($waterSourceTypeRaw !== '') ? WaterSourceType::from($waterSourceTypeRaw) : null;
 
-        $seismicStability = $data['seismic_stability'] ?? '';
+        $seismicStability = $data['seismicStability'] ?? '';
         $seismicStability = ($seismicStability !== '') ? $seismicStability : null;
 
-        $floodRisk = $data['flood_risk'] ?? '';
+        $floodRisk = $data['floodRisk'] ?? '';
         $floodRisk = ($floodRisk !== '') ? $floodRisk : null;
 
-        $groundwaterLevel = $data['groundwater_level'] ?? '';
+        $groundwaterLevel = $data['groundwaterLevel'] ?? '';
         $groundwaterLevel = ($groundwaterLevel !== '') ? $groundwaterLevel : null;
 
-        $waterProximity = $data['water_proximity'] ?? '';
+        $waterProximity = $data['waterProximity'] ?? '';
         $waterProximity = ($waterProximity !== '') ? $waterProximity : null;
 
-        $waterFlowRate = $data['water_flow_rate'] ?? '';
+        $waterFlowRate = $data['waterFlowRate'] ?? '';
         $waterFlowRate = ($waterFlowRate !== '') ? $waterFlowRate : null;
 
-        $populationDensity = $data['population_density'] ?? '';
+        $populationDensity = $data['populationDensity'] ?? '';
         $populationDensity = ($populationDensity !== '') ? $populationDensity : null;
 
-        $transportInfrastructureScore = $data['transport_infrastructure_score'] ?? '';
+        $transportInfrastructureScore = $data['transportInfrastructureScore'] ?? '';
         $transportInfrastructureScore = ($transportInfrastructureScore !== '') ? $transportInfrastructureScore : null;
 
-        $geologicalRiskScore = $data['geological_risk_score'] ?? '';
+        $geologicalRiskScore = $data['geologicalRiskScore'] ?? '';
         $geologicalRiskScore = ($geologicalRiskScore !== '') ? $geologicalRiskScore : null;
 
         $geologicalPlantData = new GeologicalPlantData(

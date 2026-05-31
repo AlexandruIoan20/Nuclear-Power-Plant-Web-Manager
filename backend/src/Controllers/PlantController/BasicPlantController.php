@@ -43,7 +43,8 @@ class BasicPlantController {
             http_response_code(200);
             echo json_encode([
                 'success' => true, 
-                'message' => 'Datele de bază au fost salvate cu succes.'
+                'message' => 'Datele de bază au fost salvate cu succes.',
+                'plantId' => $plantId
             ]);
 
         } catch(Exception $e) { 

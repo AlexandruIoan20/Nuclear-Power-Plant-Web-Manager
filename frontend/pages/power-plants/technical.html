@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Date Tehnice Centrală</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+    <div class="page-shell">
+        <main class="form-panel login-card" style="margin: 0 auto;">
+            <h2 id="form-title">Date Tehnice</h2>
+
+            <form id="technical-form">
+                <div class="field-grid">
+
+                    <div class="field">
+                        <label for="number_of_reactors">Număr Reactoare:</label>
+                        <input type="number" id="number_of_reactors" name="number_of_reactors" min="0" />
+                    </div>
+
+                    <div class="field">
+                        <label for="estimated_efficiency">Eficiență Estimată (%):</label>
+                        <input type="number" id="estimated_efficiency" name="estimated_efficiency" step="0.01" min="0" max="100" />
+                    </div>
+
+                    <div class="field">
+                        <label for="operational_risk_level">Nivel Risc Operațional (0.00 - 1.00):</label>
+                        <input type="number" id="operational_risk_level" name="operational_risk_level" step="0.01" min="0" max="1" />
+                    </div>
+
+                </div>
+
+                <hr style="margin: 2rem 0;">
+
+                <h3>Configurații Reactoare</h3>
+                <div id="reactor-configurations-container"></div>
+
+                <button type="button" class="button" id="add-reactor-btn">+ Adaugă Configurație Reactor</button>
+
+                <hr style="margin: 2rem 0;">
+
+                <div class="card-actions">
+                    <button type="submit" class="button" id="submit-btn">Salvează</button>
+                </div>
+
+                <div id="status-message" style="margin-top: 18px;"></div>
+            </form>
+        </main>
+    </div>
+
+    <script type="module" src="../../modules/pages/technical.js"></script>
+</body>
+</html>
