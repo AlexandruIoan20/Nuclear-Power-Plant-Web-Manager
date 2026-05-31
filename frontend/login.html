@@ -14,7 +14,7 @@
             const container = document.getElementById("app-container");
 
             // Facem call către ruta definită în index.php
-            fetch("http://localhost:8081/login")
+            fetch("http://localhost:8081/api/login")
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`Eroare de server: ${response.status}`);

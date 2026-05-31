@@ -11,6 +11,18 @@ class Router {
         $this->routes[] = ['method' => 'POST', 'uri' => $uri, 'action' => $action];
     }
 
+    public function put(string $uri, callable $action): void { 
+        $this->routes[] = ['method' => "PUT", 'uri' => $uri, 'action' => $action]; 
+    }
+
+    public function patch(string $uri, callable $action): void { 
+        $this->routes[] = ['method' => "PATCH", 'uri' => $uri, 'action' => $action]; 
+    }
+
+    public function delete(string $uri, callable $action): void { 
+        $this->routes[] = ['method' => "DELETE", 'uri' => $uri, 'action' => $action]; 
+    }
+
     public function dispatch(string $requestMethod, string $requestUri): void {
         foreach ($this->routes as $route) {
             $pattern = preg_replace('/\{([a-zA-Z0-9\-]+)\}/', '([a-zA-Z0-9\-]+)', $route['uri']);

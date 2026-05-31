@@ -1,25 +1,29 @@
 <?php
 
 require_once __DIR__ . '/../../Services/PlantService/BasicPlantService.php'; 
+require_once __DIR__ . '../../../Dto/BasicPlantDataDTO.php'; 
 
 class BasicPlantController { 
     public function __construct(
         private PlantServiceFacade $plantServiceFacade
     ) {}
 
-    public function showForm(string $plantId): void { 
+    public function getBasicPlantData(string $plantId) { 
+        header('Content-Type: application/json; charset=UTF-8'); 
+
         $basicPlantData = $this->plantServiceFacade->getBasicDataByPlantId($plantId); 
-        $isUpdate = ($basicPlantData !== null); 
 
-        $formAction = "/power-plants/{$plantId}/basics";
-
-        if ($isUpdate) {
-            $formAction = "/power-plants/{$plantId}/basic-update";
-        } else {
-            $formAction = "/power-plants/{$plantId}/basic-save";
+        if(!$basicPlantData) { 
+            http_response_code(404); 
+            echo json_encode(["status" => "error", "message" => "Datele despre centrala nu au fost gasite"]); 
+            exit; 
         }
 
-        require_once __DIR__ . '/../../Views/PlantViews/plant-basics-form.view.php'; 
+        $basicPlantDataDTO = BasicPlantDataDTO::fromEntity($basicPlantData); 
+
+        http_response_code(200); 
+        echo json_encode(["status" => "success", "data" => $basicPlantDataDTO]); 
+        exit; 
     }
 
     public function createBasicPlantData(string $plantId) { 
@@ -55,14 +59,33 @@ class BasicPlantController {
 
 
     public function updateBasicPlantData(string $plantId) { 
-        $dateFormular = $_POST; 
+        $jsonPayload = file_get_contents('php://input');
+        $dateFormular = json_decode($jsonPayload, true);
+        
+        if ($dateFormular === null) {
+            $dateFormular = [];
+        }
 
-        error_log("[DEBUG] Date Formular"); 
+        error_log("[DEBUG] Date Formular decodate din JSON (Update):"); 
         error_log(print_r($dateFormular, true));
+
         try { 
             $this->plantServiceFacade->updateBasicData($dateFormular, $plantId); 
+            
+            http_response_code(200);
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Datele de bază au fost actualizate cu succes.'
+            ]);
+
         } catch(Exception $e) { 
-            echo "Error at POST for updating the basic plant data: " . htmlspecialchars($e->getMessage()); 
+            error_log("[ERROR] POST/PUT Basic Data Update: " . $e->getMessage());
+            
+            http_response_code(400);
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Eroare la actualizare: ' . $e->getMessage()
+            ]); 
         }
     }
 }

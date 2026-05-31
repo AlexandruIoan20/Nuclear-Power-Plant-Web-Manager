@@ -184,3 +184,7 @@ FROM
     unnest(enum_range(NULL::reactor_types)) AS r(reactor_type)
 CROSS JOIN 
     unnest(enum_range(NULL::cooling_types)) AS c(cooling_type);
+
+ALTER TABLE basic_data ADD CONSTRAINT unique_power_plant_basic UNIQUE (power_plant_id);
+ALTER TABLE geological_data ADD CONSTRAINT unique_power_plant_geological UNIQUE (power_plant_id);
+ALTER TABLE technical_data ADD CONSTRAINT unique_power_plant_technical UNIQUE (power_plant_id);

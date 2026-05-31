@@ -1,21 +1,29 @@
 <?php
 
+require_once __DIR__ . '/../../Services/PlantServiceFacade.php'; 
+require_once __DIR__ . '/../../Dto/GeologicalPlantDataDTO.php'; 
+
 class GeologicalPlantController { 
     public function __construct(
         private PlantServiceFacade $plantServiceFacade
     ) {}
 
-    public function showForm(string $plantId): void { 
-        $geologicalPlantData = $this->plantServiceFacade->getGeologicalDataByPlantId($plantId); 
-        $isUpdate = ($geologicalPlantData !== null); 
+    public function getGeologicalPlantData(string $plantId): void { 
+        header('Content-Type: application/json; charset=UTF-8'); 
 
-        if ($isUpdate) {
-            $formAction = "/power-plants/{$plantId}/geological-update";
-        } else {
-            $formAction = "/power-plants/{$plantId}/geological-save";
+        $geologicalData = $this->plantServiceFacade->getGeologicalDataByPlantId($plantId); 
+
+        if(!$geologicalData) { 
+            http_response_code(404); 
+            echo json_encode(["status" => "error", "message" => "Datele geografice nu au fost gasite."]);
+            
+            exit;
         }
 
-        require_once __DIR__ . '/../../Views/PlantViews/plant-geological-form.view.php'; 
+        $geologicalPlantDataDTO = GeologicalPlantDataDTO::fromEntity($geologicalData); 
+
+        http_response_code(200); 
+        echo json_encode(["status" => "success", "data" => $geologicalPlantDataDTO]); 
     }
 
     public function createGeologicalPlantData(string $plantId): void { 
