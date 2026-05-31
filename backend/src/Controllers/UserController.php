@@ -20,6 +20,9 @@ class UserController {
     }
 
     public function handleRegister(): void {
+        $wantsJson = str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')
+            || strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'fetch';
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = $_POST['name'] ?? '';
             $email = $_POST['email'] ?? '';
@@ -27,12 +30,26 @@ class UserController {
             $password_confirm = $_POST['password_confirm'] ?? '';
 
             if (empty($name) || empty($email) || empty($password) || empty($password_confirm)) {
+                if ($wantsJson) {
+                    http_response_code(400);
+                    header('Content-Type: application/json; charset=UTF-8');
+                    echo json_encode(['status' => 'error', 'message' => 'Toate câmpurile sunt necesare.']);
+                    return;
+                }
+
                 $_SESSION['register_error'] = 'Toate câmpurile sunt necesare.';
                 require __DIR__ . '/../Views/register.view.php';
                 return;
             }
 
             if ($password !== $password_confirm) {
+                if ($wantsJson) {
+                    http_response_code(400);
+                    header('Content-Type: application/json; charset=UTF-8');
+                    echo json_encode(['status' => 'error', 'message' => 'Parolele nu se potrivesc.']);
+                    return;
+                }
+
                 $_SESSION['register_error'] = 'Parolele nu se potrivesc.';
                 require __DIR__ . '/../Views/register.view.php';
                 return;
@@ -45,10 +62,27 @@ class UserController {
                     'password' => $password
                 ]);
 
+                if ($wantsJson) {
+                    header('Content-Type: application/json; charset=UTF-8');
+                    echo json_encode([
+                        'status' => 'success',
+                        'message' => 'Cont creat cu succes! Poți să te conectezi acum.',
+                        'redirect' => 'login.html'
+                    ]);
+                    return;
+                }
+
                 $_SESSION['register_success'] = 'Cont creat cu succes! Poți să te conectezi acum.';
-                header('Location: /login.html', true, 302);
+                header('Location: http://localhost:5500/login.html', true, 302);
                 exit;
             } catch (Exception $e) {
+                if ($wantsJson) {
+                    http_response_code(400);
+                    header('Content-Type: application/json; charset=UTF-8');
+                    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+                    return;
+                }
+
                 $_SESSION['register_error'] = $e->getMessage();
                 require __DIR__ . '/../Views/register.view.php';
                 return;
@@ -64,11 +98,21 @@ class UserController {
     }
 
     public function handleLogin(): void {
+        $wantsJson = str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')
+            || strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'fetch';
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
 
             if (empty($email) || empty($password)) {
+                if ($wantsJson) {
+                    http_response_code(400);
+                    header('Content-Type: application/json; charset=UTF-8');
+                    echo json_encode(['status' => 'error', 'message' => 'Email și parolă sunt necesare.']);
+                    return;
+                }
+
                 $_SESSION['login_error'] = 'Email și parolă sunt necesare.';
                 require __DIR__ . '/../Views/login.view.php';
                 return;
@@ -77,6 +121,13 @@ class UserController {
             $user = $this->userService->authenticateUser($email, $password);
 
             if (!$user) {
+                if ($wantsJson) {
+                    http_response_code(401);
+                    header('Content-Type: application/json; charset=UTF-8');
+                    echo json_encode(['status' => 'error', 'message' => 'Email sau parolă incorectă.']);
+                    return;
+                }
+
                 $_SESSION['login_error'] = 'Email sau parolă incorectă.';
                 require __DIR__ . '/../Views/login.view.php';
                 return;
@@ -87,7 +138,17 @@ class UserController {
             $_SESSION['user_role'] = $user['role'];
             $_SESSION['username'] = $user['username'];
 
-            header('Location: /dashboard.html', true, 302);
+            if ($wantsJson) {
+                header('Content-Type: application/json; charset=UTF-8');
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Autentificare reușită.',
+                    'redirect' => 'dashboard.html'
+                ]);
+                return;
+            }
+
+            header('Location: http://localhost:5500/dashboard.html', true, 302);
             exit;
         }
 
@@ -96,7 +157,7 @@ class UserController {
 
     public function handleLogout(): void {
         session_destroy();
-        header('Location: /start.html', true, 302);
+        header('Location: http://localhost:5500/start.html', true, 302);
         exit;
     }
 

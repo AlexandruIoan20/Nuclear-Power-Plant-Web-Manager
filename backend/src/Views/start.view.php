@@ -21,7 +21,7 @@
                     </span>
                     <a href="http://localhost:8081/logout">Logout</a>
                 <?php else: ?>
-                    <a href="http://localhost:8081/login.html">Login</a>
+                    <a href="http://localhost:5500/login.html">Login</a>
                 <?php endif; ?>
                 <a href="#overview">Overview</a>
             </nav>
@@ -40,11 +40,11 @@
 
                 <div class="hero-actions">
                     <?php if (isset($_SESSION['user_id'])): ?>
-                        <a class="button" href="http://localhost:8081/dashboard.html">Accesează dashboard</a>
+                        <a class="button" href="http://localhost:5500/dashboard.html">Accesează dashboard</a>
                         <a class="button secondary" href="http://localhost:8081/logout">Logout</a>
                     <?php else: ?>
-                        <a class="button" href="http://localhost:8081/login.html">Accesează login</a>
-                        <a class="button secondary" href="http://localhost:8081/register.html">Crează cont</a>
+                        <a class="button" href="http://localhost:5500/login.html">Accesează login</a>
+                        <a class="button secondary" href="http://localhost:5500/register.html">Crează cont</a>
                     <?php endif; ?>
                 </div>
 

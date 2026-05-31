@@ -191,6 +191,22 @@ $router->get('/api/user/status', function() use ($userService) {
     (new UserController($userService))->getUserStatus();
 });
 
+$router->get('/api/users', function() use ($userService) {
+    header('Content-Type: application/json; charset=UTF-8');
+    $users = $userService->getAllUsers();
+
+    $payload = array_map(function (User $user) {
+        return [
+            'id' => $user->getId(),
+            'username' => $user->getName(),
+            'email' => $user->getEmail(),
+        ];
+    }, $users);
+
+    echo json_encode(['status' => 'success', 'data' => $payload]);
+    exit;
+});
+
 $router->get('/dashboard', function() use ($userService) {
     (new UserController($userService))->showDashboard();
 });

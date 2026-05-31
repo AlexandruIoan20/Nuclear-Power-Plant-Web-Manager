@@ -55,10 +55,10 @@
                 </div>
 
                 <div class="hero-actions" style="margin-top: 30px; flex-wrap: wrap; gap: 12px;">
-                    <a class="button" href="/notifications.html">Notificări</a>
-                    <a class="button" href="/approvals.html">Aprobări</a>
-                    <a class="button" href="/map.html">Harta centralelor</a>
-                    <a class="button secondary" href="/power-plants/list.html">Lista centralelor</a>
+                    <a class="button" href="http://localhost:5500/notifications.html">Notificări</a>
+                    <a class="button" href="http://localhost:5500/approvals.html">Aprobări</a>
+                    <a class="button" href="http://localhost:5500/map.html">Harta centralelor</a>
+                    <a class="button secondary" href="http://localhost:5500/power-plants/list.html">Lista centralelor</a>
                     <a class="button secondary" href="/logout">Deconectare</a>
                 </div>
 
@@ -73,8 +73,8 @@
                         <h3>Centrale și reactoare</h3>
                         <p style="color: var(--muted);">Din lista de centrale poți intra în view/update, apoi în date de bază, geologice și tehnice.</p>
                         <div class="button-row" style="margin-top: 14px;">
-                            <a class="button secondary" href="/power-plants/list.html">Deschide lista</a>
-                            <a class="button secondary" href="/reactor.html">Vezi reactor</a>
+                            <a class="button secondary" href="http://localhost:5500/power-plants/list.html">Deschide lista</a>
+                            <a class="button secondary" href="http://localhost:5500/reactor.html">Vezi reactor</a>
                         </div>
                     </div>
                 </div>

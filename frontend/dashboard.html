@@ -8,9 +8,9 @@
 </head>
 <body>
     <div class="page-shell">
-        <div id="app-container" class="panel">
+        <main id="app-container" class="panel">
             <p class="inline-status">Se încarcă dashboard-ul...</p>
-        </div>
+        </main>
     </div>
 
     <script>
@@ -20,24 +20,59 @@
             fetch('http://localhost:8081/api/user/status', { credentials: 'include' })
                 .then((response) => {
                     if (response.status === 401) {
-                        window.location.href = 'http://localhost:8081/login.html';
+                        window.location.href = 'login.html';
                         return null;
                     }
 
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return fetch('http://localhost:8081/dashboard', { credentials: 'include' });
+                    return response.json();
                 })
-                .then((response) => {
-                    if (!response) return null;
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return response.text();
-                })
-                .then((html) => {
-                    if (html) container.innerHTML = html;
+                .then((result) => {
+                    if (!result) return;
+
+                    const user = result.data;
+                    container.innerHTML = `
+                        <header class="topbar">
+                            <div class="brand">
+                                <strong>Nuclear Plant Control</strong>
+                                <span>Overview operațional pentru centralele nucleare</span>
+                            </div>
+                            <nav class="nav-links" aria-label="Navigare principală">
+                                <a href="start.html">Start</a>
+                                <a href="dashboard.html" class="active">Dashboard</a>
+                                <a href="http://localhost:8081/logout">Logout</a>
+                            </nav>
+                        </header>
+
+                        <section>
+                            <p class="eyebrow">CONTROL PANEL / OVERVIEW</p>
+                            <h1>Bun venit, ${user.username}!</h1>
+                            <p>Ești conectat cu succes. Aici pornește navigarea către notificări, aprobări, harta centralelor și lista de unități.</p>
+
+                            <div class="status-card" style="margin: 18px 0 26px;">
+                                <p class="inline-status" style="margin-bottom: 8px;">USER SESSION ACTIVE</p>
+                                <h2 style="margin: 0 0 6px;">${user.username}</h2>
+                                <p style="margin: 0; color: var(--muted);">${user.email} · Rol: ${user.role}</p>
+                            </div>
+
+                            <div class="stats" aria-label="Status utilizator">
+                                <div class="stat"><strong>${user.role}</strong><span>Rol utilizator</span></div>
+                                <div class="stat"><strong>${user.email}</strong><span>Email conectat</span></div>
+                                <div class="stat"><strong>ONLINE</strong><span>Status sesiune</span></div>
+                            </div>
+
+                            <div class="hero-actions" style="margin-top: 30px; flex-wrap: wrap; gap: 12px;">
+                                <a class="button" href="notifications.html">Notificări</a>
+                                <a class="button" href="approvals.html">Aprobări</a>
+                                <a class="button" href="map.html">Harta centralelor</a>
+                                <a class="button secondary" href="power-plants/list.html">Lista centralelor</a>
+                                <a class="button secondary" href="http://localhost:8081/logout">Deconectare</a>
+                            </div>
+                        </section>
+                    `;
                 })
                 .catch((error) => {
-                    container.innerHTML =
-                        `<p style="color: var(--danger);">Nu am putut încărca dashboard-ul: ${error.message}</p>`;
+                    container.innerHTML = `<p style="color: var(--danger);">Nu am putut încărca dashboard-ul: ${error.message}</p>`;
                 });
         });
     </script>
