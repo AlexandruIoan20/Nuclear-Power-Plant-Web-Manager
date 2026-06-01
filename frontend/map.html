@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuclear Plant Control | Map</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
     <div class="page-shell">
@@ -21,15 +22,52 @@
                 <a href="power-plants/list.html">Lista centralelor</a>
             </nav>
         </header>
-        <main class="panel">
-            <p class="eyebrow">MAP VIEW</p>
-            <h1>Hartă centralelor</h1>
-            <p>Aici poți lega harta cu poziția fiecărei centrale. Momentan este o pagină de routing pentru fluxul din diagramă.</p>
-            <div class="hero-actions" style="margin-top: 24px; flex-wrap: wrap; gap: 12px;">
-                <a class="button" href="dashboard.html">Înapoi la overview</a>
-                <a class="button secondary" href="power-plants/list.html">Lista centralelor</a>
-            </div>
+        <main class="map-layout">
+            <section class="panel map-shell">
+                <p class="eyebrow">MAP VIEW</p>
+                <h1>Hartă centralelor</h1>
+                <p>Marker-ele sunt furnizate de backend; click pe marker duce la pagina de editare.</p>
+                <div id="plants-map" class="leaflet-map" style="height:520px"></div>
+                <p id="map-status" class="map-status"></p>
+            </section>
+
+            <aside class="panel map-sidebar">
+                <p class="eyebrow">LISTĂ</p>
+                <h2>Centrale</h2>
+                <div id="map-list" class="map-list"></div>
+            </aside>
         </main>
     </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/plant-map.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const statusEl = document.getElementById('map-status');
+            const listEl = document.getElementById('map-list');
+
+            try {
+                const res = await fetch('http://localhost:8081/api/power-plants/map-data');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const payload = await res.json();
+                const plants = Array.isArray(payload.data) ? payload.data : [];
+
+                if (plants.length === 0) {
+                    statusEl.textContent = 'Nu există centrale cu coordonate.';
+                    listEl.innerHTML = '<div class="map-empty">Niciun rezultat.</div>';
+                    return;
+                }
+
+                listEl.innerHTML = plants.map(p => `\n                    <article class="map-item">\n                        <h3>${p.name || 'Centrală'}</h3>\n                        <div class="map-item-meta">${p.country || ''}</div>\n                        <div class="map-item-meta">${p.coordinates_label || ''}</div>\n                        <div class="map-item-actions"><a class="button secondary" href="${p.edit_url}">Editează</a></div>\n                    </article>\n                `).join('');
+
+                window.PlantMap.setupPlantsOverviewMap({ mapId: 'plants-map', plants });
+                statusEl.textContent = `${plants.filter(p => p.has_coordinates).length} centrală(e) afișată(e)`;
+            } catch (err) {
+                console.error('Map load error', err);
+                statusEl.textContent = 'Eroare la încărcarea hărții.';
+                listEl.innerHTML = '<div class="map-empty">Eroare la încărcare.</div>';
+            }
+        });
+    </script>
 </body>
 </html>

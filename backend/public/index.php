@@ -8,16 +8,25 @@ session_start([
     'cookie_httponly' => true,
 ]);
 
-// Allow specific local origins (needed for fetch from frontend dev servers)
+// Allow specific local origins or any localhost/127.0.0.1 origin (useful for Live Server variations)
 $allowedOrigins = [
     'http://localhost:5500',
     'http://localhost:8081',
 ];
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if ($origin && in_array($origin, $allowedOrigins, true)) {
-    header("Access-Control-Allow-Origin: $origin");
+if ($origin) {
+    if ($origin === 'null') {
+        header('Access-Control-Allow-Origin: null');
+    } else {
+        $isAllowed = in_array($origin, $allowedOrigins, true) || (bool)preg_match('#^https?://(localhost|127\.0\.0\.1)(:\d+)?$#', $origin);
+        if ($isAllowed) {
+            header("Access-Control-Allow-Origin: $origin");
+        } else {
+            header("Access-Control-Allow-Origin: {$allowedOrigins[0]}");
+        }
+    }
 } else {
-    // fallback to first allowed origin to be explicit when none provided
+    // No origin header (direct requests) — default to first allowed origin
     header("Access-Control-Allow-Origin: {$allowedOrigins[0]}");
 }
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
@@ -110,6 +119,10 @@ $router->get('/api/power-plants/list', function() use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList(); 
 }); 
 
+$router->get('/api/power-plants/map-data', function() use ($plantServiceFacade) {
+    (new DetailsPlantController($plantServiceFacade))->getPowerPlantsMapData();
+});
+
 $router->get('/api/countries', function() use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getCountries();
 });
@@ -132,6 +145,10 @@ $router->post('/api/power-plants/{id}/details-update', function($id) use ($plant
 
 $router->post('/api/power-plants/{id}/basic-update', function($id) use ($plantServiceFacade) {
     (new BasicPlantController($plantServiceFacade))->updateBasicPlantData($id);
+});
+
+$router->post('/api/power-plants/coordinates-preview', function() use ($plantServiceFacade) {
+    (new DetailsPlantController($plantServiceFacade))->previewCoordinates();
 });
 
 $router->post('/api/power-plants/{id}/basic-save', function($id) use ($plantServiceFacade) {
