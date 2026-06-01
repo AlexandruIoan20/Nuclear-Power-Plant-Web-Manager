@@ -62,6 +62,18 @@ CREATE TABLE power_plants (
         ON DELETE SET NULL
 );
 
+CREATE TABLE feasibility_reports (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), 
+    power_plant_id UUID NOT NULL, 
+    deficiencies JSONB, 
+    status power_plant_status NOT NULL, 
+    nsvi_score DECIMAL(5, 2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    CONSTRAINT fk_report_powerplant
+        FOREIGN KEY (power_plant_id) REFERENCES power_plants(id)
+        ON DELETE CASCADE 
+); 
+
 CREATE TABLE reactor (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     power_plant_id UUID NOT NULL,
@@ -169,6 +181,7 @@ CREATE TABLE reactor_schema (
 CREATE TABLE reactor_plant_data (
     technical_data_id UUID NOT NULL,
     reactor_schema_id UUID NOT NULL,
+    number_of_reactors INT NOT NULL, 
     PRIMARY KEY (technical_data_id, reactor_schema_id), 
     CONSTRAINT fk_config_technical 
         FOREIGN KEY (technical_data_id) REFERENCES technical_data(id) 
@@ -177,3 +190,17 @@ CREATE TABLE reactor_plant_data (
         FOREIGN KEY (reactor_schema_id) REFERENCES reactor_schema(id) 
         ON DELETE RESTRICT 
 );
+
+INSERT INTO reactor_schema (id, reactor_type, cooling_type)
+SELECT 
+    gen_random_uuid(), 
+    r.reactor_type, 
+    c.cooling_type
+FROM 
+    unnest(enum_range(NULL::reactor_types)) AS r(reactor_type)
+CROSS JOIN 
+    unnest(enum_range(NULL::cooling_types)) AS c(cooling_type);
+
+ALTER TABLE basic_data ADD CONSTRAINT unique_power_plant_basic UNIQUE (power_plant_id);
+ALTER TABLE geological_data ADD CONSTRAINT unique_power_plant_geological UNIQUE (power_plant_id);
+ALTER TABLE technical_data ADD CONSTRAINT unique_power_plant_technical UNIQUE (power_plant_id);

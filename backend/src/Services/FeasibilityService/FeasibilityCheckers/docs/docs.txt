@@ -1,0 +1,29 @@
+Motivatia regulilor critice introduse in algoritm: 
+
+1. Seismic Stability - Cazul Kashiwazaki-Kariwa (Japonia, 2007)
+Un cutremur de 6.6 grade, cu un epicentru foarte aproape de centrală, a generat o accelerație a terenului (PGA) mult peste limitele de proiectare ale centralei. 
+Deși reactoarele s-au oprit automat, au existat tasări de teren, incendii la transformatoare și scurgeri minore de apă radioactivă. Un scor seismic sub pragul critic 
+înseamnă că fundația fizic nu poate absorbi undele de șoc fără fisuri structurale.
+
+2. Population Density - Cazul Centralei Indian Point (SUA)
+Situată la doar 40 km de New York City, a fost închisă definitiv în 2021. Unul dintre motivele principale a fost imposibilitatea logistică de a evacua în siguranță 20 de milioane de 
+oameni în caz de accident sever. Conform normelor, există o Zonă de Excludere (Exclusion Area) unde populația trebuie să fie zero, și o Zonă de Planificare a
+Urgențelor (EPZ).
+
+3. Transport Infrastructure Score - Cazul constructiei Hinkley Point C sau ITER 
+Vasul sub presiune al unui reactor (RPV) și generatoarele de abur sunt componente indivizibile, forjate dintr-o singură bucată de oțel, care cântăresc 
+sute de tone. Nu pot fi transportate pe drumuri normale cu poduri slabe sau tunele înguste.
+
+4. Water Flow Rate - Reactoarele Chooz și Golfech (Franța)
+În verile din 2003, 2018 și 2022, Franța a fost lovită de secetă severă. Debitul râurilor Meuse, Rhône și Garonne a scăzut dramatic. Centralele au fost obligate de 
+autoritățile de mediu să își reducă masiv puterea sau să se oprească complet. De ce? Apa preluată din râu pentru răcire este returnată mai caldă. Dacă debitul
+râului e prea mic, nu există suficient volum pentru a dilua apa caldă, râul ajunge la temperaturi la care fauna acvatică moare (poluare termică).
+
+5. Flood Risk - Fukushima Daiichi (Japonia, 2011) și Fort Calhoun (SUA, 2011).
+La Fukushima, inundația cauzată de tsunami a înecat generatoarele diesel de rezervă aflate la subsol, lăsând centrala fără nicio sursă de curent (Station Blackout), 
+ceea ce a dus la topirea miezurilor. La Fort Calhoun, râul Missouri a ieșit din matcă și a înconjurat complet centrala cu apă, forțând oprirea ei pe termen lung.
+Reactoarele nu trebuie construite în zone inundabile.
+
+6. Eroare Freatica - Hanford Site (SUA) sau scurgerile de Tritiu de la diverse centrale
+Dacă există o micro-fisură în bazinele de stocare a apei uzate sau a combustibilului epuizat, izotopi precum Tritiul se pot infiltra în sol. Dacă pânza freatică este
+ la doar 1-2 metri sub fundație, apa contaminată ajunge instantaneu în circuitul hidrologic subteran, otrăvind fântânile comunităților locale și râurile din apropiere.

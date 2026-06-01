@@ -1,49 +1,86 @@
 <?php
 
+require_once __DIR__ . '/../../Services/PlantServiceFacade.php'; 
+require_once __DIR__ . '/../../Dto/TechnicalPlantDataDTO.php'; 
+
 class TechnicalPlantController { 
     public function __construct(
         private PlantServiceFacade $plantServiceFacade
     ) {}
 
-    public function showForm(string $plantId): void { 
-        $technicalPlantData = $this->plantServiceFacade->getTechnicalDataByPlantId($plantId); 
-        $isUpdate = ($technicalPlantData !== null); 
+    public function getTechnicalPlantData(string $plantId) { 
+        header('Content-Type: application/json; charset=UTF-8'); 
 
-        if($isUpdate) { 
-            $formAction = "/power-plants/{$plantId}/technical-update"; 
-        } else { 
-            $formAction = "/power-plants/{$plantId}/technical-save"; 
+        $technicalPlantData = $this->plantServiceFacade->getTechnicalDataByPlantId($plantId); 
+
+        if(!$technicalPlantData) { 
+            http_response_code(404); 
+            echo json_encode(["status" => "error", "message" => "Datele tehnice ale centralei nu au fost gasite"]); 
+            exit; 
         }
 
-        require_once __DIR__ . '/../../Entities/ReactorType.php'; 
-        require_once __DIR__ . '/../../Entities/CoolingType.php'; 
+        $technicalPlantDataDTO = TechnicalPlantDataDTO::fromEntity($technicalPlantData); 
 
-        require_once __DIR__ . '/../../Views/PlantViews/plant-technical-form.view.php'; 
+        http_response_code(200); 
+        echo json_encode(["status" => "success", "data" => $technicalPlantDataDTO]); 
+        exit; 
     }
 
     public function createTechnicalPlantData(string $plantId): void { 
-        $dateFormular = $_POST; 
+        $jsonPayload = file_get_contents('php://input');
+        $dateFormular = json_decode($jsonPayload, true) ?? [];
 
-        error_log("[DEBUG] Date Formular Technical Save"); 
+        error_log("[DEBUG] Date Formular Technical (Create)"); 
         error_log(print_r($dateFormular, true));
 
         try { 
-            $this->plantServiceFacade->saveTechnicalData($dateFormular, $plantId);
+            $responseDTO = $this->plantServiceFacade->saveTechnicalData($dateFormular, $plantId);
+            
+            http_response_code(200);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => true,
+                'message' => 'Datele tehnice au fost salvate cu succes.', 
+                'plantId' => $plantId, 
+                'technicalId' => $responseDTO->dataId
+            ]);
         } catch(Exception $e) { 
-            echo "Error at POST for the new technical plant data " . htmlspecialchars($e->getMessage()); 
+            error_log("[ERROR] POST Tech Data Create: " . $e->getMessage()); 
+        
+            http_response_code(400);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Eroare la salvarea datelor tehnice: ' . $e->getMessage()
+            ]);
         }
     }
 
     public function updateTechnicalPlantData(string $plantId): void { 
-        $dateFormular = $_POST; 
+        $jsonPayload = file_get_contents('php://input');
+        $dateFormular = json_decode($jsonPayload, true) ?? [];
 
-        error_log("[DEBUG] Date Formular Technical Update"); 
+        error_log("[DEBUG] Date Formular Technical (Update)"); 
         error_log(print_r($dateFormular, true));
 
         try { 
             $this->plantServiceFacade->updateTechnicalData($dateFormular, $plantId); 
+            
+            http_response_code(200);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => true,
+                'message' => 'Datele tehnice au fost actualizate cu succes.'
+            ]);
         } catch(Exception $e) { 
-            echo "Error at POST for updating the technical plant data" . htmlspecialchars($e->getMessage()); 
+            error_log("[ERROR] POST Tech Data Update: " . $e->getMessage()); 
+            
+            http_response_code(400);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Eroare la actualizarea datelor tehnice: ' . $e->getMessage()
+            ]);
         }
     }
 }
