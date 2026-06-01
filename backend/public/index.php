@@ -1,11 +1,35 @@
 <?php
 
-header("Access-Control-Allow-Origin: http://127.0.0.1:5500");
+session_start([
+    'cookie_samesite' => 'Lax',
+    'cookie_secure' => false,
+    'cookie_httponly' => true,
+]);
+
+$allowedOrigins = [
+    'http://localhost:5500',
+    'http://localhost:8081',
+    'http://127.0.0.1:5500',
+];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin && in_array($origin, $allowedOrigins, true)) {
+    header("Access-Control-Allow-Origin: $origin");
+} else {
+    header("Access-Control-Allow-Origin: {$allowedOrigins[0]}");
+}
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Expose-Headers: Location");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
+    exit();
+}
+
+if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/health') {
+    header('Content-Type: application/json');
+    echo json_encode(['status' => 'ok']);
     exit();
 }
 
@@ -15,6 +39,7 @@ require_once __DIR__ . '/../src/Entities/User.php';
 require_once __DIR__ . '/../src/Repositories/UserRepository.php';
 require_once __DIR__ . '/../src/Services/UserService.php';
 require_once __DIR__ . '/../src/Controllers/UserController.php';
+require_once __DIR__ . '/../src/Helpers/AuthHelper.php';
 
 require_once __DIR__ . '/../src/Repositories/PlantRepository/DetailsPlantRepository.php';
 require_once __DIR__ . '/../src/Repositories/PlantRepository/BasicPlantRepository.php';
@@ -57,9 +82,27 @@ try {
     die(json_encode(["status" => "error", "message" => "Conexiune la baza de date esuata."]));
 }
 
+$adminEmail = 'admin@nuclear.ro';
+$adminPasswordHash = '$2y$12$pLgjMWjlhKbYoAAvRByCMuLnj3l5JlYl03QHgkgZwHci6c8Q59U.i';
+
+$adminInsert = $pdo->prepare(
+    'INSERT INTO users (username, first_name, last_name, email, password_hash, role) VALUES (:username, :first_name, :last_name, :email, :password_hash, :role) ON CONFLICT (email) DO UPDATE SET username = EXCLUDED.username, first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, password_hash = EXCLUDED.password_hash, role = EXCLUDED.role'
+);
+$adminInsert->execute([
+    'username' => 'admin',
+    'first_name' => 'Admin',
+    'last_name' => 'System',
+    'email' => $adminEmail,
+    'password_hash' => $adminPasswordHash,
+    'role' => 'ADMIN',
+]);
+
 $plantRepositoryFacade = new PlantRepositoryFacade($pdo);
 $plantServiceFacade    = new PlantServiceFacade($plantRepositoryFacade);
 $feasibilityService    = FeasibilityServiceFactory::create($pdo, $plantRepositoryFacade);
+
+$userRepository = new UserRepository($pdo);
+$userService = new UserService($userRepository);
 
 $router = new Router();
 
@@ -123,6 +166,57 @@ $router->post('/api/power-plants/{id}/technical', function ($id) use ($plantServ
 
 $router->put('/api/power-plants/{id}/technical', function ($id) use ($plantServiceFacade) {
     (new TechnicalPlantController($plantServiceFacade))->updateTechnicalPlantData($id);
+});
+
+// --- Authentication ---
+$router->get('/login', function() use ($userService) {
+    (new UserController($userService))->handleLogin();
+});
+
+$router->post('/login', function() use ($userService) {
+    (new UserController($userService))->handleLogin();
+});
+
+$router->get('/register', function() use ($userService) {
+    (new UserController($userService))->handleRegister();
+});
+
+$router->post('/register', function() use ($userService) {
+    (new UserController($userService))->handleRegister();
+});
+
+$router->get('/logout', function() use ($userService) {
+    (new UserController($userService))->handleLogout();
+});
+
+$router->get('/start', function() use ($userService) {
+    (new UserController($userService))->showStart();
+});
+
+$router->get('/api/user/status', function() use ($userService) {
+    (new UserController($userService))->getUserStatus();
+});
+
+$router->get('/api/users', function() use ($userService) {
+    header('Content-Type: application/json; charset=UTF-8');
+    $users = $userService->getAllUsers();
+    $payload = array_map(function (User $user) {
+        return [
+            'id' => $user->getId(),
+            'username' => $user->getName(),
+            'email' => $user->getEmail(),
+        ];
+    }, $users);
+    echo json_encode(['status' => 'success', 'data' => $payload]);
+    exit;
+});
+
+$router->get('/dashboard', function() use ($userService) {
+    (new UserController($userService))->showDashboard();
+});
+
+$router->get('/users', function() use ($userService) {
+    (new UserController($userService))->listUsers();
 });
 
 // --- Feasibility ---

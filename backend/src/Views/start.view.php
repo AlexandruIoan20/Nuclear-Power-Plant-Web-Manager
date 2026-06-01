@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuclear Plant Control | Start</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="http://localhost:8081/style.css">
 </head>
 <body>
     <div class="page-shell">
@@ -14,7 +14,15 @@
                 <span>Consolă industrială pentru monitorizarea centralelor nucleare</span>
             </div>
             <nav class="nav-links" aria-label="Navigare principală">
-                <a href="login.html">Login</a>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <span style="color: #00ff00; font-weight: bold;">
+                        <?php echo htmlspecialchars($_SESSION['username']); ?> 
+                        <small>(<?php echo htmlspecialchars($_SESSION['user_role']); ?>)</small>
+                    </span>
+                    <a href="http://localhost:8081/logout">Logout</a>
+                <?php else: ?>
+                    <a href="http://localhost:5500/login.html">Login</a>
+                <?php endif; ?>
                 <a href="#overview">Overview</a>
             </nav>
         </header>
@@ -31,8 +39,13 @@
                 <p class="inline-status">SYSTEM STATUS: ONLINE</p>
 
                 <div class="hero-actions">
-                    <a class="button" href="login.html">Accesează login</a>
-                    <a class="button secondary" href="login.html">Intrare operator</a>
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <a class="button" href="http://localhost:5500/dashboard.html">Accesează dashboard</a>
+                        <a class="button secondary" href="http://localhost:8081/logout">Logout</a>
+                    <?php else: ?>
+                        <a class="button" href="http://localhost:5500/login.html">Accesează login</a>
+                        <a class="button secondary" href="http://localhost:5500/register.html">Crează cont</a>
+                    <?php endif; ?>
                 </div>
 
                 <div class="stats" aria-label="Indicatori sintetici">
