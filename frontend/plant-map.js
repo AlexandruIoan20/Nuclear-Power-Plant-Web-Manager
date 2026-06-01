@@ -107,6 +107,8 @@
         const longitudeInput = document.getElementById(longitudeInputId);
         const statusElement = statusId ? document.getElementById(statusId) : null;
 
+        if (latitudeInput) latitudeInput.step = 'any';
+        if (longitudeInput) longitudeInput.step = 'any';
         const initialLatitude = latitude ?? (latitudeInput ? Number(latitudeInput.value) : null);
         const initialLongitude = longitude ?? (longitudeInput ? Number(longitudeInput.value) : null);
         const hasInitialCoordinates = Number.isFinite(Number(initialLatitude)) && Number.isFinite(Number(initialLongitude));
