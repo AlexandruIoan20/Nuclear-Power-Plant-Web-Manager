@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../Helpers/generateUUID.php';
 require_once __DIR__ . '/../../Entities/PlantStatus.php'; 
 require_once __DIR__ . '/../../Entities/Plant.php'; 
 
-require_once __DIR__ . '/../../Dto/CreatePlantResponseDTO.php'; 
+require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php'; 
 
 class DetailsPlantService { 
     private PlantRepositoryFacade $plantRepositoryFacade; 
@@ -13,7 +13,7 @@ class DetailsPlantService {
         $this->plantRepositoryFacade = $plantRepositoryFacade; 
     }
 
-    public function savePlantDetails(array $data): CreatePlantResponseDTO { 
+    public function savePlantDetails(array $data): CreateDataResponseDTO { 
         $name = $data['name'] ?? ''; 
         $name = ($name !== '') ? $name : null; 
 
@@ -34,7 +34,7 @@ class DetailsPlantService {
         error_log(print_r($plant, true)); 
         $this->plantRepositoryFacade->savePlantDetails($plant); 
 
-        return new CreatePlantResponseDTO($id); 
+        return new CreateDataResponseDTO($id); 
     }
 
     public function updatePlantDetails(array $data, string $id) { 

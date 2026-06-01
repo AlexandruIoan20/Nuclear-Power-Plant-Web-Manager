@@ -5,9 +5,10 @@ import { GeologicalDataRequestDTO } from '../dto/GeologicalDataRequestDTO.js';
 import { TechnicalDataRequestDTO } from '../dto/TechnicalDataRequestDTO.js'; 
 
 export const powerPlantService = { 
-    create: (formData) => api.post("/power-plants", PlantRequestDTO(formData)), 
-    update: (formData) => api.put(`/power-plants/${formData.id}`, PlantRequestDTO(formData)), 
+    createPlantDetails: (formData) => api.post("/power-plants", PlantRequestDTO(formData)), 
+    updatePlantDetails: (formData, plantId) => api.put(`/power-plants/${plantId}/details`, PlantRequestDTO(formData)), 
     getAll: () => api.get("/power-plants"), 
+    getPlantDetails: (plantId) => api.get(`/power-plants/${plantId}/details`), 
 
     // Basics 
     getBasics: (plantId) => api.get(`/power-plants/${plantId}/basics`),
@@ -15,7 +16,7 @@ export const powerPlantService = {
     updateBasics: (formData, plantId) => api.put(`/power-plants/${plantId}/basics`, BasicDataRequestDTO(formData)), 
 
     // Geological 
-    getGeological: (plantId) => api.get(`power-plants/${plantId}/geological`), 
+    getGeological: (plantId) => api.get(`/power-plants/${plantId}/geological`), 
     createGeological: (formData, plantId) => api.post(`/power-plants/${plantId}/geological`, GeologicalDataRequestDTO(formData)), 
     updateGeological: (formData, plantId) => api.put(`/power-plants/${plantId}/geological`, GeologicalDataRequestDTO(formData)), 
 

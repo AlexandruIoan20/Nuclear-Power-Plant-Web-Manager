@@ -34,13 +34,15 @@ class GeologicalPlantController {
         error_log(print_r($dateFormular, true));
 
         try { 
-            $this->plantServiceFacade->saveGeologicalData($dateFormular, $plantId); 
+            $responseDTO = $this->plantServiceFacade->saveGeologicalData($dateFormular, $plantId); 
             
             http_response_code(200);
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
                 'success' => true,
-                'message' => 'Datele geologice au fost salvate cu succes.'
+                'message' => 'Datele geologice au fost salvate cu succes.', 
+                "plantId" => $plantId, 
+                "geologicalId" => $responseDTO->dataId 
             ]);
         } catch(Exception $e) { 
             error_log("[ERROR] POST Geo Data Create: " . $e->getMessage());

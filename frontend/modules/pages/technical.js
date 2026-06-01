@@ -66,12 +66,12 @@ function collectReactorConfigs() {
 
 document.addEventListener("DOMContentLoaded", async () => { 
     const form = document.getElementById("technical-form"); 
-    const statusMessage = document.getElementById("status-message"); 
+    const statusElement = document.getElementById("status-message"); 
     const addButton = document.getElementById("add-reactor-btn"); 
     const container = document.getElementById("reactor-configurations-container"); 
 
     if(!plantId) { 
-        showError(statusMessage, "ID centrala lipsa din URL."); 
+        showError(statusElement, "ID centrala lipsa din URL."); 
         return; 
     }
 
@@ -87,10 +87,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }); 
 
+    /*
+        Se cauta technicalId 
+            -> Daca nu exista => logica pentru post 
+            -> Daca exista => logica de get + put
+    */ 
     if(!technicalId) { 
         form.addEventListener("submit", async(e) => { 
             e.preventDefault(); 
-            clearStatus(statusMessage); 
+            clearStatus(statusElement); 
 
             const dto = TechnicalDataRequestDTO({
                 numberOfReactors: document.getElementById("number_of_reactors").value,
@@ -99,17 +104,18 @@ document.addEventListener("DOMContentLoaded", async () => {
                 reactorConfigurations: collectReactorConfigs(),
             });
 
-            console.log({ dto }); 
-
             try { 
-                await powerPlantService.createTechnical(dto, plantId); 
-                showSuccess(statusMessage, "Datele technice au fost salvate cu succes!"); 
+                const response = await powerPlantService.createTechnical(dto, plantId); 
+                showSuccess(statusElement, "Datele technice au fost salvate cu succes!"); 
+
+                window.history.replaceState({}, "", `?id=${response.plantId}&technicalId=${response.technicalId}`); 
+                window.location.href = `/pages/power-plants/finish.html?id=${response.plantId}`; 
 
                 form.reset(); 
                 container.innerHTML = ""; 
             } catch(error) { 
                 console.log(error.message); 
-                showError(statusMessage, "Eroare la salvarea datelor tehnice"); 
+                showError(statusElement, "Eroare la salvarea datelor tehnice"); 
             }
         }); 
     } else { 
@@ -130,12 +136,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         } catch (error) { 
             console.error(error.message);
-            showError(statusMessage, "Eroare la incarcarea datelor tehnice");  
+            showError(statusElement, "Eroare la incarcarea datelor tehnice");  
         }
 
         form.addEventListener("submit", async (e) => { 
             e.preventDefault(); 
-            clearStatus(statusMessage); 
+            clearStatus(statusElement); 
 
             const dto = TechnicalDataRequestDTO({
                 numberOfReactors: document.getElementById("number_of_reactors").value,
@@ -149,7 +155,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 showSuccess(statusElement, "Datele tehnice au fost salvate cu succes!"); 
             } catch(error) { 
                 console.error(error.message); 
-                showError(statusMessage, "Eroare la actualizarea datelor tehnnice."); 
+                showError(statusElement, "Eroare la actualizarea datelor tehnnice."); 
             }
         })
     }

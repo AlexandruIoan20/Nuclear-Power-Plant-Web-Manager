@@ -44,6 +44,16 @@
                     <button type="submit" class="button" id="submit-btn">Salvează</button>
                 </div>
 
+                <div class="card-actions">
+                    <button 
+                        type="button"
+                        class="button" 
+                        onclick="window.location.href=`/pages/power-plants/finish.html?id=${new URLSearchParams(window.location.search).get('id')}`"
+                    >
+                        Finalizeaza
+                    </button>
+                </div>
+
                 <div id="status-message" style="margin-top: 18px;"></div>
             </form>
         </main>

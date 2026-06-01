@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../Dto/CreatePlantResponseDTO.php'; 
+require_once __DIR__ . '/../Dto/CreateDataResponseDTO.php'; 
 
 class PlantServiceFacade {
     private DetailsPlantService $detailsPlantService;
@@ -26,7 +26,7 @@ class PlantServiceFacade {
         return $this->detailsPlantService->findById($plantId);
     }
 
-    public function savePlantDetails(array $data): CreatePlantResponseDTO {
+    public function savePlantDetails(array $data): CreateDataResponseDTO {
         return $this->detailsPlantService->savePlantDetails($data);
     }
 
@@ -39,8 +39,8 @@ class PlantServiceFacade {
         return $this->basicPlantService->findByPlantId($plantId);
     }
 
-    public function saveBasicData(array $data, string $plantId): void {
-        $this->basicPlantService->save($data, $plantId);
+    public function saveBasicData(array $data, string $plantId): CreateDataResponseDTO {
+        return $this->basicPlantService->save($data, $plantId);
     }
 
     public function updateBasicData(array $data, string $plantId): void {
@@ -52,8 +52,8 @@ class PlantServiceFacade {
         return $this->geologicalPlantService->findByPlantId($plantId);
     }
 
-    public function saveGeologicalData(array $data, string $plantId): void {
-        $this->geologicalPlantService->save($data, $plantId);
+    public function saveGeologicalData(array $data, string $plantId): CreateDataResponseDTO {
+        return $this->geologicalPlantService->save($data, $plantId);
     }
 
     public function updateGeologicalData(array $data, string $plantId): void {
@@ -66,8 +66,8 @@ class PlantServiceFacade {
         return $this->technicalPlantService->findByPlantId($plantId);
     }
 
-    public function saveTechnicalData(array $data, string $plantId): void {
-        $this->technicalPlantService->save($data, $plantId);
+    public function saveTechnicalData(array $data, string $plantId): CreateDataResponseDTO {
+        return $this->technicalPlantService->save($data, $plantId);
     }
 
     public function updateTechnicalData(array $data, string $plantId): void {

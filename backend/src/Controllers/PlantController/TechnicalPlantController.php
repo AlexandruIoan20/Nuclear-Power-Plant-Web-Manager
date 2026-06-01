@@ -34,13 +34,15 @@ class TechnicalPlantController {
         error_log(print_r($dateFormular, true));
 
         try { 
-            $this->plantServiceFacade->saveTechnicalData($dateFormular, $plantId);
+            $responseDTO = $this->plantServiceFacade->saveTechnicalData($dateFormular, $plantId);
             
             http_response_code(200);
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
                 'success' => true,
-                'message' => 'Datele tehnice au fost salvate cu succes.'
+                'message' => 'Datele tehnice au fost salvate cu succes.', 
+                'plantId' => $plantId, 
+                'technicalId' => $responseDTO->dataId
             ]);
         } catch(Exception $e) { 
             error_log("[ERROR] POST Tech Data Create: " . $e->getMessage()); 

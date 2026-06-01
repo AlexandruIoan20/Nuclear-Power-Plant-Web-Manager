@@ -64,10 +64,10 @@ class DetailsPlantController {
         }
 
         try { 
-            $responseDto = $this->plantServiceFacade->savePlantDetails($dateFormular); 
+            $responseDTO = $this->plantServiceFacade->savePlantDetails($dateFormular); 
             
             http_response_code(201); 
-            echo json_encode(["status" => "success", "message" => "Centrala a fost salvată cu succes.", "plantId" => $responseDto->plantId ]);
+            echo json_encode(["status" => "success", "message" => "Centrala a fost salvată cu succes.", "plantId" => $responseDTO->dataId ]);
             exit; 
         } catch(Exception $e) { 
             error_log("[ERROR] Save Plant: " . $e->getMessage());

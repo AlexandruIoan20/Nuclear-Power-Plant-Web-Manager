@@ -13,10 +13,10 @@ loadSelect("water_source_type", WaterSourceType);
 
 document.addEventListener("DOMContentLoaded", async () => { 
     const form = document.getElementById("geological-form"); 
-    const statusMessage = document.getElementById("status-message"); 
+    const statusElement = document.getElementById("status-message"); 
 
     if(!plantId) { 
-        showError(statusMessage, "ID centrala lipsa in URL"); 
+        showError(statusElement, "ID centrala lipsa in URL"); 
         return; 
     }
 
@@ -26,9 +26,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             -> Daca exista => logica de get + put
     */ 
     if(!geologicalId) { 
+        console.debug("Intra aici"); 
         form.addEventListener("submit", async (e) => { 
             e.preventDefault(); 
-            clearStatus(statusMessage); 
+            clearStatus(statusElement); 
 
             const dto = GeologicalDataRequestDTO({ 
                 soilType: document.getElementById("soil_type").value,
@@ -44,19 +45,23 @@ document.addEventListener("DOMContentLoaded", async () => {
             }); 
 
             try { 
-                await powerPlantService.createGeological(dto, plantId); 
-                showSuccess(statusMessage, "Datele au fost salvate cu succes!"); 
+                const response = await powerPlantService.createGeological(dto, plantId); 
+                showSuccess(statusElement, "Datele au fost salvate cu succes!"); 
+
+                window.history.replaceState({}, '', `?id=${response.plantId}&geologicalId=${response.geologicalId}`)
+                window.location.href = `/pages/power-plants/technical.html?id=${response.plantId}`;
 
                 form.reset(); 
             } catch(error) { 
                 console.error(error.message); 
-                showError(statusMessage, "Eroare la adaugarea informatiilor despre centrala.") 
+                showError(statusElement, "Eroare la adaugarea informatiilor despre centrala.")  
             }
         }); 
     } else { 
         try {
             const response = await powerPlantService.getGeological(plantId);
-            const d = response.data;
+            console.log( { response }); 
+            const d = response.data; 
         
             document.getElementById("soil_type").value = d.soilType ?? "";
             document.getElementById("water_source_type").value = d.waterSourceType ?? "";
@@ -70,12 +75,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             document.getElementById("geological_risk_score").value = d.geologicalRiskScore ?? "";
         } catch (error) {
             console.error(error.message);
-            showError(statusMessage, "Eroare la încărcarea datelor geologice.");
+            showError(statusElement, "Eroare la încărcarea datelor geologice.");
+            return; 
         }
 
         form.addEventListener("submit", async(e) => { 
             e.preventDefault(); 
-            clearStatus(statusMessage); 
+            clearStatus(statusElement); 
 
             const dto = GeologicalDataRequestDTO({ 
                 waterSourceType: document.getElementById("water_source_type").value,
@@ -90,13 +96,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             }); 
 
             try { 
-                await powerPlantService.createGeological(dto, plantId); 
-                showSuccess(statusMessage, "Datele au fost actualizate cu succes!"); 
-
-                form.reset(); 
+                await powerPlantService.updateGeological(dto, plantId); 
+                showSuccess(statusElement, "Datele au fost actualizate cu succes!"); 
             } catch(error) { 
                 console.error(error.message); 
-                showError(statusMessage, "Eroare la actualizarea informatiilor despre centrala.") 
+                showError(statusElement, "Eroare la actualizarea informatiilor despre centrala.") 
             }
         })
     }

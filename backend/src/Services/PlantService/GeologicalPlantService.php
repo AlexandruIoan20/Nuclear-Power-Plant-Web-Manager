@@ -3,6 +3,8 @@
 require_once __DIR__ . '/../../Entities/SoilType.php';
 require_once __DIR__ . '/../../Entities/WaterSourceType.php';
 
+require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php'; 
+
 class GeologicalPlantService { 
     private PlantRepositoryFacade $plantRepositoryFacade; 
 
@@ -14,7 +16,7 @@ class GeologicalPlantService {
         return $this->plantRepositoryFacade->getGeologicalDataByPlantId($plantId); 
     }
 
-    public function save(array $data, string $plantId): void { 
+    public function save(array $data, string $plantId): CreateDataResponseDTO { 
         $existingData = $this->plantRepositoryFacade->getGeologicalDataByPlantId($plantId); 
         if ($existingData !== null) { 
             throw new Exception("Există deja date geologice pentru această centrală. Te rugăm să folosești metoda de UPDATE (PUT/PATCH).");
@@ -76,6 +78,7 @@ class GeologicalPlantService {
         ); 
 
         $this->plantRepositoryFacade->saveGeologicalData($geologicalPlantData); 
+        return new CreateDataResponseDTO($geologicalPlantData->getId()); 
     }
 
     public function update(array $data, string $plantId): void { 

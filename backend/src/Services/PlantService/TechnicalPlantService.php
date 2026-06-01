@@ -4,6 +4,8 @@ require_once __DIR__ . '/../../Entities/ReactorSchema.php';
 require_once __DIR__ . '/../../Entities/ReactorType.php'; 
 require_once __DIR__ . '/../../Entities/CoolingType.php'; 
 
+require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php'; 
+
 class TechnicalPlantService { 
     private PlantRepositoryFacade $plantRepositoryFacade; 
 
@@ -15,7 +17,7 @@ class TechnicalPlantService {
         return $this->plantRepositoryFacade->getTechnicalDataByPlantId($plantId); 
     }
 
-    public function save(array $data, string $plantId): void { 
+    public function save(array $data, string $plantId): CreateDataResponseDTO { 
         $existingData = $this->plantRepositoryFacade->getTechnicalDataByPlantId($plantId);
 
         if ($existingData !== null) {
@@ -49,6 +51,7 @@ class TechnicalPlantService {
         }
 
         $this->plantRepositoryFacade->saveTechnicalData($technicalPlantData); 
+        return new CreateDataResponseDTO($technicalPlantData->getId()); 
     }
 
     public function update(array $data, string $plantId): void { 

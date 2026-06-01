@@ -13,7 +13,7 @@ class BasicPlantService {
         return $this->plantRepositoryFacade->getBasicDataByPlantId($plantId); 
     }
 
-    public function save(array $data, string $plantId) { 
+    public function save(array $data, string $plantId): CreateDataResponseDTO { 
         $existingData = $this->plantRepositoryFacade->getBasicDataByPlantId($plantId); 
         if($existingData !== null) { 
             throw new Exception("Există deja date pentru această centrală. Te rugăm să folosești metoda de UPDATE (PUT/PATCH).");
@@ -26,6 +26,8 @@ class BasicPlantService {
 
         $basicPlantData = new BasicPlantData($plantId, null, $capacity, $constructionDurationYears, $description); 
         $this->plantRepositoryFacade->saveBasicData($basicPlantData); 
+
+        return new CreateDataResponseDTO($basicPlantData->getId()); 
     }
 
     public function update(array $data, string $plantId) { 

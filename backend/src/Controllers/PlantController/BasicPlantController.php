@@ -38,13 +38,14 @@ class BasicPlantController {
         error_log(print_r($dateFormular, true));
 
         try { 
-            $this->plantServiceFacade->saveBasicData($dateFormular, $plantId); 
+            $responseDTO = $this->plantServiceFacade->saveBasicData($dateFormular, $plantId); 
             
             http_response_code(200);
             echo json_encode([
                 'success' => true, 
                 'message' => 'Datele de bază au fost salvate cu succes.',
-                'plantId' => $plantId
+                'plantId' => $plantId,  
+                "basicsId" => $responseDTO->dataId
             ]);
 
         } catch(Exception $e) { 
