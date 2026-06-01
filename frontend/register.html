@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear Plant Control | Register</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page-shell login-layout">
+        <section class="login-card" aria-labelledby="register-title">
+            <p class="eyebrow">CREATE ACCOUNT</p>
+            <h1 id="register-title">Creare cont operator</h1>
+            <p>Creează un cont nou pentru a accesa sistemul de monitorizare al centralelor nucleare.</p>
+
+            <div id="register-message" class="footer-note" aria-live="polite"></div>
+
+            <form class="field-grid" id="registerForm" action="http://localhost:8081/register" method="post">
+                <div class="field">
+                    <label for="name">Nume complet</label>
+                    <input id="name" name="name" type="text" placeholder="Ion Popescu" autocomplete="name" required>
+                </div>
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" placeholder="ion.popescu@nuclear.ro" autocomplete="email" required>
+                </div>
+                <div class="field">
+                    <label for="password">Parolă</label>
+                    <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="new-password" required>
+                </div>
+                <div class="field">
+                    <label for="password_confirm">Confirmă parolă</label>
+                    <input id="password_confirm" name="password_confirm" type="password" placeholder="••••••••" autocomplete="new-password" required>
+                </div>
+                <div class="button-row">
+                    <input type="submit" value="Creare cont">
+                    <a class="button secondary" href="login.html">Ai deja cont?</a>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const password = document.getElementById('password').value;
+            const passwordConfirm = document.getElementById('password_confirm').value;
+            const message = document.getElementById('register-message');
+
+            if (password !== passwordConfirm) {
+                message.textContent = 'Parolele nu se potrivesc.';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:8081/register', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'fetch'
+                    },
+                    body: new FormData(event.target),
+                    credentials: 'include',
+                });
+
+                const payload = await response.json();
+
+                if (response.ok && payload.redirect) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                message.textContent = payload.message || 'Contul nu a putut fi creat.';
+            } catch (error) {
+                console.error('Eroare la înregistrare:', error);
+                message.textContent = 'Eroare la conectare.';
+            }
+        });
+    </script>
+</body>
+</html>
