@@ -4,6 +4,7 @@ import { loadSelect } from '../ui/selectLoader.js';
 import { getQueryParam } from '../utils/urlHelper.js';
 import { showError, showSuccess, clearStatus } from '../ui/showMessage.js';
 import { GeologicalDataRequestDTO } from '../dto/GeologicalDataRequestDTO.js'; 
+import { saveHeaderState } from '../ui/form-header/formHeaderState.js'; 
 
 const plantId = getQueryParam("id"); 
 const geologicalId = getQueryParam("geologicalId"); 
@@ -46,6 +47,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             try { 
                 const response = await powerPlantService.createGeological(dto, plantId); 
+                saveHeaderState({ geologicalId: response.geologicalId }); 
                 showSuccess(statusElement, "Datele au fost salvate cu succes!"); 
 
                 window.history.replaceState({}, '', `?id=${response.plantId}&geologicalId=${response.geologicalId}`)

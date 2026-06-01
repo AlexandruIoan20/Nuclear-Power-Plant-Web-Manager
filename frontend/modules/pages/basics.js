@@ -2,6 +2,7 @@ import { powerPlantService } from '../services/powerPlantService.js';
 import { BasicDataRequestDTO} from '../dto/BasicDataRequestDTO.js'; 
 import { showError, showSuccess, clearStatus } from '../ui/showMessage.js'; 
 import { getQueryParam } from '../utils/urlHelper.js'; 
+import { saveHeaderState } from '../ui/form-header/formHeaderState.js'; 
 
 const plantId = getQueryParam("id");
 const basicsId = getQueryParam("basicsId"); 
@@ -32,6 +33,7 @@ document.addEventListener("DOMContentLoaded", async() => {
     
             try { 
                 const response = await powerPlantService.createBasics(dto, plantId); 
+                saveHeaderState({ basicsId: response.basicsId }); 
                 showSuccess(statusElement, "Datele au fost salvate cu succes!"); 
 
                 window.history.replaceState({}, '', `?id=${response.plantId}&basicsId=${response.basicsId}`)

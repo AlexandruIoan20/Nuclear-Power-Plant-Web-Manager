@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", async() => {
     } else { 
         try { 
             const response = await powerPlantService.getPlantDetails(plantId); 
-            const d = response.data 
+            const d = response.data;  
 
             document.getElementById("name").value = d.name ?? ""; 
             document.getElementById("country").value = d.country ?? ""; 
