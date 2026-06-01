@@ -145,7 +145,7 @@ class UserController {
                 echo json_encode([
                     'status' => 'success',
                     'message' => 'Autentificare reușită.',
-                    'redirect' => 'dashboard.html'
+                    'redirect' => 'http://localhost:8081/dashboard'
                 ]);
                 return;
             }

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editare Detalii Centrală</title>
     <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
     <div class="page-shell">
@@ -14,11 +15,7 @@
                 <span>Modificare facilitate energetică</span>
             </div>
             <div class="nav-links">
-                <a href="../dashboard.html">Dashboard</a>
                 <a href="list.html" class="button secondary">Înapoi la Listă</a>
-                <a href="update.html" class="active">Update</a>
-                <a href="../notifications.html">Notificări</a>
-                <a href="../approvals.html">Aprobări</a>
             </div>
         </header>
 
@@ -55,6 +52,12 @@
                     </div>
                 </div>
 
+                <div class="map-help" id="coordinates">
+                    <p class="eyebrow">SELECTEAZĂ PE HARTĂ</p>
+                    <div id="edit-map" class="leaflet-map" style="height:320px; margin-top:12px;"></div>
+                    <p id="edit-map-status" class="map-status"></p>
+                </div>
+
                 <div class="card-actions" style="justify-content: space-between; margin-top: 32px; border-top: 1px solid var(--border); padding-top: 18px;">
                     <button type="submit" class="button" id="save-btn">Salvează Modificările</button>
                     
@@ -66,6 +69,8 @@
         </main>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="../plant-map.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -116,6 +121,20 @@
                     document.getElementById("latitude").value = plant.latitude || "";
                     document.getElementById("longitude").value = plant.longitude || "";
                     
+                    // Initialize coordinate picker map with current coordinates
+                    if (window.PlantMap) {
+                        window.PlantMap.setupCoordinatePickerMap({
+                            mapId: 'edit-map',
+                            latitudeInputId: 'latitude',
+                            longitudeInputId: 'longitude',
+                            statusId: 'edit-map-status',
+                            previewUrl: 'http://localhost:8081/api/power-plants/coordinates-preview',
+                            latitude: plant.latitude,
+                            longitude: plant.longitude,
+                            zoom: 9
+                        });
+                    }
+
                     // Actualizăm UI-ul
                     formTitle.innerText = `Editare: ${plant.name || 'Centrală'}`;
                     loadingIndicator.style.display = "none";
@@ -123,7 +142,6 @@
                     
                     // Setăm link-ul pentru pasul următor (spre basics.html)
                     nextStepLink.href = `basics.html?id=${plantId}`;
-                    nextStepLink.textContent = 'Date de bază';
                     nextStepLink.style.display = "inline-flex";
                 } else {
                     throw new Error(result.message || "Date invalide de la server.");

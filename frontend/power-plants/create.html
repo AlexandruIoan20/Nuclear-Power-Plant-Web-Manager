@@ -5,22 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalii Centrală Electrică</title>
     <link rel="stylesheet" href="../style.css"> 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
     <div class="page-shell">
-        <header class="topbar">
-            <div class="brand">
-                <strong>Sistem Centralizat</strong>
-                <span>Create centrală</span>
-            </div>
-            <div class="nav-links">
-                <a href="../dashboard.html">Dashboard</a>
-                <a href="list.html">Lista</a>
-                <a href="create.html" class="active">Create</a>
-                <a href="../notifications.html">Notificări</a>
-                <a href="../approvals.html">Aprobări</a>
-            </div>
-        </header>
         <main class="form-panel login-card" style="margin: 0 auto;">
             <h1>Detalii Centrală Electrică</h1>
             <p>Introduceți datele pentru noua facilitate energetică în sistemul central.</p>
@@ -51,6 +39,12 @@
                     </div>
                 </div>
 
+                <div class="map-help" id="coordinates">
+                    <p class="eyebrow">SELECTEAZĂ PE HARTĂ</p>
+                    <div id="create-map" class="leaflet-map" style="height:320px; margin-top:12px;"></div>
+                    <p id="create-map-status" class="map-status"></p>
+                </div>
+
                 <div class="card-actions">
                     <button type="submit" class="button">Salvează</button>
                 </div>
@@ -60,11 +54,26 @@
         </main>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="../plant-map.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const countryList = document.getElementById("country-list");
             const plantForm = document.getElementById("plant-form");
             const statusMessage = document.getElementById("status-message");
+
+            // Initialize coordinate picker map when PlantMap is available
+            if (window.PlantMap) {
+                window.PlantMap.setupCoordinatePickerMap({
+                    mapId: 'create-map',
+                    latitudeInputId: 'latitude',
+                    longitudeInputId: 'longitude',
+                    statusId: 'create-map-status',
+                    previewUrl: 'http://localhost:8081/api/power-plants/coordinates-preview',
+                    fallbackCenter: [45.9432, 24.9668],
+                    zoom: 7
+                });
+            }
 
             fetch("http://localhost:8081/api/countries") 
                 .then(response => {
@@ -108,9 +117,6 @@
                     if (response.ok) {
                         statusMessage.innerHTML = `<span class="inline-status">Datele au fost salvate cu succes!</span>`;
                         plantForm.reset(); 
-                        window.setTimeout(() => {
-                            window.location.href = 'list.html';
-                        }, 900);
                     } else {
                         statusMessage.innerHTML = `<span style="color: var(--danger); font-size: 0.9rem;">${data.message || 'Eroare la salvare.'}</span>`;
                     }
