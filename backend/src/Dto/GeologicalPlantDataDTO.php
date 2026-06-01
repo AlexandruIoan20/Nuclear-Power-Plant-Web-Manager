@@ -22,8 +22,8 @@ class GeologicalPlantDataDTO {
         return new self ( 
             id: $g->getId(), 
             powerPlantId: $g->getPowerPlantId(), 
-            soilType: $g->getSoilType()->value, 
-            waterSourceType: $g->getWaterSourceType()->value, 
+            soilType: $g->getSoilType()->value ?? null, 
+            waterSourceType: $g->getWaterSourceType()->value ?? null, 
             seismicStability: $g->getSeismicStability(), 
             floodRisk: $g->getFloodRisk(), 
             groundwaterLevel: $g->getGroundwaterLevel(), 

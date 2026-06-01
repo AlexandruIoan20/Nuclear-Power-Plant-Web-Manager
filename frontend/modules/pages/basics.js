@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", async() => {
             document.getElementById("description").value = d.description ?? "";
         } catch(error) { 
             console.error(error.message); 
-            showMessage(statusElement, "Eroare la gasirea datelor despre centrala."); 
+            showError(statusElement, "Eroare la gasirea datelor despre centrala."); 
             return;
         }
 
@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", async() => {
                 await powerPlantService.updateBasics(dto, plantId); 
                 showSuccess(statusElement, "Datele centralei au fost actualzate cu succes!"); 
             } catch(error) { 
-                console.erorr(error.message); 
+                console.error(error.message); 
                 showError(statusElement, "Eroare la actualizarea datelor centralei."); 
             }
         })      

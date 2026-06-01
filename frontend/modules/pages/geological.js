@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         try {
             const response = await powerPlantService.getGeological(plantId);
             console.log( { response }); 
-            const d = response.data; 
+            const d = response.data;  
         
             document.getElementById("soil_type").value = d.soilType ?? "";
             document.getElementById("water_source_type").value = d.waterSourceType ?? "";
@@ -84,6 +84,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             clearStatus(statusElement); 
 
             const dto = GeologicalDataRequestDTO({ 
+                soilType: document.getElementById("soil_type").value,
                 waterSourceType: document.getElementById("water_source_type").value,
                 seismicStability: document.getElementById("seismic_stability").value,
                 floodRisk: document.getElementById("flood_risk").value,
