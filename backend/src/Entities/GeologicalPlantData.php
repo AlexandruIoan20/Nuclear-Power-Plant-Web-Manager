@@ -11,7 +11,7 @@ class GeologicalPlantData {
     private ?WaterSourceType $waterSourceType;
     private ?float $seismicStability;
     private ?float $floodRisk;
-    private ?float $groundwaterLevel;
+    private ?float $groundwaterLevel; 
     private ?float $waterProximity;
     private ?float $waterFlowRate;
     private ?float $populationDensity;

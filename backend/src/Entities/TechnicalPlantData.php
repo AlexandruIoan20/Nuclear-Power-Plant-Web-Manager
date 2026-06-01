@@ -26,9 +26,6 @@ class TechnicalPlantData {
     }
 
     public function addReactorConfiguration(ReactorSchema $schema): void {
-        foreach ($this->reactorConfigurations as $existing) {
-            if ($existing->getId() === $schema->getId()) return;
-        }
         $this->reactorConfigurations[] = $schema;
     }
 

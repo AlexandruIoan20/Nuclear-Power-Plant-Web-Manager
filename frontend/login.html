@@ -32,6 +32,13 @@
         </section>
     </div>
 
+<<<<<<< HEAD
+            // Facem call către ruta definită în index.php
+            fetch("http://localhost:8081/api/login")
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Eroare de server: ${response.status}`);
+=======
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const loginForm = document.getElementById('loginForm');
@@ -58,6 +65,7 @@
                     if (response.ok && payload.redirect) {
                         window.location.href = 'dashboard.html';
                         return;
+>>>>>>> main
                     }
 
                     message.textContent = payload.message || 'Datele de autentificare sunt incorecte.';

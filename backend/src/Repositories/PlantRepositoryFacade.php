@@ -13,6 +13,36 @@ class PlantRepositoryFacade {
         $this->technicalPlantRepository = new TechnicalPlantRepository($this->db);
     }
 
+    // Data for feasibility reports 
+    public function getPlantData(string $plantId): ?array { 
+        try { 
+            $basicData = $this->basicPlantRepository->findByPlantId($plantId); 
+            $geologicalData = $this->geologicalPlantRepository->findByPlantId($plantId); 
+            $technicalData = $this->technicalPlantRepository->findByPlantId($plantId); 
+
+            error_log("[DEBUG] Testare Plant ID: " . $plantId);
+            error_log("[DEBUG] Basic Data: " . ($basicData ? 'GASIT' : 'LIPSESTE'));
+            error_log("[DEBUG] Geological Data: " . ($geologicalData ? 'GASIT' : 'LIPSESTE'));
+            error_log("[DEBUG] Technical Data: " . ($technicalData ? 'GASIT' : 'LIPSESTE'));
+            
+            if(!$basicData || !$geologicalData || !$technicalData) { 
+                return null; 
+            }
+
+            $reactorSchemas = $this->technicalPlantRepository->getSchemasByTechnicalDataId($technicalData->getId()); 
+
+            return [
+                'basic_data' => $basicData,
+                'geological_data' => $geologicalData,
+                'technical_data' => $technicalData,
+                'reactor_schemas' => $reactorSchemas
+            ];
+        } catch(Exception $e) { 
+            error_log("[PLANT FACADE ERROR] Eroare la asamblarea datelor centralei: " . $e->getMessage()); 
+            throw new Exception("Eroare la asamblarea datelor de fezabilitate.");
+        }
+    }
+
     // Details 
     public function getAllPowerPlants(): array {
         return $this->detailsPlantRepository->findAll();
@@ -69,5 +99,9 @@ class PlantRepositoryFacade {
 
     public function updateTechnicalData(TechnicalPlantData $techData): void {
         $this->technicalPlantRepository->update($techData);
+    }
+
+    public function getReactorSchemaByDetails(string $reactorType, string $coolingType): ?ReactorSchema {
+        return $this->technicalPlantRepository->getReactorSchemaByDetails($reactorType, $coolingType);
     }
 }

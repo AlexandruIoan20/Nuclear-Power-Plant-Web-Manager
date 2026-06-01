@@ -13,18 +13,21 @@ class BasicPlantService {
         return $this->plantRepositoryFacade->getBasicDataByPlantId($plantId); 
     }
 
-    public function save(array $data, string $plantId) { 
-        $capacity = $data['capacity'] ?? ''; 
-        $capacity = ($capacity !== '') ? $capacity : null; 
+    public function save(array $data, string $plantId): CreateDataResponseDTO { 
+        $existingData = $this->plantRepositoryFacade->getBasicDataByPlantId($plantId); 
+        if($existingData !== null) { 
+            throw new Exception("Există deja date pentru această centrală. Te rugăm să folosești metoda de UPDATE (PUT/PATCH).");
+        }
 
-        $constructionDurationYears = $data['constructionDurationYears'] ?? ''; 
-        $constructionDurationYears = ($constructionDurationYears !== '') ? $constructionDurationYears : null; 
-
+        $capacity = (isset($data['capacity']) && $data['capacity'] !== '') ? (float) $data['capacity'] : null;
+        $constructionDurationYears = (isset($data['constructionDurationYears']) && $data['constructionDurationYears'] !== '') 
+            ? (int) $data['constructionDurationYears'] : null;
         $description = $data['description'] ?? ''; 
-        $description = ($description !== '') ? $description : null; 
 
         $basicPlantData = new BasicPlantData($plantId, null, $capacity, $constructionDurationYears, $description); 
         $this->plantRepositoryFacade->saveBasicData($basicPlantData); 
+
+        return new CreateDataResponseDTO($basicPlantData->getId()); 
     }
 
     public function update(array $data, string $plantId) { 

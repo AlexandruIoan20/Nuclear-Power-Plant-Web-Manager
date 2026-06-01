@@ -1,29 +1,25 @@
 <?php
 
-// Session cookie settings: for local dev we use 'Lax' to avoid Secure requirement
-// with SameSite=None which modern browsers block on non-HTTPS origins.
 session_start([
     'cookie_samesite' => 'Lax',
     'cookie_secure' => false,
     'cookie_httponly' => true,
 ]);
 
-// Allow specific local origins (needed for fetch from frontend dev servers)
 $allowedOrigins = [
     'http://localhost:5500',
     'http://localhost:8081',
+    'http://127.0.0.1:5500',
 ];
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if ($origin && in_array($origin, $allowedOrigins, true)) {
     header("Access-Control-Allow-Origin: $origin");
 } else {
-    // fallback to first allowed origin to be explicit when none provided
     header("Access-Control-Allow-Origin: {$allowedOrigins[0]}");
 }
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 header("Access-Control-Allow-Credentials: true");
-// Allow frontend to read the redirect Location header when following login redirects
 header("Access-Control-Expose-Headers: Location");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -31,52 +27,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Lightweight healthcheck for smoke tests that doesn't require DB
 if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/health') {
     header('Content-Type: application/json');
     echo json_encode(['status' => 'ok']);
     exit();
 }
 
-require_once __DIR__ . '/../src/Router.php'; 
+require_once __DIR__ . '/../src/Router.php';
 
-require_once __DIR__ . '/../src/Entities/User.php'; 
+require_once __DIR__ . '/../src/Entities/User.php';
 require_once __DIR__ . '/../src/Repositories/UserRepository.php';
 require_once __DIR__ . '/../src/Services/UserService.php';
 require_once __DIR__ . '/../src/Controllers/UserController.php';
 require_once __DIR__ . '/../src/Helpers/AuthHelper.php';
 
-require_once __DIR__ . '/../src/Repositories/PlantRepository/DetailsPlantRepository.php'; 
-require_once __DIR__ . '/../src/Repositories/PlantRepository/BasicPlantRepository.php'; 
-require_once __DIR__ . '/../src/Repositories/PlantRepository/GeologicalPlantRepository.php'; 
-require_once __DIR__ . '/../src/Repositories/PlantRepository/TechnicalPlantRepository.php'; 
+require_once __DIR__ . '/../src/Repositories/PlantRepository/DetailsPlantRepository.php';
+require_once __DIR__ . '/../src/Repositories/PlantRepository/BasicPlantRepository.php';
+require_once __DIR__ . '/../src/Repositories/PlantRepository/GeologicalPlantRepository.php';
+require_once __DIR__ . '/../src/Repositories/PlantRepository/TechnicalPlantRepository.php';
+require_once __DIR__ . '/../src/Repositories/FeasibiltyRepository.php';
 
-require_once __DIR__ . '/../src/Services/PlantService/DetailsPlantService.php'; 
-require_once __DIR__ . '/../src/Services/PlantService/BasicPlantService.php'; 
-require_once __DIR__ . '/../src/Services/PlantService/GeologicalPlantService.php'; 
-require_once __DIR__ . '/../src/Services/PlantService/TechnicalPlantService.php'; 
+require_once __DIR__ . '/../src/Services/PlantService/DetailsPlantService.php';
+require_once __DIR__ . '/../src/Services/PlantService/BasicPlantService.php';
+require_once __DIR__ . '/../src/Services/PlantService/GeologicalPlantService.php';
+require_once __DIR__ . '/../src/Services/PlantService/TechnicalPlantService.php';
+require_once __DIR__ . '/../src/Services/FeasibilityService/FeasibilityService.php';
 
-require_once __DIR__ . '/../src/Repositories/PlantRepositoryFacade.php'; 
-require_once __DIR__ . '/../src/Services/PlantServiceFacade.php'; 
+require_once __DIR__ . '/../src/Repositories/PlantRepositoryFacade.php';
+require_once __DIR__ . '/../src/Services/PlantServiceFacade.php';
+require_once __DIR__ . '/../src/Services/FeasibilityService/FeasibilityServiceFactory.php';
 
-require_once __DIR__ . '/../src/Controllers/PlantController/DetailsPlantController.php'; 
-require_once __DIR__ . '/../src/Controllers/PlantController/BasicPlantController.php'; 
-require_once __DIR__ . '/../src/Controllers/PlantController/GeologicalPlantController.php'; 
-require_once __DIR__ . '/../src/Controllers/PlantController/TechnicalPlantController.php'; 
+require_once __DIR__ . '/../src/Controllers/PlantController/DetailsPlantController.php';
+require_once __DIR__ . '/../src/Controllers/PlantController/BasicPlantController.php';
+require_once __DIR__ . '/../src/Controllers/PlantController/GeologicalPlantController.php';
+require_once __DIR__ . '/../src/Controllers/PlantController/TechnicalPlantController.php';
+require_once __DIR__ . '/../src/Controllers/FeasibilitController.php';
 
-$host = getenv('DB_HOST') ?: 'db';
-$port = getenv('DB_PORT') ?: '5432';
-$dbname = getenv('DB_NAME') ?: 'proiect_db';
-$username = getenv('DB_USER') ?: 'admin';
+$host     = getenv('DB_HOST')     ?: 'db';
+$port     = getenv('DB_PORT')     ?: '5432';
+$dbname   = getenv('DB_NAME')     ?: 'proiect_db';
+$username = getenv('DB_USER')     ?: 'admin';
 $password = getenv('DB_PASSWORD') ?: 'glorierebeja';
 
 $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
 
 try {
     $pdo = new PDO($dsn, $username, $password, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => false, 
+        PDO::ATTR_EMULATE_PREPARES   => false,
     ]);
 } catch (PDOException $e) {
     http_response_code(500);
@@ -98,71 +97,78 @@ $adminInsert->execute([
     'role' => 'ADMIN',
 ]);
 
-$plantRepositoryFacade = new PlantRepositoryFacade($pdo); 
-$plantServiceFacade = new PlantServiceFacade($plantRepositoryFacade); 
+$plantRepositoryFacade = new PlantRepositoryFacade($pdo);
+$plantServiceFacade    = new PlantServiceFacade($plantRepositoryFacade);
+$feasibilityService    = FeasibilityServiceFactory::create($pdo, $plantRepositoryFacade);
 
 $userRepository = new UserRepository($pdo);
 $userService = new UserService($userRepository);
 
 $router = new Router();
 
-$router->get('/api/power-plants/list', function() use ($plantServiceFacade) { 
-    (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList(); 
-}); 
-
-$router->get('/api/countries', function() use ($plantServiceFacade) {
+// --- Countries ---
+$router->get('/api/countries', function () use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getCountries();
 });
 
-$router->post('/api/power-plants/create', function() use ($plantServiceFacade) {
+// --- Power Plants ---
+$router->get('/api/power-plants', function () use ($plantServiceFacade) {
+    (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList();
+});
+
+$router->post('/api/power-plants', function () use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->handleSavePlantDetails();
 });
 
-$router->get('/api/power-plants/{id}/details', function($id) use ($plantServiceFacade) {
+// --- Details ---
+$router->get('/api/power-plants/{id}/details', function ($id) use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getPlantDetails($id);
 });
 
-$router->post('/api/power-plants/{id}/details-update', function($id) use ($plantServiceFacade) {
+$router->put('/api/power-plants/{id}/details', function ($id) use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->handleUpdatePlantDetails($id);
 });
 
-//$router->get('/api/power-plants/{id}/basics', function($id) use ($plantServiceFacade) {
-//    (new BasicPlantController($plantServiceFacade))->getBasicPlantData($id);
-//});
-
-$router->post('/api/power-plants/{id}/basic-update', function($id) use ($plantServiceFacade) {
-    (new BasicPlantController($plantServiceFacade))->updateBasicPlantData($id);
+// --- Basics ---
+$router->get('/api/power-plants/{id}/basics', function ($id) use ($plantServiceFacade) {
+    (new BasicPlantController($plantServiceFacade))->getBasicPlantData($id);
 });
 
-$router->post('/api/power-plants/{id}/basic-save', function($id) use ($plantServiceFacade) {
+$router->post('/api/power-plants/{id}/basics', function ($id) use ($plantServiceFacade) {
     (new BasicPlantController($plantServiceFacade))->createBasicPlantData($id);
 });
 
-//$router->get('/api/power-plants/{id}/geological', function($id) use ($plantServiceFacade) {
-//    (new GeologicalPlantController($plantServiceFacade))->getGeologicalPlantData($id);
-//});
+$router->put('/api/power-plants/{id}/basics', function ($id) use ($plantServiceFacade) {
+    (new BasicPlantController($plantServiceFacade))->updateBasicPlantData($id);
+});
 
-$router->post('/api/power-plants/{id}/geological-save', function($id) use ($plantServiceFacade) {
+// --- Geological ---
+$router->get('/api/power-plants/{id}/geological', function ($id) use ($plantServiceFacade) {
+    (new GeologicalPlantController($plantServiceFacade))->getGeologicalPlantData($id);
+});
+
+$router->post('/api/power-plants/{id}/geological', function ($id) use ($plantServiceFacade) {
     (new GeologicalPlantController($plantServiceFacade))->createGeologicalPlantData($id);
 });
 
-$router->post('/api/power-plants/{id}/geological-update', function($id) use ($plantServiceFacade) {
+$router->put('/api/power-plants/{id}/geological', function ($id) use ($plantServiceFacade) {
     (new GeologicalPlantController($plantServiceFacade))->updateGeologicalPlantData($id);
 });
 
-//$router->get('/api/power-plants/{id}/technical', function($id) use ($plantServiceFacade) {
-//    (new TechnicalPlantController($plantServiceFacade))->getTechnicalPlantData($id);
-//});
+// --- Technical ---
+$router->get('/api/power-plants/{id}/technical', function ($id) use ($plantServiceFacade) {
+    (new TechnicalPlantController($plantServiceFacade))->getTechnicalPlantData($id);
+});
 
-$router->post('/api/power-plants/{id}/technical-save', function($id) use ($plantServiceFacade) {
+$router->post('/api/power-plants/{id}/technical', function ($id) use ($plantServiceFacade) {
     (new TechnicalPlantController($plantServiceFacade))->createTechnicalPlantData($id);
 });
 
-$router->post('/api/power-plants/{id}/technical-update', function($id) use ($plantServiceFacade) {
-     (new TechnicalPlantController($plantServiceFacade))->updateTechnicalPlantData($id);
+$router->put('/api/power-plants/{id}/technical', function ($id) use ($plantServiceFacade) {
+    (new TechnicalPlantController($plantServiceFacade))->updateTechnicalPlantData($id);
 });
 
-// Authentication Routes
+// --- Authentication ---
 $router->get('/login', function() use ($userService) {
     (new UserController($userService))->handleLogin();
 });
@@ -194,7 +200,6 @@ $router->get('/api/user/status', function() use ($userService) {
 $router->get('/api/users', function() use ($userService) {
     header('Content-Type: application/json; charset=UTF-8');
     $users = $userService->getAllUsers();
-
     $payload = array_map(function (User $user) {
         return [
             'id' => $user->getId(),
@@ -202,7 +207,6 @@ $router->get('/api/users', function() use ($userService) {
             'email' => $user->getEmail(),
         ];
     }, $users);
-
     echo json_encode(['status' => 'success', 'data' => $payload]);
     exit;
 });
@@ -215,7 +219,17 @@ $router->get('/users', function() use ($userService) {
     (new UserController($userService))->listUsers();
 });
 
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+// --- Feasibility ---
+$router->get('/api/power-plants/{id}/feasibility', function ($id) use ($feasibilityService) {
+    (new FeasibilityController($feasibilityService))->getLastByPlantId($id);
+});
+
+$router->post('/api/power-plants/{id}/feasibility', function ($id) use ($feasibilityService) {
+    (new FeasibilityController($feasibilityService))->generate($id);
+});
+
+// --- Dispatch ---
+$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
 $router->dispatch($method, $uri);

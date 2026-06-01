@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../Dto/CreateDataResponseDTO.php'; 
+
 class PlantServiceFacade {
     private DetailsPlantService $detailsPlantService;
     private BasicPlantService $basicPlantService;
@@ -24,8 +26,8 @@ class PlantServiceFacade {
         return $this->detailsPlantService->findById($plantId);
     }
 
-    public function savePlantDetails(array $data): void {
-        $this->detailsPlantService->savePlantDetails($data);
+    public function savePlantDetails(array $data): CreateDataResponseDTO {
+        return $this->detailsPlantService->savePlantDetails($data);
     }
 
     public function updatePlantDetails(array $data, string $plantId): void {
@@ -37,8 +39,8 @@ class PlantServiceFacade {
         return $this->basicPlantService->findByPlantId($plantId);
     }
 
-    public function saveBasicData(array $data, string $plantId): void {
-        $this->basicPlantService->save($data, $plantId);
+    public function saveBasicData(array $data, string $plantId): CreateDataResponseDTO {
+        return $this->basicPlantService->save($data, $plantId);
     }
 
     public function updateBasicData(array $data, string $plantId): void {
@@ -50,8 +52,8 @@ class PlantServiceFacade {
         return $this->geologicalPlantService->findByPlantId($plantId);
     }
 
-    public function saveGeologicalData(array $data, string $plantId): void {
-        $this->geologicalPlantService->save($data, $plantId);
+    public function saveGeologicalData(array $data, string $plantId): CreateDataResponseDTO {
+        return $this->geologicalPlantService->save($data, $plantId);
     }
 
     public function updateGeologicalData(array $data, string $plantId): void {
@@ -64,8 +66,8 @@ class PlantServiceFacade {
         return $this->technicalPlantService->findByPlantId($plantId);
     }
 
-    public function saveTechnicalData(array $data, string $plantId): void {
-        $this->technicalPlantService->save($data, $plantId);
+    public function saveTechnicalData(array $data, string $plantId): CreateDataResponseDTO {
+        return $this->technicalPlantService->save($data, $plantId);
     }
 
     public function updateTechnicalData(array $data, string $plantId): void {
@@ -74,10 +76,10 @@ class PlantServiceFacade {
 
     public function getCompletePlantProfile(string $plantId): array {
         return [
-            'details'    => $this->detailsPlantService->findById($plantId),
-            'basic'      => $this->basicPlantService->findByPlantId($plantId),
+            'details' => $this->detailsPlantService->findById($plantId),
+            'basic' => $this->basicPlantService->findByPlantId($plantId),
             'geological' => $this->geologicalPlantService->findByPlantId($plantId),
-            'technical'  => $this->technicalPlantService->findByPlantId($plantId),
+            'technical' => $this->technicalPlantService->findByPlantId($plantId),
         ];
     }
 }
