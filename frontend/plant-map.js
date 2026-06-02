@@ -87,6 +87,7 @@
         latitudeInputId,
         longitudeInputId,
         statusId,
+        countryInputId,
         previewUrl,
         latitude,
         longitude,
@@ -105,6 +106,7 @@
 
         const latitudeInput = document.getElementById(latitudeInputId);
         const longitudeInput = document.getElementById(longitudeInputId);
+        const countryInput = countryInputId ? document.getElementById(countryInputId) : null;
         const statusElement = statusId ? document.getElementById(statusId) : null;
 
         if (latitudeInput) latitudeInput.step = 'any';
@@ -161,6 +163,9 @@
 
             const payload = result.data || {};
             setInputValues(latitudeInput, longitudeInput, payload.latitude, payload.longitude);
+            if (countryInput && payload.country) {
+                countryInput.value = payload.country;
+            }
             setMarker(payload.latitude, payload.longitude, false);
             setStatus(payload.message || payload.coordinates_label || 'Locație validată de backend.');
         }

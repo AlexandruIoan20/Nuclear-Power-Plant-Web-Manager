@@ -169,6 +169,47 @@ class DetailsPlantController {
 
         $label = number_format($latNorm, 6, '.', '') . ', ' . number_format($lonNorm, 6, '.', '');
 
+        $country = null;
+        $debugMessage = 'Coordonate validate.';
+
+        try {
+           
+            $query = http_build_query([
+                'latitude' => $latNorm,
+                'longitude' => $lonNorm,
+                'localityLanguage' => 'ro'
+            ]);
+
+            $url = "https://api.bigdatacloud.net/data/reverse-geocode-client?{$query}";
+
+            $opts = [
+                'http' => [
+                    'method' => 'GET',
+                    'header' => "Accept: application/json\r\n",
+                    'ignore_errors' => true
+                ]
+            ];
+
+            $context = stream_context_create($opts);
+            $resp = file_get_contents($url, false, $context);
+            
+            if ($resp === false) {
+                $debugMessage = 'Coordonate validate, dar conexiunea la serviciul de geocoding a eșuat.';
+            } else {
+                $geo = json_decode($resp, true);
+                
+               
+                if (isset($geo['countryName']) && !empty($geo['countryName'])) {
+                    $country = $geo['countryName'];
+                } else {
+                    $debugMessage = 'Coordonate validate, dar locația nu aparține unei țări cunoscute.';
+                }
+            }
+        } catch (Throwable $e) {
+            $debugMessage = 'Eroare la procesarea geocoding-ului: ' . $e->getMessage();
+        }
+
+        
         http_response_code(200);
         echo json_encode([
             'status' => 'success',
@@ -176,7 +217,8 @@ class DetailsPlantController {
                 'latitude' => $latNorm,
                 'longitude' => $lonNorm,
                 'coordinates_label' => $label,
-                'message' => 'Coordonate validate.'
+                'country' => $country,
+                'message' => $debugMessage
             ]
         ]);
         exit;
