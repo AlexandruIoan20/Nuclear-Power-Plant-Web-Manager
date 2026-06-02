@@ -7,20 +7,16 @@
     <link rel="stylesheet" href="../style.css">
 </head>
 <body>
-    <div class="page-shell">
-        <header class="topbar">
-            <div class="brand">
-                <strong>Sistem Centralizat</strong>
-                <span>Registrul facilităților energetice</span>
-            </div>
-            <div class="nav-links">
-                <a href="create.html" class="button">Adaugă Centrală</a>
-            </div>
-        </header>
-
+    <div class="page-shell" style="padding-top: 40px;">
         <main class="panel">
-            <h1>Lista Centralelor Electrice</h1>
-            <p>Monitorizarea și gestionarea tuturor unităților înregistrate în baza de date.</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border, #333); padding-bottom: 20px; margin-bottom: 20px;">
+                <div style="margin: 0;">
+                    <h1 style="margin: 0 0 8px 0;">Centrale Nucleare</h1>
+                </div>
+                <div>
+                    <a href="create.html" class="button">Adaugă Centrală</a>
+                </div>
+            </div>
 
             <div id="loading-indicator" class="inline-status" style="margin-bottom: 20px;">
                 Se interoghează baza de date...

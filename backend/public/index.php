@@ -6,31 +6,27 @@ session_start([
     'cookie_httponly' => true,
 ]);
 
-// Allow specific local origins or any localhost/127.0.0.1 origin (useful for Live Server variations)
 $allowedOrigins = [
     'http://localhost:5500',
     'http://localhost:8081',
     'http://127.0.0.1:5500',
 ];
+
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
 if ($origin) {
-    if ($origin === 'null') {
-        header('Access-Control-Allow-Origin: null');
+    $isAllowed = in_array($origin, $allowedOrigins, true) || (bool)preg_match('#^https?://(localhost|127\.0\.0\.1)(:\d+)?$#', $origin);
+    if ($isAllowed) {
+        header("Access-Control-Allow-Origin: $origin");
+        header("Access-Control-Allow-Credentials: true");
     } else {
-        $isAllowed = in_array($origin, $allowedOrigins, true) || (bool)preg_match('#^https?://(localhost|127\.0\.0\.1)(:\d+)?$#', $origin);
-        if ($isAllowed) {
-            header("Access-Control-Allow-Origin: $origin");
-        } else {
-            header("Access-Control-Allow-Origin: {$allowedOrigins[0]}");
-        }
+        http_response_code(403);
+        die();
     }
-} else {
-    // No origin header (direct requests) — default to first allowed origin
-    header("Access-Control-Allow-Origin: {$allowedOrigins[0]}");
 }
+
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
-header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Expose-Headers: Location");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -43,7 +39,6 @@ if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/health') {
     echo json_encode(['status' => 'ok']);
     exit();
 }
-
 require_once __DIR__ . '/../src/Router.php';
 
 require_once __DIR__ . '/../src/Entities/User.php';

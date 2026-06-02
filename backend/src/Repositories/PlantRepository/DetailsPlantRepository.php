@@ -59,13 +59,16 @@ class DetailsPlantRepository {
             )
         "); 
 
-        $stmt->execute([ 
-            'id' => $plant->getId(), 
-            'name' => $plant->getName(), 
-            'country' => $plant->getCountry(), 
-            'latitude' => $plant->getLatitude(), 
-            'longitude' => $plant->getLongitude(), 
-            'status' => $plant->getStatus()->value 
+        $latVal = $plant->getLatitude() !== null ? number_format($plant->getLatitude(), 6, '.', '') : null;
+        $lonVal = $plant->getLongitude() !== null ? number_format($plant->getLongitude(), 6, '.', '') : null;
+
+        $stmt->execute([
+            'id' => $plant->getId(),
+            'name' => $plant->getName(),
+            'country' => $plant->getCountry(),
+            'latitude' => $latVal,
+            'longitude' => $lonVal,
+            'status' => $plant->getStatus()->value
         ]);
     }
 
@@ -81,13 +84,16 @@ class DetailsPlantRepository {
             WHERE id = :id
         "); 
     
-        $stmt->execute([ 
-            'id' => $plant->getId(), 
-            'name' => $plant->getName(), 
-            'country' => $plant->getCountry(), 
-            'latitude' => $plant->getLatitude(), 
-            'longitude' => $plant->getLongitude(), 
-            'status' => $plant->getStatus()->value 
+        $latVal = $plant->getLatitude() !== null ? number_format($plant->getLatitude(), 6, '.', '') : null;
+        $lonVal = $plant->getLongitude() !== null ? number_format($plant->getLongitude(), 6, '.', '') : null;
+
+        $stmt->execute([
+            'id' => $plant->getId(),
+            'name' => $plant->getName(),
+            'country' => $plant->getCountry(),
+            'latitude' => $latVal,
+            'longitude' => $lonVal,
+            'status' => $plant->getStatus()->value
         ]);
 
         $randuriModificate = $stmt->rowCount();

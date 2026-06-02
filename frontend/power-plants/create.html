@@ -62,7 +62,6 @@
             const plantForm = document.getElementById("plant-form");
             const statusMessage = document.getElementById("status-message");
 
-            // Initialize coordinate picker map when PlantMap is available
             if (window.PlantMap) {
                 window.PlantMap.setupCoordinatePickerMap({
                     mapId: 'create-map',
@@ -104,7 +103,8 @@
                 };
 
                 try {
-                    const response = await fetch("http://localhost:8081/api/power-plants/create", { 
+                    
+                    const response = await fetch("http://localhost:8081/api/power-plants", { 
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"

@@ -20,11 +20,11 @@ class DetailsPlantService {
         $country = $data['country'] ?? ''; 
         $country = ($country !== '') ? $country : null; 
 
-        $latitude = $data['latitude'] ?? ''; 
-        $latitude = ($latitude !== '') ? $latitude : null; 
+        $latitude = $data['latitude'] ?? '';
+        $latitude = ($latitude !== '') ? (float) $latitude : null;
 
-        $longitude = $data['longitude'] ?? ''; 
-        $longitude = ($longitude !== '') ? $longitude : null;
+        $longitude = $data['longitude'] ?? '';
+        $longitude = ($longitude !== '') ? (float) $longitude : null;
 
         $status = PlantStatus::DRAFT; 
         $id = generateUUID(); 
