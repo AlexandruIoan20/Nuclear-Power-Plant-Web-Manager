@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../../Dto/PlantDTO.php';
 require_once __DIR__ . '/../../Dto/PlantDetailsDTO.php'; 
+require_once __DIR__ . '/../../Dto/GetPlantDTO.php'; 
 
 class DetailsPlantController { 
     public function __construct(
@@ -16,6 +17,19 @@ class DetailsPlantController {
         http_response_code(200);
         echo json_encode($countries);
         exit;
+    }
+
+    public function getPlant(string $id) {
+        header('Content-Type: application/json; charset=utf-8');
+    
+        $plant = $this->plantServiceFacade->getCompletePlantProfile($id);
+        if(!$plant) { 
+            echo json_encode(["status" => "error", "message" => "Centrala nu a fost gasita"]); 
+            exit; 
+        } 
+        $dto = GetPlantDTO::fromServiceArray($plant);
+    
+        echo json_encode($dto);
     }
 
     public function getPlantDetails(string $id) { 

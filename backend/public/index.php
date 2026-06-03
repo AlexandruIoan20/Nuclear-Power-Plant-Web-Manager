@@ -6,26 +6,15 @@ session_start([
     'cookie_httponly' => true,
 ]);
 
-// Allow specific local origins or any localhost/127.0.0.1 origin (useful for Live Server variations)
 $allowedOrigins = [
     'http://localhost:5500',
     'http://localhost:8081',
     'http://127.0.0.1:5500',
 ];
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if ($origin) {
-    if ($origin === 'null') {
-        header('Access-Control-Allow-Origin: null');
-    } else {
-        $isAllowed = in_array($origin, $allowedOrigins, true) || (bool)preg_match('#^https?://(localhost|127\.0\.0\.1)(:\d+)?$#', $origin);
-        if ($isAllowed) {
-            header("Access-Control-Allow-Origin: $origin");
-        } else {
-            header("Access-Control-Allow-Origin: {$allowedOrigins[0]}");
-        }
-    }
+if ($origin && in_array($origin, $allowedOrigins, true)) {
+    header("Access-Control-Allow-Origin: $origin");
 } else {
-    // No origin header (direct requests) — default to first allowed origin
     header("Access-Control-Allow-Origin: {$allowedOrigins[0]}");
 }
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE");
@@ -109,8 +98,8 @@ $adminInsert->execute([
 ]);
 
 $plantRepositoryFacade = new PlantRepositoryFacade($pdo);
-$plantServiceFacade    = new PlantServiceFacade($plantRepositoryFacade);
-$feasibilityService    = FeasibilityServiceFactory::create($pdo, $plantRepositoryFacade);
+$plantServiceFacade = new PlantServiceFacade($plantRepositoryFacade);
+$feasibilityService = FeasibilityServiceFactory::create($pdo, $plantRepositoryFacade);
 
 $userRepository = new UserRepository($pdo);
 $userService = new UserService($userRepository);
@@ -118,22 +107,18 @@ $userService = new UserService($userRepository);
 $router = new Router();
 
 // --- Countries ---
-$router->get('/api/countries', function() use ($plantServiceFacade) {
+$router->get('/api/countries', function () use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getCountries();
 });
 
 // --- Power Plants ---
-$router->get('/api/power-plants/list', function() use ($plantServiceFacade) { 
-    (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList(); 
-}); 
-
-$router->get('/api/power-plants/map-data', function() use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->getPowerPlantsMapData();
-});
-
 $router->get('/api/power-plants', function () use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList();
 });
+
+$router->get('/api/power-plants/{id}', function ($id) use ($plantServiceFacade) { 
+    (new DetailsPlantController($plantServiceFacade))->getPlant($id); 
+}); 
 
 $router->post('/api/power-plants', function () use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->handleSavePlantDetails();
@@ -151,14 +136,6 @@ $router->put('/api/power-plants/{id}/details', function ($id) use ($plantService
 // --- Basics ---
 $router->get('/api/power-plants/{id}/basics', function ($id) use ($plantServiceFacade) {
     (new BasicPlantController($plantServiceFacade))->getBasicPlantData($id);
-});
-
-$router->post('/api/power-plants/coordinates-preview', function() use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->previewCoordinates();
-});
-
-$router->post('/api/power-plants/{id}/basic-save', function($id) use ($plantServiceFacade) {
-    (new BasicPlantController($plantServiceFacade))->createBasicPlantData($id);
 });
 
 $router->post('/api/power-plants/{id}/basics', function ($id) use ($plantServiceFacade) {
@@ -209,4 +186,54 @@ $router->get('/register', function() use ($userService) {
 });
 
 $router->post('/register', function() use ($userService) {
-    (new UserController($userService))->handle
+    (new UserController($userService))->handleRegister();
+});
+
+$router->get('/logout', function() use ($userService) {
+    (new UserController($userService))->handleLogout();
+});
+
+$router->get('/start', function() use ($userService) {
+    (new UserController($userService))->showStart();
+});
+
+$router->get('/api/user/status', function() use ($userService) {
+    (new UserController($userService))->getUserStatus();
+});
+
+$router->get('/api/users', function() use ($userService) {
+    header('Content-Type: application/json; charset=UTF-8');
+    $users = $userService->getAllUsers();
+    $payload = array_map(function (User $user) {
+        return [
+            'id' => $user->getId(),
+            'username' => $user->getName(),
+            'email' => $user->getEmail(),
+        ];
+    }, $users);
+    echo json_encode(['status' => 'success', 'data' => $payload]);
+    exit;
+});
+
+$router->get('/dashboard', function() use ($userService) {
+    (new UserController($userService))->showDashboard();
+});
+
+$router->get('/users', function() use ($userService) {
+    (new UserController($userService))->listUsers();
+});
+
+// --- Feasibility ---
+$router->get('/api/power-plants/{id}/feasibility', function ($id) use ($feasibilityService) {
+    (new FeasibilityController($feasibilityService))->getLastByPlantId($id);
+});
+
+$router->post('/api/power-plants/{id}/feasibility', function ($id) use ($feasibilityService) {
+    (new FeasibilityController($feasibilityService))->generate($id);
+});
+
+// --- Dispatch ---
+$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$method = $_SERVER['REQUEST_METHOD'];
+
+$router->dispatch($method, $uri);

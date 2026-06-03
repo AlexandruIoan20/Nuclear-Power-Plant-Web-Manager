@@ -9,6 +9,7 @@ export const powerPlantService = {
     updatePlantDetails: (formData, plantId) => api.put(`/power-plants/${plantId}/details`, PlantRequestDTO(formData)), 
     getAll: () => api.get("/power-plants"), 
     getPlantDetails: (plantId) => api.get(`/power-plants/${plantId}/details`), 
+    getPlant: (plantId) => api.get(`/power-plants/${plantId}`), 
 
     // Basics 
     getBasics: (plantId) => api.get(`/power-plants/${plantId}/basics`),

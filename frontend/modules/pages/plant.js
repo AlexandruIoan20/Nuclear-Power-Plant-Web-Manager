@@ -27,7 +27,8 @@ document.addEventListener("DOMContentLoaded", async() => {
             }); 
     
             try { 
-                const response = await powerPlantService.createPlantDetails(dto); 
+                const response = await powerPlantService.createPlantDetails(dto);
+                console.log({ response });  
                 showSuccess(statusElement, "Datele au fost salvate cu succes!"); 
 
                 window.history.replaceState({}, '', `?id=${response.plantId}`); 
