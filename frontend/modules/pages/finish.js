@@ -1,6 +1,8 @@
 import { powerPlantService } from '../services/powerPlantService.js'; 
+import { feasibilityReportService } from '../services/feasibilityReportService.js'; 
 import { GetPlantDTO } from '../dto/GetPlantDTO.js'; 
 import { getQueryParam } from '../utils/urlHelper.js';
+import { clearHeaderState } from '../ui/form-header/formHeaderState.js'; 
 
 const plantId = getQueryParam("id"); 
 
@@ -10,7 +12,7 @@ function setText(id, value, suffix = '') {
 }
 
 function isComplete(dto) {
-    const ignored = ['id', 'basicId', 'geologicalId', 'technicalId'];
+    const ignored = ['id', 'basicId', 'geologicalId', 'technicalId', "safetySystems"];
     
     return Object.entries(dto).every(([key, value]) => {
         if (ignored.includes(key)) return true;
@@ -25,7 +27,25 @@ function populatePlantPage(rawData) {
     const dto = GetPlantDTO(rawData); 
 
     const verifyButton = document.getElementById("btn-verify"); 
-    if(isComplete(dto)) verifyButton.disabled = false; 
+    
+    if(isComplete(dto)) { 
+        verifyButton.disabled = false; 
+        verifyButton.addEventListener("click", async(e) => { 
+            try { 
+                const response = await feasibilityReportService.createReport(plantId); 
+
+                console.log({ response }); 
+
+                if(response.success) { 
+                    clearHeaderState(); 
+                    window.location.href = `/pages/feasibility/report-results.html?id=${plantId}`;
+                }
+            } catch(error) { 
+                console.error(error.message); 
+                alert("Eroare la generarea raportului.");
+            }
+        })
+    }
     else verifyButton.disabled = true; 
 
     console.log(verifyButton); 
@@ -103,7 +123,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         alert("Centrala nu a fost gasita."); 
         return; 
     }
-
 
     try { 
         const rawData = await powerPlantService.getPlant(plantId); 
