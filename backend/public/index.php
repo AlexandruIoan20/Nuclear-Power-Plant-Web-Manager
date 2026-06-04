@@ -6,6 +6,7 @@ session_start([
     'cookie_httponly' => true,
 ]);
 
+// Allowed origins for local development
 $allowedOrigins = [
     'http://localhost:5500',
     'http://localhost:8081',
@@ -14,6 +15,7 @@ $allowedOrigins = [
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
+// Secure CORS validation
 if ($origin) {
     $isAllowed = in_array($origin, $allowedOrigins, true) || (bool)preg_match('#^https?://(localhost|127\.0\.0\.1)(:\d+)?$#', $origin);
     if ($isAllowed) {
@@ -29,16 +31,52 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 header("Access-Control-Expose-Headers: Location");
 
+// Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
-if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/health') {
+// Health check endpoint
+/*if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/health') {
     header('Content-Type: application/json');
     echo json_encode(['status' => 'ok']);
     exit();
+} */
+
+//For testing only
+if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/health') {
+    header('Content-Type: application/json');
+    
+    require_once __DIR__ . '/../src/Services/EmailService.php';
+    
+    try {
+        $emailService = new EmailService();
+        
+       
+        $testData = [
+            'to_email' => 'test@nuc.nuc',
+            'subject' => 'deschidemadacapoti',
+            'message' => 'daca vezi asta inseamna ca paul le are cu programarea.'
+        ];
+        
+       
+        $emailService->sendAlert($testData);
+        
+        echo json_encode([
+            'status' => 'ok', 
+            'mail_system' => 'Email sent successfully to Mailtrap!'
+        ]);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode([
+            'status' => 'error', 
+            'message' => 'Mail system failed: ' . $e->getMessage()
+        ]);
+    }
+    exit();
 }
+
 require_once __DIR__ . '/../src/Router.php';
 
 require_once __DIR__ . '/../src/Entities/User.php';
@@ -69,6 +107,10 @@ require_once __DIR__ . '/../src/Controllers/PlantController/GeologicalPlantContr
 require_once __DIR__ . '/../src/Controllers/PlantController/TechnicalPlantController.php';
 require_once __DIR__ . '/../src/Controllers/FeasibilitController.php';
 
+require_once __DIR__ . '/../src/Services/EmailService.php';
+require_once __DIR__ . '/../src/Controllers/EmailController.php';
+
+// Database configuration
 $host     = getenv('DB_HOST')     ?: 'db';
 $port     = getenv('DB_PORT')     ?: '5432';
 $dbname   = getenv('DB_NAME')     ?: 'proiect_db';
@@ -85,14 +127,37 @@ try {
     ]);
 } catch (PDOException $e) {
     http_response_code(500);
-    die(json_encode(["status" => "error", "message" => "Conexiune la baza de date esuata."]));
+    die(json_encode(["status" => "error", "message" => "Database connection failed."]));
 }
 
+// Ensure default Admin user exists in the database
+$adminEmail = 'admin@nuclear.ro';
+$adminPasswordHash = '$2y$12$pLgjMWjlhKbYoAAvRByCMuLnj3l5JlYl03QHgkgZwHci6c8Q59U.i';
 
+$adminInsert = $pdo->prepare(
+    'INSERT INTO users (username, first_name, last_name, email, password_hash, role) 
+     VALUES (:username, :first_name, :last_name, :email, :password_hash, :role) 
+     ON CONFLICT (email) 
+     DO UPDATE SET username = EXCLUDED.username, first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, password_hash = EXCLUDED.password_hash, role = EXCLUDED.role'
+);
 
+$adminInsert->execute([
+    'username' => 'admin',
+    'first_name' => 'Admin',
+    'last_name' => 'System',
+    'email' => $adminEmail,
+    'password_hash' => $adminPasswordHash,
+    'role' => 'ADMIN',
+]);
+
+// Initialize Repositories and Services
 $plantRepositoryFacade = new PlantRepositoryFacade($pdo);
 $plantServiceFacade    = new PlantServiceFacade($plantRepositoryFacade);
 $feasibilityService    = FeasibilityServiceFactory::create($pdo, $plantRepositoryFacade);
+
+$emailService = new EmailService();
+$emailController = new EmailController($emailService);
+
 
 $userRepository = new UserRepository($pdo);
 $userService = new UserService($userRepository);
@@ -229,7 +294,22 @@ $router->get('/dashboard', function() use ($userService) {
 $router->get('/users', function() use ($userService) {
     (new UserController($userService))->listUsers();
 });
+// Email
 
+$router->post('/api/send-email', function () use ($emailController) {
+    $emailController->handleSendEmail();
+});
+
+// --- Feasibility ---
+$router->get('/api/power-plants/{id}/feasibility', function ($id) use ($feasibilityService) {
+    (new FeasibilityController($feasibilityService))->getLastByPlantId($id);
+});
+
+$router->post('/api/power-plants/{id}/feasibility', function ($id) use ($feasibilityService) {
+    (new FeasibilityController($feasibilityService))->generate($id);
+});
+
+// --- Dispatch ---
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
