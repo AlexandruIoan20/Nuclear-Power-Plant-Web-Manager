@@ -30,6 +30,24 @@ class PlantServiceFacade {
         return $this->detailsPlantService->savePlantDetails($data);
     }
 
+    public function updateStatus(array $data, string $plantId) { 
+        if (!isset($data['status'])) return false; 
+
+        $status = PlantStatus::tryFrom($data['status']);
+        if($status == null) return false; 
+
+        $plantData = $this->plantRepositoryFacade->getPlantDetailsById($plantId); 
+        if($plantData->getStatus()->value == $status->value) return false; 
+
+        $completePlantProfile = $this->getCompletePlantProfile($plantId); 
+        foreach($completePlantProfile as $profile) { 
+            if($profile == null) return false; 
+        }
+
+        $this->detailsPlantService->updateStatus($data, $plantId);
+        return true; 
+    }
+
     public function updatePlantDetails(array $data, string $plantId): void {
         $this->detailsPlantService->updatePlantDetails($data, $plantId);
     }

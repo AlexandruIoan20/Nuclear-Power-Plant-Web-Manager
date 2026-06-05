@@ -2,7 +2,7 @@ function isAdmin() {
     return true;
 }
 
-const ADMIN_LINK = { href: '/pages/admin.html', label: 'Admin', icon: '🛡️', key: '/pages/admin.html' };
+const ADMIN_LINK = { href: '/pages/admin/index.html', label: 'Admin', icon: '🛡️', key: '/pages/admin.html' };
 
 const currentPage = window.location.pathname;
 

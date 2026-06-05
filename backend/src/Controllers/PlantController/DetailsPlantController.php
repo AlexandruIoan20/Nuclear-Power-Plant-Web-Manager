@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../../Dto/PlantDTO.php';
 require_once __DIR__ . '/../../Dto/PlantDetailsDTO.php'; 
-require_once __DIR__ . '/../../Dto/GetPlantDTO.php'; 
+require_once __DIR__ . '/../../Dto/GetPlantDTO.php';  
 
 class DetailsPlantController { 
     public function __construct(
@@ -118,6 +118,44 @@ class DetailsPlantController {
             error_log("[ERROR] Save Plant: " . $e->getMessage());
             http_response_code(500); 
             echo json_encode(["status" => "error", "message" => "Eroare la salvare: " . $e->getMessage()]);
+            exit;
+        }
+    }
+
+    public function updateStatus(string $plantId) { 
+        header('Content-Type: application/json; charset=UTF-8'); 
+
+        $jsonPayload = file_get_contents("php://input");
+        $dateFormular = json_decode($jsonPayload, true); 
+
+        error_log("[DEBUG] Date Formular API Creare: " . print_r($dateFormular, true));
+        
+        if (empty($dateFormular)) {
+            http_response_code(400); 
+            echo json_encode(["status" => "error", "message" => "Nu s-au primit date."]);
+            exit;
+        }
+
+        try { 
+            $verified = $this->plantServiceFacade->updateStatus($dateFormular, $plantId);  
+            
+            if(!$verified) { 
+                echo json_encode([
+                    "status" => "error", 
+                    "message" => "Eroare la actualizarea statusului"
+                ]); 
+
+                exit; 
+            } 
+
+            echo json_encode([ 
+                "status" => "success", 
+                "message" => "Status actualizat cu succes"
+            ]); 
+        } catch(Exception $e) { 
+            error_log("[ERROR] Update Plant: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => "Eroare la actualizare statusului: " . $e->getMessage()]);
             exit;
         }
     }

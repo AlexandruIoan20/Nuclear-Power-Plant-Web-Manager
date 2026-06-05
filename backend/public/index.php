@@ -129,6 +129,10 @@ $router->get('/api/power-plants/{id}/details', function ($id) use ($plantService
     (new DetailsPlantController($plantServiceFacade))->getPlantDetails($id);
 });
 
+$router->patch('/api/power-plants/{id}/status', function ($plantId) use ($plantServiceFacade){ 
+    (new DetailsPlantController($plantServiceFacade)->updateStatus($plantId)); 
+}); 
+
 $router->put('/api/power-plants/{id}/details', function ($id) use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->handleUpdatePlantDetails($id);
 });

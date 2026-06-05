@@ -1,5 +1,7 @@
 <?php 
 
+require_once __DIR__ . '../../../Entities/PlantStatus.php'; 
+
 class DetailsPlantRepository {
     private PDO $db; 
 
@@ -67,6 +69,19 @@ class DetailsPlantRepository {
             'longitude' => $plant->getLongitude(), 
             'status' => $plant->getStatus()->value 
         ]);
+    }
+
+    public function updateStatus(array $data, string $plantId): void { 
+        $status = PlantStatus::from($data['status']);
+    
+        $statement = $this->db->prepare("
+            UPDATE power_plants SET status = :status WHERE id = :id
+        "); 
+    
+        $statement->execute([ 
+            "status" => $status->value, 
+            "id" => $plantId
+        ]); 
     }
 
     public function update(Plant $plant): void {

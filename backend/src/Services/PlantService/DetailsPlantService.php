@@ -37,6 +37,10 @@ class DetailsPlantService {
         return new CreateDataResponseDTO($id); 
     }
 
+    public function updateStatus(array $data, string $plantId) { 
+        $this->plantRepositoryFacade->updateStatus($data, $plantId); 
+    }
+
     public function updatePlantDetails(array $data, string $id) { 
         $name = $data['name'] ?? ''; 
         $country = $data['country'] ?? ''; 

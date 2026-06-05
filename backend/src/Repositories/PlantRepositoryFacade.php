@@ -56,6 +56,10 @@ class PlantRepositoryFacade {
         $this->detailsPlantRepository->save($plant);
     }
 
+    public function updateStatus(array $data, string $plantId): void { 
+        $this->detailsPlantRepository->updateStatus($data, $plantId); 
+    }
+
     public function updatePlantDetails(Plant $plant): void {
         $this->detailsPlantRepository->update($plant);
     }
