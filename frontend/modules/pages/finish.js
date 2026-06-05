@@ -1,6 +1,7 @@
 import { powerPlantService } from '../services/powerPlantService.js'; 
 import { feasibilityReportService } from '../services/feasibilityReportService.js'; 
 import { GetPlantDTO } from '../dto/GetPlantDTO.js'; 
+import { UpdatePlantStatusRequestDTO } from '../dto/UpdatePlanStatusRequestDTO.js'; 
 import { getQueryParam } from '../utils/urlHelper.js';
 import { clearHeaderState } from '../ui/form-header/formHeaderState.js'; 
 
@@ -37,6 +38,12 @@ function populatePlantPage(rawData) {
                 console.log({ response }); 
 
                 if(response.success) { 
+                    try { 
+                        const r = await powerPlantService.updateStatus(UpdatePlantStatusRequestDTO({ status: "REVIEW" }), plantId); 
+                        console.log({ r }); 
+                    } catch(error) { 
+                        console.log(error.message); 
+                    }
                     clearHeaderState(); 
                     window.location.href = `/pages/feasibility/report-results.html?id=${plantId}`;
                 }

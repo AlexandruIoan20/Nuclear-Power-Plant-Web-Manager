@@ -3,6 +3,7 @@ import { PlantRequestDTO } from '../dto/PlantRequestDTO.js';
 import { BasicDataRequestDTO } from '../dto/BasicDataRequestDTO.js'; 
 import { GeologicalDataRequestDTO } from '../dto/GeologicalDataRequestDTO.js'; 
 import { TechnicalDataRequestDTO } from '../dto/TechnicalDataRequestDTO.js'; 
+import { UpdatePlantStatusRequestDTO } from '../dto/UpdatePlanStatusRequestDTO.js'; 
 
 export const powerPlantService = { 
     createPlantDetails: (formData) => api.post("/power-plants", PlantRequestDTO(formData)), 
@@ -10,6 +11,7 @@ export const powerPlantService = {
     getAll: () => api.get("/power-plants"), 
     getPlantDetails: (plantId) => api.get(`/power-plants/${plantId}/details`), 
     getPlant: (plantId) => api.get(`/power-plants/${plantId}`), 
+    updateStatus: (data, plantId) => api.patch(`/power-plants/${plantId}/status`, UpdatePlantStatusRequestDTO(data)), 
 
     // Basics 
     getBasics: (plantId) => api.get(`/power-plants/${plantId}/basics`),
