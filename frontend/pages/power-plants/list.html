@@ -10,6 +10,7 @@
 </head>
 <body>
     <div class="page-shell">
+        <div id = "main-navbar"></div>
         <nav class="topbar">
             <div class="brand">
                 <strong>⚛ Nuclear Power Plant Manager</strong>
@@ -20,7 +21,6 @@
             </div>
         </nav>
 
-        <!-- FILTRU -->
         <div class="filter-bar">
             <div class="field">
                 <label for="filter-name">Caută după nume</label>
@@ -33,12 +33,10 @@
             <button class="btn-reset" id="btn-reset">✕ Resetează</button>
         </div>
 
-        <!-- RESULTS META -->
         <div class="results-meta">
             <div>Rezultate: <span id="results-count">—</span></div>
         </div>
 
-        <!-- TABLE -->
         <div class="table-shell">
             <table>
                 <thead>
@@ -64,5 +62,6 @@
     </div>
 
     <script type = "module" src = "../../modules/pages/list.js"></script>
+    <script type = "module" src = "../../modules/ui/navbar.js"></script>
 </body>
 </html>
