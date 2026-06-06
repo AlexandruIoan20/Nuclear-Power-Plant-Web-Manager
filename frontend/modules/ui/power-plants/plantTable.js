@@ -1,4 +1,4 @@
-export function renderTable(plants) {
+export function renderTable(plants, goTo = null) {
     const tbody = document.getElementById('plants-tbody');
     document.getElementById('results-count').textContent = plants.length;
 
@@ -7,25 +7,28 @@ export function renderTable(plants) {
         return;
     }
 
-    tbody.innerHTML = plants.map(p => `
-        <tr data-id="${p.id}">
-            <td class="td-name">${p.name ?? '—'}</td>
-            <td>${p.country ?? '—'}</td>
-            <td class="td-id">${shortId(p.id)}</td>
-            <td class="td-coords">${coords(p.latitude, p.longitude)}</td>
-            <td>${statusTag(p.status)}</td>
-            <td>
-                <a class="btn-view" href="/pages/power-plants/finish.html?id=${p.id}">
-                    Vezi →
-                </a>
-            </td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = plants.map(p => {
+        const href = goTo ? `${goTo}?id=${p.id}` : null;
+
+        return `
+            <tr data-id="${p.id}" style="${!goTo ? '' : 'cursor:pointer;'}">
+                <td class="td-name">${p.name ?? '—'}</td>
+                <td>${p.country ?? '—'}</td>
+                <td class="td-id">${shortId(p.id)}</td>
+                <td class="td-coords">${coords(p.latitude, p.longitude)}</td>
+                <td>${statusTag(p.status)}</td>
+                <td>
+                    ${href ? `<a class="btn-view" href="${href}">Vezi →</a>` : ''}
+                </td>
+            </tr>
+        `;
+    }).join('');
 
     tbody.querySelectorAll('tr[data-id]').forEach(tr => {
         tr.addEventListener('click', (e) => {
+            if (!goTo) return;
             if (e.target.closest('a')) return;
-            window.location.href = `/pages/power-plants/finish.html?id=${tr.dataset.id}`;
+            window.location.href = `${goTo}?id=${tr.dataset.id}`;
         });
     });
 }

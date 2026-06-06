@@ -6,6 +6,10 @@ import { loadSelect } from '../../ui/selectLoader.js';
 
 loadSelect('filter-status', PlantStatus); 
 
+let goTo = "/pages/admin/validate.html"; 
+
+console.log({ goTo });
+
 let allPlants = [];
 let sortCol = 'name';
 let sortDir = 'asc';
@@ -28,7 +32,7 @@ document.getElementById('filter-country').addEventListener('input', () => applyF
 document.getElementById('btn-reset').addEventListener('click', () => {
     document.getElementById('filter-name').value    = '';
     document.getElementById('filter-country').value = '';
-    applyFilters(allPlants, sortCol, sortDir);
+    applyFilters(allPlants, sortCol, sortDir, goTo);
 });
 
 document.querySelectorAll('th[data-col]').forEach(th => {
@@ -43,7 +47,7 @@ document.querySelectorAll('th[data-col]').forEach(th => {
             sortDir = 'asc';
         }
         updateSortHeaders();
-        applyFilters(allPlants, sortCol, sortDir);
+        applyFilters(allPlants, sortCol, sortDir, goTo);
     });
 });
 
@@ -60,7 +64,7 @@ document.getElementById('filter-status').addEventListener('change', async () => 
         allPlants = response.data ?? [];
     }
 
-    applyFilters(allPlants, sortCol, sortDir);
+    applyFilters(allPlants, sortCol, sortDir, goTo);
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -71,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log({ response }); 
 
         allPlants = response.data ?? [];
-        applyFilters(allPlants, sortCol, sortDir);
+        applyFilters(allPlants, sortCol, sortDir, goTo);
     } catch (error) {
         console.error(error.message);
         alert("Eroare la încărcarea centralelor"); 

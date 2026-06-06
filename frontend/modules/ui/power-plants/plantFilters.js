@@ -1,6 +1,6 @@
 import { renderTable } from './plantTable.js'; 
 
-export function applyFilters(allPlants, sortCol, sortDir) {
+export function applyFilters(allPlants, sortCol, sortDir, goTo) {
     const name = document.getElementById('filter-name').value.trim().toLowerCase();
     const country = document.getElementById('filter-country').value.trim().toLowerCase();
 
@@ -11,7 +11,7 @@ export function applyFilters(allPlants, sortCol, sortDir) {
     });
 
     filtered = sortPlants(filtered, sortCol, sortDir);
-    renderTable(filtered);
+    renderTable(filtered, goTo);
 }
 
 export function sortPlants(list, sortCol, sortDir) {
