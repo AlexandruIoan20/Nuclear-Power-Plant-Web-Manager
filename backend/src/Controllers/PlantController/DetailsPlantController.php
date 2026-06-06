@@ -63,6 +63,38 @@ class DetailsPlantController {
         exit;
     }
 
+    public function getPlantsByStatus() { 
+        header("Content-Type: application/json; charset=UTF-8"); 
+
+        $status = $_GET['status'] ?? null;
+    
+        if (!$status) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Parametrul 'status' lipseste"]);
+            return;
+        }
+    
+        $data = ['status' => $status];
+    
+        error_log("[DEBUG] Date getPlantsByStatus: " . print_r($data, true));
+    
+        try { 
+            $powerPlants = $this->plantServiceFacade->getPlantsByStatus($data); 
+            error_log("powerPlants in controller:  " . print_r($powerPlants, true)); 
+
+            $dtos = array_map(function($plant) {
+                return PlantDTO::fromEntity($plant);
+            }, $powerPlants);
+            
+            http_response_code(200); 
+            echo json_encode(["status" => "success", "data" => $dtos]); 
+        } catch(Exception $e) { 
+            error_log("[ERROR] GET Plants By Status: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => "Eroare la cautarea dupa status: " . $e->getMessage()]);
+        }
+    }
+    
     public function getPowerPlantsMapData()
     {
         header('Content-Type: application/json; charset=UTF-8');

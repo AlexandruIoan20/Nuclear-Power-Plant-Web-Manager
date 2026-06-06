@@ -116,6 +116,10 @@ $router->get('/api/power-plants', function () use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList();
 });
 
+$router->get('/api/power-plants/filter', function () use ($plantServiceFacade) { 
+    (new DetailsPlantController($plantServiceFacade))->getPlantsByStatus(); 
+}); 
+
 $router->get('/api/power-plants/{id}', function ($id) use ($plantServiceFacade) { 
     (new DetailsPlantController($plantServiceFacade))->getPlant($id); 
 }); 

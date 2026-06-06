@@ -22,6 +22,11 @@ class PlantServiceFacade {
         return $this->detailsPlantService->getAllPowerPlants();
     }
 
+    public function getPlantsByStatus(array $data): array { 
+        $powerPlants = $this->detailsPlantService->getPlantsByStatus($data); 
+        return $powerPlants;
+    }
+
     public function getPlantDetailsById(string $plantId): ?Plant {
         return $this->detailsPlantService->findById($plantId);
     }

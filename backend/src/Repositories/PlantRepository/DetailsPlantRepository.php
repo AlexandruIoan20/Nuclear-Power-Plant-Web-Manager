@@ -21,6 +21,21 @@ class DetailsPlantRepository {
         return $powerPlants; 
     }
 
+    public function getPlantsByStatus(array $data): array { 
+        $status = PlantStatus::from($data['status']); 
+        $powerPlants = []; 
+
+        $statement = $this->db->prepare("SELECT * FROM power_plants WHERE status = :status"); 
+        $statement->execute([ "status" => $status->value ]); 
+
+        while($row = $statement->fetch(PDO::FETCH_ASSOC)) { 
+            $powerPlants[] = new Plant($row['country'], $row['id'], $row['name'], $status, 
+            $row['latitude'], $row['longitude']); 
+        }
+        
+        return $powerPlants; 
+    }
+
     public function findById(string $plantId) { 
         $statement = $this->db->prepare("SELECT * FROM power_plants WHERE id = :plantId"); 
         $statement->execute([ 

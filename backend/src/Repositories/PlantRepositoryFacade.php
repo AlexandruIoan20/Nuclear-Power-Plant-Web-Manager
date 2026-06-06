@@ -48,6 +48,10 @@ class PlantRepositoryFacade {
         return $this->detailsPlantRepository->findAll();
     }
 
+    public function getPlantsByStatus(array $data): array { 
+        return $this->detailsPlantRepository->getPlantsByStatus($data); 
+    }
+
     public function getPlantDetailsById(string $plantId): ?Plant {
         return $this->detailsPlantRepository->findById($plantId);
     }
