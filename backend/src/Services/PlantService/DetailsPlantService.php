@@ -68,7 +68,6 @@ class DetailsPlantService {
         }
     
         $powerPlants = $this->plantRepositoryFacade->getPlantsByStatus(['status' => $status->value]); 
-        error_log("powerPlants in service 2:  " . print_r($powerPlants, true)); 
         return $powerPlants; 
     }
 

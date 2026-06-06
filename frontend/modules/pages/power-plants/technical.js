@@ -1,9 +1,9 @@
-import { powerPlantService } from '../services/powerPlantService.js'
-import { ReactorType, CoolingType } from '../config/enums.js'; 
-import { getQueryParam } from '../utils/urlHelper.js'; 
-import { showError, showSuccess, clearStatus } from '../ui/showMessage.js'; 
-import { TechnicalDataRequestDTO } from '../dto/TechnicalDataRequestDTO.js'; 
-import { saveHeaderState } from '../ui/form-header/formHeaderState.js'; 
+import { powerPlantService } from '../../services/powerPlantService.js'
+import { ReactorType, CoolingType } from '../../config/enums.js'; 
+import { getQueryParam } from '../../utils/urlHelper.js'; 
+import { showError, showSuccess, clearStatus } from '../../ui/showMessage.js'; 
+import { TechnicalDataRequestDTO } from '../../dto/TechnicalDataRequestDTO.js'; 
+import { saveHeaderState } from '../../ui/form-header/formHeaderState.js'; 
 
 const plantId = getQueryParam("id"); 
 const technicalId = getQueryParam("technicalId"); 

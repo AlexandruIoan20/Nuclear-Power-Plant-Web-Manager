@@ -1,9 +1,9 @@
-import { powerPlantService } from '../services/powerPlantService.js'; 
-import { feasibilityReportService } from '../services/feasibilityReportService.js'; 
-import { GetPlantDTO } from '../dto/GetPlantDTO.js'; 
-import { UpdatePlantStatusRequestDTO } from '../dto/UpdatePlanStatusRequestDTO.js'; 
-import { getQueryParam } from '../utils/urlHelper.js';
-import { clearHeaderState } from '../ui/form-header/formHeaderState.js'; 
+import { powerPlantService } from '../../services/powerPlantService.js'; 
+import { feasibilityReportService } from '../../services/feasibilityReportService.js'; 
+import { GetPlantDTO } from '../../dto/GetPlantDTO.js'; 
+import { UpdatePlantStatusRequestDTO } from '../../dto/UpdatePlanStatusRequestDTO.js'; 
+import { getQueryParam } from '../../utils/urlHelper.js';
+import { clearHeaderState } from '../../ui/form-header/formHeaderState.js'; 
 
 const plantId = getQueryParam("id"); 
 

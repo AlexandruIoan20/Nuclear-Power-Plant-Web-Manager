@@ -1,7 +1,7 @@
-import { powerPlantService } from '../services/powerPlantService.js'
-import { PlantRequestDTO } from '../dto/PlantRequestDTO.js'; 
-import { showError, showSuccess, clearStatus } from '../ui/showMessage.js'; 
-import { getQueryParam } from '../utils/urlHelper.js'; 
+import { powerPlantService } from '../../services/powerPlantService.js'
+import { PlantRequestDTO } from '../../dto/PlantRequestDTO.js'; 
+import { showError, showSuccess, clearStatus } from '../../ui/showMessage.js'; 
+import { getQueryParam } from '../../utils/urlHelper.js'; 
 
 const plantId = getQueryParam("id");  
 

@@ -8,10 +8,12 @@ import { UpdatePlantStatusRequestDTO } from '../dto/UpdatePlanStatusRequestDTO.j
 export const powerPlantService = { 
     createPlantDetails: (formData) => api.post("/power-plants", PlantRequestDTO(formData)), 
     updatePlantDetails: (formData, plantId) => api.put(`/power-plants/${plantId}/details`, PlantRequestDTO(formData)), 
+    updateStatus: (data, plantId) => api.patch(`/power-plants/${plantId}/status`, UpdatePlantStatusRequestDTO(data)), 
+
     getAll: () => api.get("/power-plants"), 
     getPlantDetails: (plantId) => api.get(`/power-plants/${plantId}/details`), 
     getPlant: (plantId) => api.get(`/power-plants/${plantId}`), 
-    updateStatus: (data, plantId) => api.patch(`/power-plants/${plantId}/status`, UpdatePlantStatusRequestDTO(data)), 
+    getPlantsByStatus: (status) => api.get(`/power-plants/filter?status=${status}`), 
 
     // Basics 
     getBasics: (plantId) => api.get(`/power-plants/${plantId}/basics`),

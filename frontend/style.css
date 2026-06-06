@@ -748,3 +748,42 @@ tbody tr:hover {
         grid-template-columns: 1fr;
     }
 }
+
+
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+    align-items: flex-end;
+}
+
+.filter-bar .field {
+    display: grid;
+    gap: 6px;
+    flex: 1;
+    min-width: 160px;
+}
+
+.btn-reset {
+    appearance: none;
+    border: 1px solid rgba(255,215,0,0.3);
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    padding: 11px 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.2s, color 0.2s;
+    width: auto;
+    align-self: flex-end;
+}
+.btn-reset:hover { border-color: rgba(255,215,0,0.6); color: var(--yellow); }
+
+@media (max-width: 600px) {
+    .filter-bar .field { min-width: 100%; }
+    .btn-reset { width: 100%; }
+}

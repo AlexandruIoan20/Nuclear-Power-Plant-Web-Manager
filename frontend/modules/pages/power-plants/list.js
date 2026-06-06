@@ -1,6 +1,6 @@
-import { powerPlantService } from '../services/powerPlantService.js'; 
-import { clearHeaderState, } from '../ui/form-header/formHeaderState.js'; 
-import { applyFilters } from '../ui/power-plants/plantFilters.js'; 
+import { powerPlantService } from '../../services/powerPlantService.js'; 
+import { clearHeaderState, } from '../../ui/form-header/formHeaderState.js'; 
+import { applyFilters } from '../../ui/power-plants/plantFilters.js'; 
  
 let allPlants = [];
 let sortCol = 'name';
