@@ -36,16 +36,53 @@ class DetailsPlantController {
         exit;
     }
 
-    public function getPowerPlantsList() { 
+    public function getPowerPlantsList(): void {
         header('Content-Type: application/json; charset=UTF-8');
-        $powerPlants = $this->plantServiceFacade->getAllPowerPlants(); 
-        
-        $dtos = array_map(function($plant) {
-            return PlantDTO::fromEntity($plant);
-        }, $powerPlants);
-        
+
+        $plantsEntities = $this->plantServiceFacade->getAllPowerPlants();
+        $payload = [];
+
+        foreach ($plantsEntities as $plant) {
+            $payload[] = [
+                'id' => $plant->getId(),
+                'name' => $plant->getName() ?? 'Fără nume',
+                'country' => $plant->getCountry() ?? 'Nespecificată',
+                'latitude' => $plant->getLatitude() !== null ? (float)$plant->getLatitude() : 0.0,
+                'longitude' => $plant->getLongitude() !== null ? (float)$plant->getLongitude() : 0.0,
+                'status' => $plant->getStatus()->value
+            ];
+        }
+
         http_response_code(200);
-        echo json_encode(["status" => "success", "data" => $dtos]);
+        echo json_encode($payload);
+        exit;
+    }
+
+   
+    public function getPendingApprovalsList(): void {
+        header('Content-Type: application/json; charset=UTF-8');
+
+        $plantsEntities = $this->plantServiceFacade->getAllPowerPlants();
+        $payload = [];
+
+        foreach ($plantsEntities as $plant) {
+         
+            if ($plant->getStatus()->value === 'APPROVED') {
+                continue;
+            }
+
+            $payload[] = [
+                'id' => $plant->getId(),
+                'name' => $plant->getName() ?? 'Fără nume',
+                'country' => $plant->getCountry() ?? 'Nespecificată',
+                'latitude' => $plant->getLatitude() !== null ? (float)$plant->getLatitude() : 0.0,
+                'longitude' => $plant->getLongitude() !== null ? (float)$plant->getLongitude() : 0.0,
+                'status' => $plant->getStatus()->value
+            ];
+        }
+
+        http_response_code(200);
+        echo json_encode($payload);
         exit;
     }
 

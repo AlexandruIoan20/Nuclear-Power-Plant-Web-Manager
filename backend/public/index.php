@@ -1,11 +1,10 @@
 <?php
-
+///before was Lax, false, false
 session_start([
-    'cookie_samesite' => 'Lax',
-    'cookie_secure' => false,
+    'cookie_samesite' => 'None', 
+    'cookie_secure' => false,    
     'cookie_httponly' => true,
 ]);
-
 // Allowed origins for local development
 $allowedOrigins = [
     'http://localhost:5500',
@@ -106,6 +105,7 @@ require_once __DIR__ . '/../src/Controllers/PlantController/BasicPlantController
 require_once __DIR__ . '/../src/Controllers/PlantController/GeologicalPlantController.php';
 require_once __DIR__ . '/../src/Controllers/PlantController/TechnicalPlantController.php';
 require_once __DIR__ . '/../src/Controllers/FeasibilitController.php';
+require_once __DIR__ . '/../src/Controllers/ApprovalController.php';
 
 require_once __DIR__ . '/../src/Services/EmailService.php';
 require_once __DIR__ . '/../src/Controllers/EmailController.php';
@@ -135,7 +135,9 @@ try {
 
 // Ensure default Admin user exists in the database
 $adminEmail = 'admin@nuclear.ro';
-$adminPasswordHash = '$2y$12$pLgjMWjlhKbYoAAvRByCMuLnj3l5JlYl03QHgkgZwHci6c8Q59U.i';
+
+// FIX SUPREM: Generăm hash-ul dinamic prin funcția ta nativă exact când pornește scriptul!
+$adminPasswordHash = password_hash('admin', PASSWORD_BCRYPT);
 
 $adminInsert = $pdo->prepare(
     'INSERT INTO users (username, first_name, last_name, email, password_hash, role) 
@@ -149,7 +151,7 @@ $adminInsert->execute([
     'first_name' => 'Admin',
     'last_name' => 'System',
     'email' => $adminEmail,
-    'password_hash' => $adminPasswordHash,
+    'password_hash' => $adminPasswordHash, // <--- Va fi noul hash generat local pentru cuvântul "admin"
     'role' => 'ADMIN',
 ]);
 
@@ -170,6 +172,8 @@ $userService = new UserService($userRepository);
 
 $router = new Router();
 
+
+
 // --- Countries ---
 $router->get('/api/countries', function() use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getCountries();
@@ -179,6 +183,9 @@ $router->get('/api/countries', function() use ($plantServiceFacade) {
 $router->get('/api/power-plants/list', function() use ($plantServiceFacade) { 
     (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList(); 
 }); 
+$router->get('/api/power-plants/pending-approvals', function() use ($plantServiceFacade) { 
+    (new DetailsPlantController($plantServiceFacade))->getPendingApprovalsList(); 
+});
 
 $router->get('/api/power-plants/map-data', function() use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getPowerPlantsMapData();
@@ -300,6 +307,12 @@ $router->get('/dashboard', function() use ($userService) {
 $router->get('/users', function() use ($userService) {
     (new UserController($userService))->listUsers();
 });
+
+//Approvals
+$router->put('/api/power-plants/{id}/approve', function ($id) use ($plantServiceFacade) {
+    (new ApprovalController($plantServiceFacade))->approvePlant($id);
+});
+
 // Email
 
 $router->post('/api/send-email', function () use ($emailController) {

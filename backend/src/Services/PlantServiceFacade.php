@@ -17,6 +17,11 @@ class PlantServiceFacade {
         $this->technicalPlantService = new TechnicalPlantService($this->plantRepositoryFacade);
     }
 
+
+    public function updatePlantStatus(string $plantId, string $status): void {
+        $this->plantRepositoryFacade->updatePlantStatus($plantId, $status);
+    }
+
     // Details
     public function getAllPowerPlants(): array {
         return $this->detailsPlantService->getAllPowerPlants();

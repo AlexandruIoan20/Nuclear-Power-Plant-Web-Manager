@@ -15,7 +15,7 @@ class UserRepository {
             'last_name' => 'User',
             'email' => $user->getEmail(), 
             'password_hash' => $user->getPasswordHash(),
-            'role' => 'OPERATOR'
+            'role' => $user->getRole() 
         ]); 
     }
 
@@ -24,7 +24,8 @@ class UserRepository {
         $users = []; 
 
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { 
-            $users[] = new User($row['username'], $row['email'], $row['password_hash'], $row['id']); 
+            
+            $users[] = new User($row['username'], $row['email'], $row['password_hash'], $row['id'], $row['role']); 
         }
 
         return $users; 
@@ -43,5 +44,4 @@ class UserRepository {
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ?: null;
     }
-
 }

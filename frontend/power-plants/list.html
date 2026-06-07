@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="ro">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista Centralelor</title>
     <link rel="stylesheet" href="../style.css">
 </head>
+
 <body>
     <div class="page-shell" style="padding-top: 40px;">
         <main class="panel">
@@ -14,6 +16,7 @@
                     <h1 style="margin: 0 0 8px 0;">Centrale Nucleare</h1>
                 </div>
                 <div>
+                    <a href="../approvals.html" class="button secondary" style="margin-right: 10px;">Panou Aprobări</a>
                     <a href="create.html" class="button">Adaugă Centrală</a>
                 </div>
             </div>
@@ -34,20 +37,21 @@
             const errorMessage = document.getElementById("error-message");
 
             try {
-                const response = await fetch("http://localhost:8081/api/power-plants/list");
+              
+                const response = await fetch("http://localhost:8081/api/power-plants");
                 
                 if (!response.ok) {
                     throw new Error(`Eroare de server: HTTP ${response.status}`);
                 }
 
-                const result = await response.json();
-
-                console.log("DEBUG: ", result); 
+        
+                const plants = await response.json();
                 
                 loadingIndicator.style.display = "none";
 
-                if (result.status === "success" && result.data && result.data.length > 0) {
-                    result.data.forEach(plant => {
+               
+                if (Array.isArray(plants) && plants.length > 0) {
+                    plants.forEach(plant => {
                         const card = document.createElement("div");
                         card.className = "status-card"; 
                         card.style.display = "flex";
@@ -55,19 +59,24 @@
                         card.style.alignItems = "center";
                         card.style.padding = "20px";
 
+                       
                         card.innerHTML = `
                             <div>
                                 <p style="margin-bottom: 8px; font-size: 1.1rem; color: var(--green);">
                                     <span class="field-hint" style="font-size: 0.8rem; text-transform: uppercase;">Nume:</span> 
-                                    <strong>${plant.name || 'Necunoscut'}</strong>
+                                    <strong>${plant.name}</strong>
                                 </p>
-                                <p style="margin: 0; color: var(--text);">
+                                <p style="margin: 0 0 4px 0; color: var(--text);">
                                     <span class="field-hint" style="font-size: 0.8rem; text-transform: uppercase;">Țară:</span> 
-                                    ${plant.country || 'Nespecificată'}
+                                    ${plant.country}
+                                </p>
+                                <p style="margin: 0; color: var(--text-muted); font-size: 0.85rem;">
+                                    <span class="field-hint" style="font-size: 0.75rem; text-transform: uppercase;">Status:</span> 
+                                    <span class="badge ${plant.status.toLowerCase()}">${plant.status}</span>
                                 </p>
                             </div>
                             <div>
-                                <a href="update.html?id=${plant.id}" class="button secondary" style="text-decoration: none;">
+                                <a href="basics.html?id=${plant.id}" class="button secondary" style="text-decoration: none;">
                                     Editează
                                 </a>
                             </div>
@@ -75,12 +84,12 @@
                         container.appendChild(card);
                     });
                 } else {
-                    container.innerHTML = `<p style="color: var(--muted);">Nu există nicio centrală electrică înregistrată în sistem.</p>`;
+                    container.innerHTML = `<p style="color: var(--text-muted);">Nu există nicio centrală electrică înregistrată în sistem.</p>`;
                 }
             } catch (error) {
                 loadingIndicator.style.display = "none";
                 errorMessage.style.display = "block";
-                errorMessage.innerHTML = `<strong>Eroare critică:</strong> Nu s-au putut prelua datele de la server. Verificați conexiunea.`;
+                errorMessage.innerHTML = `<strong>Eroare critică:</strong> Nu s-au putut prelua datele de la server.`;
                 console.error("Eroare la preluarea listei:", error);
             }
         });
