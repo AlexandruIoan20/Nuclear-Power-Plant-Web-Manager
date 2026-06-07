@@ -1,10 +1,11 @@
 <?php
-///before was Lax, false, false
+
 session_start([
     'cookie_samesite' => 'None', 
     'cookie_secure' => false,    
     'cookie_httponly' => true,
 ]);
+
 // Allowed origins for local development
 $allowedOrigins = [
     'http://localhost:5500',
@@ -36,48 +37,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Health check endpoint
-/*if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/health') {
-    header('Content-Type: application/json');
-    echo json_encode(['status' => 'ok']);
-    exit();
-} */
-
-//For testing only
+// For testing only
 if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/health') {
     header('Content-Type: application/json');
-    
     require_once __DIR__ . '/../src/Services/EmailService.php';
-    
     try {
         $emailService = new EmailService();
-        
-       
         $testData = [
             'to_email' => 'test@nuc.nuc',
             'subject' => 'deschidemadacapoti',
             'message' => 'daca vezi asta inseamna ca paul le are cu programarea.'
         ];
-        
-       
         $emailService->sendAlert($testData);
-        
-        echo json_encode([
-            'status' => 'ok', 
-            'mail_system' => 'Email sent successfully to Mailtrap!'
-        ]);
+        echo json_encode(['status' => 'ok', 'mail_system' => 'Email sent successfully to Mailtrap!']);
     } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode([
-            'status' => 'error', 
-            'message' => 'Mail system failed: ' . $e->getMessage()
-        ]);
+        echo json_encode(['status' => 'error', 'message' => 'Mail system failed: ' . $e->getMessage()]);
     }
     exit();
 }
 
 require_once __DIR__ . '/../src/Router.php';
-
 require_once __DIR__ . '/../src/Entities/User.php';
 require_once __DIR__ . '/../src/Repositories/UserRepository.php';
 require_once __DIR__ . '/../src/Services/UserService.php';
@@ -135,8 +115,6 @@ try {
 
 // Ensure default Admin user exists in the database
 $adminEmail = 'admin@nuclear.ro';
-
-// FIX SUPREM: Generăm hash-ul dinamic prin funcția ta nativă exact când pornește scriptul!
 $adminPasswordHash = password_hash('admin', PASSWORD_BCRYPT);
 
 $adminInsert = $pdo->prepare(
@@ -151,7 +129,7 @@ $adminInsert->execute([
     'first_name' => 'Admin',
     'last_name' => 'System',
     'email' => $adminEmail,
-    'password_hash' => $adminPasswordHash, // <--- Va fi noul hash generat local pentru cuvântul "admin"
+    'password_hash' => $adminPasswordHash,
     'role' => 'ADMIN',
 ]);
 
@@ -166,13 +144,10 @@ $emailController = new EmailController($emailService);
 $rssService = new RssService($plantServiceFacade);
 $rssController = new RssController($rssService);    
 
-
 $userRepository = new UserRepository($pdo);
 $userService = new UserService($userRepository);
 
 $router = new Router();
-
-
 
 // --- Countries ---
 $router->get('/api/countries', function() use ($plantServiceFacade) {
@@ -183,6 +158,7 @@ $router->get('/api/countries', function() use ($plantServiceFacade) {
 $router->get('/api/power-plants/list', function() use ($plantServiceFacade) { 
     (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList(); 
 }); 
+
 $router->get('/api/power-plants/pending-approvals', function() use ($plantServiceFacade) { 
     (new DetailsPlantController($plantServiceFacade))->getPendingApprovalsList(); 
 });
@@ -287,7 +263,6 @@ $router->get('/api/user/status', function() use ($userService) {
 $router->get('/api/users', function() use ($userService) {
     header('Content-Type: application/json; charset=UTF-8');
     $users = $userService->getAllUsers();
-
     $payload = array_map(function (User $user) {
         return [
             'id' => $user->getId(),
@@ -295,7 +270,6 @@ $router->get('/api/users', function() use ($userService) {
             'email' => $user->getEmail(),
         ];
     }, $users);
-
     echo json_encode(['status' => 'success', 'data' => $payload]);
     exit;
 });
@@ -308,13 +282,12 @@ $router->get('/users', function() use ($userService) {
     (new UserController($userService))->listUsers();
 });
 
-//Approvals
-$router->put('/api/power-plants/{id}/approve', function ($id) use ($plantServiceFacade) {
-    (new ApprovalController($plantServiceFacade))->approvePlant($id);
+// FIX RUTA APPROVALS: Mapare corectă pentru endpoint-ul unificat bazat pe body JSON
+$router->put('/api/power-plants/{id}/status', function ($id) use ($plantServiceFacade) {
+    (new ApprovalController($plantServiceFacade))->updateStatus($id);
 });
 
 // Email
-
 $router->post('/api/send-email', function () use ($emailController) {
     $emailController->handleSendEmail();
 });

@@ -18,7 +18,7 @@
             <h1 id="login-title">Autentificare operator</h1>
             <p>Introdu datele de acces pentru a continua către dashboard-ul de monitorizare.</p>
 
-            <div id="login-message" class="footer-note" aria-live="polite"></div>
+            <div id="login-message" class="footer-note" aria-live="polite" style="margin-bottom: 16px; min-height: 1.2rem;"></div>
 
             <form class="field-grid" id="loginForm" action="http://localhost:8081/login" method="post">
                 <div class="field">
@@ -46,15 +46,21 @@
                 event.preventDefault();
                 const submitButton = loginForm.querySelector('input[type="submit"]');
                 if (submitButton) submitButton.disabled = true;
+                message.textContent = '';
 
                 try {
+                  
+                    const formData = new FormData(loginForm);
+                    const urlEncodedData = new URLSearchParams(formData);
+
                     const response = await fetch('http://localhost:8081/login', {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json',
-                            'X-Requested-With': 'fetch'
+                            'X-Requested-With': 'fetch',
+                            'Content-Type': 'application/x-www-form-urlencoded'
                         },
-                        body: new FormData(loginForm),
+                        body: urlEncodedData,
                         credentials: 'include',
                     });
 
@@ -65,10 +71,12 @@
                         return;
                     }
 
+                    message.style.color = 'var(--danger)';
                     message.textContent = payload.message || 'Datele de autentificare sunt incorecte.';
                 } catch (error) {
                     console.error('Eroare la autentificare:', error);
-                    message.textContent = 'Eroare la conectare.';
+                    message.style.color = 'var(--danger)';
+                    message.textContent = 'Eroare la conectare. Verificați rețeaua.';
                 } finally {
                     if (submitButton) submitButton.disabled = false;
                 }

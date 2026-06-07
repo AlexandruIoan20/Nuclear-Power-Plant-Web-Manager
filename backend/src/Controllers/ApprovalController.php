@@ -10,51 +10,48 @@ class ApprovalController {
     }
 
     /**
-     * Schimbă statusul unei centrale în APPROVED.
-     * Rută: PUT /api/power-plants/{id}/approve
+     * Actualizează statusul unei centrale (ex: APPROVED, REJECTED).
+     * Rută: PUT /api/power-plants/{id}/status
      */
-    public function approvePlant($plantId): void {
+    public function updateStatus($plantId): void {
         header('Content-Type: application/json; charset=UTF-8');
 
         $cleanPlantId = trim((string)$plantId);
-
         if (empty($cleanPlantId)) {
             http_response_code(400);
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'ID-ul facilității nucleare este invalid sau lipsește.'
-            ]);
+            echo json_encode(['status' => 'error', 'message' => 'ID-ul facilității lipsește.']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $newStatus = $input['status'] ?? null;
+
+        if (!in_array($newStatus, ['APPROVED', 'REJECTED'], true)) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'Statusul solicitat este invalid.']);
             exit;
         }
 
         $userRole = $_SESSION['user_role'] ?? ($_SESSION['user']['role'] ?? null);
-
         if ($userRole !== 'ADMIN') {
             http_response_code(403);
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Acces refuzat. Doar utilizatorii cu privilegii de ADMIN pot aproba facilități nucleare.'
-            ]);
+            echo json_encode(['status' => 'error', 'message' => 'Acces refuzat. Necesită privilegii de ADMIN.']);
             exit;
         }
 
         try {
-            $this->plantServiceFacade->updatePlantStatus($cleanPlantId, 'APPROVED');
+            $this->plantServiceFacade->updatePlantStatus($cleanPlantId, $newStatus);
 
             http_response_code(200);
             echo json_encode([
                 'status' => 'success',
-                'message' => 'Centrala a fost revizuită și aprobată cu succes. Aceasta este acum activă în sistem.'
+                'message' => 'Statusul centralei a fost actualizat cu succes în: ' . $newStatus
             ]);
             exit;
         } catch (Exception $e) {
-            error_log("[APPROVAL ERROR] Eșec la aprobarea centralei {$cleanPlantId}: " . $e->getMessage());
-            
+            error_log("[STATUS UPDATE ERROR] Eșec la modificarea centralei {$cleanPlantId}: " . $e->getMessage());
             http_response_code(400);
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Nu s-a putut procesa aprobarea: ' . $e->getMessage()
-            ]);
+            echo json_encode(['status' => 'error', 'message' => 'Nu s-a putut procesa actualizarea: ' . $e->getMessage()]);
             exit;
         }
     }

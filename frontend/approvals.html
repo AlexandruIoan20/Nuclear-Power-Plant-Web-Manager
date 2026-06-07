@@ -94,7 +94,8 @@
                         <td style="padding: 12px; font-family: monospace;">${plant.latitude}, ${plant.longitude}</td>
                         <td style="padding: 12px;"><span class="badge">${plant.status}</span></td>
                         <td style="padding: 12px; text-align: right;">
-                            <button class="button small action-approve" data-id="${plant.id}">Aprobă centrală</button>
+                            <button class="button small action-approve" data-id="${plant.id}" style="margin-right: 6px;">Aprobă</button>
+                            <button class="button small secondary action-reject" data-id="${plant.id}" style="background-color: #dc3545; color: white; border-color: #dc3545;">Respinge</button>
                         </td>
                     `;
                     tableBody.appendChild(tr);
@@ -102,7 +103,13 @@
 
                 document.querySelectorAll(".action-approve").forEach(btn => {
                     btn.addEventListener("click", () => {
-                        executeApproval(btn.getAttribute("data-id"));
+                        executeStatusChange(btn.getAttribute("data-id"), "APPROVED");
+                    });
+                });
+
+                document.querySelectorAll(".action-reject").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        executeStatusChange(btn.getAttribute("data-id"), "REJECTED");
                     });
                 });
 
@@ -110,12 +117,16 @@
                 tableBody.innerHTML = `<tr><td colspan="5" style="padding: 20px; text-align: center; color: var(--danger);">Eroare la încărcarea datelor.</td></tr>`;
             }
 
-            async function executeApproval(id) {
+            async function executeStatusChange(id, targetStatus) {
                 statusMessage.innerHTML = "";
                 try {
-                    const response = await fetch(`http://localhost:8081/api/power-plants/${id}/approve`, {
+                    const response = await fetch(`http://localhost:8081/api/power-plants/${id}/status`, {
                         method: "PUT",
-                        credentials: 'include'
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ status: targetStatus })
                     });
                     const result = await response.json();
 

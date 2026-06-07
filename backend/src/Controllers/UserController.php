@@ -133,12 +133,14 @@ class UserController {
                 return;
             }
 
+            // Alocarea datelor în sesiune
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_email'] = $user['email'];
             $_SESSION['user_role'] = $user['role'];
             $_SESSION['username'] = $user['username'];
 
-            session_regenerate_id(true);
+            // FIX: Am comentat regenerarea ID-ului pentru a preveni pierderea cookie-ului pe porturi diferite (cross-port local dev)
+            // session_regenerate_id(true);
 
             if ($wantsJson) {
                 header('Content-Type: application/json; charset=UTF-8');
@@ -210,5 +212,4 @@ class UserController {
             ]
         ]);
     }
-
 }
