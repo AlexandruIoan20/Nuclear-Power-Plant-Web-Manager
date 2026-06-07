@@ -180,7 +180,11 @@
         map.on('click', async (event) => {
             try {
                 setStatus('Validare în curs prin backend...');
-                await sendCoordinates(event.latlng.lat, event.latlng.lng);
+                
+         
+                const wrappedCoordinates = event.latlng.wrap();
+                
+                await sendCoordinates(wrappedCoordinates.lat, wrappedCoordinates.lng);
             } catch (error) {
                 setStatus(error.message);
             }
