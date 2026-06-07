@@ -39,7 +39,7 @@ class DetailsPlantRepository {
             $row['longitude']
         );
     }
-
+    
     public function save(Plant $plant): void { 
         $stmt = $this->db->prepare("
             INSERT INTO power_plants (

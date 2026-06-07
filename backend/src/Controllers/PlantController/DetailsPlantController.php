@@ -145,7 +145,7 @@ class DetailsPlantController {
 
         if (!$body || !isset($body['latitude']) || !isset($body['longitude'])) {
             http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Payload invalid: latitude și longitude sunt necesare.']);
+            echo json_encode(['status' => 'error', 'message' => 'Payload invalid.']);
             exit;
         }
 
@@ -158,58 +158,40 @@ class DetailsPlantController {
             exit;
         }
 
-        if ($lat < -90 || $lat > 90 || $lon < -180 || $lon > 180) {
-            http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Coordonate în afara intervalului permis.']);
-            exit;
-        }
-
         $latNorm = round($lat, 6);
         $lonNorm = round($lon, 6);
-
         $label = number_format($latNorm, 6, '.', '') . ', ' . number_format($lonNorm, 6, '.', '');
 
         $country = null;
-        $debugMessage = 'Coordonate validate.';
 
+  
+        $opts = [
+            'http' => [
+                'method' => 'GET',
+                'header' => "Accept: application/json\r\nUser-Agent: NuclearProjectBackend/1.0\r\n",
+                'ignore_errors' => true,
+                'timeout' => 1.5
+            ]
+        ];
+        $context = stream_context_create($opts);
+
+     
         try {
-           
-            $query = http_build_query([
-                'latitude' => $latNorm,
-                'longitude' => $lonNorm,
-                'localityLanguage' => 'ro'
-            ]);
-
-            $url = "https://api.bigdatacloud.net/data/reverse-geocode-client?{$query}";
-
-            $opts = [
-                'http' => [
-                    'method' => 'GET',
-                    'header' => "Accept: application/json\r\n",
-                    'ignore_errors' => true
-                ]
-            ];
-
-            $context = stream_context_create($opts);
-            $resp = file_get_contents($url, false, $context);
+            $geoQuery = http_build_query(['latitude' => $latNorm, 'longitude' => $lonNorm, 'localityLanguage' => 'ro']);
+            $geoUrl = "https://api.bigdatacloud.net/data/reverse-geocode-client?{$geoQuery}";
+            $geoResp = file_get_contents($geoUrl, false, $context);
             
-            if ($resp === false) {
-                $debugMessage = 'Coordonate validate, dar conexiunea la serviciul de geocoding a eșuat.';
-            } else {
-                $geo = json_decode($resp, true);
-                
-               
-                if (isset($geo['countryName']) && !empty($geo['countryName'])) {
-                    $country = $geo['countryName'];
-                } else {
-                    $debugMessage = 'Coordonate validate, dar locația nu aparține unei țări cunoscute.';
+            if ($geoResp !== false) {
+                $geoData = json_decode($geoResp, true);
+                if (!empty($geoData['countryName'])) {
+                    $country = $geoData['countryName'];
                 }
             }
         } catch (Throwable $e) {
-            $debugMessage = 'Eroare la procesarea geocoding-ului: ' . $e->getMessage();
+            error_log("[PREVIEW ERROR] Nu am putut lua țara: " . $e->getMessage());
         }
 
-        
+   
         http_response_code(200);
         echo json_encode([
             'status' => 'success',
@@ -218,7 +200,7 @@ class DetailsPlantController {
                 'longitude' => $lonNorm,
                 'coordinates_label' => $label,
                 'country' => $country,
-                'message' => $debugMessage
+                'message' => 'Locație validată rapid.'
             ]
         ]);
         exit;
