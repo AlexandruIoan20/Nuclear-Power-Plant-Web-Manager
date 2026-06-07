@@ -110,6 +110,9 @@ require_once __DIR__ . '/../src/Controllers/FeasibilitController.php';
 require_once __DIR__ . '/../src/Services/EmailService.php';
 require_once __DIR__ . '/../src/Controllers/EmailController.php';
 
+require_once __DIR__ . '/../src/Services/RssService.php';
+require_once __DIR__ . '/../src/Controllers/RssController.php';
+
 // Database configuration
 $host     = getenv('DB_HOST')     ?: 'db';
 $port     = getenv('DB_PORT')     ?: '5432';
@@ -157,6 +160,9 @@ $feasibilityService    = FeasibilityServiceFactory::create($pdo, $plantRepositor
 
 $emailService = new EmailService();
 $emailController = new EmailController($emailService);
+
+$rssService = new RssService($plantServiceFacade);
+$rssController = new RssController($rssService);    
 
 
 $userRepository = new UserRepository($pdo);
@@ -298,6 +304,11 @@ $router->get('/users', function() use ($userService) {
 
 $router->post('/api/send-email', function () use ($emailController) {
     $emailController->handleSendEmail();
+});
+
+// RSS 
+$router->get('/api/rss/power-plants', function () use ($rssController) {
+    $rssController->handleGetPlantsFeed();
 });
 
 // --- Feasibility ---
