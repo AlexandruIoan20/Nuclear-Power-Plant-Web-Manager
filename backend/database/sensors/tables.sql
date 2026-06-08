@@ -72,7 +72,7 @@ CREATE TABLE sensor_readings (
 ); 
 
 CREATE TABLE sensor_templates (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     reactor_type reactor_types NOT NULL,
     sensor_code VARCHAR(30) NOT NULL,
     sensor_type sensor_types NOT NULL,

@@ -46,6 +46,7 @@ require_once __DIR__ . '/../src/Repositories/PlantRepository/BasicPlantRepositor
 require_once __DIR__ . '/../src/Repositories/PlantRepository/GeologicalPlantRepository.php';
 require_once __DIR__ . '/../src/Repositories/PlantRepository/TechnicalPlantRepository.php';
 require_once __DIR__ . '/../src/Repositories/FeasibiltyRepository.php';
+require_once __DIR__ . '/../src/Repositories/ReactorRepository.php'; 
 
 require_once __DIR__ . '/../src/Services/PlantService/DetailsPlantService.php';
 require_once __DIR__ . '/../src/Services/PlantService/BasicPlantService.php';
@@ -56,12 +57,14 @@ require_once __DIR__ . '/../src/Services/FeasibilityService/FeasibilityService.p
 require_once __DIR__ . '/../src/Repositories/PlantRepositoryFacade.php';
 require_once __DIR__ . '/../src/Services/PlantServiceFacade.php';
 require_once __DIR__ . '/../src/Services/FeasibilityService/FeasibilityServiceFactory.php';
+require_once __DIR__ . '/../src/Services/ReactorService.php'; 
 
 require_once __DIR__ . '/../src/Controllers/PlantController/DetailsPlantController.php';
 require_once __DIR__ . '/../src/Controllers/PlantController/BasicPlantController.php';
 require_once __DIR__ . '/../src/Controllers/PlantController/GeologicalPlantController.php';
 require_once __DIR__ . '/../src/Controllers/PlantController/TechnicalPlantController.php';
 require_once __DIR__ . '/../src/Controllers/FeasibilitController.php';
+require_once __DIR__ . '/../src/Controllers/ReactorController.php'; 
 
 $host     = getenv('DB_HOST')     ?: 'db';
 $port     = getenv('DB_PORT')     ?: '5432';
@@ -73,7 +76,7 @@ $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
 
 try {
     $pdo = new PDO($dsn, $username, $password, [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES   => false,
     ]);
@@ -82,27 +85,15 @@ try {
     die(json_encode(["status" => "error", "message" => "Conexiune la baza de date esuata."]));
 }
 
-$adminEmail = 'admin@nuclear.ro';
-$adminPasswordHash = '$2y$12$pLgjMWjlhKbYoAAvRByCMuLnj3l5JlYl03QHgkgZwHci6c8Q59U.i';
-
-$adminInsert = $pdo->prepare(
-    'INSERT INTO users (username, first_name, last_name, email, password_hash, role) VALUES (:username, :first_name, :last_name, :email, :password_hash, :role) ON CONFLICT (email) DO UPDATE SET username = EXCLUDED.username, first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, password_hash = EXCLUDED.password_hash, role = EXCLUDED.role'
-);
-$adminInsert->execute([
-    'username' => 'admin',
-    'first_name' => 'Admin',
-    'last_name' => 'System',
-    'email' => $adminEmail,
-    'password_hash' => $adminPasswordHash,
-    'role' => 'ADMIN',
-]);
-
 $plantRepositoryFacade = new PlantRepositoryFacade($pdo);
 $plantServiceFacade = new PlantServiceFacade($plantRepositoryFacade);
 $feasibilityService = FeasibilityServiceFactory::create($pdo, $plantRepositoryFacade);
 
 $userRepository = new UserRepository($pdo);
 $userService = new UserService($userRepository);
+
+$reactorRepository = new ReactorRepository($pdo); 
+$reactorService = new ReactorService($reactorRepository);
 
 $router = new Router();
 
@@ -239,6 +230,32 @@ $router->get('/api/power-plants/{id}/feasibility', function ($id) use ($feasibil
 $router->post('/api/power-plants/{id}/feasibility', function ($id) use ($feasibilityService) {
     (new FeasibilityController($feasibilityService))->generate($id);
 });
+
+// --- Reactoare ---
+
+$router->get('/api/reactors', function () use ($reactorService) { 
+    (new ReactorController($reactorService))->getAllReactors(); 
+}); 
+
+$router->get('/api/reactors/{id}', function($id) use ($reactorService) { 
+    (new ReactorController($reactorService))->getReactor($id); 
+}); 
+
+$router->get('/api/power-plants/{id}/reactors', function($id) use ($reactorService) { 
+    (new ReactorController($reactorService))->getReactorsByPlant($id); 
+}); 
+
+$router->post('/api/reactors', function() use ($reactorService) { 
+    (new ReactorController($reactorService))->createReactor(); 
+}); 
+
+$router->put('/api/reactors/{id}', function ($id) use ($reactorService) { 
+    (new ReactorController($reactorService))->updateReactor($id); 
+});
+
+$router->delete('/api/reactors/{id}', function ($id) use ($reactorService) { 
+    (new ReactorController($reactorService))->deleteReactor($id); 
+}); 
 
 // --- Dispatch ---
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
