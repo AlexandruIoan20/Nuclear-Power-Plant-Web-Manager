@@ -1,5 +1,7 @@
 <?php 
 
+require_once __DIR__ . '../../../Entities/PlantStatus.php'; 
+
 class DetailsPlantRepository {
     private PDO $db; 
 
@@ -8,19 +10,63 @@ class DetailsPlantRepository {
     }
 
     public function findAll(): array { 
-        $statement = $this->db->query("SELECT * FROM power_plants"); 
+        $statement = $this->db->query("
+            SELECT p.id, p.name, p.status,
+                   g.country, g.latitude, g.longitude
+            FROM power_plants p
+            LEFT JOIN geological_data g ON p.id = g.power_plant_id
+        "); 
         $powerPlants = []; 
 
         while($row = $statement->fetch(PDO::FETCH_ASSOC)) { 
-            $powerPlants[] = new Plant($row['country'], $row['id'], $row['name'], PlantStatus::from($row['status']), 
-            $row['latitude'], $row['longitude']); 
+            $powerPlants[] = [
+                'id' => $row['id'],
+                'name' => $row['name'],
+                'country' => $row['country'],
+                'latitude' => $row['latitude'],
+                'longitude' => $row['longitude'],
+                'status' => $row['status'],
+            ]; 
         }
 
         return $powerPlants; 
     }
 
+    public function getPlantsByStatus(array $data): array { 
+        $status = PlantStatus::from($data['status']); 
+        $powerPlants = []; 
+
+        $statement = $this->db->prepare("
+            SELECT p.id, p.name, p.status,
+                   g.country, g.latitude, g.longitude
+            FROM power_plants p
+            LEFT JOIN geological_data g ON p.id = g.power_plant_id
+            WHERE p.status = :status
+        "); 
+        $statement->execute([ "status" => $status->value ]); 
+
+        while($row = $statement->fetch(PDO::FETCH_ASSOC)) { 
+            $powerPlants[] = [
+                'id' => $row['id'],
+                'name' => $row['name'],
+                'country' => $row['country'],
+                'latitude' => $row['latitude'],
+                'longitude' => $row['longitude'],
+                'status' => $row['status'],
+            ]; 
+        }
+        
+        return $powerPlants; 
+    }
+
     public function findById(string $plantId) { 
-        $statement = $this->db->prepare("SELECT * FROM power_plants WHERE id = :plantId"); 
+        $statement = $this->db->prepare("
+            SELECT p.id, p.name, p.status,
+                   g.country, g.latitude, g.longitude
+            FROM power_plants p
+            LEFT JOIN geological_data g ON p.id = g.power_plant_id
+            WHERE p.id = :plantId
+        "); 
         $statement->execute([ 
             'plantId' => $plantId
         ]); 
@@ -31,12 +77,9 @@ class DetailsPlantRepository {
         }
 
         return new Plant(
-            $row['country'],
             $row['id'],
             $row['name'],
-            PlantStatus::from($row['status']),
-            $row['latitude'],
-            $row['longitude']
+            PlantStatus::from($row['status'])
         );
     }
     
@@ -45,54 +88,46 @@ class DetailsPlantRepository {
             INSERT INTO power_plants (
                 id,
                 name, 
-                country, 
-                latitude, 
-                longitude,
                 status
             ) VALUES (
                 :id, 
                 :name, 
-                :country, 
-                :latitude, 
-                :longitude,
                 :status
             )
         "); 
 
-        $latVal = $plant->getLatitude() !== null ? number_format($plant->getLatitude(), 6, '.', '') : null;
-        $lonVal = $plant->getLongitude() !== null ? number_format($plant->getLongitude(), 6, '.', '') : null;
-
         $stmt->execute([
             'id' => $plant->getId(),
             'name' => $plant->getName(),
-            'country' => $plant->getCountry(),
-            'latitude' => $latVal,
-            'longitude' => $lonVal,
             'status' => $plant->getStatus()->value
         ]);
+    }
+
+    public function updateStatus(array $data, string $plantId): void { 
+        $status = PlantStatus::from($data['status']);
+    
+        $statement = $this->db->prepare("
+            UPDATE power_plants SET status = :status WHERE id = :id
+        "); 
+    
+        $statement->execute([ 
+            "status" => $status->value, 
+            "id" => $plantId
+        ]); 
     }
 
     public function update(Plant $plant): void {
         $stmt = $this->db->prepare("
             UPDATE power_plants 
             SET 
-                name = :name, 
-                country = :country, 
-                latitude = :latitude, 
-                longitude = :longitude,
+                name = :name,
                 status = :status
             WHERE id = :id
         "); 
     
-        $latVal = $plant->getLatitude() !== null ? number_format($plant->getLatitude(), 6, '.', '') : null;
-        $lonVal = $plant->getLongitude() !== null ? number_format($plant->getLongitude(), 6, '.', '') : null;
-
         $stmt->execute([
             'id' => $plant->getId(),
             'name' => $plant->getName(),
-            'country' => $plant->getCountry(),
-            'latitude' => $latVal,
-            'longitude' => $lonVal,
             'status' => $plant->getStatus()->value
         ]);
 

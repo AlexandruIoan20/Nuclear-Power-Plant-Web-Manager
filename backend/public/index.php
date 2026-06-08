@@ -6,7 +6,6 @@ session_start([
     'cookie_httponly' => true,
 ]);
 
-// Allowed origins for local development
 $allowedOrigins = [
     'http://localhost:5500',
     'http://localhost:8081',
@@ -15,7 +14,6 @@ $allowedOrigins = [
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
-// Secure CORS validation
 if ($origin) {
     $isAllowed = in_array($origin, $allowedOrigins, true) || (bool)preg_match('#^https?://(localhost|127\.0\.0\.1)(:\d+)?$#', $origin);
     if ($isAllowed) {
@@ -69,6 +67,7 @@ require_once __DIR__ . '/../src/Repositories/PlantRepository/BasicPlantRepositor
 require_once __DIR__ . '/../src/Repositories/PlantRepository/GeologicalPlantRepository.php';
 require_once __DIR__ . '/../src/Repositories/PlantRepository/TechnicalPlantRepository.php';
 require_once __DIR__ . '/../src/Repositories/FeasibiltyRepository.php';
+require_once __DIR__ . '/../src/Repositories/ReactorRepository.php'; 
 
 require_once __DIR__ . '/../src/Services/PlantService/DetailsPlantService.php';
 require_once __DIR__ . '/../src/Services/PlantService/BasicPlantService.php';
@@ -79,6 +78,7 @@ require_once __DIR__ . '/../src/Services/FeasibilityService/FeasibilityService.p
 require_once __DIR__ . '/../src/Repositories/PlantRepositoryFacade.php';
 require_once __DIR__ . '/../src/Services/PlantServiceFacade.php';
 require_once __DIR__ . '/../src/Services/FeasibilityService/FeasibilityServiceFactory.php';
+require_once __DIR__ . '/../src/Services/ReactorService.php'; 
 
 require_once __DIR__ . '/../src/Controllers/PlantController/DetailsPlantController.php';
 require_once __DIR__ . '/../src/Controllers/PlantController/BasicPlantController.php';
@@ -86,6 +86,7 @@ require_once __DIR__ . '/../src/Controllers/PlantController/GeologicalPlantContr
 require_once __DIR__ . '/../src/Controllers/PlantController/TechnicalPlantController.php';
 require_once __DIR__ . '/../src/Controllers/FeasibilitController.php';
 require_once __DIR__ . '/../src/Controllers/ApprovalController.php';
+require_once __DIR__ . '/../src/Controllers/ReactorController.php'; 
 
 require_once __DIR__ . '/../src/Services/EmailService.php';
 require_once __DIR__ . '/../src/Controllers/EmailController.php';
@@ -114,7 +115,7 @@ $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
 
 try {
     $pdo = new PDO($dsn, $username, $password, [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES   => false,
     ]);
@@ -123,30 +124,9 @@ try {
     die(json_encode(["status" => "error", "message" => "Database connection failed."]));
 }
 
-// Ensure default Admin user exists in the database
-$adminEmail = 'admin@nuclear.ro';
-$adminPasswordHash = password_hash('admin', PASSWORD_BCRYPT);
-
-$adminInsert = $pdo->prepare(
-    'INSERT INTO users (username, first_name, last_name, email, password_hash, role) 
-     VALUES (:username, :first_name, :last_name, :email, :password_hash, :role) 
-     ON CONFLICT (email) 
-     DO UPDATE SET username = EXCLUDED.username, first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, password_hash = EXCLUDED.password_hash, role = EXCLUDED.role'
-);
-
-$adminInsert->execute([
-    'username' => 'admin',
-    'first_name' => 'Admin',
-    'last_name' => 'System',
-    'email' => $adminEmail,
-    'password_hash' => $adminPasswordHash,
-    'role' => 'ADMIN',
-]);
-
-// Initialize Repositories and Services
 $plantRepositoryFacade = new PlantRepositoryFacade($pdo);
-$plantServiceFacade    = new PlantServiceFacade($plantRepositoryFacade);
-$feasibilityService    = FeasibilityServiceFactory::create($pdo, $plantRepositoryFacade);
+$plantServiceFacade = new PlantServiceFacade($plantRepositoryFacade);
+$feasibilityService = FeasibilityServiceFactory::create($pdo, $plantRepositoryFacade);
 
 $emailService = new EmailService();
 $emailController = new EmailController($emailService);
@@ -161,11 +141,13 @@ $userRepository = new UserRepository($pdo);
 $userService = new UserService($userRepository);
 
 $notificationService = new NotificationService($plantServiceFacade, $alertService);
+$reactorRepository = new ReactorRepository($pdo); 
+$reactorService = new ReactorService($reactorRepository);
 
 $router = new Router();
 
 // --- Countries ---
-$router->get('/api/countries', function() use ($plantServiceFacade) {
+$router->get('/api/countries', function () use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getCountries();
 });
 
@@ -186,14 +168,30 @@ $router->get('/api/power-plants', function () use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList();
 });
 
+$router->get('/api/power-plants/filter', function () use ($plantServiceFacade) { 
+    (new DetailsPlantController($plantServiceFacade))->getPlantsByStatus(); 
+}); 
+
+$router->get('/api/power-plants/{id}', function ($id) use ($plantServiceFacade) { 
+    (new DetailsPlantController($plantServiceFacade))->getPlant($id); 
+}); 
+
 $router->post('/api/power-plants', function () use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->handleSavePlantDetails();
+});
+
+$router->post('/api/power-plants/coordinates-preview', function () use ($plantServiceFacade) {
+    (new DetailsPlantController($plantServiceFacade))->previewCoordinates();
 });
 
 // --- Details ---
 $router->get('/api/power-plants/{id}/details', function ($id) use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getPlantDetails($id);
 });
+
+$router->patch('/api/power-plants/{id}/status', function ($plantId) use ($plantServiceFacade){ 
+    (new DetailsPlantController($plantServiceFacade)->updateStatus($plantId)); 
+}); 
 
 $router->put('/api/power-plants/{id}/details', function ($id) use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->handleUpdatePlantDetails($id);
@@ -202,14 +200,6 @@ $router->put('/api/power-plants/{id}/details', function ($id) use ($plantService
 // --- Basics ---
 $router->get('/api/power-plants/{id}/basics', function ($id) use ($plantServiceFacade) {
     (new BasicPlantController($plantServiceFacade))->getBasicPlantData($id);
-});
-
-$router->post('/api/power-plants/coordinates-preview', function() use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->previewCoordinates();
-});
-
-$router->post('/api/power-plants/{id}/basic-save', function($id) use ($plantServiceFacade) {
-    (new BasicPlantController($plantServiceFacade))->createBasicPlantData($id);
 });
 
 $router->post('/api/power-plants/{id}/basics', function ($id) use ($plantServiceFacade) {
@@ -315,7 +305,7 @@ $router->get('/users', function() use ($userService) {
     (new UserController($userService))->listUsers();
 });
 
-
+// De cautat cod duplicat la refactorizare
 $router->put('/api/power-plants/{id}/status', function ($id) use ($plantServiceFacade) {
     (new ApprovalController($plantServiceFacade))->updateStatus($id);
 });
@@ -339,8 +329,34 @@ $router->post('/api/power-plants/{id}/feasibility', function ($id) use ($feasibi
     (new FeasibilityController($feasibilityService))->generate($id);
 });
 
+// --- Reactoare ---
+
+$router->get('/api/reactors', function () use ($reactorService) { 
+    (new ReactorController($reactorService))->getAllReactors(); 
+}); 
+
+$router->get('/api/reactors/{id}', function($id) use ($reactorService) { 
+    (new ReactorController($reactorService))->getReactor($id); 
+}); 
+
+$router->get('/api/power-plants/{id}/reactors', function($id) use ($reactorService) { 
+    (new ReactorController($reactorService))->getReactorsByPlant($id); 
+}); 
+
+$router->post('/api/reactors', function() use ($reactorService) { 
+    (new ReactorController($reactorService))->createReactor(); 
+}); 
+
+$router->put('/api/reactors/{id}', function ($id) use ($reactorService) { 
+    (new ReactorController($reactorService))->updateReactor($id); 
+});
+
+$router->delete('/api/reactors/{id}', function ($id) use ($reactorService) { 
+    (new ReactorController($reactorService))->deleteReactor($id); 
+}); 
+
 // --- Dispatch ---
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
 $router->dispatch($method, $uri);

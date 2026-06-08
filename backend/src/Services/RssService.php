@@ -24,10 +24,10 @@ class RssService {
         
         foreach ($plants as $plant) {
             
-            $name = htmlspecialchars($plant->getName() ?: 'Unnamed Plant');
-            $country = htmlspecialchars($plant->getCountry() ?: 'Unknown Country');
-            $status = htmlspecialchars($plant->getStatus()->value ?? 'DRAFT');
-            $id = $plant->getId();
+            $name = htmlspecialchars($plant['name'] ?: 'Unnamed Plant');
+            $country = htmlspecialchars($plant['country'] ?: 'Unknown Country');
+            $status = htmlspecialchars($plant['status'] ?? 'DRAFT');
+            $id = $plant['id'];
             
             $xml .= '<item>';
             $xml .= '<title>' . $name . ' (' . $country . ')</title>';

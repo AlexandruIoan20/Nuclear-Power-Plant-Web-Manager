@@ -6,6 +6,9 @@ class GeologicalPlantDataDTO {
     public function __construct(
         public readonly string $id,
         public readonly string $powerPlantId,
+        public readonly ?string $country,
+        public readonly ?float $latitude,
+        public readonly ?float $longitude,
         public readonly ?string $soilType,
         public readonly ?string $waterSourceType,
         public readonly ?float $seismicStability,
@@ -22,8 +25,11 @@ class GeologicalPlantDataDTO {
         return new self ( 
             id: $g->getId(), 
             powerPlantId: $g->getPowerPlantId(), 
-            soilType: $g->getSoilType()->value ?? null, 
-            waterSourceType: $g->getWaterSourceType()->value ?? null, 
+            country: $g->getCountry(), 
+            latitude: $g->getLatitude(), 
+            longitude: $g->getLongitude(), 
+            soilType: $g->getSoilType()?->value, 
+            waterSourceType: $g->getWaterSourceType()?->value, 
             seismicStability: $g->getSeismicStability(), 
             floodRisk: $g->getFloodRisk(), 
             groundwaterLevel: $g->getGroundwaterLevel(), 

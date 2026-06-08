@@ -41,7 +41,7 @@ class ScoringChecker extends AbstractFeasibilityChecker {
         $averageNsviScore = round($totalWeightedScore / $totalReactors, 2);
 
         $finalEvaluation = [ 
-            'nvsi_score' => $averageNsviScore, 
+            'nsvi_score' => $averageNsviScore, 
             'deficiencies' => $allDeficiencies
         ]; 
 

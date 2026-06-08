@@ -3,10 +3,9 @@ import { getHeaderState } from './formHeaderState.js'
 
 const currentPage = window.location.pathname.split("/").pop().replace(".html", "");
 
-function getSteps() {  
+function getSteps() {
     const plantId = getQueryParam("id");
     const { basicsId, geologicalId, technicalId } = getHeaderState();
-
     return [
         {
             label: "Detalii Centrală",
@@ -52,6 +51,9 @@ export function renderHeader() {
     if (!header) return;
 
     const steps = getSteps();
+    const plantId = getQueryParam("id");
+    const { basicsId, geologicalId, technicalId } = getHeaderState();
+    const allCompleted = !!plantId && !!basicsId && !!geologicalId && !!technicalId;
 
     header.innerHTML = `
         <nav class="form-nav">
@@ -61,7 +63,8 @@ export function renderHeader() {
             </div>
             <button class="form-nav__toggle" id="nav-toggle" aria-label="Deschide meniul">☰</button>
             <div class="form-nav__links" id="nav-links">
-                ${steps.map(step => buildButton(step, !!getQueryParam("id"))).join("")}
+                ${steps.map(step => buildButton(step, !!plantId)).join("")}
+                ${buildFinishButton(allCompleted, plantId)}
             </div>
         </nav>
     `;
@@ -70,6 +73,41 @@ export function renderHeader() {
         const links = document.getElementById("nav-links");
         links.classList.toggle("form-nav__links--open");
     });
+}
+
+function buildFinishButton(allCompleted, plantId) {
+    const isCurrent = currentPage === "finish";
+
+    // Pagina activă curentă
+    if (isCurrent) {
+        return `
+            <span class="nav-btn nav-btn--current">
+                <span class="nav-btn__icon">🏁</span>
+                <span class="nav-btn__label">Finalizare</span>
+                <span class="nav-btn__badge nav-btn__badge--active">Activ</span>
+            </span>
+        `;
+    }
+
+    // Toate secțiunile completate → buton activ
+    if (allCompleted) {
+        return `
+            <a href="/pages/power-plants/finish.html?id=${plantId}" class="nav-btn nav-btn--empty">
+                <span class="nav-btn__icon">🏁</span>
+                <span class="nav-btn__label">Finalizare</span>
+                <span class="nav-btn__badge nav-btn__badge--empty">Necompletat</span>
+            </a>
+        `;
+    }
+
+    // Nu toate completate → disabled
+    return `
+        <span class="nav-btn nav-btn--disabled" title="Completează toate secțiunile pentru a finaliza">
+            <span class="nav-btn__icon">🏁</span>
+            <span class="nav-btn__label">Finalizare</span>
+            <span class="nav-btn__badge nav-btn__badge--locked">🔒</span>
+        </span>
+    `;
 }
 
 function buildButton(step, plantExists) {
