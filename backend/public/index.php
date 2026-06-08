@@ -6,6 +6,33 @@ session_start([
     'cookie_httponly' => true,
 ]);
 
+while (ob_get_level()) ob_end_clean();
+
+set_exception_handler(function (Throwable $e) {
+    while (ob_get_level()) ob_end_clean();
+    http_response_code(500);
+    header('Content-Type: application/json; charset=UTF-8');
+    echo json_encode(['status' => 'error', 'message' => 'Eroare internă.', 'debug' => $e->getMessage()]);
+    exit;
+});
+
+set_error_handler(function ($severity, $message, $file, $line) {
+    if (error_reporting() & $severity) {
+        throw new ErrorException($message, 0, $severity, $file, $line);
+    }
+});
+
+register_shutdown_function(function () {
+    $error = error_get_last();
+    if ($error !== null && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        while (ob_get_level()) ob_end_clean();
+        http_response_code(500);
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode(['status' => 'error', 'message' => 'Eroare fatală.', 'debug' => $error['message']]);
+        exit;
+    }
+});
+
 $allowedOrigins = [
     'http://localhost:5500',
     'http://localhost:8081',

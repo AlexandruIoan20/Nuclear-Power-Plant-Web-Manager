@@ -135,18 +135,4 @@ class DetailsPlantRepository {
         error_log("[DEBUG] ID cautat pentru update: " . $plant->getId());
         error_log("[DEBUG] Randuri modificate efectiv: " . $randuriModificate);
     }
-
-
-    public function updateStatus(string $plantId, string $status): void {
-        $stmt = $this->db->prepare("
-            UPDATE power_plants 
-            SET status = :status 
-            WHERE id = :id
-        ");
-        
-        $stmt->execute([
-            'id' => $plantId,
-            'status' => $status
-        ]);
-    }
 }

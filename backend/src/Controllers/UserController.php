@@ -67,15 +67,16 @@ class UserController {
                     echo json_encode([
                         'status' => 'success',
                         'message' => 'Cont creat cu succes! Poți să te conectezi acum.',
-                        'redirect' => 'http://localhost:5500/login.html'
+                        'redirect' => 'http://localhost:5500/pages/login.html'
                     ]);
                     return;
                 }
 
                 $_SESSION['register_success'] = 'Cont creat cu succes! Poți să te conectezi acum.';
-                header('Location: http://localhost:5500/login.html', true, 302);
+                header('Location: http://localhost:5500/pages/login.html', true, 302);
                 exit;
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
+                error_log("[REGISTER ERROR] " . $e->getMessage());
                 if ($wantsJson) {
                     http_response_code(400);
                     header('Content-Type: application/json; charset=UTF-8');
@@ -102,58 +103,67 @@ class UserController {
             || strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'fetch';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $email = $_POST['email'] ?? '';
-            $password = $_POST['password'] ?? '';
+            try {
+                $email = $_POST['email'] ?? '';
+                $password = $_POST['password'] ?? '';
 
-            if (empty($email) || empty($password)) {
-                if ($wantsJson) {
-                    http_response_code(400);
-                    header('Content-Type: application/json; charset=UTF-8');
-                    echo json_encode(['status' => 'error', 'message' => 'Email și parolă sunt necesare.']);
+                if (empty($email) || empty($password)) {
+                    if ($wantsJson) {
+                        http_response_code(400);
+                        header('Content-Type: application/json; charset=UTF-8');
+                        echo json_encode(['status' => 'error', 'message' => 'Email și parolă sunt necesare.']);
+                        return;
+                    }
+
+                    $_SESSION['login_error'] = 'Email și parolă sunt necesare.';
+                    require __DIR__ . '/../Views/login.view.php';
                     return;
                 }
 
-                $_SESSION['login_error'] = 'Email și parolă sunt necesare.';
-                require __DIR__ . '/../Views/login.view.php';
-                return;
-            }
+                $user = $this->userService->authenticateUser($email, $password);
 
-            $user = $this->userService->authenticateUser($email, $password);
+                if (!$user) {
+                    if ($wantsJson) {
+                        http_response_code(401);
+                        header('Content-Type: application/json; charset=UTF-8');
+                        echo json_encode(['status' => 'error', 'message' => 'Email sau parolă incorectă.']);
+                        return;
+                    }
 
-            if (!$user) {
-                if ($wantsJson) {
-                    http_response_code(401);
-                    header('Content-Type: application/json; charset=UTF-8');
-                    echo json_encode(['status' => 'error', 'message' => 'Email sau parolă incorectă.']);
+                    $_SESSION['login_error'] = 'Email sau parolă incorectă.';
+                    require __DIR__ . '/../Views/login.view.php';
                     return;
                 }
 
-                $_SESSION['login_error'] = 'Email sau parolă incorectă.';
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['user_email'] = $user['email'];
+                $_SESSION['user_role'] = $user['role'];
+                $_SESSION['username'] = $user['username'];
+
+                if ($wantsJson) {
+                    header('Content-Type: application/json; charset=UTF-8');
+                    echo json_encode([
+                        'status' => 'success',
+                        'message' => 'Autentificare reușită.',
+                        'redirect' => 'http://localhost:5500/pages/dashboard.html'
+                    ]);
+                    return;
+                }
+
+                header('Location: http://localhost:5500/pages/dashboard.html', true, 302);
+                exit;
+            } catch (Throwable $e) {
+                error_log("[LOGIN ERROR] " . $e->getMessage());
+                if ($wantsJson) {
+                    http_response_code(500);
+                    header('Content-Type: application/json; charset=UTF-8');
+                    echo json_encode(['status' => 'error', 'message' => 'Eroare internă. Încercați din nou.']);
+                    return;
+                }
+                $_SESSION['login_error'] = 'Eroare internă. Încercați din nou.';
                 require __DIR__ . '/../Views/login.view.php';
                 return;
             }
-
-            // Alocarea datelor în sesiune
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['user_email'] = $user['email'];
-            $_SESSION['user_role'] = $user['role'];
-            $_SESSION['username'] = $user['username'];
-
-            // FIX: Am comentat regenerarea ID-ului pentru a preveni pierderea cookie-ului pe porturi diferite (cross-port local dev)
-            // session_regenerate_id(true);
-
-            if ($wantsJson) {
-                header('Content-Type: application/json; charset=UTF-8');
-                echo json_encode([
-                    'status' => 'success',
-                    'message' => 'Autentificare reușită.',
-                    'redirect' => 'http://localhost:5500/dashboard.html'
-                ]);
-                return;
-            }
-
-            header('Location: http://localhost:5500/dashboard.html', true, 302);
-            exit;
         }
 
         require __DIR__ . '/../Views/login.view.php';
@@ -174,7 +184,7 @@ class UserController {
         }
 
         session_destroy();
-        header('Location: http://localhost:5500/start.html', true, 302);
+        header('Location: http://localhost:5500/pages/start.html', true, 302);
         exit;
     }
 

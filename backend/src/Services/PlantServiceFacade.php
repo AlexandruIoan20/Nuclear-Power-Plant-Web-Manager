@@ -49,6 +49,8 @@ class PlantServiceFacade {
 
         
         return array_values($pendingPlants);
+    }
+
     public function getPlantsByStatus(array $data): array { 
         $powerPlants = $this->detailsPlantService->getPlantsByStatus($data); 
         return $powerPlants;

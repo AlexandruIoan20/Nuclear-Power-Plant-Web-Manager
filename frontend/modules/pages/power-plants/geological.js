@@ -9,7 +9,7 @@ import { setupCoordinatePickerMap } from '../../ui/map/coordinatePicker.js';
 import { API_BASE } from '../../config/api.config.js'; 
 
 const plantId = getQueryParam("id"); 
-const geologicalId = getQueryParam("geologicalId"); 
+let geologicalId = getQueryParam("geologicalId"); 
 
 loadSelect("soil_type", SoilType); 
 loadSelect("water_source_type", WaterSourceType); 
@@ -65,9 +65,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             initialLatitude = d.latitude;
             initialLongitude = d.longitude;
         } catch (error) {
-            console.error(error.message);
-            showError(statusElement, "Eroare la încărcarea datelor geologice.");
-            return; 
+            console.warn('Datele geografice nu au fost găsite, se trece în modul de creare:', error.message);
+            geologicalId = null;
         }
     }
 
