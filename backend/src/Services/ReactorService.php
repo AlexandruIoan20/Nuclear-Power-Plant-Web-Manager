@@ -49,7 +49,7 @@ class ReactorService {
             $data['reactorCode'],
             $reactorType,
             $coolingType,
-            null, // id (se va genera automat în constructor)
+            null, 
             $operationalStatus,
             $data['thermalPowerMw'] ?? null,
             $data['electricalPowerMw'] ?? null,
