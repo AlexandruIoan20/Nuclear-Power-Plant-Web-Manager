@@ -93,6 +93,13 @@ require_once __DIR__ . '/../src/Controllers/EmailController.php';
 require_once __DIR__ . '/../src/Services/RssService.php';
 require_once __DIR__ . '/../src/Controllers/RssController.php';
 
+
+require_once __DIR__ . '/../src/Repositories/AlertRepository.php';
+require_once __DIR__ . '/../src/Services/AlertService.php';
+require_once __DIR__ . '/../src/Controllers/AlertController.php';
+
+
+
 // Database configuration
 $host     = getenv('DB_HOST')     ?: 'db';
 $port     = getenv('DB_PORT')     ?: '5432';
@@ -140,6 +147,9 @@ $feasibilityService    = FeasibilityServiceFactory::create($pdo, $plantRepositor
 
 $emailService = new EmailService();
 $emailController = new EmailController($emailService);
+
+$alertRepository = new AlertRepository($pdo);
+$alertService = new AlertService($alertRepository, $emailService);
 
 $rssService = new RssService($plantServiceFacade);
 $rssController = new RssController($rssService);    
@@ -229,6 +239,22 @@ $router->post('/api/power-plants/{id}/technical', function ($id) use ($plantServ
 
 $router->put('/api/power-plants/{id}/technical', function ($id) use ($plantServiceFacade) {
     (new TechnicalPlantController($plantServiceFacade))->updateTechnicalPlantData($id);
+});
+
+
+// --- Alerts ---
+// --- Alerts & Sensors ---
+
+$router->post('/api/alerts/receive', function () use ($alertService) {
+    (new AlertController($alertService))->receiveAlert();
+});
+
+$router->get('/api/alerts/unread', function () use ($alertService) {
+    (new AlertController($alertService))->getUnread();
+});
+
+$router->put('/api/alerts/{id}/read', function ($id) use ($alertService) {
+    (new AlertController($alertService))->markRead($id);
 });
 
 // --- Authentication ---

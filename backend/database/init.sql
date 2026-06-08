@@ -110,6 +110,15 @@ CREATE TABLE measurements (
         ON DELETE CASCADE
 );
 
+CREATE TABLE alerts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    plant_id UUID NOT NULL,
+    alert_type VARCHAR(20) NOT NULL,
+    message TEXT NOT NULL,
+    is_read SMALLINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TYPE soil_types AS ENUM (
     'BEDROCK',      
     'STIFF_CLAY',   

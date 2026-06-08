@@ -5,6 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuclear Plant Control | Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Stiluri pentru pop-up-urile alertelor de la senzori */
+        .sensor-alert-popup {
+            background-color: #1a1a1a;
+            border-left: 4px solid var(--danger, #dc3545);
+            color: white;
+            padding: 16px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            width: 320px;
+            font-size: 0.9rem;
+            animation: slideIn 0.3s ease-out;
+        }
+        .sensor-alert-popup.alarm { border-color: #ffc107; }
+        .sensor-alert-popup.scram { border-color: #dc3545; background-color: #2b0000; }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
 </head>
 <body>
     <script>
@@ -12,11 +33,14 @@
             window.location.replace('http://localhost:5500' + window.location.pathname.replace(/\/dashboard\.html$/, '/dashboard.html'));
         }
     </script>
+    
     <div class="page-shell">
         <main id="app-container" class="panel">
             <p class="inline-status">Se încarcă dashboard-ul...</p>
         </main>
     </div>
+
+    <div id="sensor-alerts-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
 
     <script>
         function escapeHtml(value) {
@@ -36,6 +60,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('app-container');
 
+            // 1. Încărcarea datelor de sesiune și a UI-ului principal
             fetch('http://localhost:8081/api/user/status', { credentials: 'include' })
                 .then((response) => {
                     if (response.status === 401) {
@@ -97,6 +122,87 @@
                 .catch((error) => {
                     container.innerHTML = `<p class="error-banner">Nu am putut încărca dashboard-ul: ${error.message}</p>`;
                 });
+
+            // 2. Logica de Polling pentru Alertele Senzorilor
+            const alertsContainer = document.getElementById('sensor-alerts-container');
+            let displayedAlerts = new Set();
+
+            async function checkSensorAlerts() {
+                try {
+                    const response = await fetch("http://localhost:8081/api/alerts/unread", {
+                        credentials: 'include'
+                    });
+                    
+                    if (!response.ok) return;
+                    
+                    const result = await response.json();
+                    
+                    if (result.status === 'success' && Array.isArray(result.data)) {
+                        renderNewAlerts(result.data);
+                    }
+                } catch (error) {
+                    console.error("Eroare la verificarea alertelor:", error);
+                }
+            }
+
+            function renderNewAlerts(alerts) {
+                alerts.forEach(alert => {
+                    if (!displayedAlerts.has(alert.id)) {
+                        displayedAlerts.add(alert.id);
+
+                        const alertElement = document.createElement('div');
+                        const typeClass = alert.type.toLowerCase();
+                        alertElement.className = `sensor-alert-popup ${typeClass}`;
+                        alertElement.id = `alert-${alert.id}`;
+
+                        alertElement.innerHTML = `
+                            <div style="font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">
+                                ⚠ ${escapeHtml(alert.type)}
+                            </div>
+                            <div style="margin-bottom: 12px; color: #ccc; line-height: 1.4;">
+                                ${escapeHtml(alert.message)}
+                            </div>
+                            <button class="button small secondary dismiss-alert-btn" data-id="${alert.id}" style="width: 100%; justify-content: center;">
+                                Confirmă & Închide
+                            </button>
+                        `;
+
+                        alertsContainer.appendChild(alertElement);
+                    }
+                });
+
+                document.querySelectorAll('.dismiss-alert-btn').forEach(btn => {
+                    if (!btn.dataset.mapped) {
+                        btn.dataset.mapped = "true";
+                        btn.addEventListener('click', () => {
+                            dismissAlert(btn.getAttribute('data-id'));
+                        });
+                    }
+                });
+            }
+
+            async function dismissAlert(id) {
+                try {
+                    const response = await fetch(`http://localhost:8081/api/alerts/${id}/read`, {
+                        method: 'PUT',
+                        credentials: 'include'
+                    });
+
+                    if (response.ok) {
+                        const alertUI = document.getElementById(`alert-${id}`);
+                        if (alertUI) alertUI.remove();
+                        displayedAlerts.delete(id);
+                    }
+                } catch (error) {
+                    console.error("Eroare la respingerea alertei:", error);
+                }
+            }
+
+            // Inițializăm intervalul (5000 ms = 5 secunde)
+            setInterval(checkSensorAlerts, 5000);
+            
+            // Rulăm o primă verificare instantanee pentru eventualele alerte din urmă
+            checkSensorAlerts();
         });
     </script>
 </body>
