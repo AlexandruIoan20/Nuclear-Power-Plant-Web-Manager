@@ -37,6 +37,10 @@ class DetailsPlantService {
         return new CreateDataResponseDTO($id); 
     }
 
+    public function updateStatus(array $data, string $plantId) { 
+        $this->plantRepositoryFacade->updateStatus($data, $plantId); 
+    }
+
     public function updatePlantDetails(array $data, string $id) { 
         $name = $data['name'] ?? ''; 
         $country = $data['country'] ?? ''; 
@@ -54,6 +58,17 @@ class DetailsPlantService {
 
     public function getAllPowerPlants(): array { 
         return $this->plantRepositoryFacade->getAllPowerPlants(); 
+    }
+
+    public function getPlantsByStatus(array $data): array { 
+        $status = PlantStatus::tryFrom($data['status']); 
+    
+        if($status === null) {
+            return ["success" => false, "message" => "Nu exista centrale cu acest status de proiect."];
+        }
+    
+        $powerPlants = $this->plantRepositoryFacade->getPlantsByStatus(['status' => $status->value]); 
+        return $powerPlants; 
     }
 
     public function findById(string $plantId) { 

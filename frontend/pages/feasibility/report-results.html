@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../../../../style.css">
+</head>
+<body>
+    <div class="page-shell">
+    
+        <div class="topbar">
+            <div class="brand">
+                <strong>RAPORT DE FEZABILITATE</strong>
+                <span id="report-meta"></span> </div>
+            <div class="nav-links">
+                <span id="report-status" class="tag"></span>
+            </div>
+        </div>
+    
+        <div class="panel" style="margin-bottom: 24px;">
+            <h1 style="font-size: 1.2rem; color: var(--yellow); text-transform: uppercase; margin-bottom: 12px;">
+                Rezumat Evaluare
+            </h1>
+            <p id="report-message"></p>
+            
+            <div class="stats">
+                <div class="stat" style="border-color: rgba(57, 255, 20, 0.4);">
+                    <strong id="report-nsvi-score" style="font-size: 2.2rem; margin-bottom: 2px;"></strong>
+                    <span class="eyebrow">NSVI SCORE</span>
+                </div>
+            </div>
+        </div>
+    
+        <div class="card">
+            <h3 style="color: var(--yellow); text-transform: uppercase; margin-bottom: 16px; margin-top: 0;">
+                Deficiențe Detectate
+            </h3>
+            <div class="table-shell">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Detalii Deficiență</th>
+                            <th style="width: 140px; text-align: right;">Impact Scor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deficiencies-table-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    
+    </div>
+
+    <script type = "module" src = "../../modules/pages/feasibility/report-results.js"></script>
+</body>
+</html>

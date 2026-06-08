@@ -1,7 +1,7 @@
-import { powerPlantService } from '../services/powerPlantService.js'
-import { PlantRequestDTO } from '../dto/PlantRequestDTO.js'; 
-import { showError, showSuccess, clearStatus } from '../ui/showMessage.js'; 
-import { getQueryParam } from '../utils/urlHelper.js'; 
+import { powerPlantService } from '../../services/powerPlantService.js'
+import { PlantRequestDTO } from '../../dto/PlantRequestDTO.js'; 
+import { showError, showSuccess, clearStatus } from '../../ui/showMessage.js'; 
+import { getQueryParam } from '../../utils/urlHelper.js'; 
 
 const plantId = getQueryParam("id");  
 
@@ -27,7 +27,8 @@ document.addEventListener("DOMContentLoaded", async() => {
             }); 
     
             try { 
-                const response = await powerPlantService.createPlantDetails(dto); 
+                const response = await powerPlantService.createPlantDetails(dto);
+                console.log({ response });  
                 showSuccess(statusElement, "Datele au fost salvate cu succes!"); 
 
                 window.history.replaceState({}, '', `?id=${response.plantId}`); 

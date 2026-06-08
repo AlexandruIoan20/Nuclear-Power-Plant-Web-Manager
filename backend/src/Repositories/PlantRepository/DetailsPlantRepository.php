@@ -1,5 +1,7 @@
 <?php 
 
+require_once __DIR__ . '../../../Entities/PlantStatus.php'; 
+
 class DetailsPlantRepository {
     private PDO $db; 
 
@@ -16,6 +18,21 @@ class DetailsPlantRepository {
             $row['latitude'], $row['longitude']); 
         }
 
+        return $powerPlants; 
+    }
+
+    public function getPlantsByStatus(array $data): array { 
+        $status = PlantStatus::from($data['status']); 
+        $powerPlants = []; 
+
+        $statement = $this->db->prepare("SELECT * FROM power_plants WHERE status = :status"); 
+        $statement->execute([ "status" => $status->value ]); 
+
+        while($row = $statement->fetch(PDO::FETCH_ASSOC)) { 
+            $powerPlants[] = new Plant($row['country'], $row['id'], $row['name'], $status, 
+            $row['latitude'], $row['longitude']); 
+        }
+        
         return $powerPlants; 
     }
 
@@ -67,6 +84,19 @@ class DetailsPlantRepository {
             'longitude' => $plant->getLongitude(), 
             'status' => $plant->getStatus()->value 
         ]);
+    }
+
+    public function updateStatus(array $data, string $plantId): void { 
+        $status = PlantStatus::from($data['status']);
+    
+        $statement = $this->db->prepare("
+            UPDATE power_plants SET status = :status WHERE id = :id
+        "); 
+    
+        $statement->execute([ 
+            "status" => $status->value, 
+            "id" => $plantId
+        ]); 
     }
 
     public function update(Plant $plant): void {

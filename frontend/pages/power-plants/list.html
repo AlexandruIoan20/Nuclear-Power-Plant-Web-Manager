@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+</head>
+<body>
+    <div class="page-shell">
+        <div id = "main-navbar"></div>
+        <nav class="topbar">
+            <div class="brand">
+                <strong>⚛ Nuclear Power Plant Manager</strong>
+                <span>Sistem de management centrale nucleare</span>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="active">Centrale</a>
+            </div>
+        </nav>
+
+        <div class="filter-bar">
+            <div class="field">
+                <label for="filter-name">Caută după nume</label>
+                <input type="text" id="filter-name" placeholder="ex. Solar Plant..." autocomplete="off" />
+            </div>
+            <div class="field">
+                <label for="filter-country">Caută după țară</label>
+                <input type="text" id="filter-country" placeholder="ex. Romania..." autocomplete="off" />
+            </div>
+            <button class="btn-reset" id="btn-reset">✕ Resetează</button>
+        </div>
+
+        <div class="results-meta">
+            <div>Rezultate: <span id="results-count">—</span></div>
+        </div>
+
+        <div class="table-shell">
+            <table>
+                <thead>
+                    <tr>
+                        <th data-col="name">Nume <span class="sort-icon">↕</span></th>
+                        <th data-col="country">Țară <span class="sort-icon">↕</span></th>
+                        <th data-col="id">ID <span class="sort-icon">↕</span></th>
+                        <th data-col="coords">Coordonate</th>
+                        <th data-col="status">Status <span class="sort-icon">↕</span></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="plants-tbody">
+                    <tr class="state-row">
+                        <td colspan="6">
+                            <span class="spinner-inline"></span> Se încarcă centralele...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script type = "module" src = "../../modules/pages/power-plants/list.js"></script>
+    <script type = "module" src = "../../modules/ui/navbar.js"></script>
+</body>
+</html>

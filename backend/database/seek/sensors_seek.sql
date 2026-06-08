@@ -1,0 +1,30 @@
+INSERT INTO sensor_templates
+    (reactor_type, sensor_code, sensor_type, description, location_zone,
+     unit_of_measure, normal_min, normal_max, alarm_low, alarm_high,
+     alert_low, alert_high, scram_low, scram_high)
+VALUES
+('PWR','TI-001','THERMOCOUPLE','Temperatura agent racire - iesire circuit primar','Bucla 1 / Iesire reactor',
+ '°C',290,325,285,330,280,340,270,350),
+('PWR','TI-002','THERMOCOUPLE','Temperatura agent racire - intrare circuit primar','Bucla 1 / Intrare reactor',
+ '°C',280,295,275,300,270,310,260,320),
+('PWR','TI-003','THERMOCOUPLE','Temperatura combustibil - centrul miezului activ','Miez activ / Zona centrala',
+ '°C',400,750,380,780,350,850,300,1000),
+('PWR','PR-001','PRESSURE_TRANSDUCER','Presiune circuit primar','Presuprizor',
+ 'MPa',14.8,16.0,14.5,16.5,14.0,17.0,13.0,18.0),
+('PWR','PR-002','PRESSURE_TRANSDUCER','Presiune abur generator','Generator aburi 1 / Secundar',
+ 'MPa',5.5,7.0,5.2,7.5,5.0,8.0,4.0,9.0),
+('PWR','FM-001','FLOW_METER','Debit circuit primar - Pompa P-1A','Circuit primar / Pompa P-1A',
+ 'm³/h',18000,22000,17000,23000,15000,24000,12000,25000),
+('PWR','NI-001','NEUTRON_DETECTOR','Flux neutronic excore - putere nominala','Excore / Detector A',
+ '%Pn',0,100,NULL,102,NULL,105,NULL,110),
+('PWR','NI-002','NEUTRON_DETECTOR','Flux neutronic excore - pornire','Excore / Detector B',
+ 'n/cm²/s',1000000,10000000000000,NULL,NULL,NULL,NULL,NULL,11000000000000),
+('PWR','RM-001','RADIATION_MONITOR','Activitate specifica agent primar','Circuit primar / Bypass purificare',
+ 'Bq/L',10000,10000000,NULL,15000000,NULL,50000000,NULL,100000000),
+('PWR','RM-002','RADIATION_MONITOR','Doza zona controlata - Hol reactor','Cladire reactor / Nivel 0',
+ 'mSv/h',0,0.5,NULL,1.0,NULL,5.0,NULL,100.0),
+('PWR','LI-001','LEVEL_SENSOR','Nivel apa presuprizor','Presuprizor',
+ '%',25,60,20,70,15,80,10,90),
+('PWR','VI-001','VIBRATION_SENSOR','Vibratii pompa circuit primar P-1A','Pompa P-1A / Lagare',
+ 'mm/s',0,2.5,NULL,3.5,NULL,7.0,NULL,12.0)
+ON CONFLICT (reactor_type, sensor_code) DO NOTHING;

@@ -1,10 +1,10 @@
-import { powerPlantService } from '../services/powerPlantService.js'; 
-import { SoilType, WaterSourceType } from '../config/enums.js'; 
-import { loadSelect } from '../ui/selectLoader.js';
-import { getQueryParam } from '../utils/urlHelper.js';
-import { showError, showSuccess, clearStatus } from '../ui/showMessage.js';
-import { GeologicalDataRequestDTO } from '../dto/GeologicalDataRequestDTO.js'; 
-import { saveHeaderState } from '../ui/form-header/formHeaderState.js'; 
+import { powerPlantService } from '../../services/powerPlantService.js'; 
+import { SoilType, WaterSourceType } from '../../config/enums.js'; 
+import { loadSelect } from '../../ui/selectLoader.js';
+import { getQueryParam } from '../../utils/urlHelper.js';
+import { showError, showSuccess, clearStatus } from '../../ui/showMessage.js';
+import { GeologicalDataRequestDTO } from '../../dto/GeologicalDataRequestDTO.js'; 
+import { saveHeaderState } from '../../ui/form-header/formHeaderState.js'; 
 
 const plantId = getQueryParam("id"); 
 const geologicalId = getQueryParam("geologicalId"); 

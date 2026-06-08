@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../../Dto/PlantDTO.php';
 require_once __DIR__ . '/../../Dto/PlantDetailsDTO.php'; 
+require_once __DIR__ . '/../../Dto/GetPlantDTO.php';  
 
 class DetailsPlantController { 
     public function __construct(
@@ -16,6 +17,19 @@ class DetailsPlantController {
         http_response_code(200);
         echo json_encode($countries);
         exit;
+    }
+
+    public function getPlant(string $id) {
+        header('Content-Type: application/json; charset=utf-8');
+    
+        $plant = $this->plantServiceFacade->getCompletePlantProfile($id);
+        if(!$plant) { 
+            echo json_encode(["status" => "error", "message" => "Centrala nu a fost gasita"]); 
+            exit; 
+        } 
+        $dto = GetPlantDTO::fromServiceArray($plant);
+    
+        echo json_encode($dto);
     }
 
     public function getPlantDetails(string $id) { 
@@ -49,6 +63,38 @@ class DetailsPlantController {
         exit;
     }
 
+    public function getPlantsByStatus() { 
+        header("Content-Type: application/json; charset=UTF-8"); 
+
+        $status = $_GET['status'] ?? null;
+    
+        if (!$status) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Parametrul 'status' lipseste"]);
+            return;
+        }
+    
+        $data = ['status' => $status];
+    
+        error_log("[DEBUG] Date getPlantsByStatus: " . print_r($data, true));
+    
+        try { 
+            $powerPlants = $this->plantServiceFacade->getPlantsByStatus($data); 
+            error_log("powerPlants in controller:  " . print_r($powerPlants, true)); 
+
+            $dtos = array_map(function($plant) {
+                return PlantDTO::fromEntity($plant);
+            }, $powerPlants);
+            
+            http_response_code(200); 
+            echo json_encode(["status" => "success", "data" => $dtos]); 
+        } catch(Exception $e) { 
+            error_log("[ERROR] GET Plants By Status: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => "Eroare la cautarea dupa status: " . $e->getMessage()]);
+        }
+    }
+    
     public function getPowerPlantsMapData()
     {
         header('Content-Type: application/json; charset=UTF-8');
@@ -104,6 +150,44 @@ class DetailsPlantController {
             error_log("[ERROR] Save Plant: " . $e->getMessage());
             http_response_code(500); 
             echo json_encode(["status" => "error", "message" => "Eroare la salvare: " . $e->getMessage()]);
+            exit;
+        }
+    }
+
+    public function updateStatus(string $plantId) { 
+        header('Content-Type: application/json; charset=UTF-8'); 
+
+        $jsonPayload = file_get_contents("php://input");
+        $dateFormular = json_decode($jsonPayload, true); 
+
+        error_log("[DEBUG] Date Formular API Creare: " . print_r($dateFormular, true));
+        
+        if (empty($dateFormular)) {
+            http_response_code(400); 
+            echo json_encode(["status" => "error", "message" => "Nu s-au primit date."]);
+            exit;
+        }
+
+        try { 
+            $verified = $this->plantServiceFacade->updateStatus($dateFormular, $plantId);  
+            
+            if(!$verified) { 
+                echo json_encode([
+                    "status" => "error", 
+                    "message" => "Eroare la actualizarea statusului"
+                ]); 
+
+                exit; 
+            } 
+
+            echo json_encode([ 
+                "status" => "success", 
+                "message" => "Status actualizat cu succes"
+            ]); 
+        } catch(Exception $e) { 
+            error_log("[ERROR] Update Plant: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => "Eroare la actualizare statusului: " . $e->getMessage()]);
             exit;
         }
     }

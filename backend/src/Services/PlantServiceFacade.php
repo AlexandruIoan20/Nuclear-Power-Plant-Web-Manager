@@ -22,12 +22,35 @@ class PlantServiceFacade {
         return $this->detailsPlantService->getAllPowerPlants();
     }
 
+    public function getPlantsByStatus(array $data): array { 
+        $powerPlants = $this->detailsPlantService->getPlantsByStatus($data); 
+        return $powerPlants;
+    }
+
     public function getPlantDetailsById(string $plantId): ?Plant {
         return $this->detailsPlantService->findById($plantId);
     }
 
     public function savePlantDetails(array $data): CreateDataResponseDTO {
         return $this->detailsPlantService->savePlantDetails($data);
+    }
+
+    public function updateStatus(array $data, string $plantId) { 
+        if (!isset($data['status'])) return false; 
+
+        $status = PlantStatus::tryFrom($data['status']);
+        if($status == null) return false; 
+
+        $plantData = $this->plantRepositoryFacade->getPlantDetailsById($plantId); 
+        if($plantData->getStatus()->value == $status->value) return false; 
+
+        $completePlantProfile = $this->getCompletePlantProfile($plantId); 
+        foreach($completePlantProfile as $profile) { 
+            if($profile == null) return false; 
+        }
+
+        $this->detailsPlantService->updateStatus($data, $plantId);
+        return true; 
     }
 
     public function updatePlantDetails(array $data, string $plantId): void {

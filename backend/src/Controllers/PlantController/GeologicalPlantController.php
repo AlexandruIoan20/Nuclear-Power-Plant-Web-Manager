@@ -26,33 +26,41 @@ class GeologicalPlantController {
         echo json_encode(["status" => "success", "data" => $geologicalPlantDataDTO]); 
     }
 
-    public function createGeologicalPlantData(string $plantId): void { 
+    public function createGeologicalPlantData(string $plantId): void {
+        error_log('=== CREATE START === plantId: ' . $plantId);
+        
         $jsonPayload = file_get_contents('php://input');
+        error_log('=== raw payload: ' . $jsonPayload);
+        
         $dateFormular = json_decode($jsonPayload, true) ?? [];
-
-        error_log("[DEBUG] Date Formular Geological (Create)"); 
-        error_log(print_r($dateFormular, true));
-
-        try { 
-            $responseDTO = $this->plantServiceFacade->saveGeologicalData($dateFormular, $plantId); 
+        error_log('=== dateFormular: ' . print_r($dateFormular, true));
+        
+        try {
+            error_log('=== inainte de saveGeologicalData');
+            $responseDTO = $this->plantServiceFacade->saveGeologicalData($dateFormular, $plantId);
+            error_log('=== dupa saveGeologicalData, responseDTO: ' . print_r($responseDTO, true));
             
             http_response_code(200);
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
                 'success' => true,
-                'message' => 'Datele geologice au fost salvate cu succes.', 
-                "plantId" => $plantId, 
-                "geologicalId" => $responseDTO->dataId 
+                'message' => 'Datele geologice au fost salvate cu succes.',
+                "plantId" => $plantId,
+                "geologicalId" => $responseDTO->dataId
             ]);
-        } catch(Exception $e) { 
-            error_log("[ERROR] POST Geo Data Create: " . $e->getMessage());
+            error_log('=== CREATE DONE ===');
+            
+        } catch(Exception $e) {
+            error_log('[ERROR] mesaj: ' . $e->getMessage());
+            error_log('[ERROR] fisier: ' . $e->getFile() . ' linia: ' . $e->getLine());
+            error_log('[ERROR] trace: ' . $e->getTraceAsString());
             
             http_response_code(400);
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
                 'success' => false,
-                'message' => 'Eroare la salvarea datelor geologice: ' . $e->getMessage()
-            ]); 
+                'message' => 'Eroare: ' . $e->getMessage()
+            ]);
         }
     }
 
