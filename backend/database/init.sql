@@ -13,3 +13,4 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 \i '/docker-entrypoint-initdb.d/seek/users_seek.sql'
 \i '/docker-entrypoint-initdb.d/seek/reactors_seek.sql'
 \i '/docker-entrypoint-initdb.d/seek/sensors_seek.sql'
+\i '/docker-entrypoint-initdb.d/seek/feasibility_demo_seek.sql'
