@@ -1,17 +1,55 @@
 <!DOCTYPE html>
 <html lang="ro">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuclear Plant Control | Notifications</title>
+    <title>Nuclear Plant Control | Notificări</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .notification-card {
+            background-color: var(--surface, #1e1e1e);
+            border-left: 4px solid var(--border);
+            padding: 20px;
+            margin-bottom: 16px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .notification-card.scram { border-color: var(--danger, #dc3545); }
+        .notification-card.alarm { border-color: #ffc107; }
+        .notification-card.alert { border-color: #fd7e14; }
+        .notification-card.info { border-color: var(--primary, #0d6efd); }
+        
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .notification-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+        .notification-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+        .notification-body {
+            color: #ccc;
+            line-height: 1.5;
+        }
+    </style>
 </head>
+
 <body>
     <div class="page-shell">
         <header class="topbar">
             <div class="brand">
                 <strong>Nuclear Plant Control</strong>
-                <span>Flux notificări</span>
+                <span>Flux operațional unificat</span>
             </div>
             <nav class="nav-links">
                 <a href="dashboard.html">Dashboard</a>
@@ -22,19 +60,95 @@
             </nav>
         </header>
         <main class="panel">
-            <p class="eyebrow">NOTIFICATIONS</p>
-            <h1>Notificări operaționale</h1>
-            <p>Aici poți lega alertele, evenimentele critice și notificările de sistem din diagramă.</p>
-            <div class="stats">
-                <div class="stat"><strong>04</strong><span>alerte active</span></div>
-                <div class="stat"><strong>12</strong><span>evenimente azi</span></div>
-                <div class="stat"><strong>LIVE</strong><span>flux monitorizare</span></div>
+            <p class="eyebrow">SYSTEM LOGS</p>
+            <h1>Centrul de Notificări</h1>
+            <p>Istoricul consolidat al alertelor de la senzori și al solicitărilor administrative.</p>
+
+            <div id="loading-indicator" class="inline-status" style="margin-top: 20px;">
+                Se interoghează serverul...
             </div>
-            <div class="hero-actions" style="margin-top: 24px; flex-wrap: wrap; gap: 12px;">
-                <a class="button" href="dashboard.html">Înapoi la overview</a>
-                <a class="button secondary" href="approvals.html">Vezi aprobări</a>
+            
+            <div id="error-message" style="color: var(--danger); display: none; margin-top: 20px;"></div>
+
+            <div id="notifications-container" style="margin-top: 32px;">
             </div>
+
         </main>
     </div>
+
+    <script>
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"]|'/g, (character) => {
+                const escapeMap = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                };
+                return escapeMap[character] || character;
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const container = document.getElementById("notifications-container");
+            const loadingIndicator = document.getElementById("loading-indicator");
+            const errorMessage = document.getElementById("error-message");
+
+            try {
+                const response = await fetch("http://localhost:8081/api/notifications", {
+                    credentials: 'include'
+                });
+                
+                if (response.status === 401) {
+                    window.location.href = "login.html";
+                    return;
+                }
+                
+               
+                const result = await response.json();
+
+                if (!response.ok) {
+                    
+                    throw new Error(result.message || `Eroare HTTP ${response.status}`);
+                }
+
+                loadingIndicator.style.display = "none";
+
+                if (result.status === 'success' && Array.isArray(result.data)) {
+                    if (result.data.length === 0) {
+                        container.innerHTML = `<p style="color: var(--text-muted); text-align: center;">Nu există nicio notificare înregistrată în sistem.</p>`;
+                        return;
+                    }
+
+                    result.data.forEach(notification => {
+                        const card = document.createElement("div");
+                        const severityClass = notification.severity.toLowerCase();
+                        card.className = `notification-card ${severityClass}`;
+
+                        card.innerHTML = `
+                            <div class="notification-header">
+                                <span class="notification-title">${escapeHtml(notification.title)}</span>
+                                <span class="notification-meta">${escapeHtml(notification.date)}</span>
+                            </div>
+                            <div class="notification-body">
+                                ${escapeHtml(notification.message)}
+                            </div>
+                            <div class="notification-meta" style="margin-top: 8px;">
+                                TYPE: ${escapeHtml(notification.type)} | ROLE CLEARANCE: ${escapeHtml(notification.target_role)}
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
+                }
+            } catch (error) {
+                loadingIndicator.style.display = "none";
+                errorMessage.style.display = "block";
+                errorMessage.innerHTML = `<strong>Eroare comunicație:</strong> ${escapeHtml(error.message)}`;
+                console.error("Eroare fetch notificări:", error);
+            }
+        });
+    </script>
 </body>
+
 </html>

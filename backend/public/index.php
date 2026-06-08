@@ -98,6 +98,9 @@ require_once __DIR__ . '/../src/Repositories/AlertRepository.php';
 require_once __DIR__ . '/../src/Services/AlertService.php';
 require_once __DIR__ . '/../src/Controllers/AlertController.php';
 
+require_once __DIR__ . '/../src/Services/NotificationService.php';
+require_once __DIR__ . '/../src/Controllers/NotificationController.php';
+
 
 
 // Database configuration
@@ -156,6 +159,8 @@ $rssController = new RssController($rssService);
 
 $userRepository = new UserRepository($pdo);
 $userService = new UserService($userRepository);
+
+$notificationService = new NotificationService($plantServiceFacade, $alertService);
 
 $router = new Router();
 
@@ -240,10 +245,12 @@ $router->post('/api/power-plants/{id}/technical', function ($id) use ($plantServ
 $router->put('/api/power-plants/{id}/technical', function ($id) use ($plantServiceFacade) {
     (new TechnicalPlantController($plantServiceFacade))->updateTechnicalPlantData($id);
 });
-
+// --- Notifications ---
+$router->get('/api/notifications', function () use ($notificationService) {
+    (new NotificationController($notificationService))->getNotifications();
+});
 
 // --- Alerts ---
-// --- Alerts & Sensors ---
 
 $router->post('/api/alerts/receive', function () use ($alertService) {
     (new AlertController($alertService))->receiveAlert();
@@ -308,7 +315,7 @@ $router->get('/users', function() use ($userService) {
     (new UserController($userService))->listUsers();
 });
 
-// FIX RUTA APPROVALS: Mapare corectă pentru endpoint-ul unificat bazat pe body JSON
+
 $router->put('/api/power-plants/{id}/status', function ($id) use ($plantServiceFacade) {
     (new ApprovalController($plantServiceFacade))->updateStatus($id);
 });
