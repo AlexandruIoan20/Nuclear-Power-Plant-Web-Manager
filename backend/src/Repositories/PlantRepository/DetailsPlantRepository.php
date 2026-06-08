@@ -10,12 +10,23 @@ class DetailsPlantRepository {
     }
 
     public function findAll(): array { 
-        $statement = $this->db->query("SELECT * FROM power_plants"); 
+        $statement = $this->db->query("
+            SELECT p.id, p.name, p.status,
+                   g.country, g.latitude, g.longitude
+            FROM power_plants p
+            LEFT JOIN geological_data g ON p.id = g.power_plant_id
+        "); 
         $powerPlants = []; 
 
         while($row = $statement->fetch(PDO::FETCH_ASSOC)) { 
-            $powerPlants[] = new Plant($row['country'], $row['id'], $row['name'], PlantStatus::from($row['status']), 
-            $row['latitude'], $row['longitude']); 
+            $powerPlants[] = [
+                'id' => $row['id'],
+                'name' => $row['name'],
+                'country' => $row['country'],
+                'latitude' => $row['latitude'],
+                'longitude' => $row['longitude'],
+                'status' => $row['status'],
+            ]; 
         }
 
         return $powerPlants; 
@@ -25,19 +36,37 @@ class DetailsPlantRepository {
         $status = PlantStatus::from($data['status']); 
         $powerPlants = []; 
 
-        $statement = $this->db->prepare("SELECT * FROM power_plants WHERE status = :status"); 
+        $statement = $this->db->prepare("
+            SELECT p.id, p.name, p.status,
+                   g.country, g.latitude, g.longitude
+            FROM power_plants p
+            LEFT JOIN geological_data g ON p.id = g.power_plant_id
+            WHERE p.status = :status
+        "); 
         $statement->execute([ "status" => $status->value ]); 
 
         while($row = $statement->fetch(PDO::FETCH_ASSOC)) { 
-            $powerPlants[] = new Plant($row['country'], $row['id'], $row['name'], $status, 
-            $row['latitude'], $row['longitude']); 
+            $powerPlants[] = [
+                'id' => $row['id'],
+                'name' => $row['name'],
+                'country' => $row['country'],
+                'latitude' => $row['latitude'],
+                'longitude' => $row['longitude'],
+                'status' => $row['status'],
+            ]; 
         }
         
         return $powerPlants; 
     }
 
     public function findById(string $plantId) { 
-        $statement = $this->db->prepare("SELECT * FROM power_plants WHERE id = :plantId"); 
+        $statement = $this->db->prepare("
+            SELECT p.id, p.name, p.status,
+                   g.country, g.latitude, g.longitude
+            FROM power_plants p
+            LEFT JOIN geological_data g ON p.id = g.power_plant_id
+            WHERE p.id = :plantId
+        "); 
         $statement->execute([ 
             'plantId' => $plantId
         ]); 
@@ -48,41 +77,29 @@ class DetailsPlantRepository {
         }
 
         return new Plant(
-            $row['country'],
             $row['id'],
             $row['name'],
-            PlantStatus::from($row['status']),
-            $row['latitude'],
-            $row['longitude']
+            PlantStatus::from($row['status'])
         );
     }
-
+    
     public function save(Plant $plant): void { 
         $stmt = $this->db->prepare("
             INSERT INTO power_plants (
                 id,
                 name, 
-                country, 
-                latitude, 
-                longitude,
                 status
             ) VALUES (
                 :id, 
                 :name, 
-                :country, 
-                :latitude, 
-                :longitude,
                 :status
             )
         "); 
 
-        $stmt->execute([ 
-            'id' => $plant->getId(), 
-            'name' => $plant->getName(), 
-            'country' => $plant->getCountry(), 
-            'latitude' => $plant->getLatitude(), 
-            'longitude' => $plant->getLongitude(), 
-            'status' => $plant->getStatus()->value 
+        $stmt->execute([
+            'id' => $plant->getId(),
+            'name' => $plant->getName(),
+            'status' => $plant->getStatus()->value
         ]);
     }
 
@@ -103,21 +120,15 @@ class DetailsPlantRepository {
         $stmt = $this->db->prepare("
             UPDATE power_plants 
             SET 
-                name = :name, 
-                country = :country, 
-                latitude = :latitude, 
-                longitude = :longitude,
+                name = :name,
                 status = :status
             WHERE id = :id
         "); 
     
-        $stmt->execute([ 
-            'id' => $plant->getId(), 
-            'name' => $plant->getName(), 
-            'country' => $plant->getCountry(), 
-            'latitude' => $plant->getLatitude(), 
-            'longitude' => $plant->getLongitude(), 
-            'status' => $plant->getStatus()->value 
+        $stmt->execute([
+            'id' => $plant->getId(),
+            'name' => $plant->getName(),
+            'status' => $plant->getStatus()->value
         ]);
 
         $randuriModificate = $stmt->rowCount();
@@ -125,4 +136,17 @@ class DetailsPlantRepository {
         error_log("[DEBUG] Randuri modificate efectiv: " . $randuriModificate);
     }
 
+
+    public function updateStatus(string $plantId, string $status): void {
+        $stmt = $this->db->prepare("
+            UPDATE power_plants 
+            SET status = :status 
+            WHERE id = :id
+        ");
+        
+        $stmt->execute([
+            'id' => $plantId,
+            'status' => $status
+        ]);
+    }
 }

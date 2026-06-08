@@ -1,11 +1,8 @@
 WITH new_plant AS (
-    INSERT INTO power_plants (id, name, country, latitude, longitude, status)
+    INSERT INTO power_plants (id, name, status)
     VALUES (
         gen_random_uuid(),
         'Centrala Nucleara Valea Jiului',
-        'Romania',
-        45.365000,
-        23.365000,
         'DRAFT'
     )
     RETURNING id
@@ -22,7 +19,8 @@ new_basic AS (
 ),
 new_geological AS (
     INSERT INTO geological_data (
-        id, power_plant_id, soil_type, water_source_type,
+        id, power_plant_id, country, latitude, longitude,
+        soil_type, water_source_type,
         seismic_stability, flood_risk, groundwater_level,
         water_proximity, water_flow_rate, population_density,
         transport_infrastructure_score, geological_risk_score
@@ -30,6 +28,9 @@ new_geological AS (
     SELECT
         gen_random_uuid(),
         id,
+        'Romania',
+        45.365000,
+        23.365000,
         'BEDROCK',
         'FRESH_WATER',
         7.5,

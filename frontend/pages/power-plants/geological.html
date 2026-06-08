@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Date Geologice Centrală</title>
     <link rel="stylesheet" href="../../../style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
     <div class="page-shell">
@@ -16,13 +17,29 @@
                 <div class="field-grid">
 
                     <div class="field">
+                        <label for="country">Țară:</label>
+                        <input type="text" id="country" name="country" list="country-list"
+                            placeholder="Tastează pentru a căuta..." />
+                        <datalist id="country-list"></datalist>
+                    </div>
+
+                    <div class="field">
+                        <label for="latitude">Latitudine:</label>
+                        <input type="number" id="latitude" name="latitude" step="any" min="-90" max="90" />
+                    </div>
+
+                    <div class="field">
+                        <label for="longitude">Longitudine:</label>
+                        <input type="number" id="longitude" name="longitude" step="any" min="-180" max="180" />
+                    </div>
+
                     <div class="field">
                         <label for="soil_type">Tip Sol:</label>
                         <select id="soil_type" name="soil_type">
                             <option value="">-- Selectează tipul de sol --</option>
                         </select>
                     </div>
-                    
+
                     <div class="field">
                         <label for="water_source_type">Tip Sursă Apă:</label>
                         <select id="water_source_type" name="water_source_type">
@@ -72,6 +89,12 @@
 
                 </div>
 
+                <div class="map-help">
+                    <p class="eyebrow">SELECTEAZĂ PE HARTĂ</p>
+                    <div id="geological-map" style="height:320px; margin-top:12px;"></div>
+                    <p id="geological-map-status" class="map-status"></p>
+                </div>
+
                 <div class="card-actions">
                     <button type="submit" class="button" id="submit-btn">Salvează</button>
                 </div>
@@ -81,6 +104,7 @@
         </main>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module" src="../../modules/ui/form-header/formHeader.js"></script>
     <script type="module" src="../../modules/pages/power-plants/geological.js"></script>
 </body>

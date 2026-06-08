@@ -67,13 +67,13 @@ class UserController {
                     echo json_encode([
                         'status' => 'success',
                         'message' => 'Cont creat cu succes! Poți să te conectezi acum.',
-                        'redirect' => 'login.html'
+                        'redirect' => 'http://localhost:5500/login.html'
                     ]);
                     return;
                 }
 
                 $_SESSION['register_success'] = 'Cont creat cu succes! Poți să te conectezi acum.';
-                header('Location: http://localhost:8081/login', true, 302);
+                header('Location: http://localhost:5500/login.html', true, 302);
                 exit;
             } catch (Exception $e) {
                 if ($wantsJson) {
@@ -133,24 +133,26 @@ class UserController {
                 return;
             }
 
+            // Alocarea datelor în sesiune
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_email'] = $user['email'];
             $_SESSION['user_role'] = $user['role'];
             $_SESSION['username'] = $user['username'];
 
-            session_regenerate_id(true);
+            // FIX: Am comentat regenerarea ID-ului pentru a preveni pierderea cookie-ului pe porturi diferite (cross-port local dev)
+            // session_regenerate_id(true);
 
             if ($wantsJson) {
                 header('Content-Type: application/json; charset=UTF-8');
                 echo json_encode([
                     'status' => 'success',
                     'message' => 'Autentificare reușită.',
-                    'redirect' => 'http://localhost:8081/dashboard'
+                    'redirect' => 'http://localhost:5500/dashboard.html'
                 ]);
                 return;
             }
 
-            header('Location: http://localhost:8081/dashboard', true, 302);
+            header('Location: http://localhost:5500/dashboard.html', true, 302);
             exit;
         }
 
@@ -172,7 +174,7 @@ class UserController {
         }
 
         session_destroy();
-        header('Location: http://localhost:8081/start', true, 302);
+        header('Location: http://localhost:5500/start.html', true, 302);
         exit;
     }
 
@@ -210,5 +212,4 @@ class UserController {
             ]
         ]);
     }
-
 }

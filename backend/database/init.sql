@@ -9,8 +9,10 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 \i '/docker-entrypoint-initdb.d/plants/tables.sql'
 \i '/docker-entrypoint-initdb.d/reactors/tables.sql' 
 \i '/docker-entrypoint-initdb.d/sensors/tables.sql'
+\i '/docker-entrypoint-initdb.d/alerts/tables.sql'
 
 \i '/docker-entrypoint-initdb.d/seek/users_seek.sql'
 \i '/docker-entrypoint-initdb.d/seek/reactors_seek.sql'
 \i '/docker-entrypoint-initdb.d/seek/sensors_seek.sql'
 \i '/docker-entrypoint-initdb.d/seek/feasibility_demo_seek.sql'
+

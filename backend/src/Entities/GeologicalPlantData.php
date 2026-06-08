@@ -7,6 +7,9 @@ require_once __DIR__ . '/../Entities/WaterSourceType.php';
 class GeologicalPlantData {
     private string $id;
     private string $powerPlantId;
+    private ?string $country;
+    private ?float $latitude;
+    private ?float $longitude;
     private ?SoilType $soilType;
     private ?WaterSourceType $waterSourceType;
     private ?float $seismicStability;
@@ -21,6 +24,9 @@ class GeologicalPlantData {
     public function __construct(
         string $powerPlantId,
         ?string $id = null,
+        ?string $country = null,
+        ?float $latitude = null,
+        ?float $longitude = null,
         ?SoilType $soilType = null,
         ?WaterSourceType $waterSourceType = null,
         ?float $seismicStability = null,
@@ -34,6 +40,9 @@ class GeologicalPlantData {
     ) {
         $this->id = $id ?? generateUUID();
         $this->powerPlantId = $powerPlantId;
+        $this->country = $country;
+        $this->latitude = $latitude;
+        $this->longitude = $longitude;
         $this->soilType = $soilType;
         $this->waterSourceType = $waterSourceType;
         $this->seismicStability = $seismicStability;
@@ -60,6 +69,30 @@ class GeologicalPlantData {
 
     public function setPowerPlantId(string $powerPlantId): void {
         $this->powerPlantId = $powerPlantId;
+    }
+
+    public function getCountry(): ?string {
+        return $this->country;
+    }
+
+    public function setCountry(?string $country): void {
+        $this->country = $country;
+    }
+
+    public function getLatitude(): ?float {
+        return $this->latitude;
+    }
+
+    public function setLatitude(?float $latitude): void {
+        $this->latitude = $latitude;
+    }
+
+    public function getLongitude(): ?float {
+        return $this->longitude;
+    }
+
+    public function setLongitude(?float $longitude): void {
+        $this->longitude = $longitude;
     }
 
     public function getSoilType(): ?SoilType {

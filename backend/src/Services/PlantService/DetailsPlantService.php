@@ -17,21 +17,10 @@ class DetailsPlantService {
         $name = $data['name'] ?? ''; 
         $name = ($name !== '') ? $name : null; 
 
-        $country = $data['country'] ?? ''; 
-        $country = ($country !== '') ? $country : null; 
-
-        $latitude = $data['latitude'] ?? ''; 
-        $latitude = ($latitude !== '') ? $latitude : null; 
-
-        $longitude = $data['longitude'] ?? ''; 
-        $longitude = ($longitude !== '') ? $longitude : null;
-
         $status = PlantStatus::DRAFT; 
         $id = generateUUID(); 
 
-        $plant = new Plant($country, $id, $name, $status, $latitude, $longitude); 
-        error_log("PLANT: "); 
-        error_log(print_r($plant, true)); 
+        $plant = new Plant($id, $name, $status); 
         $this->plantRepositoryFacade->savePlantDetails($plant); 
 
         return new CreateDataResponseDTO($id); 
@@ -43,13 +32,9 @@ class DetailsPlantService {
 
     public function updatePlantDetails(array $data, string $id) { 
         $name = $data['name'] ?? ''; 
-        $country = $data['country'] ?? ''; 
-
-        $latitude = (isset($data['latitude']) && $data['latitude'] !== '') ? (float) $data['latitude'] : null;         
-        $longitude = (isset($data['longitude']) && $data['longitude'] !== '') ? (float) $data['longitude'] : null;
         $status = PlantStatus::DRAFT; 
 
-        $plant = new Plant($country, $id, $name, $status, $latitude, $longitude); 
+        $plant = new Plant($id, $name, $status); 
 
         error_log("[DEBUG] A power plant was built successfully"); 
         error_log("[DEBUG]" . print_r($plant, true)); 

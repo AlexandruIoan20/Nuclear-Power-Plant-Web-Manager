@@ -1,9 +1,6 @@
 CREATE TABLE power_plants (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), 
     name VARCHAR(255) NOT NULL,
-    country VARCHAR(100) NOT NULL,
-    latitude DECIMAL(9,6),
-    longitude DECIMAL(9,6),
     status power_plant_status NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by UUID,
@@ -39,6 +36,9 @@ CREATE TABLE basic_data (
 CREATE TABLE geological_data (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     power_plant_id UUID NOT NULL,
+    country VARCHAR(100),
+    latitude DECIMAL(9,6),
+    longitude DECIMAL(9,6),
     soil_type soil_types,
     water_source_type water_source_types,
     seismic_stability DECIMAL,

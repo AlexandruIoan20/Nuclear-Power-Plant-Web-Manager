@@ -43,6 +43,12 @@ class PlantRepositoryFacade {
         }
     }
 
+    public function updatePlantStatus(string $plantId, string $status): void {
+        $this->detailsPlantRepository->updateStatus($plantId, $status);
+    }
+
+    
+
     // Details 
     public function getAllPowerPlants(): array {
         return $this->detailsPlantRepository->findAll();

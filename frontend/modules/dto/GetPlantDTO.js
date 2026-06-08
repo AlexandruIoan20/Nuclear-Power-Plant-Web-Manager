@@ -2,9 +2,9 @@ export function GetPlantDTO(data) {
     return {
         id: data.details?.id ?? null,
         name: data.details?.name ?? null,
-        country: data.details?.country ?? null,
-        latitude: data.details?.latitude ?? null,
-        longitude: data.details?.longitude ?? null,
+        country: data.geological?.country ?? null,
+        latitude: data.geological?.latitude ?? null,
+        longitude: data.geological?.longitude ?? null,
         status: data.details?.status ?? null,
 
         basicId: data.basic?.id ?? null,

@@ -20,3 +20,8 @@ Thumbs.db
 # Dependency/cache artifacts
 vendor/
 node_modules/
+
+
+#PHPMailer
+
+PHPMailer/

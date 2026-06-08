@@ -26,6 +26,9 @@ class GeologicalPlantRepository {
         return new GeologicalPlantData(
             $row['power_plant_id'],
             $row['id'],
+            $row['country'],
+            $row['latitude'] !== null ? (float)$row['latitude'] : null,
+            $row['longitude'] !== null ? (float)$row['longitude'] : null,
             $soilType,
             $waterSourceType,
             $row['seismic_stability'] !== null ? (float)$row['seismic_stability'] : null,
@@ -44,6 +47,9 @@ class GeologicalPlantRepository {
             INSERT INTO geological_data (
                 id, 
                 power_plant_id, 
+                country,
+                latitude,
+                longitude,
                 soil_type, 
                 water_source_type,
                 seismic_stability, 
@@ -57,6 +63,9 @@ class GeologicalPlantRepository {
             ) VALUES (
                 :id, 
                 :powerPlantId, 
+                :country,
+                :latitude,
+                :longitude,
                 :soilType, 
                 :waterSourceType,
                 :seismicStability, 
@@ -73,6 +82,9 @@ class GeologicalPlantRepository {
         $statement->execute([
             'id' => $geologicalPlantData->getId(),
             'powerPlantId' => $geologicalPlantData->getPowerPlantId(),
+            'country' => $geologicalPlantData->getCountry(),
+            'latitude' => $geologicalPlantData->getLatitude(),
+            'longitude' => $geologicalPlantData->getLongitude(),
             'soilType' => $geologicalPlantData->getSoilType()?->value,
             'waterSourceType' => $geologicalPlantData->getWaterSourceType()?->value,
             'seismicStability' => $geologicalPlantData->getSeismicStability(),
@@ -90,6 +102,9 @@ class GeologicalPlantRepository {
         $statement = $this->pdo->prepare("
             UPDATE geological_data 
             SET 
+                country = :country,
+                latitude = :latitude,
+                longitude = :longitude,
                 soil_type = :soilType, 
                 water_source_type = :waterSourceType,
                 seismic_stability = :seismicStability, 
@@ -105,6 +120,9 @@ class GeologicalPlantRepository {
 
         $statement->execute([
             'id' => $geologicalPlantData->getId(),
+            'country' => $geologicalPlantData->getCountry(),
+            'latitude' => $geologicalPlantData->getLatitude(),
+            'longitude' => $geologicalPlantData->getLongitude(),
             'soilType' => $geologicalPlantData->getSoilType()?->value,
             'waterSourceType' => $geologicalPlantData->getWaterSourceType()?->value,
             'seismicStability' => $geologicalPlantData->getSeismicStability(),

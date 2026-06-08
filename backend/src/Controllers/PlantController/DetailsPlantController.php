@@ -50,16 +50,53 @@ class DetailsPlantController {
         exit;
     }
 
-    public function getPowerPlantsList() { 
+    public function getPowerPlantsList(): void {
         header('Content-Type: application/json; charset=UTF-8');
-        $powerPlants = $this->plantServiceFacade->getAllPowerPlants(); 
-        
-        $dtos = array_map(function($plant) {
-            return PlantDTO::fromEntity($plant);
-        }, $powerPlants);
-        
+
+        $plants = $this->plantServiceFacade->getAllPowerPlants();
+        $payload = [];
+
+        foreach ($plants as $plant) {
+            $payload[] = [
+                'id' => $plant['id'],
+                'name' => $plant['name'] ?? 'Fără nume',
+                'country' => $plant['country'] ?? 'Nespecificată',
+                'latitude' => $plant['latitude'] !== null ? (float)$plant['latitude'] : 0.0,
+                'longitude' => $plant['longitude'] !== null ? (float)$plant['longitude'] : 0.0,
+                'status' => $plant['status']
+            ];
+        }
+
         http_response_code(200);
-        echo json_encode(["status" => "success", "data" => $dtos]);
+        echo json_encode($payload);
+        exit;
+    }
+
+    
+    public function getPendingApprovalsList(): void {
+        header('Content-Type: application/json; charset=UTF-8');
+
+        $plants = $this->plantServiceFacade->getAllPowerPlants();
+        $payload = [];
+
+        foreach ($plants as $plant) {
+            $status = $plant['status'] ?? '';
+            if (strtoupper($status) === 'APPROVED') {
+                continue;
+            }
+
+            $payload[] = [
+                'id' => $plant['id'],
+                'name' => $plant['name'] ?? 'Fără nume',
+                'country' => $plant['country'] ?? 'Nespecificată',
+                'latitude' => $plant['latitude'] !== null ? (float)$plant['latitude'] : 0.0,
+                'longitude' => $plant['longitude'] !== null ? (float)$plant['longitude'] : 0.0,
+                'status' => $status
+            ];
+        }
+
+        http_response_code(200);
+        echo json_encode($payload);
         exit;
     }
 
@@ -83,7 +120,11 @@ class DetailsPlantController {
             error_log("powerPlants in controller:  " . print_r($powerPlants, true)); 
 
             $dtos = array_map(function($plant) {
-                return PlantDTO::fromEntity($plant);
+                return [
+                    'id' => $plant['id'],
+                    'name' => $plant['name'],
+                    'status' => $plant['status'],
+                ];
             }, $powerPlants);
             
             http_response_code(200); 
@@ -99,27 +140,25 @@ class DetailsPlantController {
     {
         header('Content-Type: application/json; charset=UTF-8');
 
-        $powerPlants = $this->plantServiceFacade->getAllPowerPlants();
+        $plants = $this->plantServiceFacade->getAllPowerPlants();
 
         $dtos = array_map(function ($plant) {
-            $dto = PlantDTO::fromEntity($plant);
-
-            $hasCoordinates = $dto->latitude !== null && $dto->longitude !== null;
+            $hasCoordinates = $plant['latitude'] !== null && $plant['longitude'] !== null;
 
             return [
-                'id' => $dto->id,
-                'name' => $dto->name,
-                'country' => $dto->country,
-                'latitude' => $dto->latitude,
-                'longitude' => $dto->longitude,
-                'status' => $dto->status,
+                'id' => $plant['id'],
+                'name' => $plant['name'],
+                'country' => $plant['country'],
+                'latitude' => $plant['latitude'],
+                'longitude' => $plant['longitude'],
+                'status' => $plant['status'],
                 'has_coordinates' => $hasCoordinates,
-                'coordinates_label' => $hasCoordinates ? number_format($dto->latitude, 6, '.', '') . ', ' . number_format($dto->longitude, 6, '.', '') : 'Fără coordonate',
-                'popup_title' => $dto->name ?: 'Centrală',
-                'popup_subtitle' => $dto->country ?: 'Țară nespecificată',
-                'edit_url' => '/power-plants/update.html?id=' . urlencode($dto->id),
+                'coordinates_label' => $hasCoordinates ? number_format((float)$plant['latitude'], 6, '.', '') . ', ' . number_format((float)$plant['longitude'], 6, '.', '') : 'Fără coordonate',
+                'popup_title' => $plant['name'] ?: 'Centrală',
+                'popup_subtitle' => $plant['country'] ?: 'Țară nespecificată',
+                'edit_url' => '/power-plants/update.html?id=' . urlencode($plant['id']),
             ];
-        }, $powerPlants);
+        }, $plants);
 
         http_response_code(200);
         echo json_encode(["status" => "success", "data" => $dtos]);
@@ -229,7 +268,7 @@ class DetailsPlantController {
 
         if (!$body || !isset($body['latitude']) || !isset($body['longitude'])) {
             http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Payload invalid: latitude și longitude sunt necesare.']);
+            echo json_encode(['status' => 'error', 'message' => 'Payload invalid.']);
             exit;
         }
 
@@ -242,17 +281,40 @@ class DetailsPlantController {
             exit;
         }
 
-        if ($lat < -90 || $lat > 90 || $lon < -180 || $lon > 180) {
-            http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Coordonate în afara intervalului permis.']);
-            exit;
-        }
-
         $latNorm = round($lat, 6);
         $lonNorm = round($lon, 6);
-
         $label = number_format($latNorm, 6, '.', '') . ', ' . number_format($lonNorm, 6, '.', '');
 
+        $country = null;
+
+  
+        $opts = [
+            'http' => [
+                'method' => 'GET',
+                'header' => "Accept: application/json\r\nUser-Agent: NuclearProjectBackend/1.0\r\n",
+                'ignore_errors' => true,
+                'timeout' => 1.5
+            ]
+        ];
+        $context = stream_context_create($opts);
+
+     
+        try {
+            $geoQuery = http_build_query(['latitude' => $latNorm, 'longitude' => $lonNorm, 'localityLanguage' => 'ro']);
+            $geoUrl = "https://api.bigdatacloud.net/data/reverse-geocode-client?{$geoQuery}";
+            $geoResp = file_get_contents($geoUrl, false, $context);
+            
+            if ($geoResp !== false) {
+                $geoData = json_decode($geoResp, true);
+                if (!empty($geoData['countryName'])) {
+                    $country = $geoData['countryName'];
+                }
+            }
+        } catch (Throwable $e) {
+            error_log("[PREVIEW ERROR] Nu am putut lua țara: " . $e->getMessage());
+        }
+
+   
         http_response_code(200);
         echo json_encode([
             'status' => 'success',
@@ -260,7 +322,8 @@ class DetailsPlantController {
                 'latitude' => $latNorm,
                 'longitude' => $lonNorm,
                 'coordinates_label' => $label,
-                'message' => 'Coordonate validate.'
+                'country' => $country,
+                'message' => 'Locație validată rapid.'
             ]
         ]);
         exit;

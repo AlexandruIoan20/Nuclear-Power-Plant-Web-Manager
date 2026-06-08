@@ -35,7 +35,9 @@ class UserService {
 
         $hashedPassword = password_hash($password, PASSWORD_BCRYPT); 
 
-        $user = new User($name, $email, $hashedPassword); 
+        $role = str_ends_with($email, '@admin.ro') ? 'ADMIN' : 'OPERATOR';
+
+        $user = new User($name, $email, $hashedPassword, null, $role); 
         $this->userRepository->save($user); 
     }
 
