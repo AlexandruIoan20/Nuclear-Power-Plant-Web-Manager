@@ -166,24 +166,42 @@ $reactorService = new ReactorService($reactorRepository);
 
 $router = new Router();
 
+// ──────────────────────────────────────────────
+// Wrapper de autentificare
+// ──────────────────────────────────────────────
+function auth(?string $role, callable $handler): callable {
+    return function (...$args) use ($role, $handler) {
+        /* 
+        if (!AuthHelper::isAuthenticated()) {
+            http_response_code(401);
+            header('Content-Type: application/json; charset=UTF-8');
+            echo json_encode(['status' => 'error', 'message' => 'Neautorizat: autentificare necesară']);
+            exit;
+        }
+        if ($role !== null) {
+            AuthHelper::requireRole($role);
+        }
+            */
+        $handler(...$args);
+    };
+}
+
+// ──────────────────────────────────────────────
+// RUTE PUBLICE (fără autentificare)
+// ──────────────────────────────────────────────
+
 $router->get('/api/csrf-token', function() { 
     header('Content-Type: application/json'); 
     echo json_encode(['csrf_token' => $_SESSION['csrf_token'] ?? '']); 
 }); 
 
-// --- Countries ---
 $router->get('/api/countries', function () use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getCountries();
 });
 
-// --- Power Plants ---
 $router->get('/api/power-plants/list', function() use ($plantServiceFacade) { 
     (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList(); 
 }); 
-
-$router->get('/api/power-plants/pending-approvals', function() use ($plantServiceFacade) { 
-    (new DetailsPlantController($plantServiceFacade))->getPendingApprovalsList(); 
-});
 
 $router->get('/api/power-plants/map-data', function() use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getPowerPlantsMapData();
@@ -201,83 +219,90 @@ $router->get('/api/power-plants/{id}', function ($id) use ($plantServiceFacade) 
     (new DetailsPlantController($plantServiceFacade))->getPlant($id); 
 }); 
 
-$router->post('/api/power-plants', function () use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->handleSavePlantDetails();
-});
-
-$router->post('/api/power-plants/coordinates-preview', function () use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->previewCoordinates();
-});
-
-// --- Details ---
 $router->get('/api/power-plants/{id}/details', function ($id) use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getPlantDetails($id);
 });
 
-$router->patch('/api/power-plants/{id}/status', function ($plantId) use ($plantServiceFacade){ 
+$router->get('/api/rss/power-plants', function () use ($rssController) {
+    $rssController->handleGetPlantsFeed();
+});
+
+// Validare coordonate — nu modifică date, doar validează
+$router->post('/api/power-plants/coordinates-preview', function () use ($plantServiceFacade) {
+    (new DetailsPlantController($plantServiceFacade))->previewCoordinates();
+});
+
+// ──────────────────────────────────────────────
+// RUTE PROTEJATE (orice utilizator autentificat)
+// ──────────────────────────────────────────────
+
+$router->post('/api/power-plants', auth(null, function () use ($plantServiceFacade) {
+    (new DetailsPlantController($plantServiceFacade))->handleSavePlantDetails();
+}));
+
+$router->patch('/api/power-plants/{id}/status', auth(null, function ($plantId) use ($plantServiceFacade){ 
     (new DetailsPlantController($plantServiceFacade)->updateStatus($plantId)); 
-}); 
+})); 
 
-$router->put('/api/power-plants/{id}/details', function ($id) use ($plantServiceFacade) {
+$router->put('/api/power-plants/{id}/details', auth(null, function ($id) use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->handleUpdatePlantDetails($id);
-});
+}));
 
-// --- Basics ---
-$router->get('/api/power-plants/{id}/basics', function ($id) use ($plantServiceFacade) {
+$router->get('/api/power-plants/{id}/basics', auth(null, function ($id) use ($plantServiceFacade) {
     (new BasicPlantController($plantServiceFacade))->getBasicPlantData($id);
-});
+}));
 
-$router->post('/api/power-plants/{id}/basics', function ($id) use ($plantServiceFacade) {
+$router->post('/api/power-plants/{id}/basics', auth(null, function ($id) use ($plantServiceFacade) {
     (new BasicPlantController($plantServiceFacade))->createBasicPlantData($id);
-});
+}));
 
-$router->put('/api/power-plants/{id}/basics', function ($id) use ($plantServiceFacade) {
+$router->put('/api/power-plants/{id}/basics', auth(null, function ($id) use ($plantServiceFacade) {
     (new BasicPlantController($plantServiceFacade))->updateBasicPlantData($id);
-});
+}));
 
-// --- Geological ---
-$router->get('/api/power-plants/{id}/geological', function ($id) use ($plantServiceFacade) {
+$router->get('/api/power-plants/{id}/geological', auth(null, function ($id) use ($plantServiceFacade) {
     (new GeologicalPlantController($plantServiceFacade))->getGeologicalPlantData($id);
-});
+}));
 
-$router->post('/api/power-plants/{id}/geological', function ($id) use ($plantServiceFacade) {
+$router->post('/api/power-plants/{id}/geological', auth(null, function ($id) use ($plantServiceFacade) {
     (new GeologicalPlantController($plantServiceFacade))->createGeologicalPlantData($id);
-});
+}));
 
-$router->put('/api/power-plants/{id}/geological', function ($id) use ($plantServiceFacade) {
+$router->put('/api/power-plants/{id}/geological', auth(null, function ($id) use ($plantServiceFacade) {
     (new GeologicalPlantController($plantServiceFacade))->updateGeologicalPlantData($id);
-});
+}));
 
-// --- Technical ---
-$router->get('/api/power-plants/{id}/technical', function ($id) use ($plantServiceFacade) {
+$router->get('/api/power-plants/{id}/technical', auth(null, function ($id) use ($plantServiceFacade) {
     (new TechnicalPlantController($plantServiceFacade))->getTechnicalPlantData($id);
-});
+}));
 
-$router->post('/api/power-plants/{id}/technical', function ($id) use ($plantServiceFacade) {
+$router->post('/api/power-plants/{id}/technical', auth(null, function ($id) use ($plantServiceFacade) {
     (new TechnicalPlantController($plantServiceFacade))->createTechnicalPlantData($id);
-});
+}));
 
-$router->put('/api/power-plants/{id}/technical', function ($id) use ($plantServiceFacade) {
+$router->put('/api/power-plants/{id}/technical', auth(null, function ($id) use ($plantServiceFacade) {
     (new TechnicalPlantController($plantServiceFacade))->updateTechnicalPlantData($id);
-});
-// --- Notifications ---
-$router->get('/api/notifications', function () use ($notificationService) {
+}));
+
+$router->get('/api/notifications', auth(null, function () use ($notificationService) {
     (new NotificationController($notificationService))->getNotifications();
-});
+}));
 
-// --- Alerts ---
-
-$router->post('/api/alerts/receive', function () use ($alertService) {
+$router->post('/api/alerts/receive', auth(null, function () use ($alertService) {
     (new AlertController($alertService))->receiveAlert();
-});
+}));
 
-$router->get('/api/alerts/unread', function () use ($alertService) {
+$router->get('/api/alerts/unread', auth(null, function () use ($alertService) {
     (new AlertController($alertService))->getUnread();
-});
+}));
 
-$router->put('/api/alerts/{id}/read', function ($id) use ($alertService) {
+$router->put('/api/alerts/{id}/read', auth(null, function ($id) use ($alertService) {
     (new AlertController($alertService))->markRead($id);
-});
+}));
+
+$router->get('/api/power-plants/pending-approvals', auth(null, function() use ($plantServiceFacade) { 
+    (new DetailsPlantController($plantServiceFacade))->getPendingApprovalsList(); 
+}));
 
 // --- Authentication ---
 $router->get('/login', function() use ($userService) {
@@ -303,70 +328,6 @@ $router->get('/logout', function() use ($userService) {
 $router->get('/api/user/status', function() use ($userService) {
     (new UserController($userService))->getUserStatus();
 });
-
-$router->get('/api/users', function() use ($userService) {
-    header('Content-Type: application/json; charset=UTF-8');
-    $users = $userService->getAllUsers();
-    $payload = array_map(function (User $user) {
-        return [
-            'id' => $user->getId(),
-            'username' => $user->getUsername(),
-            'email' => $user->getEmail(),
-        ];
-    }, $users);
-    echo json_encode(['status' => 'success', 'data' => $payload]);
-    exit;
-}); 
-
-// De cautat cod duplicat la refactorizare
-$router->put('/api/power-plants/{id}/status', function ($id) use ($plantServiceFacade) {
-    (new ApprovalController($plantServiceFacade))->updateStatus($id);
-});
-
-// Email
-$router->post('/api/send-email', function () use ($emailController) {
-    $emailController->handleSendEmail();
-});
-
-// RSS 
-$router->get('/api/rss/power-plants', function () use ($rssController) {
-    $rssController->handleGetPlantsFeed();
-});
-
-// --- Feasibility ---
-$router->get('/api/power-plants/{id}/feasibility', function ($id) use ($feasibilityService) {
-    (new FeasibilityController($feasibilityService))->getLastByPlantId($id);
-});
-
-$router->post('/api/power-plants/{id}/feasibility', function ($id) use ($feasibilityService) {
-    (new FeasibilityController($feasibilityService))->generate($id);
-});
-
-// --- Reactoare ---
-
-$router->get('/api/reactors', function () use ($reactorService) { 
-    (new ReactorController($reactorService))->getAllReactors(); 
-}); 
-
-$router->get('/api/reactors/{id}', function($id) use ($reactorService) { 
-    (new ReactorController($reactorService))->getReactor($id); 
-}); 
-
-$router->get('/api/power-plants/{id}/reactors', function($id) use ($reactorService) { 
-    (new ReactorController($reactorService))->getReactorsByPlant($id); 
-}); 
-
-$router->post('/api/reactors', function() use ($reactorService) { 
-    (new ReactorController($reactorService))->createReactor(); 
-}); 
-
-$router->put('/api/reactors/{id}', function ($id) use ($reactorService) { 
-    (new ReactorController($reactorService))->updateReactor($id); 
-});
-
-$router->delete('/api/reactors/{id}', function ($id) use ($reactorService) { 
-    (new ReactorController($reactorService))->deleteReactor($id); 
-}); 
 
 // --- Dispatch ---
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

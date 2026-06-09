@@ -59,7 +59,6 @@ class UserController {
                 }
 
                 $_SESSION['register_error'] = 'Toate câmpurile sunt necesare.';
-                require __DIR__ . '/../Views/register.view.php';
                 return;
             }
 
@@ -72,7 +71,6 @@ class UserController {
                 }
 
                 $_SESSION['register_error'] = 'Parolele nu se potrivesc.';
-                require __DIR__ . '/../Views/register.view.php';
                 return;
             }
 
@@ -109,12 +107,10 @@ class UserController {
                 }
 
                 $_SESSION['register_error'] = $e->getMessage();
-                require __DIR__ . '/../Views/register.view.php';
                 return;
             }
         }
 
-        require __DIR__ . '/../Views/register.view.php';
     }
 
     public function handleLogin(): void {
@@ -143,7 +139,6 @@ class UserController {
                 }
 
                 $_SESSION['login_error'] = 'Email și parolă sunt necesare.';
-                require __DIR__ . '/../Views/login.view.php';
                 return;
             }
 
@@ -162,7 +157,6 @@ class UserController {
                 }
 
                 $_SESSION['login_error'] = 'Email sau parolă incorectă.';
-                require __DIR__ . '/../Views/login.view.php';
                 return;
             }
 
@@ -189,7 +183,6 @@ class UserController {
             exit;
         }
 
-        require __DIR__ . '/../Views/login.view.php';
     }
 
     public function handleLogout(): void {

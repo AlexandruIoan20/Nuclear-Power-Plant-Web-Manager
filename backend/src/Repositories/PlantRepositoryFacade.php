@@ -93,8 +93,8 @@ class PlantRepositoryFacade {
         return $this->geologicalPlantRepository->findByPlantId($plantId);
     }
 
-    public function saveGeologicalData(GeologicalPlantData $geoData): void {
-        $this->geologicalPlantRepository->save($geoData);
+    public function saveGeologicalData(GeologicalPlantData $geoData): bool {
+        return $this->geologicalPlantRepository->save($geoData);
     }
 
     public function updateGeologicalData(GeologicalPlantData $geoData): void {

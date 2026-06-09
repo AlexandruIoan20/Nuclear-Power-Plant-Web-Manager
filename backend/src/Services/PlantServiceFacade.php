@@ -1,6 +1,7 @@
 <?php
 
-require_once __DIR__ . '/../Dto/CreateDataResponseDTO.php'; 
+require_once __DIR__ . '/../Dto/CreateDataResponseDTO.php';
+require_once __DIR__ . '/../Dto/GeologicalPlantDataDTO.php';
 
 class PlantServiceFacade {
     private DetailsPlantService $detailsPlantService;
@@ -100,8 +101,8 @@ class PlantServiceFacade {
     }
 
     // Geological
-    public function getGeologicalDataByPlantId(string $plantId): ?GeologicalPlantData {
-        return $this->geologicalPlantService->findByPlantId($plantId);
+    public function getGeologicalDataByPlantId(string $plantId): ?GeologicalPlantDataDTO {
+        return $this->geologicalPlantService->getGeologicalData($plantId);
     }
 
     public function saveGeologicalData(array $data, string $plantId): CreateDataResponseDTO {

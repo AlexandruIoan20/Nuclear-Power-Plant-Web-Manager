@@ -11,69 +11,71 @@ class GeologicalPlantController {
     public function getGeologicalPlantData(string $plantId): void { 
         header('Content-Type: application/json; charset=UTF-8'); 
 
-        $geologicalData = $this->plantServiceFacade->getGeologicalDataByPlantId($plantId); 
+        try {
+            $dto = $this->plantServiceFacade->getGeologicalDataByPlantId($plantId); 
 
-        if (!$geologicalData) { 
-            http_response_code(404); 
-            echo json_encode(["status" => "error", "message" => "Datele geografice nu au fost gasite."]);
-            exit;
+            if (!$dto) { 
+                http_response_code(404); 
+                echo json_encode(["status" => "error", "message" => "Datele geologice nu au fost găsite."]);
+                exit;
+            }
+
+            http_response_code(200); 
+            echo json_encode(["status" => "success", "data" => $dto]); 
+        } catch (Exception $e) {
+            error_log("[ERROR] GET Geological: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => "Eroare la preluarea datelor geologice."]);
         }
-
-        $geologicalPlantDataDTO = GeologicalPlantDataDTO::fromEntity($geologicalData); 
-
-        http_response_code(200); 
-        echo json_encode(["status" => "success", "data" => $geologicalPlantDataDTO]); 
         exit;
     }
 
-
     public function createGeologicalPlantData(string $plantId): void { 
         header('Content-Type: application/json; charset=UTF-8');
-        error_log('=== CREATE START === plantId: ' . $plantId);
 
-        
         $jsonPayload = file_get_contents('php://input');
-        error_log('=== raw payload: ' . $jsonPayload);
-        
-        $dateFormular = json_decode($jsonPayload, true) ?? [];
-        error_log('=== dateFormular: ' . print_r($dateFormular, true));
-        
-        try {
-            error_log('=== inainte de saveGeologicalData');
-            $responseDTO = $this->plantServiceFacade->saveGeologicalData($dateFormular, $plantId);
-            error_log('=== dupa saveGeologicalData, responseDTO: ' . print_r($responseDTO, true));
-            
-            http_response_code(200);
-            echo json_encode([
-                'success' => true,
-                'message' => 'Datele geologice au fost salvate cu succes.',
-                "plantId" => $plantId,
-                "geologicalId" => $responseDTO->dataId
-            ]);
-            error_log('=== CREATE DONE ===');
-            
-        } catch(Exception $e) {
-            error_log('[ERROR] mesaj: ' . $e->getMessage());
-            error_log('[ERROR] fisier: ' . $e->getFile() . ' linia: ' . $e->getLine());
-            error_log('[ERROR] trace: ' . $e->getTraceAsString());
-            
+        $dateFormular = json_decode($jsonPayload, true);
+
+        if (empty($dateFormular)) {
             http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Nu s-au primit date."]);
+            exit;
+        }
+
+        try {
+            $responseDTO = $this->plantServiceFacade->saveGeologicalData($dateFormular, $plantId);
+            
+            http_response_code(201);
             echo json_encode([
-                'success' => false,
-                'message' => 'Eroare: ' . $e->getMessage()
+                'status' => 'success',
+                'message' => 'Datele geologice au fost salvate cu succes.',
+                'plantId' => $plantId,
+                'geologicalId' => $responseDTO->dataId
+            ]);
+        } catch (Exception $e) {
+            error_log("[ERROR] Create Geological: " . $e->getMessage());
+            $code = (str_contains($e->getMessage(), 'Există deja')) ? 409 : 400;
+            http_response_code($code);
+            echo json_encode([
+                'status' => 'error',
+                'message' => $e->getMessage()
             ]);
         }
+        exit;
     }
 
     public function updateGeologicalPlantData(string $plantId): void { 
         header('Content-Type: application/json; charset=UTF-8');
-        
-        $jsonPayload = file_get_contents('php://input');
-        $dateFormular = json_decode($jsonPayload, true) ?? [];
 
-        error_log("[DEBUG] Date Formular Geological (Update)"); 
-        error_log(print_r($dateFormular, true));
-        
+        $jsonPayload = file_get_contents('php://input');
+        $dateFormular = json_decode($jsonPayload, true);
+
+        if (empty($dateFormular)) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Nu s-au primit date pentru actualizare."]);
+            exit;
+        }
+
         try { 
             $this->plantServiceFacade->updateGeologicalData($dateFormular, $plantId); 
             
@@ -82,16 +84,15 @@ class GeologicalPlantController {
                 'status' => 'success',
                 'message' => 'Datele geologice au fost actualizate cu succes.'
             ]);
-            exit;
-        } catch(Exception $e) { 
-            error_log("[ERROR] POST Geo Data Update: " . $e->getMessage());
-            
-            http_response_code(400);
+        } catch (Exception $e) { 
+            error_log("[ERROR] Update Geological: " . $e->getMessage());
+            $code = str_contains($e->getMessage(), 'găsit') ? 404 : 400;
+            http_response_code($code);
             echo json_encode([
                 'status' => 'error',
-                'message' => 'Eroare la actualizarea datelor geologice: ' . $e->getMessage()
+                'message' => $e->getMessage()
             ]); 
-            exit;
         }
+        exit;
     }
 }

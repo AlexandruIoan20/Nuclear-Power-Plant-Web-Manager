@@ -1,4 +1,4 @@
-import { API_BASE } from '../../config/api.config.js';
+import { api } from '../../core/api.js';
 
 export function setupCoordinatePickerMap({
     mapId,
@@ -30,9 +30,12 @@ export function setupCoordinatePickerMap({
     if (latitudeInput) latitudeInput.step = 'any';
     if (longitudeInput) longitudeInput.step = 'any';
 
-    const initialLatitude = latitude ?? (latitudeInput ? Number(latitudeInput.value) : null);
-    const initialLongitude = longitude ?? (longitudeInput ? Number(longitudeInput.value) : null);
-    const hasInitialCoordinates = Number.isFinite(Number(initialLatitude)) && Number.isFinite(Number(initialLongitude));
+    const rawLat = latitudeInput ? latitudeInput.value.trim() : '';
+    const rawLon = longitudeInput ? longitudeInput.value.trim() : '';
+    const initialLatitude = latitude ?? (rawLat !== '' ? Number(rawLat) : null);
+    const initialLongitude = longitude ?? (rawLon !== '' ? Number(rawLon) : null);
+    const hasInitialCoordinates = initialLatitude !== null && initialLongitude !== null
+        && Number.isFinite(initialLatitude) && Number.isFinite(initialLongitude);
     const startCenter = hasInitialCoordinates ? [Number(initialLatitude), Number(initialLongitude)] : fallbackCenter;
     const startZoom = hasInitialCoordinates ? zoom : fallbackZoom;
 
@@ -63,23 +66,10 @@ export function setupCoordinatePickerMap({
     }
 
     async function sendCoordinates(nextLatitude, nextLongitude) {
-        const response = await fetch(`${API_BASE}/power-plants/coordinates-preview`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                latitude: nextLatitude,
-                longitude: nextLongitude
-            })
+        const result = await api.post('/power-plants/coordinates-preview', {
+            latitude: nextLatitude,
+            longitude: nextLongitude
         });
-
-        const result = await response.json();
-
-        if (!response.ok || result.status !== 'success') {
-            throw new Error(result.message || 'Coordonate invalide.');
-        }
 
         const payload = result.data || {};
 

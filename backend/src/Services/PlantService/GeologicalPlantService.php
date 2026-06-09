@@ -2,7 +2,8 @@
 
 require_once __DIR__ . '/../../Entities/SoilType.php';
 require_once __DIR__ . '/../../Entities/WaterSourceType.php';
-require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php'; 
+require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php';
+require_once __DIR__ . '/../../Dto/GeologicalPlantDataDTO.php';
 
 class GeologicalPlantService { 
     private PlantRepositoryFacade $plantRepositoryFacade; 
@@ -11,8 +12,14 @@ class GeologicalPlantService {
         $this->plantRepositoryFacade = $plantRepositoryFacade; 
     }
 
-    public function findByPlantId(string $plantId) { 
+    public function findByPlantId(string $plantId): ?GeologicalPlantData { 
         return $this->plantRepositoryFacade->getGeologicalDataByPlantId($plantId); 
+    }
+
+    public function getGeologicalData(string $plantId): ?GeologicalPlantDataDTO {
+        $entity = $this->findByPlantId($plantId);
+        if (!$entity) return null;
+        return GeologicalPlantDataDTO::fromEntity($entity);
     }
 
     private function runAutoGeolocation(float $lat, float $lon): array {
@@ -28,7 +35,7 @@ class GeologicalPlantService {
             'waterProximity' => null,
             'waterFlowRate' => null,
             'populationDensity' => null,
-            'transportScore' => null,
+            'transportInfrastructureScore' => null,
         ];
 
         $opts = [
@@ -51,7 +58,7 @@ class GeologicalPlantService {
                 if (isset($geoData['localityInfo']['administrative'])) {
                     $adminLevels = count($geoData['localityInfo']['administrative']);
                     $result['populationDensity'] = (float) min(100.0, $adminLevels * 20.0);
-                    $result['transportScore'] = (float) min(10.0, $adminLevels * 2.0);
+                    $result['transportInfrastructureScore'] = (float) round(min(1.0, $adminLevels * 0.2), 2);
                 }
             }
         } catch (Throwable $e) {
@@ -66,7 +73,7 @@ class GeologicalPlantService {
             if ($seismicResp !== false) {
                 $seismicData = json_decode($seismicResp, true);
                 $totalEvents = $seismicData['metadata']['count'] ?? 0;
-                $result['seismicStability'] = (float) round(max(0.0, 10.0 - ($totalEvents * 1.5)), 2);
+                $result['seismicStability'] = (float) round(max(0.0, min(1.0, (10.0 - ($totalEvents * 1.5)) / 10)), 2);
             }
         } catch (Throwable $e) {
             error_log("[SEISMIC SERVICE ERROR] USGS a crăpat: " . $e->getMessage());
@@ -84,7 +91,7 @@ class GeologicalPlantService {
 
                 if ($result['waterFlowRate'] > 0) {
                     $result['waterProximity'] = 1.2;
-                    $result['floodRisk'] = (float) round(min(100.0, ($result['waterFlowRate'] / 150) * 100), 2);
+                    $result['floodRisk'] = (float) round(min(1.0, ($result['waterFlowRate'] / 150)), 2);
                 } else {
                     $result['waterProximity'] = 15.0;
                     $result['floodRisk'] = 0.0;
@@ -145,22 +152,33 @@ class GeologicalPlantService {
     }
 
     public function save(array $data, string $plantId): CreateDataResponseDTO { 
-        $existingData = $this->plantRepositoryFacade->getGeologicalDataByPlantId($plantId); 
-        if ($existingData !== null) { 
-            throw new Exception("Există deja date geologice pentru această centrală. Te rugăm să folosești metoda de UPDATE (PUT/PATCH).");
+        $latitude = null;
+        if (isset($data['latitude']) && $data['latitude'] !== '') {
+            $latitude = (float) $data['latitude'];
+            if ($latitude < -90 || $latitude > 90) {
+                throw new Exception("Latitudinea trebuie să fie între -90 și 90.");
+            }
         }
 
-        $country = (isset($data['country']) && $data['country'] !== '') ? $data['country'] : null;
-        $latitude = (isset($data['latitude']) && $data['latitude'] !== '') ? (float) $data['latitude'] : null;
-        $longitude = (isset($data['longitude']) && $data['longitude'] !== '') ? (float) $data['longitude'] : null;
+        $longitude = null;
+        if (isset($data['longitude']) && $data['longitude'] !== '') {
+            $longitude = (float) $data['longitude'];
+            if ($longitude < -180 || $longitude > 180) {
+                throw new Exception("Longitudinea trebuie să fie între -180 și 180.");
+            }
+        }
 
-        $soilType = (isset($data['soilType']) && $data['soilType'] !== '') 
-            ? SoilType::from($data['soilType']) 
-            : null;
+        $soilType = null;
+        if (isset($data['soilType']) && $data['soilType'] !== '') {
+            $soilType = SoilType::tryFrom($data['soilType']);
+            if (!$soilType) throw new Exception("Tip sol invalid.");
+        }
 
-        $waterSourceType = (isset($data['waterSourceType']) && $data['waterSourceType'] !== '') 
-            ? WaterSourceType::from($data['waterSourceType']) 
-            : null;
+        $waterSourceType = null;
+        if (isset($data['waterSourceType']) && $data['waterSourceType'] !== '') {
+            $waterSourceType = WaterSourceType::tryFrom($data['waterSourceType']);
+            if (!$waterSourceType) throw new Exception("Tip sursă apă invalid.");
+        }
 
         $seismicStability = (isset($data['seismicStability']) && $data['seismicStability'] !== '') 
             ? (float) $data['seismicStability'] 
@@ -194,6 +212,8 @@ class GeologicalPlantService {
             ? (float) $data['geologicalRiskScore'] 
             : null;
 
+        $country = (isset($data['country']) && $data['country'] !== '') ? $data['country'] : null;
+
         if ($latitude !== null && $longitude !== null) {
             $autoResult = $this->runAutoGeolocation($latitude, $longitude);
 
@@ -204,7 +224,7 @@ class GeologicalPlantService {
             if ($waterProximity === null) $waterProximity = $autoResult['waterProximity'];
             if ($waterFlowRate === null) $waterFlowRate = $autoResult['waterFlowRate'];
             if ($populationDensity === null) $populationDensity = $autoResult['populationDensity'];
-            if ($transportInfrastructureScore === null) $transportInfrastructureScore = $autoResult['transportScore'];
+            if ($transportInfrastructureScore === null) $transportInfrastructureScore = $autoResult['transportInfrastructureScore'];
             if ($waterSourceType === null) $waterSourceType = $autoResult['waterSourceType'];
         }
 
@@ -226,53 +246,91 @@ class GeologicalPlantService {
             $geologicalRiskScore
         ); 
 
-        $this->plantRepositoryFacade->saveGeologicalData($geologicalPlantData); 
+        $inserted = $this->plantRepositoryFacade->saveGeologicalData($geologicalPlantData); 
+        if (!$inserted) {
+            throw new Exception("Există deja date geologice pentru această centrală.");
+        }
         return new CreateDataResponseDTO($geologicalPlantData->getId()); 
     }
 
     public function update(array $data, string $plantId): void { 
-        $currentData = $this->plantRepositoryFacade->getGeologicalDataByPlantId($plantId); 
-        if ($currentData === null) {
-            throw new Exception("Nu s-au găsit date geologice existente pentru a efectua actualizarea.");
+        $geologicalData = $this->plantRepositoryFacade->getGeologicalDataByPlantId($plantId); 
+        if ($geologicalData === null) {
+            throw new Exception("Nu s-au găsit date geologice existente pentru actualizare.");
         }
-        
-        $country = (isset($data['country']) && $data['country'] !== '') ? $data['country'] : $currentData->getCountry();
-        $latitude = (isset($data['latitude']) && $data['latitude'] !== '') ? (float) $data['latitude'] : $currentData->getLatitude();
-        $longitude = (isset($data['longitude']) && $data['longitude'] !== '') ? (float) $data['longitude'] : $currentData->getLongitude();
 
-        $soilTypeRaw = $data['soilType'] ?? '';
-        $soilType = ($soilTypeRaw !== '') ? SoilType::from($soilTypeRaw) : null;
+        if (isset($data['country'])) {
+            $geologicalData->setCountry($data['country'] !== '' ? $data['country'] : null);
+        }
 
-        $waterSourceTypeRaw = $data['waterSourceType'] ?? '';
-        $waterSourceType = ($waterSourceTypeRaw !== '') ? WaterSourceType::from($waterSourceTypeRaw) : null;
+        if (isset($data['latitude'])) {
+            $lat = $data['latitude'] !== '' ? (float) $data['latitude'] : null;
+            if ($lat !== null && ($lat < -90 || $lat > 90)) {
+                throw new Exception("Latitudinea trebuie să fie între -90 și 90.");
+            }
+            $geologicalData->setLatitude($lat);
+        }
 
-        $seismicStability = (isset($data['seismicStability']) && $data['seismicStability'] !== '') ? (float)$data['seismicStability'] : null;
-        $floodRisk = (isset($data['floodRisk']) && $data['floodRisk'] !== '') ? (float)$data['floodRisk'] : null;
-        $groundwaterLevel = (isset($data['groundwaterLevel']) && $data['groundwaterLevel'] !== '') ? (float)$data['groundwaterLevel'] : null;
-        $waterProximity = (isset($data['waterProximity']) && $data['waterProximity'] !== '') ? (float)$data['waterProximity'] : null;
-        $waterFlowRate = (isset($data['waterFlowRate']) && $data['waterFlowRate'] !== '') ? (float)$data['waterFlowRate'] : null;
-        $populationDensity = (isset($data['populationDensity']) && $data['populationDensity'] !== '') ? (float)$data['populationDensity'] : null;
-        $transportInfrastructureScore = (isset($data['transportInfrastructureScore']) && $data['transportInfrastructureScore'] !== '') ? (float)$data['transportInfrastructureScore'] : null;
-        $geologicalRiskScore = (isset($data['geologicalRiskScore']) && $data['geologicalRiskScore'] !== '') ? (float)$data['geologicalRiskScore'] : null;
+        if (isset($data['longitude'])) {
+            $lon = $data['longitude'] !== '' ? (float) $data['longitude'] : null;
+            if ($lon !== null && ($lon < -180 || $lon > 180)) {
+                throw new Exception("Longitudinea trebuie să fie între -180 și 180.");
+            }
+            $geologicalData->setLongitude($lon);
+        }
 
-        $geologicalPlantData = new GeologicalPlantData(
-            $plantId, 
-            $currentData->getId(), 
-            $country,
-            $latitude,
-            $longitude,
-            $soilType, 
-            $waterSourceType,
-            $seismicStability, 
-            $floodRisk,
-            $groundwaterLevel, 
-            $waterProximity, 
-            $waterFlowRate,
-            $populationDensity,
-            $transportInfrastructureScore,
-            $geologicalRiskScore
-        ); 
+        if (isset($data['soilType'])) {
+            if ($data['soilType'] !== '') {
+                $soilType = SoilType::tryFrom($data['soilType']);
+                if (!$soilType) throw new Exception("Tip sol invalid.");
+                $geologicalData->setSoilType($soilType);
+            } else {
+                $geologicalData->setSoilType(null);
+            }
+        }
 
-        $this->plantRepositoryFacade->updateGeologicalData($geologicalPlantData); 
+        if (isset($data['waterSourceType'])) {
+            if ($data['waterSourceType'] !== '') {
+                $waterSourceType = WaterSourceType::tryFrom($data['waterSourceType']);
+                if (!$waterSourceType) throw new Exception("Tip sursă apă invalid.");
+                $geologicalData->setWaterSourceType($waterSourceType);
+            } else {
+                $geologicalData->setWaterSourceType(null);
+            }
+        }
+
+        if (isset($data['seismicStability'])) {
+            $geologicalData->setSeismicStability($data['seismicStability'] !== '' ? (float) $data['seismicStability'] : null);
+        }
+
+        if (isset($data['floodRisk'])) {
+            $geologicalData->setFloodRisk($data['floodRisk'] !== '' ? (float) $data['floodRisk'] : null);
+        }
+
+        if (isset($data['groundwaterLevel'])) {
+            $geologicalData->setGroundwaterLevel($data['groundwaterLevel'] !== '' ? (float) $data['groundwaterLevel'] : null);
+        }
+
+        if (isset($data['waterProximity'])) {
+            $geologicalData->setWaterProximity($data['waterProximity'] !== '' ? (float) $data['waterProximity'] : null);
+        }
+
+        if (isset($data['waterFlowRate'])) {
+            $geologicalData->setWaterFlowRate($data['waterFlowRate'] !== '' ? (float) $data['waterFlowRate'] : null);
+        }
+
+        if (isset($data['populationDensity'])) {
+            $geologicalData->setPopulationDensity($data['populationDensity'] !== '' ? (float) $data['populationDensity'] : null);
+        }
+
+        if (isset($data['transportInfrastructureScore'])) {
+            $geologicalData->setTransportInfrastructureScore($data['transportInfrastructureScore'] !== '' ? (float) $data['transportInfrastructureScore'] : null);
+        }
+
+        if (isset($data['geologicalRiskScore'])) {
+            $geologicalData->setGeologicalRiskScore($data['geologicalRiskScore'] !== '' ? (float) $data['geologicalRiskScore'] : null);
+        }
+
+        $this->plantRepositoryFacade->updateGeologicalData($geologicalData); 
     }
 }
