@@ -19,8 +19,9 @@ class DetailsPlantService {
 
         $status = PlantStatus::DRAFT; 
         $id = generateUUID(); 
+        $createdBy = $_SESSION['user_id'] ?? null;
 
-        $plant = new Plant($id, $name, $status); 
+        $plant = new Plant($id, $name, $status, $createdBy); 
         $this->plantRepositoryFacade->savePlantDetails($plant); 
 
         return new CreateDataResponseDTO($id); 

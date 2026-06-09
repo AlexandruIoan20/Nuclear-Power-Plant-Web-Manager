@@ -4,13 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuclear Plant Control | Register</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
+    <script src="../modules/config/globals.js"></script>
 </head>
 <body>
     <script>
         if (window.location.hostname === '127.0.0.1') {
-            window.location.replace('http://localhost:5500' + window.location.pathname.replace(/\/register\.html$/, '/register.html'));
+            window.location.replace(FRONTEND_BASE + window.location.pathname.replace(/\/register\.html$/, '/register.html'));
         }
+    </script>
+    <script>
+        (async () => {
+            try {
+                const res = await fetch(API_BASE + '/user/status', { credentials: 'include' });
+                if (res.ok) {
+                    window.location.replace(FRONTEND_BASE + '/pages/dashboard.html');
+                }
+            } catch (_) {}
+        })();
     </script>
     <div class="page-shell login-layout">
         <section class="login-card" aria-labelledby="register-title">
@@ -20,10 +31,18 @@
 
             <div id="register-message" class="footer-note" aria-live="polite"></div>
 
-            <form class="field-grid" id="registerForm" action="http://localhost:8081/register" method="post">
+            <form class="field-grid" id="registerForm" method="post">
                 <div class="field">
-                    <label for="name">Nume complet</label>
-                    <input id="name" name="name" type="text" placeholder="Ion Popescu" autocomplete="name" required>
+                    <label for="first_name">Prenume</label>
+                    <input id="first_name" name="first_name" type="text" placeholder="Ion" autocomplete="given-name" required>
+                </div>
+                <div class="field">
+                    <label for="last_name">Nume</label>
+                    <input id="last_name" name="last_name" type="text" placeholder="Popescu" autocomplete="family-name" required>
+                </div>
+                <div class="field">
+                    <label for="username">Nume de utilizator</label>
+                    <input id="username" name="username" type="text" placeholder="ion.popescu" autocomplete="username" required>
                 </div>
                 <div class="field">
                     <label for="email">Email</label>
@@ -59,11 +78,12 @@
             }
 
             try {
-                const response = await fetch('http://localhost:8081/register', {
+                const response = await fetch(BACKEND_BASE + '/register', {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',
-                        'X-Requested-With': 'fetch'
+                        'X-Requested-With': 'fetch',
+                        'X-CSRF-Token': await getCsrfToken()
                     },
                     body: new FormData(event.target),
                     credentials: 'include',

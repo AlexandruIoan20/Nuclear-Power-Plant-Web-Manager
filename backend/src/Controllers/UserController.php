@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../Constants/urls.php';
+
 class UserController { 
     private UserService $userService; 
 
@@ -7,29 +9,48 @@ class UserController {
         $this->userService = $userService; 
     }
 
-    public function showLoginForm(): void { 
-        require __DIR__ . '/../Views/login.view.php'; 
+    private function wantsJson(): bool {
+        return str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')
+            || strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'fetch';
     }
 
-    public function showStart(): void { 
-        require __DIR__ . '/../Views/start.view.php'; 
+    private function redirectIfAuthenticated(): void {
+        if (AuthHelper::isAuthenticated()) {
+            header("Location: " . URL_FRONTEND . "/pages/dashboard.html", true, 302);
+            exit;
+        }
     }
 
-    public function showRegisterForm(): void { 
-        require __DIR__ . '/../Views/register.view.php'; 
+    private function rejectIfAuthenticated(): void {
+        if (AuthHelper::isAuthenticated()) {
+            http_response_code(409);
+            header('Content-Type: application/json; charset=UTF-8');
+            echo json_encode(['status' => 'error', 'message' => 'Ești deja autentificat.']);
+            exit;
+        }
     }
 
     public function handleRegister(): void {
-        $wantsJson = str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')
-            || strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'fetch';
+        $wantsJson = $this->wantsJson();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $this->redirectIfAuthenticated();
+        }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $name = $_POST['name'] ?? '';
+            if (!$wantsJson) {
+                $this->redirectIfAuthenticated();
+            } else {
+                $this->rejectIfAuthenticated();
+            }
+            $firstName = $_POST['first_name'] ?? '';
+            $lastName = $_POST['last_name'] ?? '';
+            $username = $_POST['username'] ?? '';
             $email = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
             $password_confirm = $_POST['password_confirm'] ?? '';
 
-            if (empty($name) || empty($email) || empty($password) || empty($password_confirm)) {
+            if (empty($firstName) || empty($lastName) || empty($username) || empty($email) || empty($password) || empty($password_confirm)) {
                 if ($wantsJson) {
                     http_response_code(400);
                     header('Content-Type: application/json; charset=UTF-8');
@@ -57,7 +78,9 @@ class UserController {
 
             try {
                 $this->userService->registerUser([
-                    'name' => $name,
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'username' => $username,
                     'email' => $email,
                     'password' => $password
                 ]);
@@ -67,13 +90,14 @@ class UserController {
                     echo json_encode([
                         'status' => 'success',
                         'message' => 'Cont creat cu succes! Poți să te conectezi acum.',
-                        'redirect' => 'http://localhost:5500/login.html'
+                        'redirect' => URL_FRONTEND . "/pages/login.html"
                     ]);
                     return;
                 }
 
                 $_SESSION['register_success'] = 'Cont creat cu succes! Poți să te conectezi acum.';
-                header('Location: http://localhost:5500/login.html', true, 302);
+                $locationString = "Location: " . URL_FRONTEND . "/pages/login.html"; 
+                header($locationString, true, 302);
                 exit;
             } catch (Exception $e) {
                 if ($wantsJson) {
@@ -84,7 +108,6 @@ class UserController {
                 }
 
                 $_SESSION['register_error'] = $e->getMessage();
-                require __DIR__ . '/../Views/register.view.php';
                 return;
             }
         }
@@ -92,16 +115,19 @@ class UserController {
         require __DIR__ . '/../Views/register.view.php';
     }
 
-    public function listUsers(): void {
-        $users = $this->userService->getAllUsers(); 
-        require __DIR__ . '/../Views/users.view.php'; 
-    }
-
     public function handleLogin(): void {
-        $wantsJson = str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')
-            || strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'fetch';
+        $wantsJson = $this->wantsJson();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $this->redirectIfAuthenticated();
+        }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!$wantsJson) {
+                $this->redirectIfAuthenticated();
+            } else {
+                $this->rejectIfAuthenticated();
+            }
             $email = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
 
@@ -114,7 +140,6 @@ class UserController {
                 }
 
                 $_SESSION['login_error'] = 'Email și parolă sunt necesare.';
-                require __DIR__ . '/../Views/login.view.php';
                 return;
             }
 
@@ -129,7 +154,6 @@ class UserController {
                 }
 
                 $_SESSION['login_error'] = 'Email sau parolă incorectă.';
-                require __DIR__ . '/../Views/login.view.php';
                 return;
             }
 
@@ -139,20 +163,20 @@ class UserController {
             $_SESSION['user_role'] = $user['role'];
             $_SESSION['username'] = $user['username'];
 
-            // FIX: Am comentat regenerarea ID-ului pentru a preveni pierderea cookie-ului pe porturi diferite (cross-port local dev)
-            // session_regenerate_id(true);
+            session_regenerate_id(true);
 
             if ($wantsJson) {
                 header('Content-Type: application/json; charset=UTF-8');
                 echo json_encode([
                     'status' => 'success',
                     'message' => 'Autentificare reușită.',
-                    'redirect' => 'http://localhost:5500/dashboard.html'
+                    'redirect' => URL_FRONTEND . '/pages/dashboard.html'
                 ]);
                 return;
             }
 
-            header('Location: http://localhost:5500/dashboard.html', true, 302);
+            $locationString = "Location: " . URL_FRONTEND . "/pages/dashboard.html"; 
+            header($locationString, true, 302);
             exit;
         }
 
@@ -174,13 +198,9 @@ class UserController {
         }
 
         session_destroy();
-        header('Location: http://localhost:5500/start.html', true, 302);
+        $locationString = "Location: " . URL_FRONTEND . "/pages/index.html"; 
+        header($locationString, true, 302);
         exit;
-    }
-
-    public function showDashboard(): void {
-        AuthHelper::requireLogin();
-        require __DIR__ . '/../Views/dashboard.view.php';
     }
 
     public function getUserStatus(): void {

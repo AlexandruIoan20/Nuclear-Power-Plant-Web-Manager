@@ -1,3 +1,0 @@
-De facut pagina raportului atunci cand nvsi score este 0 (crapa)
-
-BACKEND: Endpoint PATCH schimbare status reactor

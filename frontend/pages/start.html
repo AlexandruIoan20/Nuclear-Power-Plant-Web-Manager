@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuclear Plant Control | App</title>
     <link rel="stylesheet" href="../style.css">
+    <script src="../modules/config/globals.js"></script>
 </head>
 <body>
     <script>
         if (window.location.hostname === '127.0.0.1') {
-            window.location.replace('http://localhost:5500' + window.location.pathname.replace(/\/start\.html$/, '/start.html'));
+            window.location.replace(FRONTEND_BASE + window.location.pathname.replace(/\/start\.html$/, '/start.html'));
         }
     </script>
     <div class="page-shell">
@@ -74,7 +75,7 @@
             const statusElement = document.getElementById('system-status');
             const actionArea = document.getElementById('action-area');
 
-            fetch('http://localhost:8081/api/user/status', { credentials: 'include' })
+            fetch(API_BASE + '/user/status', { credentials: 'include' })
                 .then((response) => response.status === 401 ? null : response.json())
                 .then((result) => {
                     if (!result || result.status !== 'success') {
@@ -86,7 +87,7 @@
                     statusElement.textContent = `Conectat ca ${user.username} (${user.role})`;
                     actionArea.innerHTML = `
                         <a class="button" href="dashboard.html">Accesează dashboard</a>
-                        <a class="button secondary" href="http://localhost:8081/logout">Logout</a>
+                        <a class="button secondary" href="${BACKEND_BASE}/logout">Logout</a>
                     `;
                 })
                 .catch((error) => {

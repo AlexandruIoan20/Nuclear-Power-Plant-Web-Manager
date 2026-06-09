@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuclear Plant Control | Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
+    <script src="../modules/config/globals.js"></script>
     <style>
         /* Stiluri pentru pop-up-urile alertelor de la senzori */
         .sensor-alert-popup {
@@ -30,7 +31,7 @@
 <body>
     <script>
         if (window.location.hostname === '127.0.0.1') {
-            window.location.replace('http://localhost:5500' + window.location.pathname.replace(/\/dashboard\.html$/, '/dashboard.html'));
+            window.location.replace(FRONTEND_BASE + window.location.pathname.replace(/\/dashboard\.html$/, '/dashboard.html'));
         }
     </script>
     
@@ -61,7 +62,7 @@
             const container = document.getElementById('app-container');
 
             // 1. Încărcarea datelor de sesiune și a UI-ului principal
-            fetch('http://localhost:8081/api/user/status', { credentials: 'include' })
+            fetch(API_BASE + '/user/status', { credentials: 'include' })
                 .then((response) => {
                     if (response.status === 401) {
                         window.location.href = 'login.html';
@@ -88,7 +89,7 @@
                             <nav class="nav-links" aria-label="Navigare principală">
                                 <a href="start.html">Start</a>
                                 <a href="dashboard.html" class="active">Dashboard</a>
-                                <a href="http://localhost:8081/logout">Logout</a>
+                                <a href="${BACKEND_BASE}/logout">Logout</a>
                             </nav>
                         </header>
 
@@ -114,7 +115,7 @@
                                 <a class="button" href="approvals.html">Aprobări</a>
                                 <a class="button" href="map.html">Harta centralelor</a>
                                 <a class="button secondary" href="power-plants/list.html">Lista centralelor</a>
-                                <a class="button secondary" href="http://localhost:8081/logout">Deconectare</a>
+                                <a class="button secondary" href="${BACKEND_BASE}/logout">Deconectare</a>
                             </div>
                         </section>
                     `;
@@ -129,7 +130,7 @@
 
             async function checkSensorAlerts() {
                 try {
-                    const response = await fetch("http://localhost:8081/api/alerts/unread", {
+                    const response = await fetch(API_BASE + "/alerts/unread", {
                         credentials: 'include'
                     });
                     
@@ -183,8 +184,11 @@
 
             async function dismissAlert(id) {
                 try {
-                    const response = await fetch(`http://localhost:8081/api/alerts/${id}/read`, {
+                    const response = await fetch(`${API_BASE}/alerts/${id}/read`, {
                         method: 'PUT',
+                        headers: {
+                            'X-CSRF-Token': await getCsrfToken()
+                        },
                         credentials: 'include'
                     });
 

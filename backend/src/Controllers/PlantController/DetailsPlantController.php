@@ -63,7 +63,10 @@ class DetailsPlantController {
                 'country' => $plant['country'] ?? 'Nespecificată',
                 'latitude' => $plant['latitude'] !== null ? (float)$plant['latitude'] : 0.0,
                 'longitude' => $plant['longitude'] !== null ? (float)$plant['longitude'] : 0.0,
-                'status' => $plant['status']
+                'status' => $plant['status'],
+                'created_by' => $plant['created_by'],
+                'created_at' => $plant['created_at'],
+                'updated_at' => $plant['updated_at']
             ];
         }
 
@@ -91,7 +94,10 @@ class DetailsPlantController {
                 'country' => $plant['country'] ?? 'Nespecificată',
                 'latitude' => $plant['latitude'] !== null ? (float)$plant['latitude'] : 0.0,
                 'longitude' => $plant['longitude'] !== null ? (float)$plant['longitude'] : 0.0,
-                'status' => $status
+                'status' => $status,
+                'created_by' => $plant['created_by'],
+                'created_at' => $plant['created_at'],
+                'updated_at' => $plant['updated_at']
             ];
         }
 
@@ -124,6 +130,9 @@ class DetailsPlantController {
                     'id' => $plant['id'],
                     'name' => $plant['name'],
                     'status' => $plant['status'],
+                    'created_by' => $plant['created_by'],
+                    'created_at' => $plant['created_at'],
+                    'updated_at' => $plant['updated_at'],
                 ];
             }, $powerPlants);
             
@@ -152,6 +161,9 @@ class DetailsPlantController {
                 'latitude' => $plant['latitude'],
                 'longitude' => $plant['longitude'],
                 'status' => $plant['status'],
+                'created_by' => $plant['created_by'],
+                'created_at' => $plant['created_at'],
+                'updated_at' => $plant['updated_at'],
                 'has_coordinates' => $hasCoordinates,
                 'coordinates_label' => $hasCoordinates ? number_format((float)$plant['latitude'], 6, '.', '') . ', ' . number_format((float)$plant['longitude'], 6, '.', '') : 'Fără coordonate',
                 'popup_title' => $plant['name'] ?: 'Centrală',

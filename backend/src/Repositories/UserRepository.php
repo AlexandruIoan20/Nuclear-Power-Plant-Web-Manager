@@ -10,9 +10,9 @@ class UserRepository {
     public function save (User $user): void { 
         $stmt = $this->db->prepare("INSERT INTO users (username, first_name, last_name, email, password_hash, role) VALUES (:username, :first_name, :last_name, :email, :password_hash, :role)"); 
         $stmt->execute([
-            'username' => $user->getName(),
-            'first_name' => $user->getName(),
-            'last_name' => 'User',
+            'username' => $user->getUsername(),
+            'first_name' => $user->getFirstName(),
+            'last_name' => $user->getLastName(),
             'email' => $user->getEmail(), 
             'password_hash' => $user->getPasswordHash(),
             'role' => $user->getRole() 
@@ -24,15 +24,22 @@ class UserRepository {
         $users = []; 
 
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { 
-            
-            $users[] = new User($row['username'], $row['email'], $row['password_hash'], $row['id'], $row['role']); 
+            $users[] = new User(
+                $row['username'],
+                $row['first_name'],
+                $row['last_name'],
+                $row['email'],
+                $row['password_hash'],
+                $row['id'],
+                $row['role']
+            );
         }
 
         return $users; 
     }
 
     public function findByEmail(string $email): ?array {
-        $stmt = $this->db->prepare("SELECT id, username, email, password_hash, role FROM users WHERE email = :email LIMIT 1");
+        $stmt = $this->db->prepare("SELECT id, username, first_name, last_name, email, password_hash, role FROM users WHERE email = :email LIMIT 1");
         $stmt->execute(['email' => $email]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ?: null;
@@ -41,6 +48,13 @@ class UserRepository {
     public function findById($id): ?array {
         $stmt = $this->db->prepare("SELECT id, username, first_name, last_name, email, role FROM users WHERE id = :id LIMIT 1");
         $stmt->execute(['id' => $id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
+    }
+
+    public function findByUsername(string $username): ?array {
+        $stmt = $this->db->prepare("SELECT id, username, email, password_hash, role FROM users WHERE username = :username LIMIT 1");
+        $stmt->execute(['username' => $username]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ?: null;
     }

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuclear Plant Control | Approvals</title>
     <link rel="stylesheet" href="style.css">
+    <script src="../modules/config/globals.js"></script>
 </head>
 
 <body>
@@ -69,7 +70,7 @@
             const statPending = document.getElementById("stat-pending");
 
             try {
-                const response = await fetch("http://localhost:8081/api/power-plants/pending-approvals", {
+                const response = await fetch(API_BASE + "/power-plants/pending-approvals", {
                     credentials: 'include'
                 });
                 if (!response.ok) throw new Error("Eroare server");
@@ -120,10 +121,11 @@
             async function executeStatusChange(id, targetStatus) {
                 statusMessage.innerHTML = "";
                 try {
-                    const response = await fetch(`http://localhost:8081/api/power-plants/${id}/status`, {
+                    const response = await fetch(`${API_BASE}/power-plants/${id}/status`, {
                         method: "PUT",
                         headers: {
-                            "Content-Type": "application/json"
+                            "Content-Type": "application/json",
+                            "X-CSRF-Token": await getCsrfToken()
                         },
                         credentials: 'include',
                         body: JSON.stringify({ status: targetStatus })

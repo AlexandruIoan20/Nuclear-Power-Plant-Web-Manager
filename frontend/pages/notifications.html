@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuclear Plant Control | Notificări</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
+    <script src="../modules/config/globals.js"></script>
     <style>
         .notification-card {
             background-color: var(--surface, #1e1e1e);
@@ -96,7 +97,7 @@
             const errorMessage = document.getElementById("error-message");
 
             try {
-                const response = await fetch("http://localhost:8081/api/notifications", {
+                const response = await fetch(API_BASE + "/notifications", {
                     credentials: 'include'
                 });
                 

@@ -21,7 +21,10 @@ class TechnicalPlantRepository {
             $row['id'], 
             $row['number_of_reactors'], 
             $row['estimated_efficiency'], 
-            $row['operational_risk_level']
+            $row['operational_risk_level'],
+            [],
+            $row['created_at'],
+            $row['updated_at']
         ); 
 
         $relationStatement = $this->pdo->prepare("SELECT * FROM reactor_schema JOIN reactor_plant_data ON reactor_schema.id = reactor_plant_data.reactor_schema_id 
@@ -50,9 +53,11 @@ class TechnicalPlantRepository {
             error_log("[saveTechnicalData] Transaction started");
     
             $statement = $this->pdo->prepare("INSERT INTO technical_data (
-                    id, power_plant_id, number_of_reactors, estimated_efficiency, operational_risk_level
+                    id, power_plant_id, number_of_reactors, estimated_efficiency, operational_risk_level,
+                    created_at, updated_at
                 ) VALUES (
-                    :id, :power_plant_id, :number_of_reactors, :estimated_efficiency, :operational_risk_level
+                    :id, :power_plant_id, :number_of_reactors, :estimated_efficiency, :operational_risk_level,
+                    NOW(), NOW()
                 )");
     
             $insertParams = [
@@ -138,7 +143,8 @@ class TechnicalPlantRepository {
                 SET 
                     number_of_reactors = :number_of_reactors, 
                     estimated_efficiency = :estimated_efficiency, 
-                    operational_risk_level = :operational_risk_level
+                    operational_risk_level = :operational_risk_level,
+                    updated_at = NOW()
                 WHERE id = :id
             "); 
 

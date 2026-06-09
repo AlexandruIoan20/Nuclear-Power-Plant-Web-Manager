@@ -10,7 +10,9 @@ class TechnicalPlantDataDTO {
         public readonly ?float $estimatedEfficiency, 
         public readonly ?float $operationalRiskLevel, 
         public readonly ?array $safetySystems, 
-        public readonly ?array $reactorConfigs, 
+        public readonly ?array $reactorConfigs,
+        public readonly ?string $createdAt,
+        public readonly ?string $updatedAt
     ) {}
 
     public static function fromEntity(TechnicalPlantData $t, array $configs = []) { 
@@ -29,7 +31,9 @@ class TechnicalPlantDataDTO {
             estimatedEfficiency: $t->getEstimatedEfficiency(), 
             operationalRiskLevel: $t->getOperationalRiskLevel(), 
             safetySystems: $t->getSafetySystems(), 
-            reactorConfigs: $formattedReactorConfigs
+            reactorConfigs: $formattedReactorConfigs,
+            createdAt: $t->getCreatedAt(),
+            updatedAt: $t->getUpdatedAt()
         ); 
     }
 }

@@ -8,11 +8,13 @@ class UserService {
     }
 
     public function registerUser(array $data): void { 
-        $name = trim($data['name'] ?? '');
+        $firstName = trim($data['first_name'] ?? '');
+        $lastName = trim($data['last_name'] ?? '');
+        $username = trim($data['username'] ?? '');
         $email = trim($data['email'] ?? '');
         $password = $data['password'] ?? '';
 
-        if ($name === '' || $email === '' || $password === '') {
+        if ($firstName === '' || $lastName === '' || $username === '' || $email === '' || $password === '') {
             throw new Exception('Toate câmpurile sunt necesare!');
         }
 
@@ -20,7 +22,15 @@ class UserService {
             throw new Exception('Adresa de email nu este validă!');
         }
 
-        if (strlen($name) > 30) {
+        if (strlen($firstName) > 50) {
+            throw new Exception('Prenumele este prea lung!');
+        }
+
+        if (strlen($lastName) > 50) {
+            throw new Exception('Numele este prea lung!');
+        }
+
+        if (strlen($username) > 30) {
             throw new Exception('Numele de utilizator este prea lung!');
         }
 
@@ -33,11 +43,16 @@ class UserService {
             throw new Exception('Email-ul este deja înregistrat!');
         }
 
+        $existingUsername = $this->userRepository->findByUsername($username);
+        if ($existingUsername) {
+            throw new Exception('Numele de utilizator este deja luat!');
+        }
+
         $hashedPassword = password_hash($password, PASSWORD_BCRYPT); 
 
         $role = str_ends_with($email, '@admin.ro') ? 'ADMIN' : 'OPERATOR';
 
-        $user = new User($name, $email, $hashedPassword, null, $role); 
+        $user = new User($username, $firstName, $lastName, $email, $hashedPassword, null, $role); 
         $this->userRepository->save($user); 
     }
 

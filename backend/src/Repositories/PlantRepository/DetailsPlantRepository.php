@@ -12,6 +12,7 @@ class DetailsPlantRepository {
     public function findAll(): array { 
         $statement = $this->db->query("
             SELECT p.id, p.name, p.status,
+                   p.created_by, p.created_at, p.updated_at,
                    g.country, g.latitude, g.longitude
             FROM power_plants p
             LEFT JOIN geological_data g ON p.id = g.power_plant_id
@@ -26,6 +27,9 @@ class DetailsPlantRepository {
                 'latitude' => $row['latitude'],
                 'longitude' => $row['longitude'],
                 'status' => $row['status'],
+                'created_by' => $row['created_by'],
+                'created_at' => $row['created_at'],
+                'updated_at' => $row['updated_at'],
             ]; 
         }
 
@@ -38,6 +42,7 @@ class DetailsPlantRepository {
 
         $statement = $this->db->prepare("
             SELECT p.id, p.name, p.status,
+                   p.created_by, p.created_at, p.updated_at,
                    g.country, g.latitude, g.longitude
             FROM power_plants p
             LEFT JOIN geological_data g ON p.id = g.power_plant_id
@@ -53,6 +58,9 @@ class DetailsPlantRepository {
                 'latitude' => $row['latitude'],
                 'longitude' => $row['longitude'],
                 'status' => $row['status'],
+                'created_by' => $row['created_by'],
+                'created_at' => $row['created_at'],
+                'updated_at' => $row['updated_at'],
             ]; 
         }
         
@@ -62,6 +70,7 @@ class DetailsPlantRepository {
     public function findById(string $plantId) { 
         $statement = $this->db->prepare("
             SELECT p.id, p.name, p.status,
+                   p.created_by, p.created_at, p.updated_at,
                    g.country, g.latitude, g.longitude
             FROM power_plants p
             LEFT JOIN geological_data g ON p.id = g.power_plant_id
@@ -79,7 +88,10 @@ class DetailsPlantRepository {
         return new Plant(
             $row['id'],
             $row['name'],
-            PlantStatus::from($row['status'])
+            PlantStatus::from($row['status']),
+            $row['created_by'],
+            $row['created_at'],
+            $row['updated_at']
         );
     }
     
@@ -88,18 +100,25 @@ class DetailsPlantRepository {
             INSERT INTO power_plants (
                 id,
                 name, 
-                status
+                status,
+                created_by,
+                created_at,
+                updated_at
             ) VALUES (
                 :id, 
                 :name, 
-                :status
+                :status,
+                :created_by,
+                NOW(),
+                NOW()
             )
         "); 
 
         $stmt->execute([
             'id' => $plant->getId(),
             'name' => $plant->getName(),
-            'status' => $plant->getStatus()->value
+            'status' => $plant->getStatus()->value,
+            'created_by' => $plant->getCreatedBy()
         ]);
     }
 
@@ -107,7 +126,7 @@ class DetailsPlantRepository {
         $status = PlantStatus::from($data['status']);
     
         $statement = $this->db->prepare("
-            UPDATE power_plants SET status = :status WHERE id = :id
+            UPDATE power_plants SET status = :status, updated_at = NOW() WHERE id = :id
         "); 
     
         $statement->execute([ 
@@ -121,7 +140,8 @@ class DetailsPlantRepository {
             UPDATE power_plants 
             SET 
                 name = :name,
-                status = :status
+                status = :status,
+                updated_at = NOW()
             WHERE id = :id
         "); 
     
@@ -134,19 +154,5 @@ class DetailsPlantRepository {
         $randuriModificate = $stmt->rowCount();
         error_log("[DEBUG] ID cautat pentru update: " . $plant->getId());
         error_log("[DEBUG] Randuri modificate efectiv: " . $randuriModificate);
-    }
-
-
-    public function updateStatus(string $plantId, string $status): void {
-        $stmt = $this->db->prepare("
-            UPDATE power_plants 
-            SET status = :status 
-            WHERE id = :id
-        ");
-        
-        $stmt->execute([
-            'id' => $plantId,
-            'status' => $status
-        ]);
     }
 }

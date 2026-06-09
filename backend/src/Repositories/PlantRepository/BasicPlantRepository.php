@@ -18,7 +18,15 @@ class BasicPlantRepository {
             return null; 
         }
 
-        $basicPlantData = new BasicPlantData($row['power_plant_id'], $row['id'], $row['capacity_mw'], $row['construction_duration_years'], $row['description']); 
+        $basicPlantData = new BasicPlantData(
+            $row['power_plant_id'],
+            $row['id'],
+            $row['capacity_mw'],
+            $row['construction_duration_years'],
+            $row['description'],
+            $row['created_at'],
+            $row['updated_at']
+        ); 
         return $basicPlantData; 
     }
 
@@ -29,13 +37,17 @@ class BasicPlantRepository {
                 power_plant_id, 
                 capacity_mw, 
                 construction_duration_years, 
-                description
+                description,
+                created_at,
+                updated_at
             ) VALUES (
                 :id, 
                 :powerPlantId, 
                 :capacity, 
                 :constructionDurationYears, 
-                :description 
+                :description,
+                NOW(),
+                NOW()
             )
         "); 
 
@@ -54,7 +66,8 @@ class BasicPlantRepository {
             SET 
                 capacity_mw = :capacity, 
                 construction_duration_years = :constructionDurationYears, 
-                description = :description
+                description = :description,
+                updated_at = NOW()
             WHERE id = :id
         "); 
     

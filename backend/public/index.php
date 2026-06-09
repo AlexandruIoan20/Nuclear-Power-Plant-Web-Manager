@@ -1,21 +1,40 @@
 <?php
 
+require_once __DIR__ . '/../src/Constants/urls.php';
+
+ini_set('session.gc_maxlifetime', 3600);
+ini_set('session.cookie_lifetime', 3600);
+
 session_start([
-    'cookie_samesite' => 'None', 
+    'cookie_samesite' => 'Lax', 
     'cookie_secure' => false,    
     'cookie_httponly' => true,
 ]);
 
+if(empty($_SESSION['csrf_token'])) { 
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); 
+}
+
+if(!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'OPTIONS', 'HEAD'])) { 
+    $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''; 
+    if(empty($token) || !hash_equals($_SESSION['csrf_token'], $token)) { 
+        http_response_code(403); 
+        header('Content-Type: application/json'); 
+        echo json_encode(['status' => 'error', 'message' => 'Invalid CSRF token' ]); 
+        exit; 
+    }
+} 
+
 $allowedOrigins = [
-    'http://localhost:5500',
-    'http://localhost:8081',
+    URL_FRONTEND,
+    URL_BACKEND,
     'http://127.0.0.1:5500',
 ];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
 if ($origin) {
-    $isAllowed = in_array($origin, $allowedOrigins, true) || (bool)preg_match('#^https?://(localhost|127\.0\.0\.1)(:\d+)?$#', $origin);
+    $isAllowed = in_array($origin, $allowedOrigins, true);
     if ($isAllowed) {
         header("Access-Control-Allow-Origin: $origin");
         header("Access-Control-Allow-Credentials: true");
@@ -26,7 +45,7 @@ if ($origin) {
 }
 
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-Token");
 header("Access-Control-Expose-Headers: Location");
 
 // Handle preflight requests
@@ -55,6 +74,7 @@ if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/health') {
     exit();
 }
 
+require_once __DIR__ . '/../src/Constants/urls.php';
 require_once __DIR__ . '/../src/Router.php';
 require_once __DIR__ . '/../src/Entities/User.php';
 require_once __DIR__ . '/../src/Repositories/UserRepository.php';
@@ -145,6 +165,11 @@ $reactorRepository = new ReactorRepository($pdo);
 $reactorService = new ReactorService($reactorRepository);
 
 $router = new Router();
+
+$router->get('/api/csrf-token', function() { 
+    header('Content-Type: application/json'); 
+    echo json_encode(['csrf_token' => $_SESSION['csrf_token'] ?? '']); 
+}); 
 
 // --- Countries ---
 $router->get('/api/countries', function () use ($plantServiceFacade) {
@@ -275,10 +300,6 @@ $router->get('/logout', function() use ($userService) {
     (new UserController($userService))->handleLogout();
 });
 
-$router->get('/start', function() use ($userService) {
-    (new UserController($userService))->showStart();
-});
-
 $router->get('/api/user/status', function() use ($userService) {
     (new UserController($userService))->getUserStatus();
 });
@@ -289,21 +310,13 @@ $router->get('/api/users', function() use ($userService) {
     $payload = array_map(function (User $user) {
         return [
             'id' => $user->getId(),
-            'username' => $user->getName(),
+            'username' => $user->getUsername(),
             'email' => $user->getEmail(),
         ];
     }, $users);
     echo json_encode(['status' => 'success', 'data' => $payload]);
     exit;
-});
-
-$router->get('/dashboard', function() use ($userService) {
-    (new UserController($userService))->showDashboard();
-});
-
-$router->get('/users', function() use ($userService) {
-    (new UserController($userService))->listUsers();
-});
+}); 
 
 // De cautat cod duplicat la refactorizare
 $router->put('/api/power-plants/{id}/status', function ($id) use ($plantServiceFacade) {

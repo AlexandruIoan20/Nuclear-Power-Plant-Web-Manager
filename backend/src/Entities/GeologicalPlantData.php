@@ -20,6 +20,8 @@ class GeologicalPlantData {
     private ?float $populationDensity;
     private ?float $transportInfrastructureScore;
     private ?float $geologicalRiskScore;
+    private ?string $createdAt;
+    private ?string $updatedAt;
 
     public function __construct(
         string $powerPlantId,
@@ -36,7 +38,9 @@ class GeologicalPlantData {
         ?float $waterFlowRate = null,
         ?float $populationDensity = null,
         ?float $transportInfrastructureScore = null,
-        ?float $geologicalRiskScore = null
+        ?float $geologicalRiskScore = null,
+        ?string $createdAt = null,
+        ?string $updatedAt = null
     ) {
         $this->id = $id ?? generateUUID();
         $this->powerPlantId = $powerPlantId;
@@ -53,6 +57,8 @@ class GeologicalPlantData {
         $this->populationDensity = $populationDensity;
         $this->transportInfrastructureScore = $transportInfrastructureScore;
         $this->geologicalRiskScore = $geologicalRiskScore;
+        $this->createdAt = $createdAt;
+        $this->updatedAt = $updatedAt;
     }
 
     public function getId(): string {
@@ -173,5 +179,21 @@ class GeologicalPlantData {
 
     public function setGeologicalRiskScore(?float $geologicalRiskScore): void {
         $this->geologicalRiskScore = $geologicalRiskScore;
+    }
+
+    public function getCreatedAt(): ?string {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(?string $createdAt): void {
+        $this->createdAt = $createdAt;
+    }
+
+    public function getUpdatedAt(): ?string {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?string $updatedAt): void {
+        $this->updatedAt = $updatedAt;
     }
 }

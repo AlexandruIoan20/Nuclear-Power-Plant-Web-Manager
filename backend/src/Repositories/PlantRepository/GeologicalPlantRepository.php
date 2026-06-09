@@ -38,7 +38,9 @@ class GeologicalPlantRepository {
             $row['water_flow_rate'] !== null ? (float)$row['water_flow_rate'] : null,
             $row['population_density'] !== null ? (float)$row['population_density'] : null,
             $row['transport_infrastructure_score'] !== null ? (float)$row['transport_infrastructure_score'] : null,
-            $row['geological_risk_score'] !== null ? (float)$row['geological_risk_score'] : null
+            $row['geological_risk_score'] !== null ? (float)$row['geological_risk_score'] : null,
+            $row['created_at'],
+            $row['updated_at']
         );
     }
 
@@ -59,7 +61,9 @@ class GeologicalPlantRepository {
                 water_flow_rate,
                 population_density,
                 transport_infrastructure_score,
-                geological_risk_score
+                geological_risk_score,
+                created_at,
+                updated_at
             ) VALUES (
                 :id, 
                 :powerPlantId, 
@@ -75,7 +79,9 @@ class GeologicalPlantRepository {
                 :waterFlowRate,
                 :populationDensity,
                 :transportInfrastructureScore,
-                :geologicalRiskScore 
+                :geologicalRiskScore,
+                NOW(),
+                NOW()
             )
         ");
 
@@ -114,7 +120,8 @@ class GeologicalPlantRepository {
                 water_flow_rate = :waterFlowRate,
                 population_density = :populationDensity,
                 transport_infrastructure_score = :transportInfrastructureScore,
-                geological_risk_score = :geologicalRiskScore
+                geological_risk_score = :geologicalRiskScore,
+                updated_at = NOW()
             WHERE id = :id
         ");
 

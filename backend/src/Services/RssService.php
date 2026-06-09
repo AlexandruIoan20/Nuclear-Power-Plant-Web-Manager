@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../Constants/urls.php';
+
 class RssService {
     public function __construct(
         private PlantServiceFacade $plantServiceFacade
@@ -16,7 +18,7 @@ class RssService {
         
     
         $xml .= '<title>Nuclear Power Plants Registry</title>';
-        $xml .= '<link>http://localhost:8081/api/rss/power-plants</link>';
+        $xml .= '<link>' . URL_BACKEND . '/api/rss/power-plants</link>';
         $xml .= '<description>Latest nuclear power plants added to the global registry system.</description>';
         $xml .= '<language>en-us</language>';
         $xml .= '<lastBuildDate>' . date(DATE_RSS) . '</lastBuildDate>';
@@ -32,7 +34,7 @@ class RssService {
             $xml .= '<item>';
             $xml .= '<title>' . $name . ' (' . $country . ')</title>';
          
-            $xml .= '<link>http://localhost:5500/pages/power-plants/details.html?id=' . urlencode($id) . '</link>';
+            $xml .= '<link>' . URL_FRONTEND . '/pages/power-plants/details.html?id=' . urlencode($id) . '</link>';
             $xml .= '<guid isPermaLink="false">' . $id . '</guid>';
             $xml .= '<description><![CDATA[';
             $xml .= 'A nuclear power plant has been updated or registered.<br/>';

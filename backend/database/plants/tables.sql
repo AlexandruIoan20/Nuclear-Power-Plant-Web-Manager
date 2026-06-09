@@ -3,6 +3,7 @@ CREATE TABLE power_plants (
     name VARCHAR(255) NOT NULL,
     status power_plant_status NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by UUID,
     CONSTRAINT fk_powerplant_user
         FOREIGN KEY (created_by) REFERENCES users(id)
@@ -27,6 +28,8 @@ CREATE TABLE basic_data (
     capacity_mw DECIMAL,
     construction_duration_years INT,
     description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_basicdata_powerplant
         FOREIGN KEY (power_plant_id) REFERENCES power_plants(id)
         ON DELETE CASCADE,
@@ -49,6 +52,8 @@ CREATE TABLE geological_data (
     population_density DECIMAL,
     transport_infrastructure_score DECIMAL,
     geological_risk_score DECIMAL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_geological_powerplant
         FOREIGN KEY (power_plant_id) REFERENCES power_plants(id)
         ON DELETE CASCADE,
@@ -62,6 +67,8 @@ CREATE TABLE technical_data (
     estimated_efficiency DECIMAL,
     operational_risk_level DECIMAL,
     safety_systems JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_technical_powerplant
         FOREIGN KEY (power_plant_id) REFERENCES power_plants(id)
         ON DELETE CASCADE,

@@ -18,7 +18,9 @@ class GeologicalPlantDataDTO {
         public readonly ?float $waterFlowRate,
         public readonly ?float $populationDensity,
         public readonly ?float $transportInfrastructureScore,
-        public readonly ?float $geologicalRiskScore
+        public readonly ?float $geologicalRiskScore,
+        public readonly ?string $createdAt,
+        public readonly ?string $updatedAt
     ) {}
 
     public static function fromEntity(GeologicalPlantData $g): self { 
@@ -37,7 +39,9 @@ class GeologicalPlantDataDTO {
             waterFlowRate: $g->getWaterFlowRate(), 
             populationDensity: $g->getPopulationDensity(), 
             transportInfrastructureScore: $g->getTransportInfrastructureScore(), 
-            geologicalRiskScore: $g->getGeologicalRiskScore(), 
+            geologicalRiskScore: $g->getGeologicalRiskScore(),
+            createdAt: $g->getCreatedAt(),
+            updatedAt: $g->getUpdatedAt()
         ); 
     }
 }

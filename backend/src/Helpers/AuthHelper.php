@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../Constants/urls.php';
+
 class AuthHelper {
     
     public static function isAuthenticated(): bool {
@@ -20,7 +22,7 @@ class AuthHelper {
 
     public static function requireLogin(): void {
         if (!self::isAuthenticated()) {
-            header('Location: http://localhost:8081/login');
+            header("Location: " . URL_BACKEND . "/login");
             exit;
         }
     }
