@@ -99,7 +99,8 @@ class UserController {
                 $locationString = "Location: " . URL_FRONTEND . "/pages/login.html"; 
                 header($locationString, true, 302);
                 exit;
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
+                error_log("[REGISTER ERROR] " . $e->getMessage());
                 if ($wantsJson) {
                     http_response_code(400);
                     header('Content-Type: application/json; charset=UTF-8');
@@ -108,6 +109,7 @@ class UserController {
                 }
 
                 $_SESSION['register_error'] = $e->getMessage();
+                require __DIR__ . '/../Views/register.view.php';
                 return;
             }
         }
@@ -128,6 +130,7 @@ class UserController {
             } else {
                 $this->rejectIfAuthenticated();
             }
+            
             $email = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
 
@@ -140,10 +143,15 @@ class UserController {
                 }
 
                 $_SESSION['login_error'] = 'Email și parolă sunt necesare.';
+                require __DIR__ . '/../Views/login.view.php';
                 return;
             }
 
-            $user = $this->userService->authenticateUser($email, $password);
+            try {
+                $user = $this->userService->authenticateUser($email, $password);
+            } catch (Throwable $e) {
+                $user = null;
+            }
 
             if (!$user) {
                 if ($wantsJson) {
@@ -154,6 +162,7 @@ class UserController {
                 }
 
                 $_SESSION['login_error'] = 'Email sau parolă incorectă.';
+                require __DIR__ . '/../Views/login.view.php';
                 return;
             }
 
@@ -198,7 +207,7 @@ class UserController {
         }
 
         session_destroy();
-        $locationString = "Location: " . URL_FRONTEND . "/pages/index.html"; 
+        $locationString = "Location: " . URL_FRONTEND . "/pages/start.html"; 
         header($locationString, true, 302);
         exit;
     }
