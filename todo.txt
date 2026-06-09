@@ -1,2 +1,0 @@
-sa salvam coordonatele cu 6 zecimale 
-sa facem coord->country

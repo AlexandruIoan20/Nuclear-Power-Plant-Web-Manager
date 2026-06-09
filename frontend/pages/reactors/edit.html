@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editare Reactor</title>
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+    <div class="page-shell">
+        <div id="main-navbar"></div>
+        <main class="form-panel login-card" style="margin: 0 auto;">
+            <h1>Editare Reactor</h1>
+            <p>Actualizați datele reactorului.</p>
+
+            <form id="reactor-form">
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="reactorCode">Cod Reactor:</label>
+                        <input type="text" id="reactorCode" name="reactorCode" required />
+                    </div>
+
+                    <div class="field">
+                        <label for="reactorType">Tip Reactor:</label>
+                        <select id="reactorType" name="reactorType" required></select>
+                    </div>
+
+                    <div class="field">
+                        <label for="coolingType">Tip Răcire:</label>
+                        <select id="coolingType" name="coolingType" required></select>
+                    </div>
+
+                    <div class="field">
+                        <label for="operationalStatus">Status Operațional:</label>
+                        <select id="operationalStatus" name="operationalStatus"></select>
+                    </div>
+
+                    <div class="field">
+                        <label for="thermalPowerMw">Putere Termică (MW):</label>
+                        <input type="number" id="thermalPowerMw" name="thermalPowerMw" step="0.01" />
+                    </div>
+
+                    <div class="field">
+                        <label for="electricalPowerMw">Putere Electrică (MW):</label>
+                        <input type="number" id="electricalPowerMw" name="electricalPowerMw" step="0.01" />
+                    </div>
+
+                    <div class="field">
+                        <label for="fuelCycleDays">Ciclu Combustibil (zile):</label>
+                        <input type="number" id="fuelCycleDays" name="fuelCycleDays" />
+                    </div>
+
+                    <div class="field">
+                        <label for="currentCycleDay">Ziua Curentă a Ciclului:</label>
+                        <input type="number" id="currentCycleDay" name="currentCycleDay" />
+                    </div>
+
+                    <div class="field">
+                        <label for="wearIndex">Indice Uzură (0 - 1):</label>
+                        <input type="number" id="wearIndex" name="wearIndex" step="0.0001" min="0" max="1" />
+                    </div>
+
+                    <div class="field">
+                        <label for="designLifetimeYr">Durată Viață (ani):</label>
+                        <input type="number" id="designLifetimeYr" name="designLifetimeYr" />
+                    </div>
+
+                    <div class="field">
+                        <label for="commissioningDate">Data Punerii în Funcțiune:</label>
+                        <input type="date" id="commissioningDate" name="commissioningDate" />
+                    </div>
+
+                    <div class="field">
+                        <label for="firstCriticality">Data Primei Criticități:</label>
+                        <input type="date" id="firstCriticality" name="firstCriticality" />
+                    </div>
+
+                    <div class="field">
+                        <label for="lastInspectionAt">Ultima Inspecție:</label>
+                        <input type="datetime-local" id="lastInspectionAt" name="lastInspectionAt" />
+                    </div>
+
+                    <div class="field">
+                        <label for="nextPlannedOutage">Următoarea Oprire Planificată:</label>
+                        <input type="datetime-local" id="nextPlannedOutage" name="nextPlannedOutage" />
+                    </div>
+
+                    <div class="field">
+                        <label for="description">Descriere:</label>
+                        <textarea id="description" name="description" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="card-actions">
+                    <button type="submit" class="button">Actualizează</button>
+                    <button type="button" class="button secondary" onclick="window.location.href = '/pages/reactors/list.html?plantId=' + new URLSearchParams(window.location.search).get('plantId')">Anulează</button>
+                </div>
+
+                <div id="status-message" style="margin-top: 18px;"></div>
+            </form>
+        </main>
+    </div>
+
+    <script type="module" src="../../modules/pages/reactors/edit.js"></script>
+    <script type="module" src="../../modules/ui/navbar.js"></script>
+</body>
+</html>

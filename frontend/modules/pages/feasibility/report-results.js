@@ -4,6 +4,41 @@ import { getQueryParam } from '../../utils/urlHelper.js';
 
 const plantId = getQueryParam("id"); 
 
+function populateErrors(errors) {
+    const card = document.getElementById('errors-card');
+    const container = document.getElementById('errors-container');
+    if (!card || !container) return;
+
+    if (!errors || errors.length === 0) {
+        card.style.display = 'none';
+        return;
+    }
+
+    card.style.display = 'block';
+    container.innerHTML = '';
+
+    errors.forEach((err, index) => {
+        const errorItem = document.createElement('div');
+        errorItem.style.cssText = 'display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);';
+        
+        if (index === errors.length - 1) {
+            errorItem.style.borderBottom = 'none';
+        }
+
+        const bullet = document.createElement('span');
+        bullet.textContent = '✕';
+        bullet.style.cssText = 'color:var(--red);font-size:1.1rem;flex-shrink:0;margin-top:2px;';
+        errorItem.appendChild(bullet);
+
+        const text = document.createElement('span');
+        text.textContent = typeof err === 'string' ? err : (err.reason || err.message || JSON.stringify(err));
+        text.style.cssText = 'color:var(--text);line-height:1.5;';
+        errorItem.appendChild(text);
+
+        container.appendChild(errorItem);
+    });
+}
+
 export function populateFeasibilityReport(rawData) {
     const dto = FeasibilityReportDTO(rawData);
 
@@ -31,6 +66,8 @@ export function populateFeasibilityReport(rawData) {
 
     const scoreEl = document.getElementById('report-nsvi-score');
     if (scoreEl) scoreEl.textContent = dto.nsviScore !== null ? dto.nsviScore : '--';
+
+    populateErrors(dto.errors);
 
     const tbody = document.getElementById('deficiencies-table-body');
     if (tbody) {
@@ -94,7 +131,7 @@ export function populateFeasibilityReport(rawData) {
                     const penaltyTag = document.createElement('span');
                     penaltyTag.className = 'tag danger';
                     penaltyTag.style.fontSize = '0.85rem';
-                    penaltyTag.textContent = def.penalty > 0 ? `-${def.penalty}` : def.penalty; // Asigură formatul negativ
+                    penaltyTag.textContent = def.penalty > 0 ? `-${def.penalty}` : def.penalty;
                     tdPenalty.appendChild(penaltyTag);
                 } else {
                     tdPenalty.textContent = '--';
@@ -117,23 +154,46 @@ export function populateFeasibilityReport(rawData) {
     }
 }
 
+function showLoading(message) {
+    const shell = document.querySelector('.page-shell');
+    if (!shell) return;
+    let loader = document.getElementById('loading-indicator');
+    if (!loader) {
+        loader = document.createElement('div');
+        loader.id = 'loading-indicator';
+        loader.style.cssText = 'text-align:center;padding:40px;color:var(--muted);font-size:1.1rem;';
+        shell.prepend(loader);
+    }
+    loader.textContent = message;
+}
+
+function hideLoading() {
+    const loader = document.getElementById('loading-indicator');
+    if (loader) loader.remove();
+}
+
 document.addEventListener("DOMContentLoaded", async () => { 
     if(!plantId) { 
         alert("Centrala nu a fost gasita."); 
         return; 
     }
 
+    showLoading("Se încarcă raportul..."); 
+
     try { 
         const response = await feasibilityReportService.getReport(plantId); 
         
         console.log({ response }); 
         if(!response.success) { 
+            hideLoading(); 
             alert("A aparut o problema la cautarea raportului"); 
             return; 
         }
 
+        hideLoading(); 
         populateFeasibilityReport(response.data); 
     } catch(error) {    
+        hideLoading(); 
         console.error(error.message); 
         alert("A aparut o eroare la cautarea raportului"); 
     }

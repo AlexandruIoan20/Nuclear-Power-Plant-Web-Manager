@@ -27,8 +27,28 @@ async function updateStatus(status) {
 }
 
 
+function showLoading(message) {
+    const shell = document.querySelector('.page-shell');
+    if (!shell) return;
+    let loader = document.getElementById('loading-indicator');
+    if (!loader) {
+        loader = document.createElement('div');
+        loader.id = 'loading-indicator';
+        loader.style.cssText = 'text-align:center;padding:40px;color:var(--muted);font-size:1.1rem;';
+        shell.prepend(loader);
+    }
+    loader.textContent = message;
+}
+
+function hideLoading() {
+    const loader = document.getElementById('loading-indicator');
+    if (loader) loader.remove();
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     if (!plantId) { alert('ID centrală lipsă.'); return; }
+
+    showLoading('Se încarcă datele...');
 
     try {
         const [plantData, reportData] = await Promise.all([
@@ -37,6 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ]);
 
         console.log({ plantData, reportData }); 
+        hideLoading();
 
         populatePlantPage(plantData);
 
@@ -51,6 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('btn-reject').addEventListener('click',  () => updateStatus('REJECTED'));
 
     } catch (e) {
+        hideLoading();
         console.error(e);
         alert('Eroare la încărcarea datelor.');
     }

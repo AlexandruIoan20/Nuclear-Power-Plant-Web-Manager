@@ -6,6 +6,7 @@ class FeasibilityReportDTO implements JsonSerializable {
         public readonly string  $status,
         public readonly ?float  $nsviScore,
         public readonly array   $deficiencies,
+        public readonly array   $errors,
         public readonly ?string $message,
         public readonly ?string $createdAt,
     ) {}
@@ -16,7 +17,8 @@ class FeasibilityReportDTO implements JsonSerializable {
             reportId: null,
             status: $result['status'],
             nsviScore: $result['nsvi_score'] ?? null,
-            deficiencies: $result['deficiencies'] ?? ($result['errors'] ?? []),
+            deficiencies: $result['deficiencies'] ?? [],
+            errors: $result['errors'] ?? [],
             message: $result['message'] ?? null,
             createdAt: null,
         );
@@ -29,6 +31,7 @@ class FeasibilityReportDTO implements JsonSerializable {
             status: $row['status'],
             nsviScore: $row['nsvi_score'],
             deficiencies: $row['deficiencies'] ?? [],
+            errors: $row['errors'] ?? [],
             message: null,
             createdAt: $row['created_at'],
         );
@@ -41,6 +44,7 @@ class FeasibilityReportDTO implements JsonSerializable {
             'status' => $this->status,
             'nsviScore' => $this->nsviScore,
             'deficiencies' => $this->deficiencies,
+            'errors' => $this->errors,
             'createdAt' => $this->createdAt,
         ];
     }

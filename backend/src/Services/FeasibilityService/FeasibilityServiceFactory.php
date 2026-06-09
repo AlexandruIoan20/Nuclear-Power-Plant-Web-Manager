@@ -3,9 +3,13 @@
 require_once __DIR__ . '/FeasibilityCheckers/GeologicalCriticalChecker.php'; 
 require_once __DIR__ . '/FeasibilityCheckers/TechnicalCriticalChecker.php' ; 
 require_once __DIR__ . '/FeasibilityCheckers/ScoringChecker.php'; 
+require_once __DIR__ . '/../../Helpers/TransactionManager.php'; 
 
 class FeasibilityServiceFactory { 
-    public static function create(PDO $db, PlantRepositoryFacade $plantRepositoryFacade): FeasibilityService { 
+    public static function create(
+            PDO $db,
+            PlantRepositoryFacade $plantRepositoryFacade,
+            TransactionManager $transactionManager): FeasibilityService { 
         $feasibilityRepository = new FeasibilityRepository($db); 
 
         $geologicalCriticalChecker = new GeologicalCriticalChecker(); 
@@ -18,7 +22,8 @@ class FeasibilityServiceFactory {
         return new FeasibilityService(
             $plantRepositoryFacade, 
             $geologicalCriticalChecker, 
-            $feasibilityRepository
+            $feasibilityRepository, 
+            $transactionManager
         ); 
     }
 }
