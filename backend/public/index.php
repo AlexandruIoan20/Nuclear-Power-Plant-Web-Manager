@@ -74,6 +74,8 @@ if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/health') {
     exit();
 }
 
+require_once __DIR__ . '/../src/Helpers/TransactionManager.php'; 
+
 require_once __DIR__ . '/../src/Constants/urls.php';
 require_once __DIR__ . '/../src/Router.php';
 require_once __DIR__ . '/../src/Entities/User.php';
@@ -144,9 +146,11 @@ try {
     die(json_encode(["status" => "error", "message" => "Database connection failed."]));
 }
 
+$transactionManager = new TransactionManager($pdo); 
+
 $plantRepositoryFacade = new PlantRepositoryFacade($pdo);
 $plantServiceFacade = new PlantServiceFacade($plantRepositoryFacade);
-$feasibilityService = FeasibilityServiceFactory::create($pdo, $plantRepositoryFacade);
+$feasibilityService = FeasibilityServiceFactory::create($pdo, $plantRepositoryFacade, $transactionManager);
 
 $emailService = new EmailService();
 $emailController = new EmailController($emailService);
@@ -166,12 +170,9 @@ $reactorService = new ReactorService($reactorRepository);
 
 $router = new Router();
 
-// ──────────────────────────────────────────────
 // Wrapper de autentificare
-// ──────────────────────────────────────────────
 function auth(?string $role, callable $handler): callable {
     return function (...$args) use ($role, $handler) {
-        /* 
         if (!AuthHelper::isAuthenticated()) {
             http_response_code(401);
             header('Content-Type: application/json; charset=UTF-8');
@@ -181,14 +182,11 @@ function auth(?string $role, callable $handler): callable {
         if ($role !== null) {
             AuthHelper::requireRole($role);
         }
-            */
         $handler(...$args);
     };
 }
 
-// ──────────────────────────────────────────────
 // RUTE PUBLICE (fără autentificare)
-// ──────────────────────────────────────────────
 
 $router->get('/api/csrf-token', function() { 
     header('Content-Type: application/json'); 
@@ -232,9 +230,7 @@ $router->post('/api/power-plants/coordinates-preview', function () use ($plantSe
     (new DetailsPlantController($plantServiceFacade))->previewCoordinates();
 });
 
-// ──────────────────────────────────────────────
 // RUTE PROTEJATE (orice utilizator autentificat)
-// ──────────────────────────────────────────────
 
 $router->post('/api/power-plants', auth(null, function () use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->handleSavePlantDetails();
@@ -282,6 +278,60 @@ $router->post('/api/power-plants/{id}/technical', auth(null, function ($id) use 
 
 $router->put('/api/power-plants/{id}/technical', auth(null, function ($id) use ($plantServiceFacade) {
     (new TechnicalPlantController($plantServiceFacade))->updateTechnicalPlantData($id);
+}));
+
+$router->get('/api/reactors', auth(null, function () use ($reactorService) {
+    (new ReactorController($reactorService))->getAllReactors();
+}));
+
+$router->get('/api/reactors/{id}', auth(null, function ($id) use ($reactorService) {
+    (new ReactorController($reactorService))->getReactor($id);
+}));
+
+$router->get('/api/power-plants/{plantId}/reactors', auth(null, function ($plantId) use ($reactorService) {
+    (new ReactorController($reactorService))->getReactorsByPlant($plantId);
+}));
+
+$router->post('/api/reactors', auth(null, function () use ($reactorService) {
+    (new ReactorController($reactorService))->createReactor();
+}));
+
+$router->put('/api/reactors/{id}', auth(null, function ($id) use ($reactorService) {
+    (new ReactorController($reactorService))->updateReactor($id);
+}));
+
+$router->delete('/api/reactors/{id}', auth(null, function ($id) use ($reactorService) {
+    (new ReactorController($reactorService))->deleteReactor($id);
+}));
+
+// RUTE FEZABILITATE (cu verificare proprietar)
+
+function checkPlantOwnership(string $plantId, PlantServiceFacade $service): void {
+    $plant = $service->getPlantDetailsById($plantId);
+    if (!$plant) {
+        http_response_code(404);
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode(['status' => 'error', 'message' => 'Centrala nu a fost găsită.']);
+        exit;
+    }
+    $role = AuthHelper::getCurrentUserRole();
+    if ($role !== 'ADMIN' && $plant->getCreatedBy() !== AuthHelper::getCurrentUserId()) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode(['status' => 'error', 'message' => 'Acces interzis: nu aveți drepturi asupra acestei centrale.']);
+        exit;
+    }
+}
+
+$router->post('/api/power-plants/{id}/feasibility', auth(null, function ($id) use ($feasibilityService, $plantServiceFacade) {
+    error_log("[FeasibilityRoute] POST /api/power-plants/{$id}/feasibility de catre user=" . (AuthHelper::getCurrentUserId() ?? '?') . " rol=" . (AuthHelper::getCurrentUserRole() ?? '?'));
+    checkPlantOwnership($id, $plantServiceFacade);
+    (new FeasibilityController($feasibilityService))->generate($id);
+}));
+
+$router->get('/api/power-plants/{id}/feasibility', auth(null, function ($id) use ($feasibilityService, $plantServiceFacade) {
+    checkPlantOwnership($id, $plantServiceFacade);
+    (new FeasibilityController($feasibilityService))->getLastByPlantId($id);
 }));
 
 $router->get('/api/notifications', auth(null, function () use ($notificationService) {

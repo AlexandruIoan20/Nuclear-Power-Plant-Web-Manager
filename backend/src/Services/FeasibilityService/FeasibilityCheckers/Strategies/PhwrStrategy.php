@@ -1,6 +1,7 @@
 <?php 
 
 require_once __DIR__ . '/ScoringStrategy.php'; 
+require_once __DIR__ . '/ConfigHelper.php';
 
 class PhwrStrategy implements ScoringStrategy { 
     public function calculate (array $plantData): array { 
@@ -8,14 +9,16 @@ class PhwrStrategy implements ScoringStrategy {
         $technicalData = $plantData['technical_data']; 
         $basicData = $plantData['basic_data']; 
 
+        $cfg = FeasibilityConfigHelper::get()['PHWR'];
+
         $baseScore = 100.0; 
         $deductions = []; 
         $totalPenalty = 0.0; 
 
-        // Verificare panza freatica
+        $check = $cfg['groundwater_level'];
         $groundWater = $geologicalData->getGroundwaterLevel(); 
-        if($groundWater < 5.0) { 
-            $penalty = 12.0;
+        if($groundWater !== null && $groundWater < $check['threshold']) { 
+            $penalty = $check['penalty'];
             $deductions[] = [ 
                 'parameter' => 'groundwater_level', 
                 'penalty' => -$penalty, 
@@ -25,10 +28,10 @@ class PhwrStrategy implements ScoringStrategy {
             $totalPenalty += $penalty; 
         }
 
-        // Verificari financiare
+        $check = $cfg['construction_duration_years'];
         $duration = $basicData->getConstructionDurationYears(); 
-        if($duration > 5) { 
-            $penalty = ($duration - 5) * 6.0; 
+        if($duration !== null && $duration > $check['threshold']) { 
+            $penalty = ($duration - $check['threshold']) * $check['multiplier']; 
             $deductions[] = [ 
                 'parameter' => 'construction_duration_years', 
                 'penalty' => -$penalty, 
@@ -38,23 +41,23 @@ class PhwrStrategy implements ScoringStrategy {
             $totalPenalty += $penalty; 
         }
 
-        // Verificari de eficienta 
+        $check = $cfg['estimated_efficiency'];
         $efficiency = $technicalData->getEstimatedEfficiency(); 
-        if($efficiency < 30.0) { 
-            $penalty = (30.0 - $efficiency) * 2.0; 
+        if($efficiency !== null && $efficiency < $check['threshold']) { 
+            $penalty = (($check['base'] ?? $check['threshold']) - $efficiency) * $check['multiplier']; 
             $deductions[] = [ 
                 'parameter' => 'estimated_efficiency', 
                 'penalty' => -$penalty, 
-                'reason' => "Eficienta estimata ({$efficiency}) este sub media tehnologica de 30%."
+                'reason' => "Eficienta estimata ({$efficiency}) este sub media tehnologica de {$check['threshold']}%."
             ]; 
 
             $totalPenalty += $penalty; 
         }
 
-        // Verificare deficienta Calandria (stabilitatea seismica)
+        $check = $cfg['seismic_stability'];
         $seismicStability = $geologicalData->getSeismicStability(); 
-        if($seismicStability < 6.0) { 
-            $penalty = (6.0 - $seismicStability) * 3.5; 
+        if($seismicStability !== null && $seismicStability < $check['threshold']) { 
+            $penalty = ($check['threshold'] - $seismicStability) * $check['multiplier']; 
             $deductions[] = [  
                 'parameter' => 'seismic_stability', 
                 'penalty' => -$penalty, 

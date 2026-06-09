@@ -33,35 +33,6 @@ function isComplete(dto) {
 
     Se face functionalitatea din backend si trecerea la REVIEW a proiectului 
 */
-const verifyButton = document.getElementById("btn-verify"); 
-    
-if(isComplete(dto)) { 
-    verifyButton.disabled = false; 
-    verifyButton.addEventListener("click", async() => { 
-        try { 
-            const response = await feasibilityReportService.createReport(plantId); 
-
-            console.log({ response }); 
-
-            if(response.success) { 
-                try { 
-                    const r = await powerPlantService.updateStatus(UpdatePlantStatusRequestDTO({ status: "REVIEW" }), plantId); 
-                    console.log({ r }); 
-                } catch(error) { 
-                    console.log(error.message); 
-                }
-                clearHeaderState(); 
-                window.location.href = `/pages/feasibility/report-results.html?id=${plantId}`;
-            }
-        } catch(error) { 
-            console.error(error.message); 
-            alert("Eroare la generarea raportului.");
-        }
-    })
-}
-
-else verifyButton.disabled = true; 
-
 document.addEventListener("DOMContentLoaded", async () => { 
     if(!plantId) { 
         alert("Centrala nu a fost gasita."); 
@@ -73,6 +44,44 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         console.log({ rawData }); 
         populatePlantPage(rawData); 
+
+        const verifyButton = document.getElementById("btn-verify"); 
+        const originalBtnText = verifyButton.textContent; 
+
+        if (isComplete(rawData)) { 
+            verifyButton.disabled = false; 
+            verifyButton.addEventListener("click", async () => { 
+                verifyButton.disabled = true; 
+                verifyButton.textContent = "Se generează raportul..."; 
+                try { 
+                    const response = await feasibilityReportService.createReport(plantId); 
+                    console.log({ response }); 
+
+                    if (response.success) { 
+                        try { 
+                            verifyButton.textContent = "Se actualizează statusul..."; 
+                            const r = await powerPlantService.updateStatus(UpdatePlantStatusRequestDTO({ status: "REVIEW" }), plantId); 
+                            console.log({ r }); 
+                        } catch (error) { 
+                            console.log(error.message); 
+                        } 
+                        clearHeaderState(); 
+                        window.location.href = `/pages/feasibility/report-results.html?id=${plantId}`; 
+                    } else { 
+                        verifyButton.disabled = false; 
+                        verifyButton.textContent = originalBtnText; 
+                        alert(response.message || "Eroare la generarea raportului."); 
+                    } 
+                } catch (error) { 
+                    console.error(error.message); 
+                    verifyButton.disabled = false; 
+                    verifyButton.textContent = originalBtnText; 
+                    alert("Eroare la generarea raportului."); 
+                } 
+            }); 
+        } else { 
+            verifyButton.disabled = true; 
+        } 
     } catch(error) {    
         console.error(error.message);
         alert("A aparut o eroare in preluarea informatiilor despre centrala");  

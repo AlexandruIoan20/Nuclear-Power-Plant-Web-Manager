@@ -1,6 +1,7 @@
 <?php 
 
 require_once __DIR__ . '/ScoringStrategy.php'; 
+require_once __DIR__ . '/ConfigHelper.php';
 
 class PwrStrategy implements ScoringStrategy { 
     public function calculate(array $plantData): array { 
@@ -8,40 +9,42 @@ class PwrStrategy implements ScoringStrategy {
         $technicalData = $plantData['technical_data']; 
         $basicData = $plantData['basic_data'];
 
+        $cfg = FeasibilityConfigHelper::get()['PWR'];
+
         $baseScore = 100.0; 
         $deductions = []; 
         $totalPenalty = 0.0; 
 
-        // Eficienta optima practica PWR ~ 35%
+        $check = $cfg['estimated_efficiency'];
         $efficiency = $technicalData->getEstimatedEfficiency(); 
-        if($efficiency < 35.0) { 
-            $penalty = (35.0 - $efficiency) * 2.0; 
+        if($efficiency !== null && $efficiency < $check['threshold']) { 
+            $penalty = (($check['base'] ?? $check['threshold']) - $efficiency) * $check['multiplier']; 
             $deductions[] = [ 
                 'parameter' => 'estimated_efficiency', 
                 'penalty' => -$penalty, 
-                'reason' => "Eficienta estimata ({$efficiency}) este sub media tehnologica de 35%."
+                'reason' => "Eficienta estimata ({$efficiency}) este sub media tehnologica de {$check['threshold']}%."
             ]; 
             
             $totalPenalty += $penalty; 
         }
 
-        // Lipsa apei din apropiere 
+        $check = $cfg['water_proximity'];
         $waterProximity = $geologicalData->getWaterProximity(); 
-        if($waterProximity > 2.0) { 
-            $penalty = ($waterProximity - 2.0) * 3.0;
+        if($waterProximity !== null && $waterProximity > $check['threshold']) { 
+            $penalty = ($waterProximity - $check['threshold']) * $check['multiplier'];
             $deductions[] = [ 
                 'parameter' => 'water_proximity', 
                 'penalty' => -$penalty, 
-                // Corectat in ghilimele duble pentru a functiona corect interpolarea variabilei
                 'reason' => "Distanta de {$waterProximity} km fata de sursa de apa necesita statii de pompare intermediare."
             ]; 
 
             $totalPenalty += $penalty; 
         }
 
+        $check = $cfg['water_flow_rate'];
         $waterFlow = $geologicalData->getWaterFlowRate();
-        if($waterFlow < 50.0) { 
-            $penalty = 10.0; 
+        if($waterFlow !== null && $waterFlow < $check['threshold']) { 
+            $penalty = $check['penalty']; 
             $deductions[] = [ 
                 'parameter' => 'water_flow_rate', 
                 'penalty' => -$penalty, 
@@ -50,10 +53,10 @@ class PwrStrategy implements ScoringStrategy {
             $totalPenalty += $penalty; 
         }
 
-        // Deficiente financiare
+        $check = $cfg['construction_duration_years'];
         $duration = $basicData->getConstructionDurationYears(); 
-        if($duration > 5) { 
-            $penalty = ($duration - 5) * 5.0; 
+        if($duration !== null && $duration > $check['threshold']) { 
+            $penalty = ($duration - $check['threshold']) * $check['multiplier']; 
             $deductions[] = [ 
                 'parameter' => 'construction_duration_years', 
                 'penalty' => -$penalty, 
@@ -63,10 +66,10 @@ class PwrStrategy implements ScoringStrategy {
             $totalPenalty += $penalty; 
         }
 
-        // Deficiente Geologice 
+        $check = $cfg['geological_risk_score'];
         $geologicalRisk = $geologicalData->getGeologicalRiskScore(); 
-        if($geologicalRisk > 2.0) { 
-            $penalty = $geologicalRisk * 2.5; 
+        if($geologicalRisk !== null && $geologicalRisk > $check['threshold']) { 
+            $penalty = $geologicalRisk * $check['multiplier']; 
             $deductions[] = [ 
                 'parameter' => 'geological_risk_score', 
                 'penalty' => -$penalty, 

@@ -1,6 +1,7 @@
 <?php 
 
 require_once __DIR__ . '/ScoringStrategy.php'; 
+require_once __DIR__ . '/ConfigHelper.php';
 
 class BwrStrategy implements ScoringStrategy { 
     public function calculate(array $plantData): array { 
@@ -8,15 +9,16 @@ class BwrStrategy implements ScoringStrategy {
         $technicalData = $plantData['technical_data']; 
         $basicData = $plantData['basic_data'];
 
+        $cfg = FeasibilityConfigHelper::get()['BWR'];
+
         $baseScore = 100.0; 
         $deductions = []; 
         $totalPenalty = 0.0; 
 
-        // Verificare deficienta seismica specifica BWR 
-        // Este mult mai sensibil la cutremure din cauza sistemului de oprire 
+        $check = $cfg['seismic_stability'];
         $seismicStability = $geologicalData->getSeismicStability(); 
-        if($seismicStability < 6.5) { 
-            $penalty = (6.5 - $seismicStability) * 4.0; 
+        if($seismicStability !== null && $seismicStability < $check['threshold']) { 
+            $penalty = ($check['threshold'] - $seismicStability) * $check['multiplier']; 
             $deductions[] = [ 
                 'parameter' => 'seismic_stability', 
                 'penalty' => -$penalty, 
@@ -26,11 +28,10 @@ class BwrStrategy implements ScoringStrategy {
             $totalPenalty += $penalty; 
         }
 
-        // Verificare deficienta operationaal si de evacuare
-        // Aburul iesit din turbina BWR este radioactiv. O densitate mare a populatiei amplifica riscul de expunere la radiatii.
+        $check = $cfg['population_density'];
         $population = $geologicalData->getPopulationDensity(); 
-        if($population > 150) { 
-            $penalty = ($population - 150) * 0.08;
+        if($population !== null && $population > $check['threshold']) { 
+            $penalty = ($population - $check['threshold']) * $check['multiplier'];
             $deductions[] = [ 
                 'parameter' => 'population_density', 
                 'penalty' => -$penalty, 
@@ -40,10 +41,10 @@ class BwrStrategy implements ScoringStrategy {
             $totalPenalty += $penalty; 
         }
 
-        // Verificare deficienta scorului transportului pentru constructiee
+        $check = $cfg['transport_infrastructure_score'];
         $transportScore = $geologicalData->getTransportInfrastructureScore(); 
-        if($transportScore < 6.0) { 
-            $penalty = (6.0 - $transportScore) * 3.5; 
+        if($transportScore !== null && $transportScore < $check['threshold']) { 
+            $penalty = ($check['threshold'] - $transportScore) * $check['multiplier']; 
             $deductions[] = [ 
                 'parameter' => 'transport_infrastructure_score', 
                 'penalty' => -$penalty, 
@@ -53,23 +54,23 @@ class BwrStrategy implements ScoringStrategy {
             $totalPenalty += $penalty; 
         }
 
-        // Verificari de eficienta 
+        $check = $cfg['estimated_efficiency'];
         $efficiency = $technicalData->getEstimatedEfficiency(); 
-        if($efficiency < 33.0) { 
-            $penalty = (30.0 - $efficiency) * 2.0; 
+        if($efficiency !== null && $efficiency < $check['threshold']) { 
+            $penalty = (($check['base'] ?? $check['threshold']) - $efficiency) * $check['multiplier']; 
             $deductions[] = [ 
                 'parameter' => 'estimated_efficiency', 
                 'penalty' => -$penalty, 
-                'reason' => "Eficienta estimata ({$efficiency}) este sub media tehnologica de 33%."
+                'reason' => "Eficienta estimata ({$efficiency}) este sub media tehnologica de {$check['threshold']}%."
             ]; 
 
             $totalPenalty += $penalty; 
         }
 
-        // Verificare economica
+        $check = $cfg['construction_duration_years'];
         $duration = $basicData->getConstructionDurationYears();
-        if ($duration > 5) {
-            $penalty = ($duration - 5) * 4.5; 
+        if ($duration !== null && $duration > $check['threshold']) {
+            $penalty = ($duration - $check['threshold']) * $check['multiplier']; 
             $deductions[] = [
                 'parameter' => 'construction_duration_years',
                 'penalty' => -$penalty, 

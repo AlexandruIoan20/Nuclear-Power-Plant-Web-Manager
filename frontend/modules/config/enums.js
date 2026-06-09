@@ -36,6 +36,19 @@ export const CoolingType = [
     { value: "COOLING_POND", label: "Cooling Pond" },
 ];
 
+export const ReactorOperationalStatus = [
+    { value: "SHUTDOWN", label: "Shutdown" },
+    { value: "COLD_STANDBY", label: "Cold Standby" },
+    { value: "HOT_STANDBY", label: "Hot Standby" },
+    { value: "STARTUP", label: "Startup" },
+    { value: "POWER_ASCENT", label: "Power Ascent" },
+    { value: "FULL_POWER", label: "Full Power" },
+    { value: "PARTIAL_POWER", label: "Partial Power" },
+    { value: "PLANNED_OUTAGE", label: "Planned Outage" },
+    { value: "UNPLANNED_OUTAGE", label: "Unplanned Outage" },
+    { value: "EMERGENCY_SHUTDOWN", label: "Emergency Shutdown" },
+];
+
 export const PlantStatus = [
     { value: "APPROVED", label: "Aprobate" }, 
     { value: "REJECTED", label: "Respinse" },
