@@ -8,8 +8,12 @@ require_once __DIR__ . '/../../../Entities/ReactorOperationalStatus.php';
 require_once __DIR__ . '/Helpers/ThresholdChecker.php';
 require_once __DIR__ . '/Helpers/MeasurementBuilder.php';
 require_once __DIR__ . '/Helpers/ReactorWearCalculator.php';
+require_once __DIR__ . '/../Observers/SubjectTrait.php';
+require_once __DIR__ . '/../Observers/ViolationEvent.php';
 
 abstract class AbstractReactorSimulator {
+    use SubjectTrait;
+
     protected SensorRepository $sensorRepository;
     protected MeasurementsRepository $measurementsRepository;
     protected ReactorRepository $reactorRepository;
@@ -41,6 +45,16 @@ abstract class AbstractReactorSimulator {
         $this->applyPhysicalCorrelation($newValues, $sensors, $reactor);
 
         $violations = $this->thresholdChecker->checkAll($newValues, $sensors);
+
+        foreach ($violations as $violation) {
+            $event = new ViolationEvent(
+                $violation['severity'],
+                $violation['value'],
+                $violation['sensor'],
+                $reactorId
+            );
+            $this->notifyObservers($event);
+        }
 
         $measurement = $this->measurementBuilder->build($newValues, $sensors, $reactor);
 
