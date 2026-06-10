@@ -3,6 +3,7 @@ import { feasibilityReportService } from '../../services/feasibilityReportServic
 import { UpdatePlantStatusRequestDTO } from '../../dto/UpdatePlanStatusRequestDTO.js'; 
 import { getQueryParam } from '../../utils/urlHelper.js';
 import { saveHeaderState, clearHeaderState } from '../../ui/form-header/formHeaderState.js'; 
+import { renderHeader } from '../../ui/form-header/formHeader.js'; 
 import { populatePlantPage } from '../../ui/power-plants/plantPageRenderer.js'; 
 import { logger } from '../../core/logger.js';
 
@@ -52,6 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 geologicalId: rawData.geological?.id,
                 technicalId: rawData.technical?.id,
             });
+            renderHeader();
         }
 
         const verifyButton = document.getElementById("btn-verify"); 
