@@ -3,6 +3,7 @@ import { BasicDataRequestDTO} from '../../dto/BasicDataRequestDTO.js';
 import { showError, showSuccess, clearStatus } from '../../ui/showMessage.js'; 
 import { getQueryParam } from '../../utils/urlHelper.js'; 
 import { saveHeaderState } from '../../ui/form-header/formHeaderState.js'; 
+import { logger } from '../../core/logger.js';
 
 const plantId = getQueryParam("id");
 const basicsId = getQueryParam("basicsId"); 
@@ -41,7 +42,7 @@ document.addEventListener("DOMContentLoaded", async() => {
 
                 form.reset(); 
             } catch(error) { 
-                console.error(error.message); 
+                logger.error(error.message); 
                 showError(statusElement, "Eroare la adaugarea informatiilor despre centrala"); 
             }
         })
@@ -54,7 +55,7 @@ document.addEventListener("DOMContentLoaded", async() => {
             document.getElementById("constructionDurationYears").value = d.constructionDurationYears ?? "";
             document.getElementById("description").value = d.description ?? "";
         } catch(error) { 
-            console.error(error.message); 
+            logger.error(error.message); 
             showError(statusElement, "Eroare la gasirea datelor despre centrala."); 
             return;
         }
@@ -73,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async() => {
                 await powerPlantService.updateBasics(dto, plantId); 
                 showSuccess(statusElement, "Datele centralei au fost actualzate cu succes!"); 
             } catch(error) { 
-                console.error(error.message); 
+                logger.error(error.message); 
                 showError(statusElement, "Eroare la actualizarea datelor centralei."); 
             }
         })      

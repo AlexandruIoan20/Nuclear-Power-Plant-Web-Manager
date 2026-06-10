@@ -46,11 +46,11 @@ class TechnicalPlantRepository {
     }
     public function save(TechnicalPlantData $technicalPlantData): void { 
         try {
-            error_log("[saveTechnicalData] START");
-            error_log("[saveTechnicalData] TechnicalPlantData: " . print_r($technicalPlantData, true));
+            LogService::instance()->info("[saveTechnicalData] START");
+            LogService::instance()->info("[saveTechnicalData] TechnicalPlantData: " . print_r($technicalPlantData, true));
     
             $this->pdo->beginTransaction();
-            error_log("[saveTechnicalData] Transaction started");
+            LogService::instance()->info("[saveTechnicalData] Transaction started");
     
             $statement = $this->pdo->prepare("INSERT INTO technical_data (
                     id, power_plant_id, number_of_reactors, estimated_efficiency, operational_risk_level,
@@ -67,19 +67,19 @@ class TechnicalPlantRepository {
                 'estimated_efficiency' => $technicalPlantData->getEstimatedEfficiency(), 
                 'operational_risk_level' => $technicalPlantData->getOperationalRiskLevel()
             ];
-            error_log("[saveTechnicalData] INSERT technical_data params: " . print_r($insertParams, true));
+            LogService::instance()->info("[saveTechnicalData] INSERT technical_data params: " . print_r($insertParams, true));
     
             $statement->execute($insertParams);
-            error_log("[saveTechnicalData] technical_data inserted, rowCount: " . $statement->rowCount());
+            LogService::instance()->info("[saveTechnicalData] technical_data inserted, rowCount: " . $statement->rowCount());
     
             $reactorConfigurations = $technicalPlantData->getReactorConfigurations(); 
-            error_log("[saveTechnicalData] reactorConfigurations count: " . count($reactorConfigurations));
-            error_log("[saveTechnicalData] reactorConfigurations raw: " . print_r($reactorConfigurations, true));
+            LogService::instance()->info("[saveTechnicalData] reactorConfigurations count: " . count($reactorConfigurations));
+            LogService::instance()->info("[saveTechnicalData] reactorConfigurations raw: " . print_r($reactorConfigurations, true));
     
             $groupedConfigurations = [];
             foreach ($reactorConfigurations as $index => $config) {
                 $key = $config->getType()->value . '_' . $config->getCooling()->value;
-                error_log("[saveTechnicalData] config[$index] key: $key | type: " . $config->getType()->value . " | cooling: " . $config->getCooling()->value);
+                LogService::instance()->info("[saveTechnicalData] config[$index] key: $key | type: " . $config->getType()->value . " | cooling: " . $config->getCooling()->value);
     
                 if (!isset($groupedConfigurations[$key])) {
                     $groupedConfigurations[$key] = [
@@ -89,9 +89,9 @@ class TechnicalPlantRepository {
                     ];
                 }
                 $groupedConfigurations[$key]['quantity']++;
-                error_log("[saveTechnicalData] config[$index] quantity for key '$key' now: " . $groupedConfigurations[$key]['quantity']);
+                LogService::instance()->info("[saveTechnicalData] config[$index] quantity for key '$key' now: " . $groupedConfigurations[$key]['quantity']);
             }
-            error_log("[saveTechnicalData] groupedConfigurations final: " . print_r($groupedConfigurations, true));
+            LogService::instance()->info("[saveTechnicalData] groupedConfigurations final: " . print_r($groupedConfigurations, true));
     
             $relationalStatement = $this->pdo->prepare("
                     INSERT INTO reactor_plant_data (technical_data_id, reactor_schema_id, number_of_reactors)
@@ -107,29 +107,29 @@ class TechnicalPlantRepository {
                     'cooling_type' => $group['cooling'],
                     'number_of_reactors' => $group['quantity']
                 ];
-                error_log("[saveTechnicalData] INSERT reactor_plant_data for key '$key': " . print_r($relationalParams, true));
+                LogService::instance()->info("[saveTechnicalData] INSERT reactor_plant_data for key '$key': " . print_r($relationalParams, true));
     
                 $relationalStatement->execute($relationalParams); 
     
                 $rowCount = $relationalStatement->rowCount();
-                error_log("[saveTechnicalData] reactor_plant_data rowCount for key '$key': $rowCount");
+                LogService::instance()->info("[saveTechnicalData] reactor_plant_data rowCount for key '$key': $rowCount");
     
                 if ($rowCount === 0) {
-                    error_log("[saveTechnicalData] ERROR - reactor_schema not found for type: " . $group['type'] . " | cooling: " . $group['cooling']);
+                    LogService::instance()->error("[saveTechnicalData] ERROR - reactor_schema not found for type: " . $group['type'] . " | cooling: " . $group['cooling']);
                     throw new Exception("Configurația reactorului (" . $group['type'] . " - " . $group['cooling'] . ") nu există în catalog.");
                 }
     
-                error_log("[saveTechnicalData] reactor_plant_data inserted successfully for key '$key'");
+                LogService::instance()->info("[saveTechnicalData] reactor_plant_data inserted successfully for key '$key'");
             }
     
             $this->pdo->commit();
-            error_log("[saveTechnicalData] Transaction committed - DONE");
+            LogService::instance()->info("[saveTechnicalData] Transaction committed - DONE");
     
         } catch (Exception $e) { 
             $this->pdo->rollBack();
-            error_log("[saveTechnicalData] ROLLBACK triggered");
-            error_log("[saveTechnicalData] Eroare la salvare: " . $e->getMessage());
-            error_log("[saveTechnicalData] Stack trace: " . $e->getTraceAsString());
+            LogService::instance()->error("[saveTechnicalData] ROLLBACK triggered");
+            LogService::instance()->error("[saveTechnicalData] Eroare la salvare: " . $e->getMessage());
+            LogService::instance()->error("[saveTechnicalData] Stack trace: " . $e->getTraceAsString());
             throw new Exception("Eroare la salvarea datelor tehnice: " . $e->getMessage());
         }
     }
@@ -204,7 +204,7 @@ class TechnicalPlantRepository {
 
         } catch (Exception $e) {
             $this->pdo->rollBack();
-            error_log("[TechnicalPlantRepository] Eroare la actualizare: " . $e->getMessage());
+            LogService::instance()->error("[TechnicalPlantRepository] Eroare la actualizare: " . $e->getMessage());
             throw new Exception("Eroare la actualizarea datelor tehnice: " . $e->getMessage());
         }
     }

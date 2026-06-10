@@ -49,7 +49,7 @@ class ApprovalController {
             ]);
             exit;
         } catch (Exception $e) {
-            error_log("[STATUS UPDATE ERROR] Eșec la modificarea centralei {$cleanPlantId}: " . $e->getMessage());
+            LogService::instance()->error("[STATUS UPDATE ERROR] Eșec la modificarea centralei {$cleanPlantId}: " . $e->getMessage());
             http_response_code(400);
             echo json_encode(['status' => 'error', 'message' => 'Nu s-a putut procesa actualizarea: ' . $e->getMessage()]);
             exit;

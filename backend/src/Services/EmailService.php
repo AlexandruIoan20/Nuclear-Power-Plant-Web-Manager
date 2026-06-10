@@ -26,8 +26,8 @@ class EmailService {
         $pass = getenv('MAIL_PASS') ?: ''; 
 
         $phpmailer = new PHPMailer(true); 
-        error_log("[DEBUG_MAIL] USER CITIT: " . getenv('MAIL_USER'));
-        error_log("[DEBUG_MAIL] PASS CITIT: " . (getenv('MAIL_PASS') ? 'Are valoare' : 'E VID'));
+        LogService::instance()->debug("[DEBUG_MAIL] USER CITIT: " . getenv('MAIL_USER'));
+        LogService::instance()->debug("[DEBUG_MAIL] PASS CITIT: " . (getenv('MAIL_PASS') ? 'Are valoare' : 'E VID'));
         try {
             $phpmailer->isSMTP();
             $phpmailer->Host       = $host;
@@ -61,12 +61,12 @@ class EmailService {
             ";
 
             $phpmailer->send();
-            error_log("[DEBUG][EMAIL_SERVICE] Email successfully sent to " . $toEmail);
+            LogService::instance()->debug("[DEBUG][EMAIL_SERVICE] Email successfully sent to " . $toEmail);
             return true;
 
         } catch (Exception $e) {
       
-            error_log("[ERROR][EMAIL_SERVICE] SMTP transfer failed: " . $phpmailer->ErrorInfo);
+            LogService::instance()->error("[ERROR][EMAIL_SERVICE] SMTP transfer failed: " . $phpmailer->ErrorInfo);
             throw new Exception("Error sending email via SMTP server: " . $phpmailer->ErrorInfo);
         }
     }

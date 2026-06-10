@@ -62,7 +62,7 @@ class GeologicalPlantService {
                 }
             }
         } catch (Throwable $e) {
-            error_log("[GEO SERVICE ERROR] BigDataCloud a crăpat: " . $e->getMessage());
+            LogService::instance()->error("[GEO SERVICE ERROR] BigDataCloud a crăpat: " . $e->getMessage());
         }
 
         try {
@@ -76,7 +76,7 @@ class GeologicalPlantService {
                 $result['seismicStability'] = (float) round(max(0.0, min(1.0, (10.0 - ($totalEvents * 1.5)) / 10)), 2);
             }
         } catch (Throwable $e) {
-            error_log("[SEISMIC SERVICE ERROR] USGS a crăpat: " . $e->getMessage());
+            LogService::instance()->error("[SEISMIC SERVICE ERROR] USGS a crăpat: " . $e->getMessage());
         }
 
         try {
@@ -98,7 +98,7 @@ class GeologicalPlantService {
                 }
             }
         } catch (Throwable $e) {
-            error_log("[FLOOD SERVICE ERROR] Open-Meteo a crăpat: " . $e->getMessage());
+            LogService::instance()->error("[FLOOD SERVICE ERROR] Open-Meteo a crăpat: " . $e->getMessage());
         }
 
         try {
@@ -117,7 +117,7 @@ class GeologicalPlantService {
                 $result['groundwaterLevel'] = (float) round(max(0.2, (1.0 - $moisture) * 8), 2);
             }
         } catch (Throwable $e) {
-            error_log("[GROUNDWATER SERVICE ERROR] Open-Meteo a crăpat: " . $e->getMessage());
+            LogService::instance()->error("[GROUNDWATER SERVICE ERROR] Open-Meteo a crăpat: " . $e->getMessage());
         }
 
         try {
@@ -145,7 +145,7 @@ class GeologicalPlantService {
                 }
             }
         } catch (Throwable $e) {
-            error_log("[SOILGRIDS SERVICE ERROR] SoilGrids a crăpat: " . $e->getMessage());
+            LogService::instance()->error("[SOILGRIDS SERVICE ERROR] SoilGrids a crăpat: " . $e->getMessage());
         }
 
         return $result;

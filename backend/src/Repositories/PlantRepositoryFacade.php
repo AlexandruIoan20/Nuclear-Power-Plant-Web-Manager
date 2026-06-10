@@ -20,10 +20,10 @@ class PlantRepositoryFacade {
             $geologicalData = $this->geologicalPlantRepository->findByPlantId($plantId); 
             $technicalData = $this->technicalPlantRepository->findByPlantId($plantId); 
 
-            error_log("[DEBUG] Testare Plant ID: " . $plantId);
-            error_log("[DEBUG] Basic Data: " . ($basicData ? 'GASIT' : 'LIPSESTE'));
-            error_log("[DEBUG] Geological Data: " . ($geologicalData ? 'GASIT' : 'LIPSESTE'));
-            error_log("[DEBUG] Technical Data: " . ($technicalData ? 'GASIT' : 'LIPSESTE'));
+            LogService::instance()->debug("[DEBUG] Testare Plant ID: " . $plantId);
+            LogService::instance()->debug("[DEBUG] Basic Data: " . ($basicData ? 'GASIT' : 'LIPSESTE'));
+            LogService::instance()->debug("[DEBUG] Geological Data: " . ($geologicalData ? 'GASIT' : 'LIPSESTE'));
+            LogService::instance()->debug("[DEBUG] Technical Data: " . ($technicalData ? 'GASIT' : 'LIPSESTE'));
             
             if(!$basicData || !$geologicalData || !$technicalData) { 
                 return null; 
@@ -38,7 +38,7 @@ class PlantRepositoryFacade {
                 'reactor_schemas' => $reactorSchemas
             ];
         } catch(Exception $e) { 
-            error_log("[PLANT FACADE ERROR] Eroare la asamblarea datelor centralei: " . $e->getMessage()); 
+            LogService::instance()->error("[PLANT FACADE ERROR] Eroare la asamblarea datelor centralei: " . $e->getMessage());
             throw new Exception("Eroare la asamblarea datelor de fezabilitate.");
         }
     }

@@ -1,4 +1,5 @@
 import { API_BASE } from '../config/api.config.js'; 
+import { logger } from './logger.js';
 
 let csrfToken = null; 
 
@@ -12,6 +13,8 @@ async function getCsrfToken() {
 }
 
 async function request(method, endpoint, body = null) { 
+    logger.info(`API ${method} ${endpoint}`, body ? { body } : undefined);
+
     const options = { 
         method, 
         headers: { "Content-Type": "application/json" },
@@ -25,11 +28,15 @@ async function request(method, endpoint, body = null) {
 
     const response = await fetch(`${API_BASE}${endpoint}`, { ...options, credentials: 'include' }); 
     const data = await response.json(); 
-    if(!response.ok) throw { 
-        status: response.status,
-        message: data.message
-    }; 
+    if(!response.ok) {
+        logger.error(`API ${method} ${endpoint} esuata`, { status: response.status, message: data.message });
+        throw { 
+            status: response.status,
+            message: data.message
+        }; 
+    }
 
+    logger.info(`API ${method} ${endpoint} reusit`);
     return data; 
 }
 

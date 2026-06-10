@@ -30,7 +30,7 @@ class FeasibilityRepository {
             return true;
             
         } catch(PDOException $e) { 
-            error_log("[FeasibilityRepository] Eroare la salvarea raportului: " . $e->getMessage()); 
+            LogService::instance()->error("[FeasibilityRepository] Eroare la salvarea raportului: " . $e->getMessage());
             return false;
         }
     }
@@ -61,7 +61,7 @@ class FeasibilityRepository {
             return $report;
             
         } catch(PDOException $e) { 
-            error_log("[FeasibilityRepository] Eroare la citirea raportului: " . $e->getMessage()); 
+            LogService::instance()->error("[FeasibilityRepository] Eroare la citirea raportului: " . $e->getMessage());
             throw new Exception("Eroare interna la baza de date.");
         }
     }

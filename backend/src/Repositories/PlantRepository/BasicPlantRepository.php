@@ -79,7 +79,7 @@ class BasicPlantRepository {
         ]);
 
         $randuriModificate = $statement->rowCount();
-        error_log("[DEBUG DB] ID centrala cautata pentru update basics: " . $basicPlantData->getPowerPlantId());
-        error_log("[DEBUG DB] Randuri modificate efectiv in basic_data: " . $randuriModificate);
+        LogService::instance()->debug("[DEBUG DB] ID centrala cautata pentru update basics: " . $basicPlantData->getPowerPlantId());
+        LogService::instance()->debug("[DEBUG DB] Randuri modificate efectiv in basic_data: " . $randuriModificate);
     }
 }

@@ -152,7 +152,7 @@ class DetailsPlantRepository {
         ]);
 
         $randuriModificate = $stmt->rowCount();
-        error_log("[DEBUG] ID cautat pentru update: " . $plant->getId());
-        error_log("[DEBUG] Randuri modificate efectiv: " . $randuriModificate);
+        LogService::instance()->debug("[DEBUG] ID cautat pentru update: " . $plant->getId());
+        LogService::instance()->debug("[DEBUG] Randuri modificate efectiv: " . $randuriModificate);
     }
 }

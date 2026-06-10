@@ -4,6 +4,7 @@ import { UpdatePlantStatusRequestDTO } from '../../dto/UpdatePlanStatusRequestDT
 import { getQueryParam } from '../../utils/urlHelper.js';
 import { populateFeasibilityReport } from '../feasibility/report-results.js'; 
 import { populatePlantPage } from '../../ui/power-plants/plantPageRenderer.js'; 
+import { logger } from '../../core/logger.js';
 
 const plantId = getQueryParam('id');
 
@@ -19,7 +20,7 @@ async function updateStatus(status) {
         );
         window.location.href = '/pages/admin.html';
     } catch (e) {
-        console.error(e);
+        logger.error(e);
         alert(`Eroare la actualizarea statusului: ${e.message}`);
         btnApprove.disabled = false;
         btnReject.disabled  = false;
@@ -56,7 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             feasibilityReportService.getReport(plantId),
         ]);
 
-        console.log({ plantData, reportData }); 
+        logger.info({ plantData, reportData }); 
         hideLoading();
 
         populatePlantPage(plantData);
@@ -73,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     } catch (e) {
         hideLoading();
-        console.error(e);
+        logger.error(e);
         alert('Eroare la încărcarea datelor.');
     }
 });
