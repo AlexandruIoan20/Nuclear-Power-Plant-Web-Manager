@@ -44,13 +44,15 @@ class GeologicalPlantController {
 
         try {
             $responseDTO = $this->plantServiceFacade->saveGeologicalData($dateFormular, $plantId);
+            $fullDto = $this->plantServiceFacade->getGeologicalDataByPlantId($plantId);
             
             http_response_code(201);
             echo json_encode([
                 'status' => 'success',
                 'message' => 'Datele geologice au fost salvate cu succes.',
                 'plantId' => $plantId,
-                'geologicalId' => $responseDTO->dataId
+                'geologicalId' => $responseDTO->dataId,
+                'data' => $fullDto
             ]);
         } catch (Exception $e) {
             LogService::instance()->error("[ERROR] Create Geological: " . $e->getMessage());

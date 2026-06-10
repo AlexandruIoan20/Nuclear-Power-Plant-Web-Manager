@@ -16,12 +16,16 @@ if(empty($_SESSION['csrf_token'])) {
 }
 
 if(!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'OPTIONS', 'HEAD'])) { 
-    $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''; 
-    if(empty($token) || !hash_equals($_SESSION['csrf_token'], $token)) { 
-        http_response_code(403); 
-        header('Content-Type: application/json'); 
-        echo json_encode(['status' => 'error', 'message' => 'Invalid CSRF token' ]); 
-        exit; 
+    $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $skipCsrf = $requestPath === '/api/logs/frontend';
+    if (!$skipCsrf) {
+        $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''; 
+        if(empty($token) || !hash_equals($_SESSION['csrf_token'], $token)) { 
+            http_response_code(403); 
+            header('Content-Type: application/json'); 
+            echo json_encode(['status' => 'error', 'message' => 'Invalid CSRF token' ]); 
+            exit; 
+        }
     }
 } 
 

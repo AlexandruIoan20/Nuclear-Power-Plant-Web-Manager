@@ -9,6 +9,7 @@ export function setupCoordinatePickerMap({
     countryInputId,
     latitude,
     longitude,
+    onPreview,
     fallbackCenter = [45.9432, 24.9668],
     fallbackZoom = 5,
     zoom = 6
@@ -86,6 +87,10 @@ export function setupCoordinatePickerMap({
 
         setMarker(payload.latitude, payload.longitude, false);
         setStatus(payload.message || payload.coordinates_label || 'Locație validată de backend.');
+
+        if (typeof onPreview === 'function') {
+            onPreview(payload);
+        }
     }
 
     if (hasInitialCoordinates) {

@@ -326,7 +326,14 @@ class DetailsPlantController {
             LogService::instance()->error("[PREVIEW ERROR] Nu am putut lua țara: " . $e->getMessage());
         }
 
-   
+        // Pre-compute all geological fields from coordinates
+        $geoPreview = [];
+        try {
+            $geoPreview = $this->plantServiceFacade->previewGeologicalLocation($latNorm, $lonNorm);
+        } catch (Throwable $e) {
+            LogService::instance()->error("[PREVIEW ERROR] Nu am putut calcula datele geologice: " . $e->getMessage());
+        }
+
         http_response_code(200);
         echo json_encode([
             'status' => 'success',
@@ -335,6 +342,15 @@ class DetailsPlantController {
                 'longitude' => $lonNorm,
                 'coordinates_label' => $label,
                 'country' => $country,
+                'soilType' => $geoPreview['soilType'] ?? null,
+                'waterSourceType' => $geoPreview['waterSourceType'] ?? null,
+                'seismicStability' => $geoPreview['seismicStability'] ?? null,
+                'floodRisk' => $geoPreview['floodRisk'] ?? null,
+                'groundwaterLevel' => $geoPreview['groundwaterLevel'] ?? null,
+                'waterProximity' => $geoPreview['waterProximity'] ?? null,
+                'waterFlowRate' => $geoPreview['waterFlowRate'] ?? null,
+                'populationDensity' => $geoPreview['populationDensity'] ?? null,
+                'transportInfrastructureScore' => $geoPreview['transportInfrastructureScore'] ?? null,
                 'message' => 'Locație validată rapid.'
             ]
         ]);

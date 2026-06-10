@@ -22,7 +22,7 @@ class GeologicalPlantService {
         return GeologicalPlantDataDTO::fromEntity($entity);
     }
 
-    private function runAutoGeolocation(float $lat, float $lon): array {
+    public function runAutoGeolocation(float $lat, float $lon): array {
         $latNorm = round($lat, 6);
         $lonNorm = round($lon, 6);
 
