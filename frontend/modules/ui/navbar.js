@@ -7,7 +7,7 @@ const ADMIN_LINK = { href: '/pages/admin/index.html', label: 'Admin', icon: '�
 const currentPage = window.location.pathname;
 
 const NAV_LINKS = [
-    { href: '/pages/index.html', label: 'Home', icon: '🏠', key: '/pages/index.html' },
+    { href: '/pages/dashboard.html', label: 'Home', icon: '🏠', key: '/pages/dashboard.html' },
     { href: '/pages/power-plants/list.html', label: 'Centrale', icon: '⚛',  key: '/pages/power-plants/list.html' },
     { href: '/pages/power-plants/create.html', label: 'Creare Centrală', icon: '➕', key: '/pages/power-plants/create.html' },
     { href: '/pages/my-projects.html', label: 'Proiectele Mele', icon: '📁', key: '/pages/my-projects.html' },

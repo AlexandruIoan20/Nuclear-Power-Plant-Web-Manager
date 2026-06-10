@@ -3,11 +3,12 @@ import { ReactorType, CoolingType } from '../../config/enums.js';
 import { getQueryParam } from '../../utils/urlHelper.js'; 
 import { showError, showSuccess, clearStatus } from '../../ui/showMessage.js'; 
 import { TechnicalDataRequestDTO } from '../../dto/TechnicalDataRequestDTO.js'; 
-import { saveHeaderState } from '../../ui/form-header/formHeaderState.js'; 
+import { saveHeaderState, getHeaderState } from '../../ui/form-header/formHeaderState.js'; 
 import { logger } from '../../core/logger.js';
 
 const plantId = getQueryParam("id"); 
-const technicalId = getQueryParam("technicalId"); 
+const urlTechnicalId = getQueryParam("technicalId");
+const technicalId = urlTechnicalId ?? getHeaderState().technicalId ?? null;
 
 let reactorIndex = 0;
 
@@ -89,12 +90,44 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }); 
 
-    /*
-        Se cauta technicalId 
-            -> Daca nu exista => logica pentru post 
-            -> Daca exista => logica de get + put
-    */ 
-    if(!technicalId) { 
+    let isEdit = !!technicalId;
+
+    if (!isEdit) {
+        try {
+            const checkResponse = await powerPlantService.getTechnical(plantId);
+            if (checkResponse.data && checkResponse.data.id) {
+                saveHeaderState({ technicalId: checkResponse.data.id });
+                window.history.replaceState({}, '', `?id=${plantId}&technicalId=${checkResponse.data.id}`);
+                reactorIndex = checkResponse.data.reactorConfigurations?.length ?? 0;
+                isEdit = true;
+            }
+        } catch {
+        }
+    }
+
+    if(isEdit) { 
+        try { 
+            const response = await powerPlantService.getTechnical(plantId); 
+            const d = response.data; 
+
+            document.getElementById("number_of_reactors").value = d.numberOfReactors ?? "";
+            document.getElementById("estimated_efficiency").value = d.estimatedEfficiency ?? "";
+            document.getElementById("operational_risk_level").value = d.operationalRiskLevel ?? "";
+
+            if (d.reactorConfigurations && d.reactorConfigurations.length > 0) {
+                d.reactorConfigurations.forEach(config => {
+                    const block = createReactorBlock(reactorIndex, config.reactorType, config.coolingType);
+                    container.appendChild(block);
+                    reactorIndex++;
+                });
+            }
+        } catch (error) { 
+            logger.error(error.message);
+            showError(statusElement, "Eroare la incarcarea datelor tehnice");  
+        }
+    }
+
+    if(!isEdit) { 
         form.addEventListener("submit", async(e) => { 
             e.preventDefault(); 
             clearStatus(statusElement); 
@@ -122,26 +155,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         }); 
     } else { 
-        try { 
-            const response = await powerPlantService.getTechnical(plantId); 
-            const d = response.data; 
-
-            document.getElementById("number_of_reactors").value = d.numberOfReactors ?? "";
-            document.getElementById("estimated_efficiency").value = d.estimatedEfficiency ?? "";
-            document.getElementById("operational_risk_level").value = d.operationalRiskLevel ?? "";
-
-            if (d.reactorConfigurations && d.reactorConfigurations.length > 0) {
-                d.reactorConfigurations.forEach(config => {
-                    const block = createReactorBlock(reactorIndex, config.reactorType, config.coolingType);
-                    container.appendChild(block);
-                    reactorIndex++;
-                });
-            }
-        } catch (error) { 
-            logger.error(error.message);
-            showError(statusElement, "Eroare la incarcarea datelor tehnice");  
-        }
-
         form.addEventListener("submit", async (e) => { 
             e.preventDefault(); 
             clearStatus(statusElement); 

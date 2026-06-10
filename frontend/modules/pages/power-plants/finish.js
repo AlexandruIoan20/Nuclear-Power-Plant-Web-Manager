@@ -2,7 +2,7 @@ import { powerPlantService } from '../../services/powerPlantService.js';
 import { feasibilityReportService } from '../../services/feasibilityReportService.js'; 
 import { UpdatePlantStatusRequestDTO } from '../../dto/UpdatePlanStatusRequestDTO.js'; 
 import { getQueryParam } from '../../utils/urlHelper.js';
-import { clearHeaderState } from '../../ui/form-header/formHeaderState.js'; 
+import { saveHeaderState, clearHeaderState } from '../../ui/form-header/formHeaderState.js'; 
 import { populatePlantPage } from '../../ui/power-plants/plantPageRenderer.js'; 
 import { logger } from '../../core/logger.js';
 
@@ -45,6 +45,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         logger.info({ rawData }); 
         populatePlantPage(rawData); 
+
+        if (rawData.basic?.id || rawData.geological?.id || rawData.technical?.id) {
+            saveHeaderState({
+                basicsId: rawData.basic?.id,
+                geologicalId: rawData.geological?.id,
+                technicalId: rawData.technical?.id,
+            });
+        }
 
         const verifyButton = document.getElementById("btn-verify"); 
         const originalBtnText = verifyButton.textContent; 
