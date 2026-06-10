@@ -2,7 +2,8 @@
 
 require_once __DIR__ . '/../../Dto/PlantDTO.php';
 require_once __DIR__ . '/../../Dto/PlantDetailsDTO.php'; 
-require_once __DIR__ . '/../../Dto/GetPlantDTO.php';  
+require_once __DIR__ . '/../../Dto/GetPlantDTO.php';
+require_once __DIR__ . '/../../Services/LogService.php';  
 
 class DetailsPlantController { 
     public function __construct(
@@ -119,11 +120,11 @@ class DetailsPlantController {
     
         $data = ['status' => $status];
     
-        error_log("[DEBUG] Date getPlantsByStatus: " . print_r($data, true));
+        LogService::instance()->debug("Date getPlantsByStatus: " . print_r($data, true));
     
         try { 
             $powerPlants = $this->plantServiceFacade->getPlantsByStatus($data); 
-            error_log("powerPlants in controller:  " . print_r($powerPlants, true)); 
+            LogService::instance()->debug("powerPlants in controller:  " . print_r($powerPlants, true)); 
 
             $dtos = array_map(function($plant) {
                 return [
@@ -139,7 +140,7 @@ class DetailsPlantController {
             http_response_code(200); 
             echo json_encode(["status" => "success", "data" => $dtos]); 
         } catch(Exception $e) { 
-            error_log("[ERROR] GET Plants By Status: " . $e->getMessage());
+            LogService::instance()->error("GET Plants By Status: " . $e->getMessage());
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Eroare la cautarea dupa status: " . $e->getMessage()]);
         }
@@ -183,7 +184,7 @@ class DetailsPlantController {
         $jsonPayload = file_get_contents("php://input");
         $dateFormular = json_decode($jsonPayload, true); 
 
-        error_log("[DEBUG] Date Formular API Creare: " . print_r($dateFormular, true));
+        LogService::instance()->debug("Date Formular API Creare: " . print_r($dateFormular, true));
         
         if (empty($dateFormular)) {
             http_response_code(400); 
@@ -198,7 +199,7 @@ class DetailsPlantController {
             echo json_encode(["status" => "success", "message" => "Centrala a fost salvată cu succes.", "plantId" => $responseDTO->dataId ]);
             exit; 
         } catch(Exception $e) { 
-            error_log("[ERROR] Save Plant: " . $e->getMessage());
+            LogService::instance()->error("Save Plant: " . $e->getMessage());
             http_response_code(500); 
             echo json_encode(["status" => "error", "message" => "Eroare la salvare: " . $e->getMessage()]);
             exit;
@@ -211,7 +212,7 @@ class DetailsPlantController {
         $jsonPayload = file_get_contents("php://input");
         $dateFormular = json_decode($jsonPayload, true); 
 
-        error_log("[DEBUG] Date Formular API Creare: " . print_r($dateFormular, true));
+        LogService::instance()->debug("Date Formular API Creare: " . print_r($dateFormular, true));
         
         if (empty($dateFormular)) {
             http_response_code(400); 
@@ -236,7 +237,7 @@ class DetailsPlantController {
                 "message" => "Status actualizat cu succes"
             ]); 
         } catch(Exception $e) { 
-            error_log("[ERROR] Update Plant: " . $e->getMessage());
+            LogService::instance()->error("Update Plant: " . $e->getMessage());
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Eroare la actualizare statusului: " . $e->getMessage()]);
             exit;
@@ -249,7 +250,7 @@ class DetailsPlantController {
         $jsonPayload = file_get_contents("php://input");
         $dateFormular = json_decode($jsonPayload, true); 
 
-        error_log("[DEBUG] Date Formular API Update pt ID {$id}: " . print_r($dateFormular, true));
+        LogService::instance()->debug("Date Formular API Update pt ID {$id}: " . print_r($dateFormular, true));
 
         if (empty($dateFormular)) {
             http_response_code(400);
@@ -264,7 +265,7 @@ class DetailsPlantController {
             echo json_encode(["status" => "success", "message" => "Detaliile au fost actualizate cu succes."]);
             exit; 
         } catch(Exception $e) { 
-            error_log("[ERROR] Update Plant: " . $e->getMessage());
+            LogService::instance()->error("Update Plant: " . $e->getMessage());
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Eroare la actualizare: " . $e->getMessage()]);
             exit;
@@ -323,7 +324,7 @@ class DetailsPlantController {
                 }
             }
         } catch (Throwable $e) {
-            error_log("[PREVIEW ERROR] Nu am putut lua țara: " . $e->getMessage());
+            LogService::instance()->error("Nu am putut lua țara: " . $e->getMessage());
         }
 
    

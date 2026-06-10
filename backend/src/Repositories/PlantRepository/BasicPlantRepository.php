@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../../Entities/BasicPlantData.php'; 
+require_once __DIR__ . '/../../Services/LogService.php';
 
 class BasicPlantRepository {
     private PDO $pdo; 
@@ -79,7 +80,7 @@ class BasicPlantRepository {
         ]);
 
         $randuriModificate = $statement->rowCount();
-        error_log("[DEBUG DB] ID centrala cautata pentru update basics: " . $basicPlantData->getPowerPlantId());
-        error_log("[DEBUG DB] Randuri modificate efectiv in basic_data: " . $randuriModificate);
+        LogService::instance()->debug("ID centrala cautata pentru update basics: " . $basicPlantData->getPowerPlantId());
+        LogService::instance()->debug("Randuri modificate efectiv in basic_data: " . $randuriModificate);
     }
 }

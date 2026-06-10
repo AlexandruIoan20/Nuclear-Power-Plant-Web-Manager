@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../Services/NotificationService.php';
+require_once __DIR__ . '/../Services/LogService.php';
 
 class NotificationController {
     private NotificationService $notificationService;
@@ -33,7 +34,7 @@ class NotificationController {
             ]);
         } catch (\Throwable $e) {
          
-            error_log("[NOTIFICATION ERROR] " . $e->getMessage() . " în " . $e->getFile() . ":" . $e->getLine());
+            LogService::instance()->error($e->getMessage() . " în " . $e->getFile() . ":" . $e->getLine());
             http_response_code(500);
             echo json_encode([
                 'status' => 'error', 

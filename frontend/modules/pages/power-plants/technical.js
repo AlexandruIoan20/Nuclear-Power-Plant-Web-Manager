@@ -4,6 +4,7 @@ import { getQueryParam } from '../../utils/urlHelper.js';
 import { showError, showSuccess, clearStatus } from '../../ui/showMessage.js'; 
 import { TechnicalDataRequestDTO } from '../../dto/TechnicalDataRequestDTO.js'; 
 import { saveHeaderState } from '../../ui/form-header/formHeaderState.js'; 
+import { logger } from '../../core/logger.js';
 
 const plantId = getQueryParam("id"); 
 const technicalId = getQueryParam("technicalId"); 
@@ -116,7 +117,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 form.reset(); 
                 container.innerHTML = ""; 
             } catch(error) { 
-                console.log(error.message); 
+                logger.error(error.message); 
                 showError(statusElement, "Eroare la salvarea datelor tehnice"); 
             }
         }); 
@@ -137,7 +138,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 });
             }
         } catch (error) { 
-            console.error(error.message);
+            logger.error(error.message);
             showError(statusElement, "Eroare la incarcarea datelor tehnice");  
         }
 
@@ -156,7 +157,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 await powerPlantService.updateTechnical(dto, plantId); 
                 showSuccess(statusElement, "Datele tehnice au fost salvate cu succes!"); 
             } catch(error) { 
-                console.error(error.message); 
+                logger.error(error.message); 
                 showError(statusElement, "Eroare la actualizarea datelor tehnnice."); 
             }
         })

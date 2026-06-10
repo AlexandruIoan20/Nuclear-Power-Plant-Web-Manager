@@ -1,6 +1,7 @@
 import { feasibilityReportService } from '../../services/feasibilityReportService.js';  
 import { FeasibilityReportDTO } from '../../dto/FeasibilityReportDTO.js'; 
 import { getQueryParam } from '../../utils/urlHelper.js'; 
+import { logger } from '../../core/logger.js';
 
 const plantId = getQueryParam("id"); 
 
@@ -183,7 +184,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try { 
         const response = await feasibilityReportService.getReport(plantId); 
         
-        console.log({ response }); 
+        logger.debug({ response }); 
         if(!response.success) { 
             hideLoading(); 
             alert("A aparut o problema la cautarea raportului"); 
@@ -194,7 +195,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         populateFeasibilityReport(response.data); 
     } catch(error) {    
         hideLoading(); 
-        console.error(error.message); 
+        logger.error(error.message); 
         alert("A aparut o eroare la cautarea raportului"); 
     }
 }); 

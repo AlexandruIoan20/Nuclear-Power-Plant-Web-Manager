@@ -1,7 +1,8 @@
 <?php
 
 require_once __DIR__ . '/../../Services/PlantServiceFacade.php'; 
-require_once __DIR__ . '/../../Dto/GeologicalPlantDataDTO.php'; 
+require_once __DIR__ . '/../../Dto/GeologicalPlantDataDTO.php';
+require_once __DIR__ . '/../../Services/LogService.php'; 
 
 class GeologicalPlantController { 
     public function __construct(
@@ -23,7 +24,7 @@ class GeologicalPlantController {
             http_response_code(200); 
             echo json_encode(["status" => "success", "data" => $dto]); 
         } catch (Exception $e) {
-            error_log("[ERROR] GET Geological: " . $e->getMessage());
+            LogService::instance()->error("GET Geological: " . $e->getMessage());
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Eroare la preluarea datelor geologice."]);
         }
@@ -53,7 +54,7 @@ class GeologicalPlantController {
                 'geologicalId' => $responseDTO->dataId
             ]);
         } catch (Exception $e) {
-            error_log("[ERROR] Create Geological: " . $e->getMessage());
+            LogService::instance()->error("Create Geological: " . $e->getMessage());
             $code = (str_contains($e->getMessage(), 'Există deja')) ? 409 : 400;
             http_response_code($code);
             echo json_encode([
@@ -85,7 +86,7 @@ class GeologicalPlantController {
                 'message' => 'Datele geologice au fost actualizate cu succes.'
             ]);
         } catch (Exception $e) { 
-            error_log("[ERROR] Update Geological: " . $e->getMessage());
+            LogService::instance()->error("Update Geological: " . $e->getMessage());
             $code = str_contains($e->getMessage(), 'găsit') ? 404 : 400;
             http_response_code($code);
             echo json_encode([

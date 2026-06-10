@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../PHPMailer/src/Exception.php';
 require_once __DIR__ . '/../../PHPMailer/src/PHPMailer.php';
 require_once __DIR__ . '/../../PHPMailer/src/SMTP.php';
+require_once __DIR__ . '/LogService.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -26,8 +27,8 @@ class EmailService {
         $pass = getenv('MAIL_PASS') ?: ''; 
 
         $phpmailer = new PHPMailer(true); 
-        error_log("[DEBUG_MAIL] USER CITIT: " . getenv('MAIL_USER'));
-        error_log("[DEBUG_MAIL] PASS CITIT: " . (getenv('MAIL_PASS') ? 'Are valoare' : 'E VID'));
+        LogService::instance()->debug("USER CITIT: " . getenv('MAIL_USER'));
+        LogService::instance()->debug("PASS CITIT: " . (getenv('MAIL_PASS') ? 'Are valoare' : 'E VID'));
         try {
             $phpmailer->isSMTP();
             $phpmailer->Host       = $host;
@@ -61,12 +62,12 @@ class EmailService {
             ";
 
             $phpmailer->send();
-            error_log("[DEBUG][EMAIL_SERVICE] Email successfully sent to " . $toEmail);
+            LogService::instance()->debug("Email successfully sent to " . $toEmail);
             return true;
 
         } catch (Exception $e) {
       
-            error_log("[ERROR][EMAIL_SERVICE] SMTP transfer failed: " . $phpmailer->ErrorInfo);
+            LogService::instance()->error("SMTP transfer failed: " . $phpmailer->ErrorInfo);
             throw new Exception("Error sending email via SMTP server: " . $phpmailer->ErrorInfo);
         }
     }

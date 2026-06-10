@@ -1,7 +1,8 @@
 <?php
 
 require_once __DIR__ . '/../../Services/PlantService/BasicPlantService.php'; 
-require_once __DIR__ . '../../../Dto/BasicPlantDataDTO.php'; 
+require_once __DIR__ . '../../../Dto/BasicPlantDataDTO.php';
+require_once __DIR__ . '/../../Services/LogService.php'; 
 
 class BasicPlantController { 
     public function __construct(
@@ -34,8 +35,8 @@ class BasicPlantController {
             $dateFormular = [];
         }
 
-        error_log("[DEBUG] Date Formular decodate din JSON:"); 
-        error_log(print_r($dateFormular, true));
+        LogService::instance()->debug("Date Formular decodate din JSON:"); 
+        LogService::instance()->debug(print_r($dateFormular, true));
 
         try { 
             $responseDTO = $this->plantServiceFacade->saveBasicData($dateFormular, $plantId); 
@@ -49,7 +50,7 @@ class BasicPlantController {
             ]);
 
         } catch(Exception $e) { 
-            error_log("[ERROR] POST Basic Data: " . $e->getMessage());
+            LogService::instance()->error("POST Basic Data: " . $e->getMessage());
             
             http_response_code(400);
             echo json_encode([
@@ -68,8 +69,8 @@ class BasicPlantController {
             $dateFormular = [];
         }
 
-        error_log("[DEBUG] Date Formular decodate din JSON (Update):"); 
-        error_log(print_r($dateFormular, true));
+        LogService::instance()->debug("Date Formular decodate din JSON (Update):"); 
+        LogService::instance()->debug(print_r($dateFormular, true));
 
         try { 
             $this->plantServiceFacade->updateBasicData($dateFormular, $plantId); 
@@ -81,7 +82,7 @@ class BasicPlantController {
             ]);
 
         } catch(Exception $e) { 
-            error_log("[ERROR] POST/PUT Basic Data Update: " . $e->getMessage());
+            LogService::instance()->error("POST/PUT Basic Data Update: " . $e->getMessage());
             
             http_response_code(400);
             echo json_encode([

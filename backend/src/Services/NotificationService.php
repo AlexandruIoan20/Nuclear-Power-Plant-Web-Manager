@@ -4,6 +4,8 @@ require_once __DIR__ . '/PlantServiceFacade.php';
 require_once __DIR__ . '/AlertService.php';
 require_once __DIR__ . '/../Entities/Alert.php';
 
+require_once __DIR__ . '/LogService.php';
+
 class NotificationService {
     private PlantServiceFacade $plantService;
     private AlertService $alertService;
@@ -15,6 +17,7 @@ class NotificationService {
 
   
     public function getAggregatedNotifications(string $userRole, string $userEmail): array {
+        LogService::instance()->debug("Obținere notificări agregate", ['role' => $userRole, 'email' => $userEmail]);
         $notifications = [];
 
      

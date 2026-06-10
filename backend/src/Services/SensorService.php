@@ -8,6 +8,7 @@ require_once __DIR__ . '/../Dto/SensorListDTO.php';
 
 require_once __DIR__ . '/../Entities/ReactorType.php'; 
 require_once __DIR__ . '/../Entities/SensorType.php'; 
+require_once __DIR__ . '/LogService.php'; 
 
 class SensorService { 
     private SensorRepository $sensorRepository; 
@@ -26,13 +27,13 @@ class SensorService {
             $templates = $this->sensorTemplateRepository->findByReactorType($reactorType); 
 
             if(empty($templates)) { 
-                error_log("[WARNING] Reactor Sensor Service: Nu au fost gasite template-uri pentru senzorii reactorului"); 
+                LogService::instance()->warning("Reactor Sensor Service: Nu au fost gasite template-uri pentru senzorii reactorului"); 
                 return; 
             }
 
             $this->sensorRepository->insertBulk($reactorId, $templates);
         } catch(Exception $e) { 
-            error_log("[ERROR] Populate Reactor Sensors: " . $e->getMessage());
+            LogService::instance()->error("Populate Reactor Sensors: " . $e->getMessage());
             throw new Exception("Eroare la generarea senzorilor pentru reactor: " . $e->getMessage()); 
         }
     }

@@ -2,6 +2,7 @@ import { reactorService } from '../../services/reactorService.js';
 import { ReactorType, CoolingType, ReactorOperationalStatus } from '../../config/enums.js';
 import { showError, showSuccess, clearStatus } from '../../ui/showMessage.js';
 import { getQueryParam } from '../../utils/urlHelper.js';
+import { logger } from '../../core/logger.js';
 
 const plantId = getQueryParam("plantId");
 
@@ -56,11 +57,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             await reactorService.createReactor(formData);
+            logger.info(`Reactor creat pentru centrala ${plantId}`, { formData });
             showSuccess(statusElement, "Reactorul a fost creat cu succes!");
             setTimeout(() => {
                 window.location.href = `/pages/reactors/list.html?plantId=${plantId}`;
             }, 1000);
         } catch (error) {
+            logger.error(`Eroare la crearea reactorului pentru centrala ${plantId}`, { message: error.message });
             showError(statusElement, "Eroare la crearea reactorului: " + (error.message || ""));
         }
     });

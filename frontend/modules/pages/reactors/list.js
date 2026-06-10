@@ -1,6 +1,7 @@
 import { reactorService } from '../../services/reactorService.js';
 import { getQueryParam } from '../../utils/urlHelper.js';
 import { renderReactorTable } from '../../ui/reactors/reactorTable.js';
+import { logger } from '../../core/logger.js';
 
 const plantId = getQueryParam("plantId");
 
@@ -14,9 +15,11 @@ function handleDelete(id) {
     if (!confirm("Sigur doriți să ștergeți acest reactor?")) return;
 
     reactorService.deleteReactor(id).then(() => {
+        logger.info(`Reactorul ${id} a fost sters`);
         reactors = reactors.filter(r => r.id !== id);
         renderTable();
     }).catch(error => {
+        logger.error(`Eroare la stergerea reactorului ${id}`, { message: error.message });
         alert("Eroare la ștergerea reactorului: " + (error.message || ""));
     });
 }
@@ -27,6 +30,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             `<tr class="state-row"><td colspan="8">ID centrală lipsă din URL.</td></tr>`;
         return;
     }
+
+    logger.info(`Se incarca lista reactoarelor pentru centrala ${plantId}`);
 
     document.getElementById('plant-id-display').textContent = plantId;
 
@@ -41,9 +46,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const response = await reactorService.getReactorsByPlant(plantId);
         reactors = response.data ?? [];
+        logger.info(`Incarcate ${reactors.length} reactoare pentru centrala ${plantId}`);
         renderTable();
     } catch (error) {
-        console.error(error.message);
+        logger.error(`Eroare la incarcarea reactoarelor pentru centrala ${plantId}`, { message: error.message });
         document.getElementById('reactors-tbody').innerHTML =
             `<tr class="state-row"><td colspan="8">Eroare la încărcarea reactoarelor.</td></tr>`;
     }

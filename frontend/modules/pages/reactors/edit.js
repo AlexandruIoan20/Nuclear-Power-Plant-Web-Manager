@@ -2,6 +2,7 @@ import { reactorService } from '../../services/reactorService.js';
 import { ReactorType, CoolingType, ReactorOperationalStatus } from '../../config/enums.js';
 import { showError, showSuccess, clearStatus } from '../../ui/showMessage.js';
 import { getQueryParam } from '../../utils/urlHelper.js';
+import { logger } from '../../core/logger.js';
 
 const plantId = getQueryParam("plantId");
 const reactorId = getQueryParam("reactorId");
@@ -51,9 +52,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("nextPlannedOutage").value = toDatetimeLocal(d.nextPlannedOutage);
         document.getElementById("description").value = d.description ?? "";
     } catch (error) {
+        logger.error(`Eroare la incarcarea reactorului ${reactorId}`, { message: error.message });
         showError(statusElement, "Eroare la încărcarea datelor reactorului: " + (error.message || ""));
         return;
     }
+
+    logger.info(`Reactorul ${reactorId} incarcat pentru editare`);
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -80,11 +84,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         try {
             await reactorService.updateReactor(reactorId, formData);
+            logger.info(`Reactorul ${reactorId} actualizat cu succes`);
             showSuccess(statusElement, "Reactorul a fost actualizat cu succes!");
             setTimeout(() => {
                 window.location.href = `/pages/reactors/list.html?plantId=${plantId}`;
             }, 1000);
         } catch (error) {
+            logger.error(`Eroare la actualizarea reactorului ${reactorId}`, { message: error.message });
             showError(statusElement, "Eroare la actualizarea reactorului: " + (error.message || ""));
         }
     });

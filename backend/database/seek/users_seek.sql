@@ -4,7 +4,7 @@ VALUES (
     'Admin',
     'System',
     'admin@nuclear.ro',
-    '$2y$12$pLgjMWjlhKbYoAAvRByCMuLnj3l5JlYl03QHgkgZwHci6c8Q59U.i',
+    '$2y$12$hkgAAfjrJOj6695U2RIsa.cp5zfuu6VIQYnk.LroJZlTw2IQSPfH.',
     'ADMIN'
 )
 ON CONFLICT (email) DO UPDATE SET

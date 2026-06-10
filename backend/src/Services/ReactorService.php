@@ -7,9 +7,11 @@ require_once __DIR__ . '/../Dto/ReactorListDTO.php';
 
 require_once __DIR__ . '/../Entities/ReactorType.php'; 
 require_once __DIR__ . '/../Entities/CoolingType.php'; 
-require_once __DIR__  . '/../Entities/ReactorOperationalStatus.php'; 
+require_once __DIR__  . '/../Entities/ReactorOperationalStatus.php';
 
-class ReactorService { 
+require_once __DIR__ . '/LogService.php';
+
+class ReactorService {
     private ReactorRepository $reactorRepository; 
 
     public function __construct(ReactorRepository $reactorRepository) { 
@@ -17,6 +19,7 @@ class ReactorService {
     }
 
     public function getReactor(string $id): ?ReactorDetailsDTO { 
+        LogService::instance()->debug("Obținere reactor după ID", ['reactor_id' => $id]);
         $reactor = $this->reactorRepository->findById($id); 
         if(!$reactor) throw new Exception("Reactorul cu ID-ul $id nu a fost gasit.");
 
@@ -24,18 +27,23 @@ class ReactorService {
     }
 
     public function getReactorsByPlant(string $plantId): array { 
+        LogService::instance()->debug("Obținere reactoare pentru centrală", ['plant_id' => $plantId]);
         $reactors = $this->reactorRepository->findByPlantId($plantId); 
 
         return array_map(fn($r) => ReactorListDTO::fromEntity($r), $reactors); 
     }
 
     public function getAllReactors(): array { 
+        LogService::instance()->debug("Obținere toate reactoarele");
         $reactors = $this->reactorRepository->findAll(); 
 
         return array_map(fn($r) => ReactorListDTO::fromEntity($r), $reactors); 
     }
 
-    public function createReactor(array $data): string { 
+    public function createReactor(array $data): string {
+        $plantId = $data['powerPlantId'] ?? '';
+        $reactorCode = $data['reactorCode'] ?? '';
+        LogService::instance()->info("Creare reactor", ['plant_id' => $plantId, 'reactor_code' => $reactorCode]);
         $this->validateCreationData($data); 
 
         $reactorType = ReactorType::tryFrom($data['reactorType']); 
@@ -66,10 +74,13 @@ class ReactorService {
 
         $this->reactorRepository->save($reactor);
 
-        return $reactor->getId();
+        $reactorId = $reactor->getId();
+        LogService::instance()->info("Reactor creat cu succes", ['reactor_id' => $reactorId, 'plant_id' => $plantId, 'reactor_code' => $reactorCode]);
+        return $reactorId;
     }
 
     public function updateReactor(string $id, array $data): void { 
+        LogService::instance()->info("Actualizare reactor", ['reactor_id' => $id]);
         $reactor = $this->reactorRepository->findById($id); 
         if(!$reactor) throw new Exception("Reactorul cu ID-ul $id nu a fost gasit pentru actualizare."); 
 
@@ -108,14 +119,17 @@ class ReactorService {
         if (array_key_exists('nextPlannedOutage', $data)) $reactor->setNextPlannedOutage($data['nextPlannedOutage']);
         if (array_key_exists('description', $data)) $reactor->setDescription($data['description']);
 
-        $this->reactorRepository->update($reactor); 
+        $this->reactorRepository->update($reactor);
+        LogService::instance()->info("Reactor actualizat cu succes", ['reactor_id' => $id]);
     } 
 
     public function deleteReactor(string $id): void { 
+        LogService::instance()->info("Ștergere reactor", ['reactor_id' => $id]);
         $reactor = $this->reactorRepository->findById($id); 
         if(!$reactor) throw new Exception("Reactorul cu ID-ul $id nu a fost gasit pentru stergere"); 
 
-        $this->reactorRepository->delete($id); 
+        $this->reactorRepository->delete($id);
+        LogService::instance()->info("Reactor șters cu succes", ['reactor_id' => $id]);
     }
 
     private function validateCreationData(array $data): void {

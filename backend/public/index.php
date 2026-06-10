@@ -124,7 +124,8 @@ require_once __DIR__ . '/../src/Controllers/AlertController.php';
 require_once __DIR__ . '/../src/Services/NotificationService.php';
 require_once __DIR__ . '/../src/Controllers/NotificationController.php';
 
-
+require_once __DIR__ . '/../src/Services/LogService.php';
+require_once __DIR__ . '/../src/Controllers/LogController.php';
 
 // Database configuration
 $host     = getenv('DB_HOST')     ?: 'db';
@@ -163,6 +164,24 @@ $rssController = new RssController($rssService);
 
 $userRepository = new UserRepository($pdo);
 $userService = new UserService($userRepository);
+
+LogService::init($pdo);
+
+// DEV ONLY: Asigură existența contului admin cu parola "admin"
+$stmt = $pdo->prepare("SELECT id, password_hash FROM users WHERE email = 'admin@nuclear.ro'");
+$stmt->execute();
+$admin = $stmt->fetch();
+if (!$admin) {
+    $hash = password_hash('admin', PASSWORD_BCRYPT);
+    $stmt = $pdo->prepare("INSERT INTO users (username, first_name, last_name, email, password_hash, role) VALUES ('admin', 'Admin', 'System', 'admin@nuclear.ro', :hash, 'ADMIN')");
+    $stmt->execute(['hash' => $hash]);
+    LogService::instance()->info("Contul admin a fost creat automat cu parola 'admin'");
+} elseif (!password_verify('admin', $admin['password_hash'])) {
+    $hash = password_hash('admin', PASSWORD_BCRYPT);
+    $stmt = $pdo->prepare("UPDATE users SET password_hash = :hash WHERE email = 'admin@nuclear.ro'");
+    $stmt->execute(['hash' => $hash]);
+    LogService::instance()->warning("Hash-ul parolei admin a fost resetat — nu corespundea cu 'admin'");
+}
 
 $notificationService = new NotificationService($plantServiceFacade, $alertService);
 $reactorRepository = new ReactorRepository($pdo); 
@@ -324,7 +343,7 @@ function checkPlantOwnership(string $plantId, PlantServiceFacade $service): void
 }
 
 $router->post('/api/power-plants/{id}/feasibility', auth(null, function ($id) use ($feasibilityService, $plantServiceFacade) {
-    error_log("[FeasibilityRoute] POST /api/power-plants/{$id}/feasibility de catre user=" . (AuthHelper::getCurrentUserId() ?? '?') . " rol=" . (AuthHelper::getCurrentUserRole() ?? '?'));
+    LogService::instance()->info("Cerere de fezabilitate pentru centrala {$id} de catre user=" . (AuthHelper::getCurrentUserId() ?? '?') . " rol=" . (AuthHelper::getCurrentUserRole() ?? '?'));
     checkPlantOwnership($id, $plantServiceFacade);
     (new FeasibilityController($feasibilityService))->generate($id);
 }));
@@ -352,6 +371,14 @@ $router->put('/api/alerts/{id}/read', auth(null, function ($id) use ($alertServi
 
 $router->get('/api/power-plants/pending-approvals', auth(null, function() use ($plantServiceFacade) { 
     (new DetailsPlantController($plantServiceFacade))->getPendingApprovalsList(); 
+}));
+
+$router->get('/api/logs', auth('ADMIN', function () {
+    (new LogController())->getLogs();
+}));
+
+$router->post('/api/logs/frontend', auth(null, function () {
+    (new LogController())->receiveFrontendLog();
 }));
 
 // --- Authentication ---

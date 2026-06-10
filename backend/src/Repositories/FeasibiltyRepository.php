@@ -1,5 +1,7 @@
 <?php 
 
+require_once __DIR__ . '/../Services/LogService.php';
+
 class FeasibilityRepository { 
     private PDO $db; 
 
@@ -30,7 +32,7 @@ class FeasibilityRepository {
             return true;
             
         } catch(PDOException $e) { 
-            error_log("[FeasibilityRepository] Eroare la salvarea raportului: " . $e->getMessage()); 
+            LogService::instance()->error("Eroare la salvarea raportului: " . $e->getMessage()); 
             return false;
         }
     }
@@ -61,7 +63,7 @@ class FeasibilityRepository {
             return $report;
             
         } catch(PDOException $e) { 
-            error_log("[FeasibilityRepository] Eroare la citirea raportului: " . $e->getMessage()); 
+            LogService::instance()->error("Eroare la citirea raportului: " . $e->getMessage()); 
             throw new Exception("Eroare interna la baza de date.");
         }
     }

@@ -1,6 +1,7 @@
 <?php 
 
 require_once __DIR__ . '../../../Entities/PlantStatus.php'; 
+require_once __DIR__ . '/../../Services/LogService.php';
 
 class DetailsPlantRepository {
     private PDO $db; 
@@ -152,7 +153,7 @@ class DetailsPlantRepository {
         ]);
 
         $randuriModificate = $stmt->rowCount();
-        error_log("[DEBUG] ID cautat pentru update: " . $plant->getId());
-        error_log("[DEBUG] Randuri modificate efectiv: " . $randuriModificate);
+        LogService::instance()->debug("ID cautat pentru update: " . $plant->getId());
+        LogService::instance()->debug("Randuri modificate efectiv: " . $randuriModificate);
     }
 }

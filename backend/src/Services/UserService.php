@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/LogService.php';
+
 class UserService { 
     private UserRepository $userRepository; 
 
@@ -8,10 +10,12 @@ class UserService {
     }
 
     public function registerUser(array $data): void { 
-        $firstName = trim($data['first_name'] ?? '');
-        $lastName = trim($data['last_name'] ?? '');
         $username = trim($data['username'] ?? '');
         $email = trim($data['email'] ?? '');
+        LogService::instance()->info("Înregistrare utilizator", ['username' => $username, 'email' => $email]);
+
+        $firstName = trim($data['first_name'] ?? '');
+        $lastName = trim($data['last_name'] ?? '');
         $password = $data['password'] ?? '';
 
         if ($firstName === '' || $lastName === '' || $username === '' || $email === '' || $password === '') {
@@ -40,11 +44,13 @@ class UserService {
 
         $existingUser = $this->userRepository->findByEmail($email);
         if ($existingUser) {
+            LogService::instance()->warning("Încercare înregistrare cu email duplicat", ['email' => $email]);
             throw new Exception('Email-ul este deja înregistrat!');
         }
 
         $existingUsername = $this->userRepository->findByUsername($username);
         if ($existingUsername) {
+            LogService::instance()->warning("Încercare înregistrare cu username duplicat", ['username' => $username]);
             throw new Exception('Numele de utilizator este deja luat!');
         }
 
@@ -53,7 +59,9 @@ class UserService {
         $role = str_ends_with($email, '@admin.ro') ? 'ADMIN' : 'OPERATOR';
 
         $user = new User($username, $firstName, $lastName, $email, $hashedPassword, null, $role); 
-        $this->userRepository->save($user); 
+        $this->userRepository->save($user);
+
+        LogService::instance()->info("Utilizator înregistrat cu succes", ['username' => $username, 'email' => $email, 'role' => $role]);
     }
 
     public function getAllUsers(): array { 
@@ -61,20 +69,26 @@ class UserService {
     }
 
     public function authenticateUser(string $email, string $password): ?array {
+        LogService::instance()->info("Încercare autentificare", ['email' => $email]);
+
         $user = $this->userRepository->findByEmail($email);
         
         if (!$user) {
+            LogService::instance()->warning("Autentificare eșuată - utilizator negăsit", ['email' => $email]);
             return null;
         }
 
         if (!password_verify($password, $user['password_hash'])) {
+            LogService::instance()->warning("Autentificare eșuată - parolă incorectă", ['email' => $email]);
             return null;
         }
 
+        LogService::instance()->info("Autentificare reușită", ['email' => $email]);
         return $user;
     }
 
     public function getUserById(string $id): ?array {
+        LogService::instance()->debug("Obținere utilizator după ID", ['user_id' => $id]);
         return $this->userRepository->findById($id);
     }
 

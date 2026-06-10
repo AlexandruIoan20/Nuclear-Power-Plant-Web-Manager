@@ -1,4 +1,5 @@
 import { api } from '../../core/api.js';
+import { logger } from '../../core/logger.js';
 
 export function setupCoordinatePickerMap({
     mapId,
@@ -13,7 +14,7 @@ export function setupCoordinatePickerMap({
     zoom = 6
 }) {
     if (typeof L === 'undefined') {
-        console.error('Leaflet nu este încărcat.');
+        logger.error('Leaflet nu este încărcat.');
         return null;
     }
 

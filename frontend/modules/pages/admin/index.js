@@ -3,12 +3,13 @@ import { clearHeaderState, } from '../../ui/form-header/formHeaderState.js';
 import { applyFilters } from '../../ui/power-plants/plantFilters.js'; 
 import { PlantStatus } from '../../config/enums.js'; 
 import { loadSelect } from '../../ui/selectLoader.js'; 
+import { logger } from '../../core/logger.js';
 
 loadSelect('filter-status', PlantStatus); 
 
 let goTo = "/pages/admin/validate.html"; 
 
-console.log({ goTo });
+logger.debug({ goTo });
 
 let allPlants = [];
 let sortCol = 'name';
@@ -54,7 +55,7 @@ document.querySelectorAll('th[data-col]').forEach(th => {
 document.getElementById('filter-status').addEventListener('change', async () => {
     const status = document.getElementById('filter-status').value;
 
-    console.log({ status }); 
+    logger.debug({ status }); 
 
     if (!status) {
         const response = await powerPlantService.getAll();
@@ -72,12 +73,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const response = await powerPlantService.getAll();
 
-        console.log({ response }); 
+        logger.debug({ response }); 
 
         allPlants = response.data ?? [];
         applyFilters(allPlants, sortCol, sortDir, goTo);
     } catch (error) {
-        console.error(error.message);
+        logger.error(error.message);
         alert("Eroare la încărcarea centralelor"); 
     }
 });

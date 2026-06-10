@@ -2,6 +2,7 @@ import { powerPlantService } from '../../services/powerPlantService.js';
 import { feasibilityReportService } from '../../services/feasibilityReportService.js';
 import { UpdatePlantStatusRequestDTO } from '../../dto/UpdatePlanStatusRequestDTO.js';
 import { getQueryParam } from '../../utils/urlHelper.js';
+import { logger } from '../../core/logger.js';
 import { populateFeasibilityReport } from '../feasibility/report-results.js'; 
 import { populatePlantPage } from '../../ui/power-plants/plantPageRenderer.js'; 
 
@@ -19,7 +20,7 @@ async function updateStatus(status) {
         );
         window.location.href = '/pages/admin.html';
     } catch (e) {
-        console.error(e);
+        logger.error(`Eroare la actualizarea statusului: ${e.message}`);
         alert(`Eroare la actualizarea statusului: ${e.message}`);
         btnApprove.disabled = false;
         btnReject.disabled  = false;
@@ -56,7 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             feasibilityReportService.getReport(plantId),
         ]);
 
-        console.log({ plantData, reportData }); 
+        logger.info(`Date incarcate pentru validarea centralei ${plantId}`);
         hideLoading();
 
         populatePlantPage(plantData);
@@ -73,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     } catch (e) {
         hideLoading();
-        console.error(e);
+        logger.error(`Eroare la incarcarea datelor pentru validare centrala ${plantId}`, { message: e.message });
         alert('Eroare la încărcarea datelor.');
     }
 });

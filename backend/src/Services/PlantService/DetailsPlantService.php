@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../Entities/PlantStatus.php';
 require_once __DIR__ . '/../../Entities/Plant.php'; 
 
 require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php'; 
+require_once __DIR__ . '/../LogService.php'; 
 
 class DetailsPlantService { 
     private PlantRepositoryFacade $plantRepositoryFacade; 
@@ -37,8 +38,8 @@ class DetailsPlantService {
 
         $plant = new Plant($id, $name, $status); 
 
-        error_log("[DEBUG] A power plant was built successfully"); 
-        error_log("[DEBUG]" . print_r($plant, true)); 
+        LogService::instance()->debug("A power plant was built successfully"); 
+        LogService::instance()->debug(print_r($plant, true)); 
         $this->plantRepositoryFacade->updatePlantDetails($plant); 
     }
 
