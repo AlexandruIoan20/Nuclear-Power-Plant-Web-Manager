@@ -28,6 +28,7 @@ class SensorTemplateRepository {
             $row['id'],
             $row['location_zone'],
             $row['unit_of_measure'],
+            $row['measurement_field'],
             $row['normal_min'] !== null ? (float)$row['normal_min'] : null,
             $row['normal_max'] !== null ? (float)$row['normal_max'] : null,
             $row['alarm_low'] !== null ? (float)$row['alarm_low'] : null,

@@ -6,6 +6,7 @@ CREATE TABLE reactor_sensors (
     description VARCHAR(255), 
     location_zone VARCHAR(100), 
     unit_of_measure VARCHAR(20), 
+    measurement_field VARCHAR(40),
     normal_min DECIMAL(20, 4), 
     normal_max DECIMAL(20, 4), 
     alarm_low DECIMAL(20, 4), 
@@ -54,6 +55,7 @@ CREATE TABLE measurements (
     fuel_burnup_mwd_t DECIMAL(10,2),
     efficiency DECIMAL(6,4),
     wear_delta DECIMAL(8,6),
+    level_reactor_vessel DECIMAL(8,2),
     CONSTRAINT fk_measurements_reactor
         FOREIGN KEY (reactor_id) REFERENCES reactor(id)
         ON DELETE CASCADE
@@ -79,6 +81,7 @@ CREATE TABLE sensor_templates (
     description VARCHAR(255) NOT NULL,
     location_zone VARCHAR(100),
     unit_of_measure VARCHAR(20),
+    measurement_field VARCHAR(40),
     normal_min DECIMAL(20,4),
     normal_max DECIMAL(20,4),
     alarm_low DECIMAL(20,4),

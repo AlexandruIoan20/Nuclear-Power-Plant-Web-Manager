@@ -65,6 +65,7 @@ class SensorService {
                 $data['description'] ?? null,
                 $data['locationZone'] ?? null,
                 $data['unitOfMeasure'] ?? null,
+                $data['measurementField'] ?? null,
                 $data['normalMin'] ?? null,
                 $data['normalMax'] ?? null,
                 $data['alarmLow'] ?? null,
@@ -110,6 +111,7 @@ class SensorService {
         if (array_key_exists('description', $data)) $sensor->setDescription($data['description']);
         if (array_key_exists('locationZone', $data)) $sensor->setLocationZone($data['locationZone']);
         if (array_key_exists('unitOfMeasure', $data)) $sensor->setUnitOfMeasure($data['unitOfMeasure']);
+        if (array_key_exists('measurementField', $data)) $sensor->setMeasurementField($data['measurementField']);
         if (array_key_exists('normalMin', $data)) $sensor->setNormalMin($data['normalMin']);
         if (array_key_exists('normalMax', $data)) $sensor->setNormalMax($data['normalMax']);
         if (array_key_exists('alarmLow', $data)) $sensor->setAlarmLow($data['alarmLow']);

@@ -26,6 +26,7 @@ class SensorRepository {
                 $t->getDescription(),
                 $t->getLocationZone(),
                 $t->getUnitOfMeasure(),
+                $t->getMeasurementField(),
                 $t->getNormalMin(),
                 $t->getNormalMax(),
                 $t->getAlarmLow(),
@@ -39,7 +40,7 @@ class SensorRepository {
 
         $columns = [
             'id', 'reactor_id', 'sensor_code', 'sensor_type',
-            'description', 'location_zone', 'unit_of_measure',
+            'description', 'location_zone', 'unit_of_measure', 'measurement_field',
             'normal_min', 'normal_max', 'alarm_low', 'alarm_high',
             'alert_low', 'alert_high', 'scram_low', 'scram_high',
         ];
@@ -56,6 +57,7 @@ class SensorRepository {
                 $s->getDescription(),
                 $s->getLocationZone(),
                 $s->getUnitOfMeasure(),
+                $s->getMeasurementField(),
                 $s->getNormalMin(),
                 $s->getNormalMax(),
                 $s->getAlarmLow(),
@@ -103,6 +105,7 @@ class SensorRepository {
             $row['description'],
             $row['location_zone'],
             $row['unit_of_measure'],
+            $row['measurement_field'],
             $row['normal_min'] !== null ? (float)$row['normal_min'] : null,
             $row['normal_max'] !== null ? (float)$row['normal_max'] : null,
             $row['alarm_low'] !== null ? (float)$row['alarm_low'] : null,
@@ -194,6 +197,7 @@ class SensorRepository {
             'description' => $s->getDescription(),
             'location_zone' => $s->getLocationZone(),
             'unit_of_measure' => $s->getUnitOfMeasure(),
+            'measurement_field' => $s->getMeasurementField(),
             'normal_min' => $s->getNormalMin(),
             'normal_max' => $s->getNormalMax(),
             'alarm_low' => $s->getAlarmLow(),
