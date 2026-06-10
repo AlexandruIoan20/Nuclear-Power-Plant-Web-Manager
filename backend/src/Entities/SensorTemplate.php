@@ -8,6 +8,7 @@ class SensorTemplate {
     private string $description;
     private ?string $locationZone;
     private ?string $unitOfMeasure;
+    private ?string $measurementField;
     private ?float $normalMin;
     private ?float $normalMax;
     private ?float $alarmLow;
@@ -25,6 +26,7 @@ class SensorTemplate {
         ?string $id = null,
         ?string $locationZone = null,
         ?string $unitOfMeasure = null,
+        ?string $measurementField = null,
         ?float $normalMin = null,
         ?float $normalMax = null,
         ?float $alarmLow = null,
@@ -41,6 +43,7 @@ class SensorTemplate {
         $this->description = $description;
         $this->locationZone = $locationZone;
         $this->unitOfMeasure = $unitOfMeasure;
+        $this->measurementField = $measurementField;
         $this->normalMin = $normalMin;
         $this->normalMax = $normalMax;
         $this->alarmLow = $alarmLow;
@@ -58,6 +61,7 @@ class SensorTemplate {
     public function getDescription(): string { return $this->description; }
     public function getLocationZone(): ?string { return $this->locationZone; }
     public function getUnitOfMeasure(): ?string { return $this->unitOfMeasure; }
+    public function getMeasurementField(): ?string { return $this->measurementField; }
     public function getNormalMin(): ?float { return $this->normalMin; }
     public function getNormalMax(): ?float { return $this->normalMax; }
     public function getAlarmLow(): ?float { return $this->alarmLow; }
@@ -74,6 +78,7 @@ class SensorTemplate {
     public function setDescription(string $description): void { $this->description = $description; }
     public function setLocationZone(?string $locationZone): void { $this->locationZone = $locationZone; }
     public function setUnitOfMeasure(?string $unitOfMeasure): void { $this->unitOfMeasure = $unitOfMeasure; }
+    public function setMeasurementField(?string $measurementField): void { $this->measurementField = $measurementField; }
     public function setNormalMin(?float $normalMin): void { $this->normalMin = $normalMin; }
     public function setNormalMax(?float $normalMax): void { $this->normalMax = $normalMax; }
     public function setAlarmLow(?float $alarmLow): void { $this->alarmLow = $alarmLow; }

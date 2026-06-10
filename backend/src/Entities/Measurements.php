@@ -26,6 +26,7 @@ class Measurement {
     private ?float $fuelBurnupMwdT;
     private ?float $efficiency;
     private ?float $wearDelta;
+    private ?float $levelReactorVessel;
 
     public function __construct(
         string $reactorId,
@@ -52,7 +53,8 @@ class Measurement {
         ?float $airborneActivity = null,
         ?float $fuelBurnupMwdT = null,
         ?float $efficiency = null,
-        ?float $wearDelta = null
+        ?float $wearDelta = null,
+        ?float $levelReactorVessel = null
     ) {
         $this->id = $id ?? bin2hex(random_bytes(16));
         $this->reactorId = $reactorId;
@@ -79,6 +81,7 @@ class Measurement {
         $this->fuelBurnupMwdT = $fuelBurnupMwdT;
         $this->efficiency = $efficiency;
         $this->wearDelta = $wearDelta;
+        $this->levelReactorVessel = $levelReactorVessel;
     }
 
     public function getId(): string { return $this->id; }
@@ -106,6 +109,7 @@ class Measurement {
     public function getFuelBurnupMwdT(): ?float { return $this->fuelBurnupMwdT; }
     public function getEfficiency(): ?float { return $this->efficiency; }
     public function getWearDelta(): ?float { return $this->wearDelta; }
+    public function getLevelReactorVessel(): ?float { return $this->levelReactorVessel; }
     
     public function setId(string $id): void { $this->id = $id; }
     public function setReactorId(string $reactorId): void { $this->reactorId = $reactorId; }
@@ -132,4 +136,5 @@ class Measurement {
     public function setFuelBurnupMwdT(?float $fuelBurnupMwdT): void { $this->fuelBurnupMwdT = $fuelBurnupMwdT; }
     public function setEfficiency(?float $efficiency): void { $this->efficiency = $efficiency; }
     public function setWearDelta(?float $wearDelta): void { $this->wearDelta = $wearDelta; }
+    public function setLevelReactorVessel(?float $levelReactorVessel): void { $this->levelReactorVessel = $levelReactorVessel; }
 }
