@@ -228,6 +228,10 @@ $router->get('/api/power-plants', function () use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList();
 });
 
+$router->get('/api/power-plants/pending-approvals', auth(null, function() use ($plantServiceFacade) { 
+    (new DetailsPlantController($plantServiceFacade))->getPendingApprovalsList(); 
+}));
+
 $router->get('/api/power-plants/filter', function () use ($plantServiceFacade) { 
     (new DetailsPlantController($plantServiceFacade))->getPlantsByStatus(); 
 }); 
@@ -367,10 +371,6 @@ $router->get('/api/alerts/unread', auth(null, function () use ($alertService) {
 
 $router->put('/api/alerts/{id}/read', auth(null, function ($id) use ($alertService) {
     (new AlertController($alertService))->markRead($id);
-}));
-
-$router->get('/api/power-plants/pending-approvals', auth(null, function() use ($plantServiceFacade) { 
-    (new DetailsPlantController($plantServiceFacade))->getPendingApprovalsList(); 
 }));
 
 $router->get('/api/logs', auth('ADMIN', function () {

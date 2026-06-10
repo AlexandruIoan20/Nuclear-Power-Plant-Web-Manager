@@ -24,7 +24,7 @@ class DetailsPlantController {
         header('Content-Type: application/json; charset=utf-8');
     
         $plant = $this->plantServiceFacade->getCompletePlantProfile($id);
-        if(!$plant) { 
+        if(!$plant || $plant['details'] === null) { 
             echo json_encode(["status" => "error", "message" => "Centrala nu a fost gasita"]); 
             exit; 
         } 
@@ -72,7 +72,7 @@ class DetailsPlantController {
         }
 
         http_response_code(200);
-        echo json_encode($payload);
+        echo json_encode(["status" => "success", "data" => $payload]);
         exit;
     }
 
