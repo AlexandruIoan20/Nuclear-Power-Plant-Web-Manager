@@ -3,17 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuclear Plant Control | Map</title>
+    <title>Nuclear Plant Control | Hartă</title>
     <link rel="stylesheet" href="../style.css">
     <script src="../modules/config/globals.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        .map-layout { display: flex; gap: 24px; align-items: flex-start; }
+        .map-shell { flex: 1; }
+        .map-sidebar { width: 320px; flex-shrink: 0; }
+        .map-list { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+        .map-item { padding: 12px; border: 1px solid var(--border); border-radius: 6px; }
+        .map-item h3 { margin: 0 0 6px; font-size: 1rem; }
+        .map-item-meta { font-size: 0.85rem; color: var(--muted); }
+        .map-item-actions { margin-top: 8px; }
+        .map-empty { padding: 24px; text-align: center; color: var(--muted); }
+        .map-status { margin-top: 8px; font-size: 0.9rem; color: var(--muted); }
+    </style>
 </head>
 <body>
     <div class="page-shell">
         <header class="topbar">
             <div class="brand">
                 <strong>Nuclear Plant Control</strong>
-                <span>Harta centralelor</span>
+                <span>Hartă centrale</span>
             </div>
             <nav class="nav-links">
                 <a href="dashboard.html">Dashboard</a>
@@ -25,16 +37,13 @@
         </header>
         <main class="map-layout">
             <section class="panel map-shell">
-                <p class="eyebrow">MAP VIEW</p>
-                <h1>Hartă centralelor</h1>
-                <p>Marker-ele sunt furnizate de backend; click pe marker duce la pagina de editare.</p>
+                
+                <h1>Centrale nucleare</h1>
                 <div id="plants-map" class="leaflet-map" style="height:520px"></div>
                 <p id="map-status" class="map-status"></p>
             </section>
 
             <aside class="panel map-sidebar">
-                <p class="eyebrow">LISTĂ</p>
-                <h2>Centrale</h2>
                 <div id="map-list" class="map-list"></div>
             </aside>
         </main>
@@ -48,6 +57,12 @@
             const listEl = document.getElementById('map-list');
 
             try {
+                const session = await fetch(API_BASE + '/user/status', { credentials: 'include' });
+                if (session.status === 401) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
                 const res = await fetch(API_BASE + '/power-plants/map-data');
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 const payload = await res.json();
@@ -59,7 +74,14 @@
                     return;
                 }
 
-                listEl.innerHTML = plants.map(p => `\n                    <article class="map-item">\n                        <h3>${p.name || 'Centrală'}</h3>\n                        <div class="map-item-meta">${p.country || ''}</div>\n                        <div class="map-item-meta">${p.coordinates_label || ''}</div>\n                        <div class="map-item-actions"><a class="button secondary" href="${p.edit_url}">Editează</a></div>\n                    </article>\n                `).join('');
+                listEl.innerHTML = plants.map(p => `
+                    <article class="map-item">
+                        <h3>${p.name || 'Centrală'}</h3>
+                        <div class="map-item-meta">${p.country || ''}</div>
+                        <div class="map-item-meta">${p.coordinates_label || ''}</div>
+                        <div class="map-item-actions"><a class="button secondary" href="${p.edit_url}">Editează</a></div>
+                    </article>
+                `).join('');
 
                 window.PlantMap.setupPlantsOverviewMap({ mapId: 'plants-map', plants });
                 statusEl.textContent = `${plants.filter(p => p.has_coordinates).length} centrală(e) afișată(e)`;
