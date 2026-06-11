@@ -61,6 +61,29 @@ CREATE TABLE measurements (
         ON DELETE CASCADE
 );
 
+CREATE TABLE measurements_hourly (
+    reactor_id UUID NOT NULL,
+    hour TIMESTAMP NOT NULL,
+    samples_count INT NOT NULL,
+    power_percent_avg DECIMAL(6,3),
+    power_percent_min DECIMAL(6,3),
+    power_percent_max DECIMAL(6,3),
+    neutron_flux_avg DECIMAL(20,4),
+    temp_fuel_center_avg DECIMAL(8,2),
+    temp_coolant_in_avg DECIMAL(8,2),
+    temp_coolant_out_avg DECIMAL(8,2),
+    temp_moderator_avg DECIMAL(8,2),
+    pressure_avg DECIMAL(8,3),
+    flow_rate_primary_avg DECIMAL(12,2),
+    radiation_avg DECIMAL(15,4),
+    efficiency_avg DECIMAL(6,4),
+    wear_delta_sum DECIMAL(12,6),
+    PRIMARY KEY (reactor_id, hour),
+    CONSTRAINT fk_hourly_reactor
+        FOREIGN KEY (reactor_id) REFERENCES reactor(id)
+        ON DELETE CASCADE
+);
+
 CREATE TABLE sensor_readings ( 
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), 
     sensor_id UUID NOT NULL, 

@@ -1,14 +1,15 @@
 <?php 
 
-require_once __DIR__ . '/src/Services/SimulatorService/SimulatorService.php'; 
+require_once __DIR__ . '/../config/scripts.php'; 
+require_once __DIR__ . '/../src/Services/SimulatorService/SimulatorService.php'; 
 
-require_once __DIR__ . '/src/Repositories/SensorRepository.php'; 
-require_once __DIR__ . '/src/Repositories/MeasurementsRepository.php'; 
-require_once __DIR__ . '/src/Repositories/ReactorRepository.php'; 
+require_once __DIR__ . '/../src/Repositories/SensorRepository.php'; 
+require_once __DIR__ . '/../src/Repositories/MeasurementsRepository.php'; 
+require_once __DIR__ . '/../src/Repositories/ReactorRepository.php'; 
 
-require_once __DIR__ . '/src/Services/SimulatorService/Observers/AlertObserver.php'; 
-require_once __DIR__ . '/src/Services/SimulatorService/Observers/ScramObserver.php'; 
-require_once __DIR__ . '/src/Services/SimulatorService/Observers/NotificationObserver.php'; 
+require_once __DIR__ . '/../src/Services/SimulatorService/Observers/AlertObserver.php'; 
+require_once __DIR__ . '/../src/Services/SimulatorService/Observers/ScramObserver.php'; 
+require_once __DIR__ . '/../src/Services/SimulatorService/Observers/NotificationObserver.php'; 
 
 $host = getenv('DB_HOST') ?: 'db';
 $port = getenv('DB_PORT') ?: '5432';
@@ -33,11 +34,11 @@ $sensorRepository = new SensorRepository($db);
 $measurementsRepository = new MeasurementsRepository($db); 
 $reactorRepository = new ReactorRepository($db); 
 
-$simulatorService = new SimulatorService($sensorRepository, $measurementsRepository, $reactorRepository); 
+$simulatorService = new SimulatorService($sensorRepository, $measurementsRepository, $reactorRepository, SIMULATOR_TICK_INTERVAL); 
 $simulatorService->attachObserver(new AlertObserver()); 
 $simulatorService->attachObserver(new ScramObserver()); 
 $simulatorService->attachObserver(new NotificationObserver()); 
 
-echo "[" . date("Y-m-d H:i:s") . "] Simulator pornit\n"; 
+echo "[" . date("Y-m-d H:i:s") . "] Simulator pornit (tick: " . SIMULATOR_TICK_INTERVAL . "s)\n"; 
 $simulatorService->run(); 
 echo "[" . date("Y-m-d H:i:s") . "] Simulator oprit\n"; 

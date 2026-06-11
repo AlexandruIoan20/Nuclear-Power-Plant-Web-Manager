@@ -23,12 +23,14 @@ class SimulatorService {
     private array $observers = []; 
     private array $simulatorCache = []; 
     private bool $running = true; 
+    private int $tickInterval; 
 
 
-    public function __construct(SensorRepository $sensorRepository, MeasurementsRepository $measurementsRepository, ReactorRepository $reactorRepository) { 
+    public function __construct(SensorRepository $sensorRepository, MeasurementsRepository $measurementsRepository, ReactorRepository $reactorRepository, int $tickInterval = 1) { 
         $this->sensorRepository = $sensorRepository; 
         $this->measurementsRepository = $measurementsRepository; 
         $this->reactorRepository = $reactorRepository; 
+        $this->tickInterval = $tickInterval;
     }
 
     public function attachObserver(ObserverInterface $observer): void { 
@@ -52,7 +54,7 @@ class SimulatorService {
             }
 
             if(function_exists('pcntl_signal_dispatch')) pcntl_signal_dispatch(); 
-            sleep(3); 
+            sleep($this->tickInterval); 
         }
     }
 

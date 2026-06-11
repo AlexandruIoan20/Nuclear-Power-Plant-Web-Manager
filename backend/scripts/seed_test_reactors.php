@@ -15,7 +15,6 @@ $pdo = new PDO($dsn, $username, $password, [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 ]);
 
-
 $stmt = $pdo->query("SELECT id FROM power_plants WHERE name = 'test' LIMIT 1");
 $plantId = $stmt->fetchColumn();
 if (!$plantId) {
