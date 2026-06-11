@@ -4,26 +4,38 @@ require_once __DIR__ . '/../../../../Entities/ReactorSensor.php';
 
 class ThresholdChecker {
 
-    public function check(float $value, ReactorSensor $sensor): ?string {
+    public function check(float $value, ReactorSensor $sensor): ?array {
         if (
             ($sensor->getScramHigh() !== null && $value > $sensor->getScramHigh()) ||
             ($sensor->getScramLow() !== null && $value < $sensor->getScramLow())
         ) {
-            return 'EMERGENCY';
+            $threshold = $value > $sensor->getScramHigh() ? $sensor->getScramHigh() : $sensor->getScramLow();
+            return [
+                'severity' => 'EMERGENCY',
+                'threshold' => $threshold,
+            ];
         }
 
         if (
             ($sensor->getAlarmHigh() !== null && $value > $sensor->getAlarmHigh()) ||
             ($sensor->getAlarmLow() !== null && $value < $sensor->getAlarmLow())
         ) {
-            return 'ALERT';
+            $threshold = $value > $sensor->getAlarmHigh() ? $sensor->getAlarmHigh() : $sensor->getAlarmLow();
+            return [
+                'severity' => 'ALERT',
+                'threshold' => $threshold,
+            ];
         }
 
         if (
             ($sensor->getAlertHigh() !== null && $value > $sensor->getAlertHigh()) ||
             ($sensor->getAlertLow() !== null && $value < $sensor->getAlertLow())
         ) {
-            return 'WARNING';
+            $threshold = $value > $sensor->getAlertHigh() ? $sensor->getAlertHigh() : $sensor->getAlertLow();
+            return [
+                'severity' => 'WARNING',
+                'threshold' => $threshold,
+            ];
         }
 
         return null;
@@ -36,12 +48,13 @@ class ThresholdChecker {
             $value = $newValues[$sensor->getId()] ?? null;
             if ($value === null) continue;
 
-            $severity = $this->check($value, $sensor);
-            if ($severity !== null) {
+            $result = $this->check($value, $sensor);
+            if ($result !== null) {
                 $violations[$sensor->getId()] = [
-                    'severity' => $severity,
+                    'severity' => $result['severity'],
                     'value' => $value,
                     'sensor' => $sensor,
+                    'threshold' => $result['threshold'],
                 ];
             }
         }
