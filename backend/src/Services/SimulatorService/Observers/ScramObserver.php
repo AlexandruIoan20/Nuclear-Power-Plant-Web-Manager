@@ -3,20 +3,19 @@
 require_once __DIR__ . '/ObserverInterface.php';
 require_once __DIR__ . '/ViolationEvent.php';
 require_once __DIR__ . '/../../../Repositories/ReactorRepository.php';
-require_once __DIR__ . '/../../../Repositories/AlertRepository.php';
 require_once __DIR__ . '/../../../Entities/ReactorOperationalStatus.php';
 
 class ScramObserver implements ObserverInterface {
     private ReactorRepository $reactorRepository;
-    private AlertRepository $alertRepository;
 
-    public function __construct(ReactorRepository $reactorRepository, AlertRepository $alertRepository) {
+    public function __construct(ReactorRepository $reactorRepository) {
         $this->reactorRepository = $reactorRepository;
-        $this->alertRepository = $alertRepository;
     }
 
     public function update(ViolationEvent $event): void {
-        if ($event->getSeverity() !== 'EMERGENCY') {
+        $severity = $event->getSeverity();
+
+        if ($severity !== 'EMERGENCY' && $severity !== 'ALERT') {
             return;
         }
 
@@ -25,10 +24,12 @@ class ScramObserver implements ObserverInterface {
             return;
         }
 
-        $reactor->setOperationalStatus(ReactorOperationalStatus::EMERGENCY_SHUTDOWN);
-        $this->reactorRepository->update($reactor);
+        if ($severity === 'EMERGENCY') {
+            $reactor->setOperationalStatus(ReactorOperationalStatus::EMERGENCY_SHUTDOWN);
+        } else {
+            $reactor->setOperationalStatus(ReactorOperationalStatus::UNPLANNED_OUTAGE);
+        }
 
-        $data = $event->toAlertData();
-        $this->alertRepository->saveReactorAlert($data);
+        $this->reactorRepository->update($reactor);
     }
 }

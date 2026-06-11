@@ -58,6 +58,8 @@ abstract class AbstractReactorSimulator {
             $this->notifyObservers($event);
         }
 
+        $reactor = $this->reactorRepository->findById($reactorId);
+
         $measurement = $this->measurementBuilder->build($newValues, $sensors, $reactor);
 
         if ($this->thresholdChecker->hasEmergency($violations)) {

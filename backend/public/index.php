@@ -177,16 +177,13 @@ $notificationService = new NotificationService($plantServiceFacade, $alertServic
 $reactorRepository = new ReactorRepository($pdo); 
 $reactorService = new ReactorService($reactorRepository);
 
-<<<<<<< HEAD
-
 $sensorRepository = new SensorRepository($pdo); 
 $sensorTemplateRepository = new SensorTemplateRepository($pdo); 
 $sensorService = new SensorService($sensorRepository, $sensorTemplateRepository, $reactorRepository); 
 $sensorController = new SensorController($sensorService); 
-=======
+
 LogService::init($pdo);
 
-// DEV ONLY - asigura existenta contului admin la runtime
 try {
     $adminEmail = 'admin@nuclear.ro';
     $adminUser = $userRepository->findByEmail($adminEmail);
@@ -214,7 +211,6 @@ try {
 } catch (Exception $e) {
     error_log('[DEV ONLY] Eroare la initializarea contului admin: ' . $e->getMessage());
 }
->>>>>>> merge-1
 
 $router = new Router();
 

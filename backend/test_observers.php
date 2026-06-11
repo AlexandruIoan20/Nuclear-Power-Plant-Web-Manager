@@ -30,26 +30,25 @@ $pdo = new PDO($dsn, $username, $password, [
 
 LogService::init($pdo);
 
+$plantId = 'a0000000-0000-0000-0000-000000000001';
+$reactorId = 'b0000000-0000-0000-0000-000000000001';
+$sensorId = 'c0000000-0000-0000-0000-000000000001';
+
 echo "=== TEST OBSERVERI REACTOR ===\n\n";
 
-// --- Setup: centrala + reactor PWR + senzor THERMOCOUPLE ---
-$plantId = 'a0000000-0000-0000-0000-000000000001';
+// --- Setup ---
 $pdo->prepare("
     INSERT INTO power_plants (id, name, status, created_by)
     VALUES (:id, 'Centrala de Test', 'APPROVED', (SELECT id FROM users LIMIT 1))
     ON CONFLICT (id) DO NOTHING
 ")->execute(['id' => $plantId]);
-echo "[OK] Centrala de test: $plantId\n";
 
-$reactorId = 'b0000000-0000-0000-0000-000000000001';
 $pdo->prepare("
     INSERT INTO reactor (id, power_plant_id, reactor_code, reactor_type, cooling_type, operational_status)
     VALUES (:id, :plant_id, 'R-TEST-001', 'PWR', 'NATURAL_DRAFT_WET', 'FULL_POWER')
     ON CONFLICT (id) DO NOTHING
 ")->execute(['id' => $reactorId, 'plant_id' => $plantId]);
-echo "[OK] Reactor PWR: $reactorId\n";
 
-$sensorId = 'c0000000-0000-0000-0000-000000000001';
 $pdo->prepare("
     INSERT INTO reactor_sensors (
         id, reactor_id, sensor_code, sensor_type, description, location_zone,
@@ -66,10 +65,7 @@ $pdo->prepare("
     )
     ON CONFLICT (id) DO UPDATE SET current_value = 300
 ")->execute(['id' => $sensorId, 'reactor_id' => $reactorId]);
-echo "[OK] Senzor THERMOCOUPLE: $sensorId\n";
-echo "    Praguri: WARNING>340 | ALERT>330 | EMERGENCY>350\n\n";
 
-// --- Instanțiază ---
 $sensorRepo = new SensorRepository($pdo);
 $measurementsRepo = new MeasurementsRepository($pdo);
 $reactorRepo = new ReactorRepository($pdo);
@@ -78,101 +74,101 @@ $emailService = new EmailService();
 
 $simulator = new PwrSimulator($sensorRepo, $measurementsRepo, $reactorRepo);
 $simulator->attachObserver(new AlertObserver($alertRepo));
-$simulator->attachObserver(new ScramObserver($reactorRepo, $alertRepo));
+$simulator->attachObserver(new ScramObserver($reactorRepo));
 $simulator->attachObserver(new NotificationObserver($emailService, $alertRepo));
 echo "[OK] Observeri atașați\n\n";
 
+// Ștergem alertele vechi ca să nu polueze testul
+$pdo->exec("DELETE FROM reactor_alerts WHERE plant_id = '{$plantId}'");
+$pdo->exec("DELETE FROM alerts WHERE plant_id = '{$plantId}'");
+
+$checkAlertTable = function($label, $severity, $expectedType, $expectedStatus) use ($pdo, $reactorId, $plantId) {
+    echo "--- $label ---\n";
+
+    $ra = $pdo->prepare("SELECT * FROM reactor_alerts WHERE reactor_id = :rid AND severity = :sev ORDER BY created_at DESC LIMIT 1");
+    $ra->execute(['rid' => $reactorId, 'sev' => $severity]);
+    $rowRa = $ra->fetch();
+
+    $al = $pdo->prepare("SELECT * FROM alerts WHERE plant_id = :pid ORDER BY created_at DESC LIMIT 1");
+    $al->execute(['pid' => $plantId]);
+    $rowAl = $al->fetch();
+
+    $ok = true;
+
+    if ($rowRa) {
+        echo "  [OK]  reactor_alerts: type={$rowRa['type']}, severity={$rowRa['severity']}, value={$rowRa['value']}, threshold={$rowRa['threshold']}\n";
+        if ($rowRa['type'] !== $expectedType) {
+            echo "  [FAIL] Așteptam type=$expectedType în reactor_alerts, e {$rowRa['type']}\n";
+            $ok = false;
+        }
+    } else {
+        echo "  [FAIL] Nicio alertă severity=$severity în reactor_alerts\n";
+        $ok = false;
+    }
+
+    if ($rowAl) {
+        echo "  [OK]  alerts: type={$rowAl['alert_type']}, message={$rowAl['message']}\n";
+    } else {
+        echo "  [FAIL] Nicio alertă în alerts (pop-up)!\n";
+        $ok = false;
+    }
+
+    if ($expectedStatus !== null) {
+        $st = $pdo->prepare("SELECT operational_status FROM reactor WHERE id = :id");
+        $st->execute(['id' => $reactorId]);
+        $s = $st->fetchColumn();
+        if ($s === $expectedStatus) {
+            echo "  [OK]  Reactor status=$expectedStatus\n";
+        } else {
+            echo "  [FAIL] Reactor status=$s (așteptam $expectedStatus)\n";
+            $ok = false;
+        }
+    }
+
+    if ($ok) echo "  [PASS]\n";
+    else echo "  [FAIL]\n";
+    echo "\n";
+};
+
 // ================================================================
-// TEST 1: EMERGENCY (valoare > scram_high=350)
+// TEST 1: EMERGENCY (valoare > scram_high=350, praguri implicite)
 // ================================================================
-echo "--- TEST 1: EMERGENCY ---\n";
-$pdo->prepare("UPDATE reactor_sensors SET current_value = 355 WHERE id = :id")
-    ->execute(['id' => $sensorId]);
+$pdo->prepare("
+    UPDATE reactor_sensors SET
+        alert_high = 340, alarm_high = 330, scram_high = 350,
+        current_value = 355
+    WHERE id = :id
+")->execute(['id' => $sensorId]);
 $simulator->tick($reactorId);
-
-$stmt = $pdo->prepare("SELECT * FROM reactor_alerts WHERE reactor_id = :rid AND severity = 'EMERGENCY'");
-$stmt->execute(['rid' => $reactorId]);
-$row = $stmt->fetch();
-
-if ($row) {
-    echo "[OK]  Alertă EMERGENCY salvată\n";
-    echo "      Type={$row['type']}, Value={$row['value']}, Threshold={$row['threshold']}\n";
-    echo "      Message: {$row['message']}\n";
-} else {
-    echo "[FAIL] Nicio alertă EMERGENCY\n";
-}
-
-$status = $pdo->prepare("SELECT operational_status FROM reactor WHERE id = :id");
-$status->execute(['id' => $reactorId]);
-$s = $status->fetchColumn();
-if ($s === 'EMERGENCY_SHUTDOWN') {
-    echo "[OK]  Reactor -> EMERGENCY_SHUTDOWN\n";
-} else {
-    echo "[FAIL] Reactor status: $s (așteptam EMERGENCY_SHUTDOWN)\n";
-}
-echo "\n";
+$checkAlertTable('TEST 1: EMERGENCY (355 > scram_high=350)', 'EMERGENCY', 'SCRAM', 'EMERGENCY_SHUTDOWN');
 
 // ================================================================
 // TEST 2: ALERT (valoare > alarm_high=330, dar < scram_high=350)
-// Resetăm reactorul pe FULL_POWER întâi
 // ================================================================
-echo "--- TEST 2: ALERT (severity ALERT) ---\n";
-$pdo->prepare("UPDATE reactor_sensors SET current_value = 335 WHERE id = :id")
-    ->execute(['id' => $sensorId]);
-$pdo->prepare("UPDATE reactor SET operational_status = 'FULL_POWER' WHERE id = :id")
-    ->execute(['id' => $reactorId]);
-$simulator->tick($reactorId);
-
-$stmt = $pdo->prepare("SELECT * FROM reactor_alerts WHERE reactor_id = :rid AND severity = 'ALERT'");
-$stmt->execute(['rid' => $reactorId]);
-$row = $stmt->fetch();
-
-if ($row) {
-    echo "[OK]  Alertă ALERT salvată\n";
-    echo "      Type={$row['type']}, Value={$row['value']}, Threshold={$row['threshold']}\n";
-    echo "      Message: {$row['message']}\n";
-} else {
-    echo "[FAIL] Nicio alertă ALERT\n";
-}
-echo "\n";
-
-// ================================================================
-// TEST 3: WARNING (valoare > alert_high=340, dar < alarm_high=330)
-// Alege valoarea 345 (340<345<330 nu-i adevărat; 345>330 deci ALERT)
-// Folosim un alt prag: scădem alarm_high să fie mai mare decât alert_high
-// De fapt, ordinea e: EMERGENCY > ALERT > WARNING
-// 345 > 330 (alarm_high) → ALERT, nu WARNING.
-// Pentru WARNING trebuie o valoare între alert_high și alarm_high,
-// dar alarm_high (330) < alert_high (340) în setup.
-// Refacem: alert_high=330, alarm_high=340
-// Atunci 335 > 330 (alert_high) dar <340 (alarm_high) → WARNING
-// ================================================================
-echo "--- TEST 3: WARNING (severity WARNING) ---\n";
-
-// Reconfigurem senzorul cu ordinea corectă: alert_high < alarm_high < scram_high
 $pdo->prepare("
     UPDATE reactor_sensors SET
-        alert_high = 330,
-        alarm_high = 340,
-        scram_high = 350,
+        alert_high = 340, alarm_high = 330, scram_high = 350,
         current_value = 335
     WHERE id = :id
 ")->execute(['id' => $sensorId]);
-echo "[INFO] Praguri noi: WARNING>330 | ALERT>340 | EMERGENCY>350\n";
-
+$pdo->prepare("UPDATE reactor SET operational_status = 'FULL_POWER' WHERE id = :id")
+    ->execute(['id' => $reactorId]);
 $simulator->tick($reactorId);
+$checkAlertTable('TEST 2: ALERT (335 > alarm_high=330)', 'ALERT', 'ALARM', 'UNPLANNED_OUTAGE');
 
-$stmt = $pdo->prepare("SELECT * FROM reactor_alerts WHERE reactor_id = :rid AND severity = 'WARNING' ORDER BY created_at DESC");
-$stmt->execute(['rid' => $reactorId]);
-$row = $stmt->fetch();
-
-if ($row) {
-    echo "[OK]  Alertă WARNING salvată\n";
-    echo "      Type={$row['type']}, Value={$row['value']}, Threshold={$row['threshold']}\n";
-    echo "      Message: {$row['message']}\n";
-} else {
-    echo "[FAIL] Nicio alertă WARNING\n";
-}
-echo "\n";
+// ================================================================
+// TEST 3: WARNING (valoare între alert_high și alarm_high)
+// Reconfigurăm: alert_high=330 < alarm_high=340 < scram_high=350
+// ================================================================
+$pdo->prepare("
+    UPDATE reactor_sensors SET
+        alert_high = 330, alarm_high = 340, scram_high = 350,
+        current_value = 335
+    WHERE id = :id
+")->execute(['id' => $sensorId]);
+$pdo->prepare("UPDATE reactor SET operational_status = 'FULL_POWER' WHERE id = :id")
+    ->execute(['id' => $reactorId]);
+$simulator->tick($reactorId);
+$checkAlertTable('TEST 3: WARNING (335 > alert_high=330, < alarm_high=340)', 'WARNING', 'ALERT', null);
 
 echo "=== TEST FINALIZAT ===\n";

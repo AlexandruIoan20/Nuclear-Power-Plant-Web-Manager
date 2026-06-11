@@ -6,6 +6,9 @@ require_once __DIR__ . '/../src/Services/SimulatorService/SimulatorService.php';
 require_once __DIR__ . '/../src/Repositories/SensorRepository.php'; 
 require_once __DIR__ . '/../src/Repositories/MeasurementsRepository.php'; 
 require_once __DIR__ . '/../src/Repositories/ReactorRepository.php'; 
+require_once __DIR__ . '/../src/Repositories/AlertRepository.php'; 
+
+require_once __DIR__ . '/../src/Services/EmailService.php'; 
 
 require_once __DIR__ . '/../src/Services/SimulatorService/Observers/AlertObserver.php'; 
 require_once __DIR__ . '/../src/Services/SimulatorService/Observers/ScramObserver.php'; 
@@ -33,11 +36,13 @@ try {
 $sensorRepository = new SensorRepository($db); 
 $measurementsRepository = new MeasurementsRepository($db); 
 $reactorRepository = new ReactorRepository($db); 
+$alertRepository = new AlertRepository($db); 
+$emailService = new EmailService(); 
 
 $simulatorService = new SimulatorService($sensorRepository, $measurementsRepository, $reactorRepository, SIMULATOR_TICK_INTERVAL); 
-$simulatorService->attachObserver(new AlertObserver()); 
-$simulatorService->attachObserver(new ScramObserver()); 
-$simulatorService->attachObserver(new NotificationObserver()); 
+$simulatorService->attachObserver(new AlertObserver($alertRepository)); 
+$simulatorService->attachObserver(new ScramObserver($reactorRepository)); 
+$simulatorService->attachObserver(new NotificationObserver($emailService, $alertRepository)); 
 
 echo "[" . date("Y-m-d H:i:s") . "] Simulator pornit (tick: " . SIMULATOR_TICK_INTERVAL . "s)\n"; 
 $simulatorService->run(); 
