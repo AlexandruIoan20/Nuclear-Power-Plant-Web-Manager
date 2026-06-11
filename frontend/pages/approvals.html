@@ -5,25 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuclear Plant Control | Approvals</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
     <script src="../modules/config/globals.js"></script>
 </head>
 
 <body>
     <div class="page-shell">
-        <header class="topbar">
-            <div class="brand">
-                <strong>Nuclear Plant Control</strong>
-                <span>Flux aprobări</span>
-            </div>
-            <nav class="nav-links">
-                <a href="dashboard.html">Dashboard</a>
-                <a href="notifications.html">Notificări</a>
-                <a href="approvals.html" class="active">Aprobări</a>
-                <a href="map.html">Hartă</a>
-                <a href="power-plants/list.html">Lista centralelor</a>
-            </nav>
-        </header>
+        <div id="main-navbar"></div>
         <main class="panel">
             <p class="eyebrow">APPROVALS</p>
             <h1>Aprobări în așteptare</h1>
@@ -144,6 +132,7 @@
             }
         });
     </script>
-</body>
 
+    <script type="module" src="../modules/ui/navbar.js"></script>
+</body>
 </html>

@@ -47,19 +47,7 @@
 
 <body>
     <div class="page-shell">
-        <header class="topbar">
-            <div class="brand">
-                <strong>Nuclear Plant Control</strong>
-                <span>Flux operațional unificat</span>
-            </div>
-            <nav class="nav-links">
-                <a href="dashboard.html">Dashboard</a>
-                <a href="notifications.html" class="active">Notificări</a>
-                <a href="approvals.html">Aprobări</a>
-                <a href="map.html">Hartă</a>
-                <a href="power-plants/list.html">Lista centralelor</a>
-            </nav>
-        </header>
+        <div id="main-navbar"></div>
         <main class="panel">
             <p class="eyebrow">SYSTEM LOGS</p>
             <h1>Centrul de Notificări</h1>
@@ -146,10 +134,11 @@
                 loadingIndicator.style.display = "none";
                 errorMessage.style.display = "block";
                 errorMessage.innerHTML = `<strong>Eroare comunicație:</strong> ${escapeHtml(error.message)}`;
-                console.error("Eroare fetch notificări:", error);
+            console.error("Eroare fetch notificări:", error);
             }
         });
     </script>
-</body>
 
+    <script type="module" src="../modules/ui/navbar.js"></script>
+</body>
 </html>

@@ -1,61 +1,82 @@
-function isAdmin() {
-    return true;
-}
+const currentPath = window.location.pathname;
 
-const ADMIN_LINK = { href: '/pages/admin/index.html', label: 'Admin', icon: '🛡️', key: '/pages/admin.html' };
-
-const currentPage = window.location.pathname;
-
-const NAV_LINKS = [
-    { href: '/pages/index.html', label: 'Home', icon: '🏠', key: '/pages/index.html' },
-    { href: '/pages/power-plants/list.html', label: 'Centrale', icon: '⚛',  key: '/pages/power-plants/list.html' },
-    { href: '/pages/power-plants/create.html', label: 'Creare Centrală', icon: '➕', key: '/pages/power-plants/create.html' },
-    { href: '/pages/my-projects.html', label: 'Proiectele Mele', icon: '📁', key: '/pages/my-projects.html' },
+const UNAUTH_LINKS = [
+    { href: '/pages/start.html', label: 'Home' },
+    { href: '/pages/login.html', label: 'Login' },
+    { href: '/pages/register.html', label: 'Înregistrare' },
 ];
 
-function buildNavLink(link) {
-    const isCurrent = currentPage === link.key;
+const USER_LINKS = [
+    { href: '/pages/dashboard.html', label: 'Dashboard' },
+    { href: '/pages/power-plants/list.html', label: 'Centrale' },
+    { href: '/pages/power-plants/create.html', label: 'Creare Centrală' },
+    { href: '/pages/map.html', label: 'Hartă' },
+    { href: '/pages/notifications.html', label: 'Notificări' },
+];
 
-    if (isCurrent) {
-        return `
-            <span class="nav-btn nav-btn--current">
-                <span class="nav-btn__icon">${link.icon}</span>
-                <span class="nav-btn__label">${link.label}</span>
-                <span class="nav-btn__badge nav-btn__badge--active">Activ</span>
-            </span>
+const ADMIN_LINKS = [
+    { href: '/pages/admin/index.html', label: 'Admin' },
+    { href: '/pages/approvals.html', label: 'Aprobări' },
+    { href: '/pages/users.html', label: 'Utilizatori' },
+];
+
+function buildLinkHtml(links) {
+    return links.map(link => {
+        const isActive = currentPath === link.href;
+        const cls = isActive ? ' class="active" aria-current="page"' : '';
+        return `<a href="${link.href}"${cls}>${link.label}</a>`;
+    }).join('');
+}
+
+function renderTopbar(el, links, user) {
+    const linksHtml = buildLinkHtml(links);
+
+    let userHtml = '';
+    if (user) {
+        userHtml = `
+            <span style="color:var(--muted);margin:0 4px;">|</span>
+            <span style="color:var(--green);text-transform:uppercase;letter-spacing:0.06em;font-size:0.82rem;">${user.username}</span>
+            <a href="${BACKEND_BASE}/logout" class="button secondary" style="width:auto;padding:6px 12px;font-size:0.78rem;">Logout</a>
         `;
     }
 
-    return `
-        <a href="${link.href}" class="nav-btn nav-btn--empty">
-            <span class="nav-btn__icon">${link.icon}</span>
-            <span class="nav-btn__label">${link.label}</span>
-        </a>
+    el.innerHTML = `
+        <header class="topbar">
+            <div class="brand">
+                <strong>Nuclear Plant Control</strong>
+            </div>
+            <nav class="nav-links" aria-label="Navigare principală">
+                ${linksHtml}
+                ${userHtml}
+            </nav>
+        </header>
     `;
 }
 
-export function renderNavbar() {
+export async function renderNavbar() {
     const el = document.getElementById('main-navbar');
     if (!el) return;
 
-    const links = isAdmin() ? [...NAV_LINKS, ADMIN_LINK] : NAV_LINKS;
+    try {
+        const response = await fetch(API_BASE + '/user/status', { credentials: 'include' });
 
-    el.innerHTML = `
-        <nav class="form-nav">
-            <div class="form-nav__brand">
-                <span>⚛</span>
-                <span>Nuclear Plant Control</span>
-            </div>
-            <button class="form-nav__toggle" id="navbar-toggle" aria-label="Deschide meniul">☰</button>
-            <div class="form-nav__links" id="navbar-links">
-                ${links.map(buildNavLink).join('')}
-            </div>
-        </nav>
-    `;
+        if (response.status === 401 || !response.ok) {
+            renderTopbar(el, UNAUTH_LINKS);
+            return;
+        }
 
-    document.getElementById('navbar-toggle').addEventListener('click', () => {
-        document.getElementById('navbar-links').classList.toggle('form-nav__links--open');
-    });
+        const result = await response.json();
+        if (result.status === 'success' && result.data) {
+            const user = result.data;
+            const isAdmin = user.role === 'admin';
+            const links = isAdmin ? [...USER_LINKS, ...ADMIN_LINKS] : USER_LINKS;
+            renderTopbar(el, links, user);
+        } else {
+            renderTopbar(el, UNAUTH_LINKS);
+        }
+    } catch {
+        renderTopbar(el, UNAUTH_LINKS);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', renderNavbar);
