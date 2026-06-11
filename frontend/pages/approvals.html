@@ -64,6 +64,19 @@
     </div>
 
     <script>
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"]|'/g, (character) => {
+                const escapeMap = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                };
+                return escapeMap[character] || character;
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", async () => {
             const tableBody = document.getElementById("approvals-table-body");
             const statusMessage = document.getElementById("status-message");
@@ -90,13 +103,13 @@
                     tr.style.borderBottom = "1px solid var(--border)";
 
                     tr.innerHTML = `
-                        <td style="padding: 12px;"><strong>${plant.name}</strong></td>
-                        <td style="padding: 12px;">${plant.country}</td>
-                        <td style="padding: 12px; font-family: monospace;">${plant.latitude}, ${plant.longitude}</td>
-                        <td style="padding: 12px;"><span class="badge">${plant.status}</span></td>
+                        <td style="padding: 12px;"><strong>${escapeHtml(plant.name)}</strong></td>
+                        <td style="padding: 12px;">${escapeHtml(plant.country)}</td>
+                        <td style="padding: 12px; font-family: monospace;">${escapeHtml(plant.latitude)}, ${escapeHtml(plant.longitude)}</td>
+                        <td style="padding: 12px;"><span class="badge">${escapeHtml(plant.status)}</span></td>
                         <td style="padding: 12px; text-align: right;">
-                            <button class="button small action-approve" data-id="${plant.id}" style="margin-right: 6px;">Aprobă</button>
-                            <button class="button small secondary action-reject" data-id="${plant.id}" style="background-color: #dc3545; color: white; border-color: #dc3545;">Respinge</button>
+                            <button class="button small action-approve" data-id="${escapeHtml(plant.id)}" style="margin-right: 6px;">Aprobă</button>
+                            <button class="button small secondary action-reject" data-id="${escapeHtml(plant.id)}" style="background-color: #dc3545; color: white; border-color: #dc3545;">Respinge</button>
                         </td>
                     `;
                     tableBody.appendChild(tr);
@@ -133,10 +146,10 @@
                     const result = await response.json();
 
                     if (response.ok && result.status === "success") {
-                        statusMessage.innerHTML = `<span class="inline-status" style="color: var(--success);">✔ ${result.message}</span>`;
+                        statusMessage.innerHTML = `<span class="inline-status" style="color: var(--success);">✔ ${escapeHtml(result.message)}</span>`;
                         window.location.reload();
                     } else {
-                        statusMessage.innerHTML = `<span style="color: var(--danger);">❌ ${result.message}</span>`;
+                        statusMessage.innerHTML = `<span style="color: var(--danger);">❌ ${escapeHtml(result.message)}</span>`;
                     }
                 } catch (error) {
                     statusMessage.innerHTML = `<span style="color: var(--danger);">❌ Eroare de rețea.</span>`;

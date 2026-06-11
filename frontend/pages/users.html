@@ -79,7 +79,7 @@
                     `;
                 })
                 .catch((error) => {
-                    container.innerHTML = `<p style="color: var(--danger);">Nu am putut încărca utilizatorii: ${error.message}</p>`;
+                    container.innerHTML = `<p style="color: var(--danger);">Nu am putut încărca utilizatorii: ${escapeHtml(error.message)}</p>`;
                 });
         });
     </script>
