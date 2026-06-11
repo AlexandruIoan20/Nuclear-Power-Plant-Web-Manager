@@ -20,6 +20,23 @@ services:
         condition: service_healthy
     restart: on-failure
 
+  simulator:
+    build: .
+    volumes:
+      - .:/var/www/html
+    working_dir: /var/www/html
+    command: php simulator.php
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
   db:
     image: postgres:15
     environment:

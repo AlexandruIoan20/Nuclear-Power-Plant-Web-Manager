@@ -1,12 +1,15 @@
 <?php 
 
 require_once __DIR__ . '/../Services/ReactorService.php';
+require_once __DIR__ . '/../Services/SensorService.php';
 
 class ReactorController { 
     private ReactorService $reactorService; 
+    private SensorService $sensorService; 
 
-    public function __construct(ReactorService $reactorService) { 
+    public function __construct(ReactorService $reactorService, ?SensorService $sensorService = null) { 
         $this->reactorService = $reactorService; 
+        $this->sensorService = $sensorService; 
     }
 
     public function getAllReactors() { 
@@ -79,6 +82,10 @@ class ReactorController {
 
         try { 
             $newReactorId = $this->reactorService->createReactor($dateFormular); 
+
+            if ($this->sensorService && isset($dateFormular['reactorType'])) {
+                $this->sensorService->populateSensorsForReactor($newReactorId, $dateFormular['reactorType']);
+            }
 
             http_response_code(201); 
             echo json_encode([ 

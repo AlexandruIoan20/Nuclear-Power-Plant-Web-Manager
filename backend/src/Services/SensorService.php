@@ -2,9 +2,11 @@
 
 require_once __DIR__ . '/../Repositories/SensorRepository.php'; 
 require_once __DIR__ . '/../Repositories/SensorTemplateRepository.php'; 
+require_once __DIR__ . '/../Repositories/ReactorRepository.php'; 
 
 require_once __DIR__ . '/../Dto/SensorDetailsDTO.php'; 
 require_once __DIR__ . '/../Dto/SensorListDTO.php'; 
+require_once __DIR__ . '/../Dto/ReactorStreamDTO.php'; 
 
 require_once __DIR__ . '/../Entities/ReactorType.php'; 
 require_once __DIR__ . '/../Entities/SensorType.php'; 
@@ -12,10 +14,12 @@ require_once __DIR__ . '/../Entities/SensorType.php';
 class SensorService { 
     private SensorRepository $sensorRepository; 
     private SensorTemplateRepository $sensorTemplateRepository; 
+    private ReactorRepository $reactorRepository; 
 
-    public function __construct(SensorRepository $sensorRepository, SensorTemplateRepository $sensorTemplateRepository) { 
+    public function __construct(SensorRepository $sensorRepository, SensorTemplateRepository $sensorTemplateRepository, ReactorRepository $reactorRepository) { 
         $this->sensorRepository = $sensorRepository; 
         $this->sensorTemplateRepository = $sensorTemplateRepository; 
+        $this->reactorRepository = $reactorRepository; 
     }
 
     public function populateSensorsForReactor(string $reactorId, string $reactorTypeString) { 
@@ -143,5 +147,22 @@ class SensorService {
 
     private function isValidUuid(string $uuid): bool {
         return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $uuid) === 1;
+    }
+
+
+    public function deleteSensor(string $id): void {
+        $sensor = $this->sensorRepository->findById($id);
+        if (!$sensor) throw new Exception("Senzorul cu ID-ul $id nu a fost găsit pentru ștergere.");
+
+        $this->sensorRepository->delete($id);
+    }
+
+    public function getStreamData(string $reactorId): ReactorStreamDTO { 
+        $reactor = $this->reactorRepository->findById($reactorId); 
+        if(!$reactor) throw new Exception("Reactorul nu a fost gasit"); 
+
+        $sensors = $this->sensorRepository->findByReactorId($reactorId); 
+
+        return ReactorStreamDTO::create($reactorId, $sensors);
     }
 }
