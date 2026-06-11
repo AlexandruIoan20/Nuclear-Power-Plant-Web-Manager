@@ -142,6 +142,26 @@ export function populateFeasibilityReport(rawData) {
                 
                 tbody.appendChild(tr);
             });
+        } else if (dto.errors && dto.errors.length > 0) {
+            dto.errors.forEach((err, index) => {
+                const tr = document.createElement('tr');
+                const tdIndex = document.createElement('td');
+                tdIndex.textContent = index + 1;
+                tdIndex.style.color = 'var(--muted)';
+                tr.appendChild(tdIndex);
+                const tdDesc = document.createElement('td');
+                tdDesc.textContent = err;
+                tdDesc.style.color = 'var(--red)';
+                tr.appendChild(tdDesc);
+                const tdPenalty = document.createElement('td');
+                const critTag = document.createElement('span');
+                critTag.className = 'tag danger';
+                critTag.style.fontSize = '0.85rem';
+                critTag.textContent = 'CRITIC';
+                tdPenalty.appendChild(critTag);
+                tr.appendChild(tdPenalty);
+                tbody.appendChild(tr);
+            });
         } else {
             const tr = document.createElement('tr');
             const td = document.createElement('td');
@@ -191,7 +211,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             return; 
         }
 
-        hideLoading(); 
+        hideLoading();
+
+        const btn = document.getElementById('btn-back-to-plant');
+        if (btn) btn.href = `/pages/power-plants/finish.html?id=${plantId}`;
+
         populateFeasibilityReport(response.data); 
     } catch(error) {    
         hideLoading(); 

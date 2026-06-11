@@ -32,7 +32,7 @@ class FeasibilityReportDTO implements JsonSerializable {
             nsviScore: $row['nsvi_score'],
             deficiencies: $row['deficiencies'] ?? [],
             errors: $row['errors'] ?? [],
-            message: null,
+            message: $row['message'] ?? null,
             createdAt: $row['created_at'],
         );
     }
@@ -45,6 +45,7 @@ class FeasibilityReportDTO implements JsonSerializable {
             'nsviScore' => $this->nsviScore,
             'deficiencies' => $this->deficiencies,
             'errors' => $this->errors,
+            'message' => $this->message,
             'createdAt' => $this->createdAt,
         ];
     }

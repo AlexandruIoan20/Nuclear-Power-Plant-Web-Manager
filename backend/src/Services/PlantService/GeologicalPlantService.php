@@ -57,8 +57,8 @@ class GeologicalPlantService {
                 $geoData = json_decode($geoResp, true);
                 if (isset($geoData['localityInfo']['administrative'])) {
                     $adminLevels = count($geoData['localityInfo']['administrative']);
-                    $result['populationDensity'] = (float) min(100.0, $adminLevels * 20.0);
-                    $result['transportInfrastructureScore'] = (float) round(min(1.0, $adminLevels * 0.2), 2);
+                    $result['populationDensity'] = (float) min(1000.0, $adminLevels * 120.0);
+                    $result['transportInfrastructureScore'] = (float) round(min(10.0, $adminLevels * 2.0), 2);
                 }
             }
         } catch (Throwable $e) {
@@ -73,7 +73,7 @@ class GeologicalPlantService {
             if ($seismicResp !== false) {
                 $seismicData = json_decode($seismicResp, true);
                 $totalEvents = $seismicData['metadata']['count'] ?? 0;
-                $result['seismicStability'] = (float) round(max(0.0, min(1.0, (10.0 - ($totalEvents * 1.5)) / 10)), 2);
+                $result['seismicStability'] = (float) round(max(0.0, min(10.0, 10.0 - ($totalEvents * 1.5))), 2);
             }
         } catch (Throwable $e) {
             LogService::instance()->error("[SEISMIC SERVICE ERROR] USGS a crăpat: " . $e->getMessage());
@@ -86,15 +86,16 @@ class GeologicalPlantService {
 
             if ($floodResp !== false) {
                 $floodData = json_decode($floodResp, true);
-                $currentDischarge = $floodData['daily']['river_discharge'][0] ?? 0.0;
-                $result['waterFlowRate'] = (float) round($currentDischarge, 2);
-
-                if ($result['waterFlowRate'] > 0) {
-                    $result['waterProximity'] = 1.2;
-                    $result['floodRisk'] = (float) round(min(1.0, ($result['waterFlowRate'] / 150)), 2);
-                } else {
-                    $result['waterProximity'] = 15.0;
-                    $result['floodRisk'] = 0.0;
+                $currentDischarge = $floodData['daily']['river_discharge'][0] ?? null;
+                if ($currentDischarge !== null) {
+                    $result['waterFlowRate'] = (float) round($currentDischarge, 2);
+                    if ($result['waterFlowRate'] > 0) {
+                        $result['waterProximity'] = 1.2;
+                        $result['floodRisk'] = (float) round(min(10.0, ($result['waterFlowRate'] / 15)), 2);
+                    } else {
+                        $result['waterProximity'] = 15.0;
+                        $result['floodRisk'] = 0.0;
+                    }
                 }
             }
         } catch (Throwable $e) {

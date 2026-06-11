@@ -78,13 +78,15 @@ class GeologicalCriticalChecker extends AbstractFeasibilityChecker {
             $criticalErrors[] = "[Eroare Freatică] Pânza freatică este prea aproape de suprafață ({$groundwaterLevel}m), risc de contaminare rapidă.";
         }
 
+        $result = parent::check($plantData);
+
         if (!empty($criticalErrors)) {
-            return [
-                'status' => 'REJECTED',
-                'errors' => array_unique($criticalErrors)
-            ];
+            $result['errors'] = array_merge(
+                $result['errors'] ?? [],
+                array_unique($criticalErrors)
+            );
         }
 
-        return parent::check($plantData); 
+        return $result; 
     }
 }
