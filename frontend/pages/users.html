@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuclear Plant Control | Users</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
     <script src="../modules/config/globals.js"></script>
 </head>
 <body>
@@ -79,7 +79,7 @@
                     `;
                 })
                 .catch((error) => {
-                    container.innerHTML = `<p style="color: var(--danger);">Nu am putut încărca utilizatorii: ${error.message}</p>`;
+                    container.innerHTML = `<p style="color: var(--danger);">Nu am putut încărca utilizatorii: ${escapeHtml(error.message)}</p>`;
                 });
         });
     </script>

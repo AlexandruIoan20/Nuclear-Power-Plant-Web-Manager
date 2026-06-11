@@ -42,20 +42,32 @@ class AlertRepository {
         $stmt->execute(['id' => $id]);
     }
 
+    public function saveReactorAlert(array $data): void {
+        $stmt = $this->db->prepare(
+            "INSERT INTO reactor_alerts (reactor_id, plant_id, type, severity, sensor_type, value, threshold, message)
+             VALUES (:reactor_id, :plant_id, :type, :severity, :sensor_type, :value, :threshold, :message)"
+        );
+        $stmt->execute([
+            'reactor_id' => $data['reactor_id'],
+            'plant_id' => $data['plant_id'],
+            'type' => $data['type'],
+            'severity' => $data['severity'],
+            'sensor_type' => $data['sensor_type'],
+            'value' => $data['value'],
+            'threshold' => $data['threshold'],
+            'message' => $data['message'],
+        ]);
+    }
+
     public function getPlantOwnerEmail(string $plantId): ?string {
-        // ARHITECTURĂ VIITOARE: Extragerea email-ului proprietarului atunci când tabela va fi actualizată
-        /*
         $stmt = $this->db->prepare("
             SELECT u.email 
             FROM users u 
-            JOIN power_plants p ON p.owner_id = u.id 
+            JOIN power_plants p ON p.created_by = u.id 
             WHERE p.id = :plant_id
         ");
         $stmt->execute(['plant_id' => $plantId]);
         $email = $stmt->fetchColumn();
         return $email ?: null;
-        */
-        
-        return null; // Fallback temporar
     }
 }

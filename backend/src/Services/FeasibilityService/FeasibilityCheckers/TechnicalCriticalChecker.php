@@ -34,13 +34,15 @@ class TechnicalCriticalChecker extends AbstractFeasibilityChecker {
             }
         }
 
+        $result = parent::check($plantData);
+
         if (!empty($criticalErrors)) {
-            return [
-                'status' => 'REJECTED',
-                'errors' => $criticalErrors
-            ];
+            $result['errors'] = array_merge(
+                $result['errors'] ?? [],
+                $criticalErrors
+            );
         }
 
-        return parent::check($plantData); 
+        return $result; 
     }
 }

@@ -4,12 +4,14 @@ import { loadSelect } from '../../ui/selectLoader.js';
 import { getQueryParam } from '../../utils/urlHelper.js';
 import { showError, showSuccess, clearStatus } from '../../ui/showMessage.js';
 import { GeologicalDataRequestDTO } from '../../dto/GeologicalDataRequestDTO.js'; 
-import { saveHeaderState } from '../../ui/form-header/formHeaderState.js'; 
+import { saveHeaderState, getHeaderState } from '../../ui/form-header/formHeaderState.js'; 
 import { setupCoordinatePickerMap } from '../../ui/map/coordinatePicker.js'; 
 import { API_BASE } from '../../config/api.config.js'; 
+import { logger } from '../../core/logger.js';
 
 const plantId = getQueryParam("id"); 
-const geologicalId = getQueryParam("geologicalId"); 
+const urlGeologicalId = getQueryParam("geologicalId");
+const geologicalId = urlGeologicalId ?? getHeaderState().geologicalId ?? null; 
 
 loadSelect("soil_type", SoilType); 
 loadSelect("water_source_type", WaterSourceType); 
@@ -27,7 +29,7 @@ async function loadCountryList() {
             datalist.appendChild(option);
         });
     } catch (error) {
-        console.error('Nu s-au putut încărca țările:', error);
+        logger.error('Nu s-au putut încărca țările:', error);
     }
 }
 
@@ -44,8 +46,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let initialLatitude = null;
     let initialLongitude = null;
+    let isEdit = !!geologicalId;
 
-    if (geologicalId) {
+    if (!isEdit) {
+        try {
+            const checkResponse = await powerPlantService.getGeological(plantId);
+            if (checkResponse.data && checkResponse.data.id) {
+                saveHeaderState({ geologicalId: checkResponse.data.id });
+                window.history.replaceState({}, '', `?id=${plantId}&geologicalId=${checkResponse.data.id}`);
+                isEdit = true;
+            }
+        } catch {
+        }
+    }
+
+    if (isEdit) {
         try {
             const response = await powerPlantService.getGeological(plantId);
             const d = response.data;
@@ -65,9 +80,29 @@ document.addEventListener("DOMContentLoaded", async () => {
             initialLatitude = d.latitude;
             initialLongitude = d.longitude;
         } catch (error) {
-            console.error(error.message);
+            logger.error(error.message);
             showError(statusElement, "Eroare la încărcarea datelor geologice.");
             return; 
+        }
+    }
+
+    function populateGeologicalPreview(payload) {
+        const fields = {
+            soil_type: payload.soilType,
+            water_source_type: payload.waterSourceType,
+            seismic_stability: payload.seismicStability,
+            flood_risk: payload.floodRisk,
+            groundwater_level: payload.groundwaterLevel,
+            water_proximity: payload.waterProximity,
+            water_flow_rate: payload.waterFlowRate,
+            population_density: payload.populationDensity,
+            transport_infrastructure_score: payload.transportInfrastructureScore,
+        };
+        for (const [id, value] of Object.entries(fields)) {
+            const el = document.getElementById(id);
+            if (el && value !== null && value !== undefined) {
+                el.value = value;
+            }
         }
     }
 
@@ -79,15 +114,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         countryInputId: 'country',
         latitude: initialLatitude,
         longitude: initialLongitude,
+        onPreview: populateGeologicalPreview,
         fallbackCenter: [45.9432, 24.9668],
         fallbackZoom: 5,
         zoom: 6
     });
     if (!coordinatePicker) {
-        console.warn('Harta nu a putut fi inițializată (Leaflet lipsă sau element lipsă).');
+        logger.warning('Harta nu a putut fi inițializată (Leaflet lipsă sau element lipsă).');
     }
 
-    if(!geologicalId) { 
+    if(!isEdit) { 
         form.addEventListener("submit", async (e) => { 
             e.preventDefault(); 
             clearStatus(statusElement); 
@@ -113,12 +149,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                 saveHeaderState({ geologicalId: response.geologicalId }); 
                 showSuccess(statusElement, "Datele au fost salvate cu succes!"); 
 
-                window.history.replaceState({}, '', `?id=${response.plantId}&geologicalId=${response.geologicalId}`)
-                window.location.href = `/pages/power-plants/technical.html?id=${response.plantId}`;
+                window.location.href = `/pages/power-plants/geological.html?id=${response.plantId}&geologicalId=${response.geologicalId}`;
 
                 form.reset(); 
             } catch(error) { 
-                console.error(error.message); 
+                logger.error(error.message); 
                 showError(statusElement, "Eroare la adaugarea informatiilor despre centrala.")  
             }
         }); 
@@ -147,7 +182,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 await powerPlantService.updateGeological(dto, plantId); 
                 showSuccess(statusElement, "Datele au fost actualizate cu succes!"); 
             } catch(error) { 
-                console.error(error.message); 
+                logger.error(error.message); 
                 showError(statusElement, "Eroare la actualizarea informatiilor despre centrala.") 
             }
         })

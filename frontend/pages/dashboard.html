@@ -121,7 +121,7 @@
                     `;
                 })
                 .catch((error) => {
-                    container.innerHTML = `<p class="error-banner">Nu am putut încărca dashboard-ul: ${error.message}</p>`;
+                    container.innerHTML = `<p class="error-banner">Nu am putut încărca dashboard-ul: ${escapeHtml(error.message)}</p>`;
                 });
 
             // 2. Logica de Polling pentru Alertele Senzorilor

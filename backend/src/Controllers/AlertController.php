@@ -26,7 +26,7 @@ class AlertController {
             http_response_code(200);
             echo json_encode(['status' => 'success', 'message' => 'Semnalul senzorului a fost procesat.']);
         } catch (\Throwable $e) {
-            error_log("[SENSOR ERROR] " . $e->getMessage());
+            LogService::instance()->error("[SENSOR ERROR] " . $e->getMessage());
             http_response_code(400);
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
@@ -60,7 +60,7 @@ class AlertController {
             echo json_encode(['status' => 'success', 'data' => $payload]);
         } catch (\Throwable $e) {
            
-            error_log("[ALERT GET ERROR] " . $e->getMessage() . " în " . $e->getFile() . " linia " . $e->getLine());
+            LogService::instance()->error("[ALERT GET ERROR] " . $e->getMessage() . " în " . $e->getFile() . " linia " . $e->getLine());
             http_response_code(500);
             echo json_encode([
                 'status' => 'error', 
@@ -83,7 +83,7 @@ class AlertController {
             $this->alertService->dismissAlert($id);
             echo json_encode(['status' => 'success']);
         } catch (\Throwable $e) {
-            error_log("[ALERT PUT ERROR] " . $e->getMessage());
+            LogService::instance()->error("[ALERT PUT ERROR] " . $e->getMessage());
             http_response_code(500);
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }

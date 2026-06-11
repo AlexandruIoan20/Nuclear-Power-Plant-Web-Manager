@@ -98,7 +98,7 @@ class UserController {
                 header($locationString, true, 302);
                 exit;
             } catch (Throwable $e) {
-                error_log("[REGISTER ERROR] " . $e->getMessage());
+                LogService::instance()->error("[REGISTER ERROR] " . $e->getMessage());
                 if ($wantsJson) {
                     http_response_code(400);
                     header('Content-Type: application/json; charset=UTF-8');

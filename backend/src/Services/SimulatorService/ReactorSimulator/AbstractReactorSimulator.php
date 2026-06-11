@@ -51,7 +51,9 @@ abstract class AbstractReactorSimulator {
                 $violation['severity'],
                 $violation['value'],
                 $violation['sensor'],
-                $reactorId
+                $reactorId,
+                $reactor->getPowerPlantId(),
+                $violation['threshold'] ?? null
             );
             $this->notifyObservers($event);
         }

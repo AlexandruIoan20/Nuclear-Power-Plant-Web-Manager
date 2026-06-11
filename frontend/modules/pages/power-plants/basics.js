@@ -2,10 +2,12 @@ import { powerPlantService } from '../../services/powerPlantService.js';
 import { BasicDataRequestDTO} from '../../dto/BasicDataRequestDTO.js'; 
 import { showError, showSuccess, clearStatus } from '../../ui/showMessage.js'; 
 import { getQueryParam } from '../../utils/urlHelper.js'; 
-import { saveHeaderState } from '../../ui/form-header/formHeaderState.js'; 
+import { saveHeaderState, getHeaderState } from '../../ui/form-header/formHeaderState.js'; 
+import { logger } from '../../core/logger.js';
 
 const plantId = getQueryParam("id");
-const basicsId = getQueryParam("basicsId"); 
+const urlBasicsId = getQueryParam("basicsId");
+const basicsId = urlBasicsId ?? getHeaderState().basicsId ?? null;
 
 document.addEventListener("DOMContentLoaded", async() => { 
     const form = document.getElementById("basics-form"); 
@@ -15,12 +17,36 @@ document.addEventListener("DOMContentLoaded", async() => {
         showError(statusElement, "ID-ul centralei nu a fost gasit."); 
     }
 
-    /*
-        Se cauta basicsId 
-            -> Daca nu exista => logica pentru post 
-            -> Daca exista => logica de get + put
-    */ 
-    if(!basicsId) { 
+    let isEdit = !!basicsId;
+
+    if (!isEdit) {
+        try {
+            const checkResponse = await powerPlantService.getBasics(plantId);
+            if (checkResponse.data && checkResponse.data.id) {
+                saveHeaderState({ basicsId: checkResponse.data.id });
+                window.history.replaceState({}, '', `?id=${plantId}&basicsId=${checkResponse.data.id}`);
+                isEdit = true;
+            }
+        } catch {
+        }
+    }
+
+    if(isEdit) { 
+        try { 
+            const response = await powerPlantService.getBasics(plantId);
+            const d = response.data; 
+            
+            document.getElementById("capacity").value = d.capacity ?? "";
+            document.getElementById("constructionDurationYears").value = d.constructionDurationYears ?? "";
+            document.getElementById("description").value = d.description ?? "";
+        } catch(error) { 
+            logger.error(error.message); 
+            showError(statusElement, "Eroare la gasirea datelor despre centrala."); 
+            return;
+        }
+    }
+
+    if(!isEdit) { 
         form.addEventListener("submit", async(e) => { 
             e.preventDefault(); 
             clearStatus(statusElement); 
@@ -41,24 +67,11 @@ document.addEventListener("DOMContentLoaded", async() => {
 
                 form.reset(); 
             } catch(error) { 
-                console.error(error.message); 
+                logger.error(error.message); 
                 showError(statusElement, "Eroare la adaugarea informatiilor despre centrala"); 
             }
         })
     } else { 
-        try { 
-            const response = await powerPlantService.getBasics(plantId);
-            const d = response.data; 
-            
-            document.getElementById("capacity").value = d.capacity ?? "";
-            document.getElementById("constructionDurationYears").value = d.constructionDurationYears ?? "";
-            document.getElementById("description").value = d.description ?? "";
-        } catch(error) { 
-            console.error(error.message); 
-            showError(statusElement, "Eroare la gasirea datelor despre centrala."); 
-            return;
-        }
-
         form.addEventListener("submit", async (e) => { 
             e.preventDefault(); 
             clearStatus(statusElement); 
@@ -73,7 +86,7 @@ document.addEventListener("DOMContentLoaded", async() => {
                 await powerPlantService.updateBasics(dto, plantId); 
                 showSuccess(statusElement, "Datele centralei au fost actualzate cu succes!"); 
             } catch(error) { 
-                console.error(error.message); 
+                logger.error(error.message); 
                 showError(statusElement, "Eroare la actualizarea datelor centralei."); 
             }
         })      

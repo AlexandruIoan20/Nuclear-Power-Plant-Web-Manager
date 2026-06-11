@@ -1,4 +1,5 @@
 import { api } from '../../core/api.js';
+import { logger } from '../../core/logger.js';
 
 export function setupCoordinatePickerMap({
     mapId,
@@ -8,12 +9,13 @@ export function setupCoordinatePickerMap({
     countryInputId,
     latitude,
     longitude,
+    onPreview,
     fallbackCenter = [45.9432, 24.9668],
     fallbackZoom = 5,
     zoom = 6
 }) {
     if (typeof L === 'undefined') {
-        console.error('Leaflet nu este încărcat.');
+        logger.error('Leaflet nu este încărcat.');
         return null;
     }
 
@@ -85,6 +87,10 @@ export function setupCoordinatePickerMap({
 
         setMarker(payload.latitude, payload.longitude, false);
         setStatus(payload.message || payload.coordinates_label || 'Locație validată de backend.');
+
+        if (typeof onPreview === 'function') {
+            onPreview(payload);
+        }
     }
 
     if (hasInitialCoordinates) {

@@ -26,13 +26,13 @@ class SensorService {
             $templates = $this->sensorTemplateRepository->findByReactorType($reactorType); 
 
             if(empty($templates)) { 
-                error_log("[WARNING] Reactor Sensor Service: Nu au fost gasite template-uri pentru senzorii reactorului"); 
+                LogService::instance()->warning("[WARNING] Reactor Sensor Service: Nu au fost gasite template-uri pentru senzorii reactorului");
                 return; 
             }
 
             $this->sensorRepository->insertBulk($reactorId, $templates);
         } catch(Exception $e) { 
-            error_log("[ERROR] Populate Reactor Sensors: " . $e->getMessage());
+            LogService::instance()->error("[ERROR] Populate Reactor Sensors: " . $e->getMessage());
             throw new Exception("Eroare la generarea senzorilor pentru reactor: " . $e->getMessage()); 
         }
     }

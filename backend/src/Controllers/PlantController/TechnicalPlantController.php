@@ -30,8 +30,8 @@ class TechnicalPlantController {
         $jsonPayload = file_get_contents('php://input');
         $dateFormular = json_decode($jsonPayload, true) ?? [];
 
-        error_log("[DEBUG] Date Formular Technical (Create)"); 
-        error_log(print_r($dateFormular, true));
+        LogService::instance()->debug("[DEBUG] Date Formular Technical (Create)");
+        LogService::instance()->info(print_r($dateFormular, true));
 
         try { 
             $responseDTO = $this->plantServiceFacade->saveTechnicalData($dateFormular, $plantId);
@@ -45,7 +45,7 @@ class TechnicalPlantController {
                 'technicalId' => $responseDTO->dataId
             ]);
         } catch(Exception $e) { 
-            error_log("[ERROR] POST Tech Data Create: " . $e->getMessage()); 
+            LogService::instance()->error("[ERROR] POST Tech Data Create: " . $e->getMessage());
         
             http_response_code(400);
             header('Content-Type: application/json; charset=utf-8');
@@ -60,8 +60,8 @@ class TechnicalPlantController {
         $jsonPayload = file_get_contents('php://input');
         $dateFormular = json_decode($jsonPayload, true) ?? [];
 
-        error_log("[DEBUG] Date Formular Technical (Update)"); 
-        error_log(print_r($dateFormular, true));
+        LogService::instance()->debug("[DEBUG] Date Formular Technical (Update)");
+        LogService::instance()->info(print_r($dateFormular, true));
 
         try { 
             $this->plantServiceFacade->updateTechnicalData($dateFormular, $plantId); 
@@ -73,7 +73,7 @@ class TechnicalPlantController {
                 'message' => 'Datele tehnice au fost actualizate cu succes.'
             ]);
         } catch(Exception $e) { 
-            error_log("[ERROR] POST Tech Data Update: " . $e->getMessage()); 
+            LogService::instance()->error("[ERROR] POST Tech Data Update: " . $e->getMessage());
             
             http_response_code(400);
             header('Content-Type: application/json; charset=utf-8');
