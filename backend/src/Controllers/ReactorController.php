@@ -22,7 +22,7 @@ class ReactorController {
             echo json_encode(["status" => "success", "data" => $reactors]); 
             exit; 
         } catch(Exception $e) { 
-            error_log('[ERROR] GET All Reactors: ' . $e->getMessage()); 
+            LogService::instance()->error('[ERROR] GET All Reactors: ' . $e->getMessage());
             http_response_code(500); 
 
             echo json_encode(["status" => "error", "message" => "Eroare la preluarea reactoarelor: " . $e->getMessage() ]);
@@ -40,7 +40,7 @@ class ReactorController {
             echo json_encode(["status" => "success", "data" => $reactor ]); 
             exit; 
         } catch(Exception $e) { 
-            error_log("[ERROR] GET Reactor {$id}: " . $e->getMessage()); 
+            LogService::instance()->error("[ERROR] GET Reactor {$id}: " . $e->getMessage());
             
             http_response_code(500); 
             echo json_encode(["status" => "error", "message" => $e->getMessage()]); 
@@ -58,7 +58,7 @@ class ReactorController {
             echo json_encode(["status" => "success", "data" => $reactors ]); 
             exit; 
         } catch(Exception $e) { 
-            error_log("[ERROR] GET Reactors By plantId {$plantId}: " . $e->getMessage() );
+            LogService::instance()->error("[ERROR] GET Reactors By plantId {$plantId}: " . $e->getMessage() );
             http_response_code(500); 
 
             echo json_encode(["status" => "error ", "message" => "Eroare la preluarea reactoarelor: " . $e->getMessage()]);
@@ -72,7 +72,7 @@ class ReactorController {
         $jsonPayload = file_get_contents("php://input");
         $dateFormular = json_decode($jsonPayload, true); 
 
-        error_log("[DEBUG] Date Formular Create Reactor: " . print_r($dateFormular, true));
+        LogService::instance()->debug("[DEBUG] Date Formular Create Reactor: " . print_r($dateFormular, true));
 
         if(empty($dateFormular)) { 
             http_response_code(400); 
@@ -96,7 +96,7 @@ class ReactorController {
 
             exit; 
         } catch(Exception $e) { 
-            error_log("[ERROR] Create Reactor: " . $e->getMessage()); 
+            LogService::instance()->error("[ERROR] Create Reactor: " . $e->getMessage());
             http_response_code(400); 
             echo json_encode(["status" => "error", "message" => "Eroare la crearea reactorului: " . $e->getMessage()]); 
             exit;
@@ -109,7 +109,7 @@ class ReactorController {
         $jsonPayload = file_get_contents("php://input");
         $dateFormular = json_decode($jsonPayload, true);
 
-        error_log("[DEBUG] Date Formular API Update Reactor pt ID {$id}: " . print_r($dateFormular, true));
+        LogService::instance()->debug("[DEBUG] Date Formular API Update Reactor pt ID {$id}: " . print_r($dateFormular, true));
 
         if (empty($dateFormular)) {
             http_response_code(400);
@@ -124,7 +124,7 @@ class ReactorController {
             echo json_encode(["status" => "success", "message" => "Reactorul a fost actualizat cu succes."]);
             exit;
         } catch (\Exception $e) {
-            error_log("[ERROR] Update Reactor {$id}: " . $e->getMessage());
+            LogService::instance()->error("[ERROR] Update Reactor {$id}: " . $e->getMessage());
             $code = str_contains($e->getMessage(), 'găsit') ? 404 : 400;
             
             http_response_code($code);
@@ -143,7 +143,7 @@ class ReactorController {
             echo json_encode(["status" => "success", "message" => "Reactorul a fost șters cu succes."]);
             exit;
         } catch (\Exception $e) {
-            error_log("[ERROR] Delete Reactor {$id}: " . $e->getMessage());
+            LogService::instance()->error("[ERROR] Delete Reactor {$id}: " . $e->getMessage());
             $code = str_contains($e->getMessage(), 'găsit') ? 404 : 500;
             
             http_response_code($code);

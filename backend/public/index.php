@@ -16,12 +16,16 @@ if(empty($_SESSION['csrf_token'])) {
 }
 
 if(!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'OPTIONS', 'HEAD'])) { 
-    $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''; 
-    if(empty($token) || !hash_equals($_SESSION['csrf_token'], $token)) { 
-        http_response_code(403); 
-        header('Content-Type: application/json'); 
-        echo json_encode(['status' => 'error', 'message' => 'Invalid CSRF token' ]); 
-        exit; 
+    $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $skipCsrf = $requestPath === '/api/logs/frontend';
+    if (!$skipCsrf) {
+        $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''; 
+        if(empty($token) || !hash_equals($_SESSION['csrf_token'], $token)) { 
+            http_response_code(403); 
+            header('Content-Type: application/json'); 
+            echo json_encode(['status' => 'error', 'message' => 'Invalid CSRF token' ]); 
+            exit; 
+        }
     }
 } 
 
@@ -128,7 +132,8 @@ require_once __DIR__ . '/../src/Controllers/AlertController.php';
 require_once __DIR__ . '/../src/Services/NotificationService.php';
 require_once __DIR__ . '/../src/Controllers/NotificationController.php';
 
-
+require_once __DIR__ . '/../src/Services/LogService.php';
+require_once __DIR__ . '/../src/Controllers/LogController.php';
 
 // Database configuration
 $host     = getenv('DB_HOST')     ?: 'db';
@@ -172,11 +177,44 @@ $notificationService = new NotificationService($plantServiceFacade, $alertServic
 $reactorRepository = new ReactorRepository($pdo); 
 $reactorService = new ReactorService($reactorRepository);
 
+<<<<<<< HEAD
 
 $sensorRepository = new SensorRepository($pdo); 
 $sensorTemplateRepository = new SensorTemplateRepository($pdo); 
 $sensorService = new SensorService($sensorRepository, $sensorTemplateRepository, $reactorRepository); 
 $sensorController = new SensorController($sensorService); 
+=======
+LogService::init($pdo);
+
+// DEV ONLY - asigura existenta contului admin la runtime
+try {
+    $adminEmail = 'admin@nuclear.ro';
+    $adminUser = $userRepository->findByEmail($adminEmail);
+    $adminPassword = 'admin';
+    if (!$adminUser || !password_verify($adminPassword, $adminUser['password_hash'])) {
+        $hash = password_hash($adminPassword, PASSWORD_BCRYPT, ['cost' => 12]);
+        $pdo->prepare("
+            INSERT INTO users (username, first_name, last_name, email, password_hash, role)
+            VALUES (:username, :first_name, :last_name, :email, :password_hash, :role)
+            ON CONFLICT (email) DO UPDATE SET
+                username = EXCLUDED.username,
+                first_name = EXCLUDED.first_name,
+                last_name = EXCLUDED.last_name,
+                password_hash = EXCLUDED.password_hash,
+                role = EXCLUDED.role
+        ")->execute([
+            'username' => 'admin',
+            'first_name' => 'Admin',
+            'last_name' => 'System',
+            'email' => $adminEmail,
+            'password_hash' => $hash,
+            'role' => 'ADMIN',
+        ]);
+    }
+} catch (Exception $e) {
+    error_log('[DEV ONLY] Eroare la initializarea contului admin: ' . $e->getMessage());
+}
+>>>>>>> merge-1
 
 $router = new Router();
 
@@ -222,6 +260,10 @@ $router->get('/api/power-plants', function () use ($plantServiceFacade) {
 $router->get('/api/power-plants/filter', function () use ($plantServiceFacade) { 
     (new DetailsPlantController($plantServiceFacade))->getPlantsByStatus(); 
 }); 
+
+$router->get('/api/power-plants/pending-approvals', auth(null, function() use ($plantServiceFacade) { 
+    (new DetailsPlantController($plantServiceFacade))->getPendingApprovalsList(); 
+}));
 
 $router->get('/api/power-plants/{id}', function ($id) use ($plantServiceFacade) { 
     (new DetailsPlantController($plantServiceFacade))->getPlant($id); 
@@ -390,9 +432,14 @@ $router->put('/api/alerts/{id}/read', auth(null, function ($id) use ($alertServi
     (new AlertController($alertService))->markRead($id);
 }));
 
-$router->get('/api/power-plants/pending-approvals', auth(null, function() use ($plantServiceFacade) { 
-    (new DetailsPlantController($plantServiceFacade))->getPendingApprovalsList(); 
+// --- Logging ---
+$router->get('/api/logs', auth('ADMIN', function () {
+    (new LogController())->getLogs();
 }));
+
+$router->post('/api/logs/frontend', function () {
+    (new LogController())->receiveFrontendLog();
+});
 
 // --- Authentication ---
 $router->get('/login', function() use ($userService) {

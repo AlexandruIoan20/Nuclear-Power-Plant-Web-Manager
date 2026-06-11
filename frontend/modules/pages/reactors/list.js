@@ -1,6 +1,7 @@
 import { reactorService } from '../../services/reactorService.js';
 import { getQueryParam } from '../../utils/urlHelper.js';
 import { renderReactorTable } from '../../ui/reactors/reactorTable.js';
+import { logger } from '../../core/logger.js';
 
 const plantId = getQueryParam("plantId");
 
@@ -43,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         reactors = response.data ?? [];
         renderTable();
     } catch (error) {
-        console.error(error.message);
+        logger.error(error.message);
         document.getElementById('reactors-tbody').innerHTML =
             `<tr class="state-row"><td colspan="8">Eroare la încărcarea reactoarelor.</td></tr>`;
     }

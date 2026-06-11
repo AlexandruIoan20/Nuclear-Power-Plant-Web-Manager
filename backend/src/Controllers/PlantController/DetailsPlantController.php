@@ -23,7 +23,7 @@ class DetailsPlantController {
         header('Content-Type: application/json; charset=utf-8');
     
         $plant = $this->plantServiceFacade->getCompletePlantProfile($id);
-        if(!$plant) { 
+        if(!$plant || !$plant['details']) { 
             echo json_encode(["status" => "error", "message" => "Centrala nu a fost gasita"]); 
             exit; 
         } 
@@ -119,11 +119,11 @@ class DetailsPlantController {
     
         $data = ['status' => $status];
     
-        error_log("[DEBUG] Date getPlantsByStatus: " . print_r($data, true));
+        LogService::instance()->debug("[DEBUG] Date getPlantsByStatus: " . print_r($data, true));
     
         try { 
             $powerPlants = $this->plantServiceFacade->getPlantsByStatus($data); 
-            error_log("powerPlants in controller:  " . print_r($powerPlants, true)); 
+            LogService::instance()->info("powerPlants in controller:  " . print_r($powerPlants, true));
 
             $dtos = array_map(function($plant) {
                 return [
@@ -139,7 +139,7 @@ class DetailsPlantController {
             http_response_code(200); 
             echo json_encode(["status" => "success", "data" => $dtos]); 
         } catch(Exception $e) { 
-            error_log("[ERROR] GET Plants By Status: " . $e->getMessage());
+            LogService::instance()->error("[ERROR] GET Plants By Status: " . $e->getMessage());
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Eroare la cautarea dupa status: " . $e->getMessage()]);
         }
@@ -168,7 +168,7 @@ class DetailsPlantController {
                 'coordinates_label' => $hasCoordinates ? number_format((float)$plant['latitude'], 6, '.', '') . ', ' . number_format((float)$plant['longitude'], 6, '.', '') : 'Fără coordonate',
                 'popup_title' => $plant['name'] ?: 'Centrală',
                 'popup_subtitle' => $plant['country'] ?: 'Țară nespecificată',
-                'edit_url' => '/power-plants/update.html?id=' . urlencode($plant['id']),
+                'edit_url' => '/pages/power-plants/finish.html?id=' . urlencode($plant['id']),
             ];
         }, $plants);
 
@@ -183,7 +183,7 @@ class DetailsPlantController {
         $jsonPayload = file_get_contents("php://input");
         $dateFormular = json_decode($jsonPayload, true); 
 
-        error_log("[DEBUG] Date Formular API Creare: " . print_r($dateFormular, true));
+        LogService::instance()->debug("[DEBUG] Date Formular API Creare: " . print_r($dateFormular, true));
         
         if (empty($dateFormular)) {
             http_response_code(400); 
@@ -198,7 +198,7 @@ class DetailsPlantController {
             echo json_encode(["status" => "success", "message" => "Centrala a fost salvată cu succes.", "plantId" => $responseDTO->dataId ]);
             exit; 
         } catch(Exception $e) { 
-            error_log("[ERROR] Save Plant: " . $e->getMessage());
+            LogService::instance()->error("[ERROR] Save Plant: " . $e->getMessage());
             http_response_code(500); 
             echo json_encode(["status" => "error", "message" => "Eroare la salvare: " . $e->getMessage()]);
             exit;
@@ -211,7 +211,7 @@ class DetailsPlantController {
         $jsonPayload = file_get_contents("php://input");
         $dateFormular = json_decode($jsonPayload, true); 
 
-        error_log("[DEBUG] Date Formular API Creare: " . print_r($dateFormular, true));
+        LogService::instance()->debug("[DEBUG] Date Formular API Creare: " . print_r($dateFormular, true));
         
         if (empty($dateFormular)) {
             http_response_code(400); 
@@ -236,7 +236,7 @@ class DetailsPlantController {
                 "message" => "Status actualizat cu succes"
             ]); 
         } catch(Exception $e) { 
-            error_log("[ERROR] Update Plant: " . $e->getMessage());
+            LogService::instance()->error("[ERROR] Update Plant: " . $e->getMessage());
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Eroare la actualizare statusului: " . $e->getMessage()]);
             exit;
@@ -249,7 +249,7 @@ class DetailsPlantController {
         $jsonPayload = file_get_contents("php://input");
         $dateFormular = json_decode($jsonPayload, true); 
 
-        error_log("[DEBUG] Date Formular API Update pt ID {$id}: " . print_r($dateFormular, true));
+        LogService::instance()->debug("[DEBUG] Date Formular API Update pt ID {$id}: " . print_r($dateFormular, true));
 
         if (empty($dateFormular)) {
             http_response_code(400);
@@ -264,7 +264,7 @@ class DetailsPlantController {
             echo json_encode(["status" => "success", "message" => "Detaliile au fost actualizate cu succes."]);
             exit; 
         } catch(Exception $e) { 
-            error_log("[ERROR] Update Plant: " . $e->getMessage());
+            LogService::instance()->error("[ERROR] Update Plant: " . $e->getMessage());
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Eroare la actualizare: " . $e->getMessage()]);
             exit;
@@ -323,10 +323,17 @@ class DetailsPlantController {
                 }
             }
         } catch (Throwable $e) {
-            error_log("[PREVIEW ERROR] Nu am putut lua țara: " . $e->getMessage());
+            LogService::instance()->error("[PREVIEW ERROR] Nu am putut lua țara: " . $e->getMessage());
         }
 
-   
+        // Pre-compute all geological fields from coordinates
+        $geoPreview = [];
+        try {
+            $geoPreview = $this->plantServiceFacade->previewGeologicalLocation($latNorm, $lonNorm);
+        } catch (Throwable $e) {
+            LogService::instance()->error("[PREVIEW ERROR] Nu am putut calcula datele geologice: " . $e->getMessage());
+        }
+
         http_response_code(200);
         echo json_encode([
             'status' => 'success',
@@ -335,6 +342,15 @@ class DetailsPlantController {
                 'longitude' => $lonNorm,
                 'coordinates_label' => $label,
                 'country' => $country,
+                'soilType' => $geoPreview['soilType'] ?? null,
+                'waterSourceType' => $geoPreview['waterSourceType'] ?? null,
+                'seismicStability' => $geoPreview['seismicStability'] ?? null,
+                'floodRisk' => $geoPreview['floodRisk'] ?? null,
+                'groundwaterLevel' => $geoPreview['groundwaterLevel'] ?? null,
+                'waterProximity' => $geoPreview['waterProximity'] ?? null,
+                'waterFlowRate' => $geoPreview['waterFlowRate'] ?? null,
+                'populationDensity' => $geoPreview['populationDensity'] ?? null,
+                'transportInfrastructureScore' => $geoPreview['transportInfrastructureScore'] ?? null,
                 'message' => 'Locație validată rapid.'
             ]
         ]);

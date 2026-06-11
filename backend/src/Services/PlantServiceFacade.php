@@ -101,6 +101,10 @@ class PlantServiceFacade {
     }
 
     // Geological
+    public function previewGeologicalLocation(float $lat, float $lon): array {
+        return $this->geologicalPlantService->runAutoGeolocation($lat, $lon);
+    }
+
     public function getGeologicalDataByPlantId(string $plantId): ?GeologicalPlantDataDTO {
         return $this->geologicalPlantService->getGeologicalData($plantId);
     }

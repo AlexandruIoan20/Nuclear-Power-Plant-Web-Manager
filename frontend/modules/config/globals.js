@@ -12,3 +12,26 @@ window.getCsrfToken = async function () {
     window._csrfToken = data.csrf_token; 
     return window._csrfToken; 
 }
+
+window._logger = {
+    _send(level, message, context) {
+        const payload = { level, message, context: context || null };
+        try {
+            navigator.sendBeacon(window.API_BASE + '/logs/frontend', JSON.stringify(payload));
+        } catch {}
+    },
+    debug(msg, ctx) { console.debug('[DEBUG]', msg, ctx || ''); },
+    info(msg, ctx) { console.info('[INFO]', msg, ctx || ''); },
+    warning(msg, ctx) {
+        console.warn('[WARNING]', msg, ctx || '');
+        this._send('WARNING', msg, ctx);
+    },
+    error(msg, ctx) {
+        console.error('[ERROR]', msg, ctx || '');
+        this._send('ERROR', msg, ctx);
+    },
+    critical(msg, ctx) {
+        console.error('[CRITICAL]', msg, ctx || '');
+        this._send('CRITICAL', msg, ctx);
+    }
+};

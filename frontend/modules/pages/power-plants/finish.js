@@ -2,8 +2,10 @@ import { powerPlantService } from '../../services/powerPlantService.js';
 import { feasibilityReportService } from '../../services/feasibilityReportService.js'; 
 import { UpdatePlantStatusRequestDTO } from '../../dto/UpdatePlanStatusRequestDTO.js'; 
 import { getQueryParam } from '../../utils/urlHelper.js';
-import { clearHeaderState } from '../../ui/form-header/formHeaderState.js'; 
+import { saveHeaderState, clearHeaderState } from '../../ui/form-header/formHeaderState.js'; 
+import { renderHeader } from '../../ui/form-header/formHeader.js'; 
 import { populatePlantPage } from '../../ui/power-plants/plantPageRenderer.js'; 
+import { logger } from '../../core/logger.js';
 
 const plantId = getQueryParam("id"); 
 
@@ -42,8 +44,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     try { 
         const rawData = await powerPlantService.getPlant(plantId); 
 
-        console.log({ rawData }); 
+        logger.info({ rawData }); 
         populatePlantPage(rawData); 
+
+        if (rawData.basic?.id || rawData.geological?.id || rawData.technical?.id) {
+            saveHeaderState({
+                basicsId: rawData.basic?.id,
+                geologicalId: rawData.geological?.id,
+                technicalId: rawData.technical?.id,
+            });
+            renderHeader();
+        }
 
         const verifyButton = document.getElementById("btn-verify"); 
         const originalBtnText = verifyButton.textContent; 
@@ -55,15 +66,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                 verifyButton.textContent = "Se generează raportul..."; 
                 try { 
                     const response = await feasibilityReportService.createReport(plantId); 
-                    console.log({ response }); 
+                    logger.info({ response }); 
 
                     if (response.success) { 
                         try { 
                             verifyButton.textContent = "Se actualizează statusul..."; 
                             const r = await powerPlantService.updateStatus(UpdatePlantStatusRequestDTO({ status: "REVIEW" }), plantId); 
-                            console.log({ r }); 
+                            logger.info({ r }); 
                         } catch (error) { 
-                            console.log(error.message); 
+                            logger.info(error.message); 
                         } 
                         clearHeaderState(); 
                         window.location.href = `/pages/feasibility/report-results.html?id=${plantId}`; 
@@ -73,7 +84,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         alert(response.message || "Eroare la generarea raportului."); 
                     } 
                 } catch (error) { 
-                    console.error(error.message); 
+                    logger.error(error.message); 
                     verifyButton.disabled = false; 
                     verifyButton.textContent = originalBtnText; 
                     alert("Eroare la generarea raportului."); 
@@ -83,7 +94,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             verifyButton.disabled = true; 
         } 
     } catch(error) {    
-        console.error(error.message);
+        logger.error(error.message);
         alert("A aparut o eroare in preluarea informatiilor despre centrala");  
     }
 })

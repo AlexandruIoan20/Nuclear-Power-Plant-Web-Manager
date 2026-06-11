@@ -37,8 +37,8 @@ class DetailsPlantService {
 
         $plant = new Plant($id, $name, $status); 
 
-        error_log("[DEBUG] A power plant was built successfully"); 
-        error_log("[DEBUG]" . print_r($plant, true)); 
+        LogService::instance()->debug("[DEBUG] A power plant was built successfully");
+        LogService::instance()->debug("[DEBUG]" . print_r($plant, true));
         $this->plantRepositoryFacade->updatePlantDetails($plant); 
     }
 

@@ -17,6 +17,7 @@ CREATE TABLE feasibility_reports (
     errors JSONB,
     status power_plant_status NOT NULL, 
     nsvi_score DECIMAL(5, 2),
+    message TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
     CONSTRAINT fk_report_powerplant
         FOREIGN KEY (power_plant_id) REFERENCES power_plants(id)

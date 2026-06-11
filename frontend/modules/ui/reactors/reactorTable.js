@@ -1,3 +1,16 @@
+function escapeHtml(value) {
+    return String(value).replace(/[&<>"]|'/g, (character) => {
+        const escapeMap = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        };
+        return escapeMap[character] || character;
+    });
+}
+
 export function renderReactorTable(reactors, plantId) {
     const tbody = document.getElementById('reactors-tbody');
     document.getElementById('results-count').textContent = reactors.length;
@@ -8,11 +21,11 @@ export function renderReactorTable(reactors, plantId) {
     }
 
     tbody.innerHTML = reactors.map(r => `
-        <tr data-id="${r.id}">
+        <tr data-id="${escapeHtml(r.id)}">
             <td class="td-id">${shortId(r.id)}</td>
-            <td>${r.reactorCode ?? '—'}</td>
-            <td>${r.reactorType ?? '—'}</td>
-            <td>${r.coolingType ?? '—'}</td>
+            <td>${escapeHtml(r.reactorCode ?? '—')}</td>
+            <td>${escapeHtml(r.reactorType ?? '—')}</td>
+            <td>${escapeHtml(r.coolingType ?? '—')}</td>
             <td>${statusTag(r.operationalStatus)}</td>
             <td>${r.thermalPowerMw != null ? r.thermalPowerMw + ' MW' : '—'}</td>
             <td>${r.electricalPowerMw != null ? r.electricalPowerMw + ' MW' : '—'}</td>

@@ -1,6 +1,7 @@
 import { powerPlantService } from '../../services/powerPlantService.js'; 
 import { clearHeaderState, } from '../../ui/form-header/formHeaderState.js'; 
 import { applyFilters } from '../../ui/power-plants/plantFilters.js'; 
+import { logger } from '../../core/logger.js';
  
 let allPlants = [];
 let sortCol = 'name';
@@ -52,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         allPlants = response.data ?? [];
         applyFilters(allPlants, sortCol, sortDir, goTo);
     } catch (error) {
-        console.error(error.message);
+        logger.error(error.message);
         alert("Eroare la încărcarea centralelor"); 
     }
 });

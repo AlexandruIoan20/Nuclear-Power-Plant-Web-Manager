@@ -45,7 +45,7 @@ class FeasibilityService
             return ['success' => true, 'message' => 'Raport salvat cu succes.', 'data' => $result];
     
         } catch (Exception $e) {
-            error_log("[FeasibilityService] PlantId={$powerPlantId} Eroare: {$e->getMessage()}");
+            LogService::instance()->error("[FeasibilityService] PlantId={$powerPlantId} Eroare: {$e->getMessage()}");
             return ['success' => false, 'message' => $e->getMessage(), 'data' => null];
         }
     }
@@ -56,7 +56,7 @@ class FeasibilityService
             $row = $this->feasibilityRepository->getLatestReportByPlantId($powerPlantId);
 
             if (!$row) {
-                error_log("[FeasibilityService] PlantId={$powerPlantId}: nu s-a gasit raport");
+                LogService::instance()->info("[FeasibilityService] PlantId={$powerPlantId}: nu s-a gasit raport");
                 return [
                     'success' => false,
                     'message' => 'Nu a fost găsit niciun raport de fezabilitate pentru această centrală.',
@@ -73,7 +73,7 @@ class FeasibilityService
             ];
 
         } catch (Exception $e) {
-            error_log("[FeasibilityService] PlantId={$powerPlantId} Eroare la citire: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}");
+            LogService::instance()->error("[FeasibilityService] PlantId={$powerPlantId} Eroare la citire: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}");
             return [
                 'success' => false,
                 'message' => 'Eroare internă la citirea raportului.',
