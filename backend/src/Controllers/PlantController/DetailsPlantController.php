@@ -168,7 +168,7 @@ class DetailsPlantController {
                 'coordinates_label' => $hasCoordinates ? number_format((float)$plant['latitude'], 6, '.', '') . ', ' . number_format((float)$plant['longitude'], 6, '.', '') : 'Fără coordonate',
                 'popup_title' => $plant['name'] ?: 'Centrală',
                 'popup_subtitle' => $plant['country'] ?: 'Țară nespecificată',
-                'edit_url' => '/power-plants/update.html?id=' . urlencode($plant['id']),
+                'edit_url' => '/pages/power-plants/finish.html?id=' . urlencode($plant['id']),
             ];
         }, $plants);
 
