@@ -6,8 +6,8 @@ ini_set('session.gc_maxlifetime', 3600);
 ini_set('session.cookie_lifetime', 3600);
 
 session_start([
-    'cookie_samesite' => 'Lax', 
-    'cookie_secure' => false,    
+    'cookie_samesite' => 'None', 
+    'cookie_secure' => true,    
     'cookie_httponly' => true,
 ]);
 

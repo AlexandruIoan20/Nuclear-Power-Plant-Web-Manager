@@ -116,6 +116,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 window.history.replaceState({}, '', `?id=${response.plantId}&geologicalId=${response.geologicalId}`)
                 window.location.href = `/pages/power-plants/technical.html?id=${response.plantId}`;
 
+                console.log({ response }); 
+
                 form.reset(); 
             } catch(error) { 
                 console.error(error.message); 

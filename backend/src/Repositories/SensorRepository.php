@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../Entities/SensorTemplate.php';
 require_once __DIR__ . '/../Entities/SensorType.php';
 require_once __DIR__ . '/../Entities/ReactorSensor.php';
+require_once __DIR__ . '/../Entities/SensorQuality.php'; 
 
 class SensorRepository {
     private PDO $db;

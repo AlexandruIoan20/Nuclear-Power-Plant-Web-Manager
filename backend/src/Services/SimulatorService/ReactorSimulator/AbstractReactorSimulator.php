@@ -66,6 +66,17 @@ abstract class AbstractReactorSimulator {
         $this->persistValues($newValues, $sensors);
         $this->measurementsRepository->save($measurement);
         $this->wearCalculator->applyWear($reactor, $measurement->getPowerPercent() ?? 0, $this->reactorRepository);
+
+        $ts = $measurement->getTimestamp() ?? date('Y-m-d H:i:s');
+        $power = $measurement->getPowerPercent() !== null ? sprintf('%.1f', $measurement->getPowerPercent()) : 'N/A';
+        $tOut = $measurement->getTempCoolantOut() !== null ? sprintf('%.1f', $measurement->getTempCoolantOut()) : 'N/A';
+        $pres = $measurement->getPressure() !== null ? sprintf('%.2f', $measurement->getPressure()) : 'N/A';
+        $flux = $measurement->getNeutronFlux() !== null ? sprintf('%.1e', $measurement->getNeutronFlux()) : 'N/A';
+
+        echo "[" . $ts . "] " . $reactor->getReactorCode()
+            . " | P=" . $power . "% | Tout=" . $tOut . "°C | P=" . $pres . " MPa | Φ=" . $flux
+            . " | wear=" . sprintf('%.4f', $reactor->getWearIndex())
+            . PHP_EOL;
     }
 
     abstract protected function applyPhysicalCorrelation(array &$newValues, array $sensors, Reactor $reactor): void;
@@ -75,6 +86,12 @@ abstract class AbstractReactorSimulator {
 
         foreach ($sensors as $sensor) {
             $currentValue = $sensor->getCurrentValue();
+
+            if ($currentValue === null) {
+                $min = $sensor->getNormalMin() ?? 0;
+                $max = $sensor->getNormalMax() ?? 100;
+                $currentValue = ($min + $max) / 2;
+            }
 
             $strategy = $this->generatorFactory->getStrategy($sensor->getSensorType());
             $newValues[$sensor->getId()] = $strategy->generate($currentValue, $sensor);

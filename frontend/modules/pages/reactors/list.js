@@ -55,6 +55,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             handleDelete(row.dataset.id);
             return;
         }
+        if (e.target.closest('.btn-monitor-reactor')) {
+            window.location.href = `/pages/reactors/detail.html?reactorId=${row.dataset.id}&plantId=${plantId}`;
+            return;
+        }
         if (e.target.closest('.btn-edit-reactor')) {
             window.location.href = `/pages/reactors/edit.html?reactorId=${row.dataset.id}&plantId=${plantId}`;
             return;

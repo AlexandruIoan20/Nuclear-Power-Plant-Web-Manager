@@ -71,7 +71,7 @@ class DetailsPlantController {
         }
 
         http_response_code(200);
-        echo json_encode($payload);
+        echo json_encode(["status" => "success", "data" => $payload]);
         exit;
     }
 

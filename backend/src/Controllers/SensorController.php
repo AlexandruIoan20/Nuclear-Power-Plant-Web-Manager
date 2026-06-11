@@ -10,12 +10,15 @@ class SensorController {
     }
 
     public function stream(string $reactorId): void {
+        set_time_limit(0);
+
         header("Content-Type: text/event-stream");
         header("Cache-Control: no-cache");
         header("Connection: keep-alive");
         header("X-Accel-Buffering: no");
 
-        if(ob_get_level()) ob_end_clean();
+        while (ob_get_level()) ob_end_clean();
+        ob_implicit_flush(true);
 
         while(true) {
             try {
