@@ -6,8 +6,8 @@ ini_set('session.gc_maxlifetime', 3600);
 ini_set('session.cookie_lifetime', 3600);
 
 session_start([
-    'cookie_samesite' => 'Lax', 
-    'cookie_secure' => false,    
+    'cookie_samesite' => 'None', 
+    'cookie_secure' => true,    
     'cookie_httponly' => true,
 ]);
 
@@ -94,6 +94,8 @@ require_once __DIR__ . '/../src/Repositories/PlantRepository/GeologicalPlantRepo
 require_once __DIR__ . '/../src/Repositories/PlantRepository/TechnicalPlantRepository.php';
 require_once __DIR__ . '/../src/Repositories/FeasibiltyRepository.php';
 require_once __DIR__ . '/../src/Repositories/ReactorRepository.php'; 
+require_once __DIR__ . '/../src/Repositories/SensorRepository.php'; 
+require_once __DIR__ . '/../src/Repositories/SensorTemplateRepository.php'; 
 
 require_once __DIR__ . '/../src/Services/PlantService/DetailsPlantService.php';
 require_once __DIR__ . '/../src/Services/PlantService/BasicPlantService.php';
@@ -105,6 +107,7 @@ require_once __DIR__ . '/../src/Repositories/PlantRepositoryFacade.php';
 require_once __DIR__ . '/../src/Services/PlantServiceFacade.php';
 require_once __DIR__ . '/../src/Services/FeasibilityService/FeasibilityServiceFactory.php';
 require_once __DIR__ . '/../src/Services/ReactorService.php'; 
+require_once __DIR__ . '/../src/Services/SensorService.php'; 
 
 require_once __DIR__ . '/../src/Controllers/PlantController/DetailsPlantController.php';
 require_once __DIR__ . '/../src/Controllers/PlantController/BasicPlantController.php';
@@ -113,6 +116,7 @@ require_once __DIR__ . '/../src/Controllers/PlantController/TechnicalPlantContro
 require_once __DIR__ . '/../src/Controllers/FeasibilitController.php';
 require_once __DIR__ . '/../src/Controllers/ApprovalController.php';
 require_once __DIR__ . '/../src/Controllers/ReactorController.php'; 
+require_once __DIR__ . '/../src/Controllers/SensorController.php'; 
 
 require_once __DIR__ . '/../src/Services/EmailService.php';
 require_once __DIR__ . '/../src/Controllers/EmailController.php';
@@ -173,6 +177,13 @@ $notificationService = new NotificationService($plantServiceFacade, $alertServic
 $reactorRepository = new ReactorRepository($pdo); 
 $reactorService = new ReactorService($reactorRepository);
 
+<<<<<<< HEAD
+
+$sensorRepository = new SensorRepository($pdo); 
+$sensorTemplateRepository = new SensorTemplateRepository($pdo); 
+$sensorService = new SensorService($sensorRepository, $sensorTemplateRepository, $reactorRepository); 
+$sensorController = new SensorController($sensorService); 
+=======
 LogService::init($pdo);
 
 // DEV ONLY - asigura existenta contului admin la runtime
@@ -203,6 +214,7 @@ try {
 } catch (Exception $e) {
     error_log('[DEV ONLY] Eroare la initializarea contului admin: ' . $e->getMessage());
 }
+>>>>>>> merge-1
 
 $router = new Router();
 
@@ -320,28 +332,58 @@ $router->put('/api/power-plants/{id}/technical', auth(null, function ($id) use (
     (new TechnicalPlantController($plantServiceFacade))->updateTechnicalPlantData($id);
 }));
 
-$router->get('/api/reactors', auth(null, function () use ($reactorService) {
-    (new ReactorController($reactorService))->getAllReactors();
+$router->get('/api/reactors', auth(null, function () use ($reactorService, $sensorService) {
+    (new ReactorController($reactorService, $sensorService))->getAllReactors();
 }));
 
-$router->get('/api/reactors/{id}', auth(null, function ($id) use ($reactorService) {
-    (new ReactorController($reactorService))->getReactor($id);
+$router->get('/api/reactors/{id}/stream', auth(null, function ($id) use ($sensorController) { 
+    $sensorController->stream($id); 
 }));
 
-$router->get('/api/power-plants/{plantId}/reactors', auth(null, function ($plantId) use ($reactorService) {
-    (new ReactorController($reactorService))->getReactorsByPlant($plantId);
+$router->get('/api/reactors/{id}', auth(null, function ($id) use ($reactorService, $sensorService) {
+    (new ReactorController($reactorService, $sensorService))->getReactor($id);
 }));
 
-$router->post('/api/reactors', auth(null, function () use ($reactorService) {
-    (new ReactorController($reactorService))->createReactor();
+$router->get('/api/power-plants/{plantId}/reactors', auth(null, function ($plantId) use ($reactorService, $sensorService) {
+    (new ReactorController($reactorService, $sensorService))->getReactorsByPlant($plantId);
 }));
 
-$router->put('/api/reactors/{id}', auth(null, function ($id) use ($reactorService) {
-    (new ReactorController($reactorService))->updateReactor($id);
+$router->post('/api/reactors', auth(null, function () use ($reactorService, $sensorService) {
+    (new ReactorController($reactorService, $sensorService))->createReactor();
 }));
 
-$router->delete('/api/reactors/{id}', auth(null, function ($id) use ($reactorService) {
-    (new ReactorController($reactorService))->deleteReactor($id);
+$router->put('/api/reactors/{id}', auth(null, function ($id) use ($reactorService, $sensorService) {
+    (new ReactorController($reactorService, $sensorService))->updateReactor($id);
+}));
+
+$router->delete('/api/reactors/{id}', auth(null, function ($id) use ($reactorService, $sensorService) {
+    (new ReactorController($reactorService, $sensorService))->deleteReactor($id);
+}));
+
+// RUTE SENZORI
+
+$router->get('/api/reactors/{reactorId}/sensors', auth(null, function ($reactorId) use ($sensorController) {
+    $sensorController->getSensorsByReactor($reactorId);
+}));
+
+$router->get('/api/sensors/{id}', auth(null, function ($id) use ($sensorController) {
+    $sensorController->getSensor($id);
+}));
+
+$router->post('/api/sensors', auth(null, function () use ($sensorController) {
+    $sensorController->createSensor();
+}));
+
+$router->put('/api/sensors/{id}', auth(null, function ($id) use ($sensorController) {
+    $sensorController->updateSensor($id);
+}));
+
+$router->delete('/api/sensors/{id}', auth(null, function ($id) use ($sensorController) {
+    $sensorController->deleteSensor($id);
+}));
+
+$router->post('/api/reactors/{reactorId}/sensors/populate', auth(null, function ($reactorId) use ($sensorController) {
+    $sensorController->populateSensors($reactorId);
 }));
 
 // RUTE FEZABILITATE (cu verificare proprietar)

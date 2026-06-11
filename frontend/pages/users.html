@@ -9,6 +9,7 @@
 </head>
 <body>
     <div class="page-shell">
+        <div id="main-navbar"></div>
         <div id="app-container" class="panel">
             <p class="inline-status">Se încarcă lista utilizatorilor...</p>
         </div>
@@ -52,17 +53,6 @@
                     `).join('');
 
                     container.innerHTML = `
-                        <header class="topbar">
-                            <div class="brand">
-                                <strong>Nuclear Plant Control</strong>
-                                <span>Utilizatori înregistrați</span>
-                            </div>
-                            <nav class="nav-links">
-                                <a href="dashboard.html">Dashboard</a>
-                                <a href="start.html">Start</a>
-                            </nav>
-                        </header>
-
                         <h1>Registered Users</h1>
                         <div class="table-shell">
                             <table>
@@ -83,5 +73,7 @@
                 });
         });
     </script>
+
+    <script type="module" src="../modules/ui/navbar.js"></script>
 </body>
 </html>

@@ -22,19 +22,7 @@
 </head>
 <body>
     <div class="page-shell">
-        <header class="topbar">
-            <div class="brand">
-                <strong>Nuclear Plant Control</strong>
-                <span>Hartă centrale</span>
-            </div>
-            <nav class="nav-links">
-                <a href="dashboard.html">Dashboard</a>
-                <a href="notifications.html">Notificări</a>
-                <a href="approvals.html">Aprobări</a>
-                <a href="map.html" class="active">Hartă</a>
-                <a href="power-plants/list.html">Lista centralelor</a>
-            </nav>
-        </header>
+        <div id="main-navbar"></div>
         <main class="map-layout">
             <section class="panel map-shell">
                 
@@ -50,6 +38,7 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="../modules/ui/navbar.js"></script>
     <script src="../plant-map.js"></script>
     <script>
         function escapeHtml(value) {

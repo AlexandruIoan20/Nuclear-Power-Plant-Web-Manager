@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitorizare Reactor</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../modules/config/globals.js"></script>
+    <style>
+        .sensor-card {
+            display: grid;
+            gap: 8px;
+            padding: 16px;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.015);
+        }
+
+        .sensor-card.border-BAD     { border-color: rgba(168,80,80,0.3); }
+        .sensor-card.border-SUSPECT { border-color: rgba(168,144,80,0.2); }
+
+        .sensor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .sensor-code {
+            font-size: 0.78rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .sensor-type {
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .sensor-value {
+            font-size: 1.7rem;
+            font-weight: 600;
+            line-height: 1.1;
+        }
+
+        .sensor-unit {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-left: 4px;
+            font-weight: normal;
+        }
+
+        .sensor-location {
+            font-size: 0.72rem;
+            color: var(--muted);
+        }
+
+        .sensor-bar-wrap {
+            height: 3px;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.06);
+        }
+
+        .sensor-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.2);
+            transition: width 0.5s ease;
+        }
+
+        .sensor-thresholds {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 0.65rem;
+            color: var(--muted);
+        }
+
+        .sensor-status-badge {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 2px 7px;
+            border-radius: 3px;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .sensor-status-badge.GOOD        { color: #6fa87c; border-color: rgba(111,168,124,0.35); }
+        .sensor-status-badge.SUSPECT     { color: #a89050; border-color: rgba(168,144,80,0.35); }
+        .sensor-status-badge.BAD         { color: #a85858; border-color: rgba(168,88,88,0.4); }
+        .sensor-status-badge.MAINTENANCE { color: #787878; border-color: rgba(120,120,120,0.3); }
+        .sensor-status-badge.SIMULATED   { color: #507898; border-color: rgba(80,120,152,0.35); }
+
+        .value-na {
+            color: var(--muted);
+            font-weight: normal;
+            font-size: 1rem;
+        }
+
+        .flash {
+            animation: flash-anim 0.3s ease;
+        }
+
+        @keyframes flash-anim {
+            from { opacity: 0.5; }
+            to   { opacity: 1; }
+        }
+
+        .stat-card {
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 6px;
+            padding: 16px 18px;
+            background: rgba(255,255,255,0.015);
+            display: grid;
+            gap: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .stat-sub {
+            font-size: 0.7rem;
+            color: var(--muted);
+        }
+
+        #connection-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.72rem;
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--muted);
+        }
+
+        #connection-indicator.online {
+            color: #6fa87c;
+            border-color: rgba(111,168,124,0.3);
+        }
+
+        #connection-indicator .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        #last-update {
+            font-size: 0.7rem;
+            color: var(--muted);
+        }
+
+        .shell-loading {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--muted);
+        }
+
+        .shell-loading .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-top-color: rgba(255,255,255,0.35);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <div id="main-navbar"></div>
+
+        <div id="shell-loader" class="shell-loading">
+            <div class="spinner"></div>
+            <div>Se încarcă datele reactorului...</div>
+        </div>
+
+        <div id="topbar" class="topbar" style="display:none;margin-bottom:24px;">
+            <div class="brand">
+                <strong id="reactor-name"></strong>
+                <span id="reactor-meta"></span>
+            </div>
+            <div class="nav-links">
+                <span id="connection-indicator" class="offline">
+                    <span class="dot"></span>
+                    <span id="connection-text">Deconectat</span>
+                </span>
+                <span id="last-update"></span>
+                <button class="button secondary" id="btn-back">Înapoi</button>
+                <button class="button" id="btn-edit">Editează</button>
+            </div>
+        </div>
+
+        <div id="stats-grid" class="grid-3" style="display:none;">
+            <div class="stat-card">
+                <div class="stat-label">Putere Termică</div>
+                <div class="stat-value" id="stat-thermal">—</div>
+                <div class="stat-sub">MW</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Putere Electrică</div>
+                <div class="stat-value" id="stat-electrical">—</div>
+                <div class="stat-sub">MW</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Ciclu Combustibil</div>
+                <div class="stat-value" id="stat-cycle">—</div>
+                <div class="stat-sub">zile</div>
+            </div>
+        </div>
+
+        <div id="stats-grid-2" class="grid-3" style="display:none;">
+            <div class="stat-card">
+                <div class="stat-label">Indice Uzură</div>
+                <div class="stat-value" id="stat-wear">—</div>
+                <div class="stat-sub">0 – 1</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Status Operațional</div>
+                <div class="stat-value" id="stat-status">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Ziua Ciclului</div>
+                <div class="stat-value" id="stat-cycle-day">—</div>
+                <div class="stat-sub">/ <span id="stat-cycle-total">—</span></div>
+            </div>
+        </div>
+
+        <div id="sensors-section" style="display:none;">
+            <h2 class="section-title" style="margin-top: 28px;">Senzori</h2>
+            <div id="sensors-count" style="margin-bottom: 12px; color: var(--muted); font-size: 0.78rem;"></div>
+            <div class="card-grid" id="sensors-grid"></div>
+        </div>
+    </div>
+
+    <script type="module" src="../../modules/pages/reactors/detail.js"></script>
+    <script type="module" src="../../modules/ui/navbar.js"></script>
+</body>
+</html>

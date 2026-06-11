@@ -18,15 +18,13 @@ class PhwrSimulator extends AbstractReactorSimulator {
             $maxTemp = $index['temp_coolant_out']['sensor']->getNormalMax() ?? 310;
 
             $targetTemp = $minTemp + ($maxTemp - $minTemp) * ($powerPct / 100);
-            $newValues[$index['temp_coolant_out']['sensor']->getId()] =
-                $currentTemp + ($targetTemp - $currentTemp) * 0.05;
+            $newValues[$index['temp_coolant_out']['sensor']->getId()] = $currentTemp + ($targetTemp - $currentTemp) * 0.05;
         }
 
         // Moderatorul ramane aproape constant (racit independent)
         if (isset($index['temp_moderator'])) {
             $currentModTemp = $index['temp_moderator']['value'];
-            $newValues[$index['temp_moderator']['sensor']->getId()] =
-                $currentModTemp + (self::MODERATOR_TEMP_NOMINAL - $currentModTemp) * 0.02;
+            $newValues[$index['temp_moderator']['sensor']->getId()] = $currentModTemp + (self::MODERATOR_TEMP_NOMINAL - $currentModTemp) * 0.02;
         }
 
         // Presiunea circuitului de racire
@@ -35,8 +33,7 @@ class PhwrSimulator extends AbstractReactorSimulator {
             $currentPres = $index['pressure']['value'];
 
             $targetPres = self::COOLANT_PRESSURE_NOMINAL + ($tempOut - 285) * 0.025;
-            $newValues[$index['pressure']['sensor']->getId()] =
-                $currentPres + ($targetPres - $currentPres) * 0.05;
+            $newValues[$index['pressure']['sensor']->getId()] = $currentPres + ($targetPres - $currentPres) * 0.05;
         }
 
         // Activitate tritiu in moderator creste cu puterea

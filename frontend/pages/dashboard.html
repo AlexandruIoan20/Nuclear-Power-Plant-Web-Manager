@@ -36,6 +36,7 @@
     </script>
     
     <div class="page-shell">
+        <div id="main-navbar"></div>
         <main id="app-container" class="panel">
             <p class="inline-status">Se încarcă dashboard-ul...</p>
         </main>
@@ -81,18 +82,6 @@
                     const role = escapeHtml(user.role);
 
                     container.innerHTML = `
-                        <header class="topbar">
-                            <div class="brand">
-                                <strong>Nuclear Plant Control</strong>
-                                <span>Overview operațional pentru centralele nucleare</span>
-                            </div>
-                            <nav class="nav-links" aria-label="Navigare principală">
-                                <a href="start.html">Start</a>
-                                <a href="dashboard.html" class="active">Dashboard</a>
-                                <a href="${BACKEND_BASE}/logout">Logout</a>
-                            </nav>
-                        </header>
-
                         <section>
                             <p class="eyebrow">CONTROL PANEL / OVERVIEW</p>
                             <h1>Bun venit, ${username}!</h1>
@@ -209,5 +198,7 @@
             checkSensorAlerts();
         });
     </script>
+
+    <script type="module" src="../modules/ui/navbar.js"></script>
 </body>
 </html>

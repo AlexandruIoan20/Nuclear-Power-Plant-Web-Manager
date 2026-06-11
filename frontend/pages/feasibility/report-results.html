@@ -5,14 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="../../../../style.css">
+    <script src="../../modules/config/globals.js"></script>
 </head>
 <body>
     <div class="page-shell">
+        <div id="main-navbar"></div>
     
-        <div class="topbar">
+        <div class="topbar" style="margin-bottom:24px;">
             <div class="brand">
                 <strong>RAPORT DE FEZABILITATE</strong>
-                <span id="report-meta"></span> </div>
+                <span id="report-meta"></span>
+            </div>
             <div class="nav-links">
                 <span id="report-status" class="tag"></span>
             </div>
@@ -65,6 +68,7 @@
     
     </div>
 
+    <script type = "module" src = "../../modules/ui/navbar.js"></script>
     <script type = "module" src = "../../modules/pages/feasibility/report-results.js"></script>
 </body>
 </html>
