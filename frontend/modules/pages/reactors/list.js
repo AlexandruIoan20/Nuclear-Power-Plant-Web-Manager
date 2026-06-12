@@ -80,6 +80,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.location.href = `/pages/reactors/detail.html?reactorId=${row.dataset.id}&plantId=${plantId}`;
             return;
         }
+        if (e.target.closest('.btn-sensors-reactor')) {
+            window.location.href = `/pages/sensors/list.html?reactorId=${row.dataset.id}&plantId=${plantId}`;
+            return;
+        }
         if (e.target.closest('.btn-edit-reactor')) {
             window.location.href = `/pages/reactors/edit.html?reactorId=${row.dataset.id}&plantId=${plantId}`;
             return;

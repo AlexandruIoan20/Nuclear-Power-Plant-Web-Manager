@@ -192,6 +192,13 @@ class SensorRepository {
         $stmt->execute(['id' => $id]);
     }
 
+    public function deleteByReactorAndCodes(string $reactorId, array $codes): void {
+        if (empty($codes)) return;
+        $placeholders = implode(', ', array_fill(0, count($codes), '?'));
+        $stmt = $this->db->prepare("DELETE FROM reactor_sensors WHERE reactor_id = ? AND sensor_code IN ($placeholders)");
+        $stmt->execute(array_merge([$reactorId], $codes));
+    }
+
     private function extractParameters(ReactorSensor $s): array {
         return [
             'id' => $s->getId(),

@@ -35,6 +35,7 @@ export function renderReactorTable(reactors, plantId, readonly) {
             <td>${r.electricalPowerMw != null ? r.electricalPowerMw + ' MW' : '—'}</td>
             <td class="td-actions">
                 <button class="btn-monitor-reactor button" style="font-size:0.72rem;padding:4px 8px;width:auto;margin-right:3px;">Live</button>
+                <button class="btn-sensors-reactor button" style="font-size:0.72rem;padding:4px 8px;width:auto;margin-right:3px;">Senzori</button>
                 <button class="btn-edit-reactor button" style="font-size:0.72rem;padding:4px 8px;width:auto;margin-right:3px;">Editează</button>
                 ${deleteBtn}
             </td>
