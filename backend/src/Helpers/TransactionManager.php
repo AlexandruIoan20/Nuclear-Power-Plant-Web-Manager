@@ -8,6 +8,9 @@ class TransactionManager {
     }
 
     public function begin(): void {
+        if ($this->db->inTransaction()) {
+            return;
+        }
         $this->db->beginTransaction();
     }
 

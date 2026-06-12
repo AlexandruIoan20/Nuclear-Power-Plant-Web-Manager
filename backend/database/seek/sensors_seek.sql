@@ -27,7 +27,7 @@ VALUES
 ('PWR','LI-001','LEVEL_SENSOR','Nivel apa presuprizor','Presuprizor',
  '%','level_reactor_vessel',25,60,20,70,15,80,10,90),
 ('PWR','VI-001','VIBRATION_SENSOR','Vibratii pompa circuit primar P-1A','Pompa P-1A / Lagare',
- 'mm/s',NULL,0,2.5,NULL,3.5,NULL,7.0,NULL,12.0),
+ 'mm/s','vibration',0,2.5,NULL,3.5,NULL,7.0,NULL,12.0),
 ('BWR','NI-001','NEUTRON_DETECTOR','Flux neutronic - putere reactor','Incinta reactor / Detector A',
  '%Pn','power_percent',0,100,NULL,102,NULL,105,NULL,110),
 ('BWR','TI-001','THERMOCOUPLE','Temperatura agent racire - iesire miez','Miez activ / Iesire',
@@ -49,7 +49,7 @@ VALUES
 ('BWR','LI-001','LEVEL_SENSOR','Nivel apa in vasul reactorului','Vas reactor',
  '%','level_reactor_vessel',30,70,25,75,20,80,15,90),
 ('BWR','VI-001','VIBRATION_SENSOR','Vibratii pompa recirculare RC-1A','Pompa RC-1A / Lagare',
- 'mm/s',NULL,0,2.5,NULL,3.5,NULL,7.0,NULL,12.0),
+ 'mm/s','vibration',0,2.5,NULL,3.5,NULL,7.0,NULL,12.0),
 ('PHWR','NI-001','NEUTRON_DETECTOR','Flux neutronic - putere reactor miez','Miez activ / Detector A',
  '%Pn','power_percent',0,100,NULL,102,NULL,105,NULL,110),
 ('PHWR','TI-001','THERMOCOUPLE','Temperatura agent racire - iesire canale combustibil','Canale combustibil / Iesire colector',
@@ -75,7 +75,7 @@ VALUES
 ('PHWR','LI-001','LEVEL_SENSOR','Nivel moderator D2O - calandria','Calandria',
  '%','level_reactor_vessel',40,80,35,85,30,90,25,95),
 ('PHWR','VI-001','VIBRATION_SENSOR','Vibratii pompa circuit primar PH-1A','Pompa PH-1A / Lagare',
- 'mm/s',NULL,0,2.5,NULL,3.5,NULL,7.0,NULL,12.0),
+ 'mm/s','vibration',0,2.5,NULL,3.5,NULL,7.0,NULL,12.0),
 ('FBR','NI-001','NEUTRON_DETECTOR','Flux neutroni rapizi - putere miez','Miez activ / Detector A',
  '%Pn','power_percent',0,100,NULL,102,NULL,105,NULL,110),
 ('FBR','TI-001','THERMOCOUPLE','Temperatura sodiu la iesirea din miez','Miez activ / Iesire sodiu',
@@ -99,5 +99,5 @@ VALUES
 ('FBR','LI-001','LEVEL_SENSOR','Nivel sodiu in vasul reactorului','Vas reactor',
  '%','level_reactor_vessel',50,90,45,92,40,95,35,98),
 ('FBR','VI-001','VIBRATION_SENSOR','Vibratii pompa electromagnetica sodiu SP-1A','Pompa SP-1A / Stator',
- 'mm/s',NULL,0,2.5,NULL,3.5,NULL,7.0,NULL,12.0)
+ 'mm/s','vibration',0,2.5,NULL,3.5,NULL,7.0,NULL,12.0)
 ON CONFLICT (reactor_type, sensor_code) DO NOTHING;

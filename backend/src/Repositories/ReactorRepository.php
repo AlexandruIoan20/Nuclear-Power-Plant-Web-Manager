@@ -1,9 +1,9 @@
 <?php 
 
-require_once __DIR__ . '../../Entities/Reactor.php'; 
-require_once __DIR__ . '../../Entities/ReactorType.php'; 
-require_once __DIR__ . '../../Entities/CoolingType.php'; 
-require_once __DIR__ . '../../Entities/ReactorOperationalStatus.php'; 
+require_once __DIR__ . '/../Entities/Reactor.php'; 
+require_once __DIR__ . '/../Entities/ReactorType.php'; 
+require_once __DIR__ . '/../Entities/CoolingType.php'; 
+require_once __DIR__ . '/../Entities/ReactorOperationalStatus.php'; 
 
 class ReactorRepository { 
     private PDO $db; 

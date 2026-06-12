@@ -7,10 +7,7 @@ import { logger } from '../../core/logger.js';
 
 loadSelect('filter-status', PlantStatus); 
 
-let goTo = "/pages/admin/validate.html"; 
-
-logger.info({ goTo });
-
+let masterPlants = [];
 let allPlants = [];
 let sortCol = 'name';
 let sortDir = 'asc';
@@ -27,13 +24,24 @@ function updateSortHeaders() {
     }
 }
 
+function navigateToPlant(plantId) {
+    const plant = masterPlants.find(p => p.id === plantId);
+    if (plant?.status === 'APPROVED') {
+        window.location.href = `/pages/reactors/list.html?plantId=${plantId}`;
+    } else {
+        window.location.href = `/pages/admin/validate.html?id=${plantId}`;
+    }
+}
+
 document.getElementById('filter-name').addEventListener('input', () => applyFilters(allPlants, sortCol, sortDir));
 document.getElementById('filter-country').addEventListener('input', () => applyFilters(allPlants, sortCol, sortDir));
 
 document.getElementById('btn-reset').addEventListener('click', () => {
     document.getElementById('filter-name').value    = '';
     document.getElementById('filter-country').value = '';
-    applyFilters(allPlants, sortCol, sortDir, goTo);
+    document.getElementById('filter-status').value  = '';
+    allPlants = masterPlants;
+    applyFilters(allPlants, sortCol, sortDir);
 });
 
 document.querySelectorAll('th[data-col]').forEach(th => {
@@ -48,24 +56,22 @@ document.querySelectorAll('th[data-col]').forEach(th => {
             sortDir = 'asc';
         }
         updateSortHeaders();
-        applyFilters(allPlants, sortCol, sortDir, goTo);
+        applyFilters(allPlants, sortCol, sortDir);
     });
 });
 
-document.getElementById('filter-status').addEventListener('change', async () => {
+document.getElementById('filter-status').addEventListener('change', () => {
     const status = document.getElementById('filter-status').value;
 
     logger.info({ status }); 
 
     if (!status) {
-        const response = await powerPlantService.getAll();
-        allPlants = response.data ?? [];
+        allPlants = masterPlants;
     } else {
-        const response = await powerPlantService.getPlantsByStatus(status);
-        allPlants = response.data ?? [];
+        allPlants = masterPlants.filter(p => p.status === status);
     }
 
-    applyFilters(allPlants, sortCol, sortDir, goTo);
+    applyFilters(allPlants, sortCol, sortDir);
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -75,10 +81,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         logger.info({ response }); 
 
-        allPlants = response.data ?? [];
-        applyFilters(allPlants, sortCol, sortDir, goTo);
+        masterPlants = response.data ?? [];
+        allPlants = masterPlants;
+        applyFilters(allPlants, sortCol, sortDir);
     } catch (error) {
         logger.error(error.message);
         alert("Eroare la încărcarea centralelor"); 
     }
+});
+
+document.getElementById('plants-tbody').addEventListener('click', (e) => {
+    const row = e.target.closest('tr[data-id]');
+    if (!row) return;
+    if (e.target.closest('a, button')) return;
+    navigateToPlant(row.dataset.id);
 });

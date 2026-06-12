@@ -1,8 +1,9 @@
 <?php 
 
 require_once __DIR__ . '/../Entities/TechnicalPlantData.php'; 
+require_once __DIR__ . '/BaseDTO.php';
 
-class TechnicalPlantDataDTO { 
+class TechnicalPlantDataDTO extends BaseDTO { 
     public function __construct ( 
         public readonly string $id, 
         public readonly string $powerPlantId, 

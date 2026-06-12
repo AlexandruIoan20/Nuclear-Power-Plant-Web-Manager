@@ -1,6 +1,8 @@
 <?php
 
 require_once __DIR__ . '/../Services/LogService.php';
+require_once __DIR__ . '/../Dto/LogListDTO.php';
+require_once __DIR__ . '/../Dto/ApiResponseDTO.php';
 
 class LogController {
     public function getLogs(): void {
@@ -14,7 +16,7 @@ class LogController {
         $validLevels = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'];
         if ($level !== null && !in_array(strtoupper($level), $validLevels)) {
             http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Nivel de log invalid.']);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Nivel de log invalid.'));
             return;
         }
 
@@ -27,21 +29,7 @@ class LogController {
                 $total = LogService::instance()->getRepository()->countByLevel($level ? strtoupper($level) : null);
             }
 
-            $data = array_map(function (Log $log) {
-                return [
-                    'id' => $log->getId(),
-                    'level' => $log->getLevel(),
-                    'message' => $log->getMessage(),
-                    'context' => $log->getContext(),
-                    'user_id' => $log->getUserId(),
-                    'plant_id' => $log->getPlantId(),
-                    'reactor_id' => $log->getReactorId(),
-                    'source' => $log->getSource(),
-                    'request_uri' => $log->getRequestUri(),
-                    'ip_address' => $log->getIpAddress(),
-                    'created_at' => $log->getCreatedAt(),
-                ];
-            }, $logs);
+            $data = array_map(fn(Log $log) => LogListDTO::fromEntity($log), $logs);
 
             http_response_code(200);
             echo json_encode([
@@ -54,7 +42,7 @@ class LogController {
             ]);
         } catch (Exception $e) {
             http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => 'Eroare la citirea logurilor: ' . $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Eroare la citirea logurilor: ' . $e->getMessage()));
         }
     }
 
@@ -66,7 +54,7 @@ class LogController {
 
         if (empty($data) || empty($data['level']) || empty($data['message'])) {
             http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Date incomplete pentru log.']);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Date incomplete pentru log.'));
             return;
         }
 
@@ -74,7 +62,7 @@ class LogController {
         $level = strtoupper($data['level']);
         if (!in_array($level, $validLevels)) {
             http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Nivel de log invalid.']);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Nivel de log invalid.'));
             return;
         }
 
@@ -88,10 +76,10 @@ class LogController {
             );
 
             http_response_code(201);
-            echo json_encode(['status' => 'success']);
+            echo json_encode(new ApiResponseDTO(status: 'success'));
         } catch (Exception $e) {
             http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => 'Eroare la salvarea logului: ' . $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Eroare la salvarea logului: ' . $e->getMessage()));
         }
     }
 }

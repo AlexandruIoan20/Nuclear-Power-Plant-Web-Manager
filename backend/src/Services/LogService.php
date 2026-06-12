@@ -47,7 +47,11 @@ class LogService {
             $ipAddress
         );
 
-        $this->repository->save($log);
+        try {
+            $this->repository->save($log);
+        } catch (PDOException $e) {
+            error_log("[LogService] Eroare la salvarea logului: " . $e->getMessage());
+        }
 
         $timestamp = date('Y-m-d H:i:s');
         $userTag = $userId ? "[user:{$userId}]" : '';

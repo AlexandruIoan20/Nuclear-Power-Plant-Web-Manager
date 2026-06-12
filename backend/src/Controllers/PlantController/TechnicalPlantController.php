@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../../Services/PlantServiceFacade.php'; 
 require_once __DIR__ . '/../../Dto/TechnicalPlantDataDTO.php'; 
+require_once __DIR__ . '/../../Dto/ApiResponseDTO.php'; 
 
 class TechnicalPlantController { 
     public function __construct(
@@ -15,14 +16,14 @@ class TechnicalPlantController {
 
         if(!$technicalPlantData) { 
             http_response_code(404); 
-            echo json_encode(["status" => "error", "message" => "Datele tehnice ale centralei nu au fost gasite"]); 
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Datele tehnice ale centralei nu au fost gasite")); 
             exit; 
         }
 
         $technicalPlantDataDTO = TechnicalPlantDataDTO::fromEntity($technicalPlantData); 
 
         http_response_code(200); 
-        echo json_encode(["status" => "success", "data" => $technicalPlantDataDTO]); 
+        echo json_encode(new ApiResponseDTO(status: 'success', data: $technicalPlantDataDTO)); 
         exit; 
     }
 
@@ -39,7 +40,7 @@ class TechnicalPlantController {
             http_response_code(200);
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
-                'success' => true,
+                'status' => 'success',
                 'message' => 'Datele tehnice au fost salvate cu succes.', 
                 'plantId' => $plantId, 
                 'technicalId' => $responseDTO->dataId
@@ -49,10 +50,7 @@ class TechnicalPlantController {
         
             http_response_code(400);
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode([
-                'success' => false,
-                'message' => 'Eroare la salvarea datelor tehnice: ' . $e->getMessage()
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Eroare la salvarea datelor tehnice: ' . $e->getMessage()));
         }
     }
 
@@ -68,19 +66,13 @@ class TechnicalPlantController {
             
             http_response_code(200);
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode([
-                'success' => true,
-                'message' => 'Datele tehnice au fost actualizate cu succes.'
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'success', message: 'Datele tehnice au fost actualizate cu succes.'));
         } catch(Exception $e) { 
             LogService::instance()->error("[ERROR] POST Tech Data Update: " . $e->getMessage());
             
             http_response_code(400);
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode([
-                'success' => false,
-                'message' => 'Eroare la actualizarea datelor tehnice: ' . $e->getMessage()
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Eroare la actualizarea datelor tehnice: ' . $e->getMessage()));
         }
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . "/../Services/SensorService.php";
+require_once __DIR__ . "/../Dto/ApiResponseDTO.php";
 
 class SensorController {
     private SensorService $sensorService;
@@ -44,11 +45,11 @@ class SensorController {
         try {
             $sensors = $this->sensorService->getSensorsByReactor($reactorId);
             http_response_code(200);
-            echo json_encode(["status" => "success", "data" => $sensors]);
+            echo json_encode(new ApiResponseDTO(status: 'success', data: $sensors));
             exit;
         } catch (Exception $e) {
             http_response_code(500);
-            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
             exit;
         }
     }
@@ -59,11 +60,11 @@ class SensorController {
         try {
             $sensor = $this->sensorService->getSensor($id);
             http_response_code(200);
-            echo json_encode(["status" => "success", "data" => $sensor]);
+            echo json_encode(new ApiResponseDTO(status: 'success', data: $sensor));
             exit;
         } catch (Exception $e) {
             http_response_code(str_contains($e->getMessage(), 'găsit') ? 404 : 500);
-            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
             exit;
         }
     }
@@ -76,7 +77,7 @@ class SensorController {
 
         if (empty($data)) {
             http_response_code(400);
-            echo json_encode(["status" => "error", "message" => "Nu s-au primit date."]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Nu s-au primit date."));
             exit;
         }
 
@@ -91,7 +92,7 @@ class SensorController {
             exit;
         } catch (Exception $e) {
             http_response_code(400);
-            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
             exit;
         }
     }
@@ -104,19 +105,19 @@ class SensorController {
 
         if (empty($data)) {
             http_response_code(400);
-            echo json_encode(["status" => "error", "message" => "Date incomplete pentru actualizare."]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Date incomplete pentru actualizare."));
             exit;
         }
 
         try {
             $this->sensorService->updateSensor($id, $data);
             http_response_code(200);
-            echo json_encode(["status" => "success", "message" => "Senzorul a fost actualizat cu succes."]);
+            echo json_encode(new ApiResponseDTO(status: 'success', message: "Senzorul a fost actualizat cu succes."));
             exit;
         } catch (Exception $e) {
             $code = str_contains($e->getMessage(), 'găsit') ? 404 : 400;
             http_response_code($code);
-            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
             exit;
         }
     }
@@ -127,12 +128,12 @@ class SensorController {
         try {
             $this->sensorService->deleteSensor($id);
             http_response_code(200);
-            echo json_encode(["status" => "success", "message" => "Senzorul a fost șters cu succes."]);
+            echo json_encode(new ApiResponseDTO(status: 'success', message: "Senzorul a fost șters cu succes."));
             exit;
         } catch (Exception $e) {
             $code = str_contains($e->getMessage(), 'găsit') ? 404 : 500;
             http_response_code($code);
-            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
             exit;
         }
     }
@@ -146,18 +147,18 @@ class SensorController {
 
         if (!$reactorType) {
             http_response_code(400);
-            echo json_encode(["status" => "error", "message" => "reactorType este obligatoriu."]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "reactorType este obligatoriu."));
             exit;
         }
 
         try {
             $this->sensorService->populateSensorsForReactor($reactorId, $reactorType);
             http_response_code(200);
-            echo json_encode(["status" => "success", "message" => "Senzorii au fost generați cu succes din template."]);
+            echo json_encode(new ApiResponseDTO(status: 'success', message: "Senzorii au fost generați cu succes din template."));
             exit;
         } catch (Exception $e) {
             http_response_code(500);
-            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
             exit;
         }
     }

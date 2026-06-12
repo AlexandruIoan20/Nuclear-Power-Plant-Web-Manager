@@ -16,10 +16,14 @@ export function renderReactorTable(reactors, plantId, readonly) {
     document.getElementById('results-count').textContent = reactors.length;
 
     if (!reactors.length) {
-        tbody.innerHTML = '<tr class="state-row"><td colspan="8">Niciun reactor găsit.</td></tr>';
+        tbody.innerHTML = '<tr class="state-row"><td colspan="7">Niciun reactor găsit.</td></tr>';
         return;
     }
 
+<<<<<<< HEAD
+    tbody.innerHTML = reactors.map(r => `
+        <tr data-id="${escapeHtml(r.id)}">
+=======
     tbody.innerHTML = reactors.map(r => {
         const deleteBtn = readonly
             ? ''
@@ -27,6 +31,7 @@ export function renderReactorTable(reactors, plantId, readonly) {
 
         return `<tr data-id="${escapeHtml(r.id)}">
             <td class="td-id">${shortId(r.id)}</td>
+>>>>>>> merge-1
             <td>${escapeHtml(r.reactorCode ?? '—')}</td>
             <td>${escapeHtml(r.reactorType ?? '—')}</td>
             <td>${escapeHtml(r.coolingType ?? '—')}</td>
@@ -34,8 +39,12 @@ export function renderReactorTable(reactors, plantId, readonly) {
             <td>${r.thermalPowerMw != null ? r.thermalPowerMw + ' MW' : '—'}</td>
             <td>${r.electricalPowerMw != null ? r.electricalPowerMw + ' MW' : '—'}</td>
             <td class="td-actions">
+<<<<<<< HEAD
+                <button class="btn-monitor-reactor button" style="font-size:0.72rem;padding:4px 8px;width:auto;margin-right:3px;">Monitorizare</button>
+=======
                 <button class="btn-monitor-reactor button" style="font-size:0.72rem;padding:4px 8px;width:auto;margin-right:3px;">Live</button>
                 <button class="btn-sensors-reactor button" style="font-size:0.72rem;padding:4px 8px;width:auto;margin-right:3px;">Senzori</button>
+>>>>>>> merge-1
                 <button class="btn-edit-reactor button" style="font-size:0.72rem;padding:4px 8px;width:auto;margin-right:3px;">Editează</button>
                 ${deleteBtn}
             </td>
@@ -52,7 +61,4 @@ function statusTag(status) {
     return '<span class="tag ' + cls + '">' + status.replace(/_/g, ' ') + '</span>';
 }
 
-function shortId(id) {
-    if (!id) return '—';
-    return '<span title="' + id + '">' + id.slice(0, 8) + '…</span>';
-}
+

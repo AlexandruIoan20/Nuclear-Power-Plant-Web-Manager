@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../Dto/CreateDataResponseDTO.php';
 require_once __DIR__ . '/../Dto/GeologicalPlantDataDTO.php';
+require_once __DIR__ . '/../Dto/GeoLocationPreviewDTO.php';
 
 class PlantServiceFacade {
     private DetailsPlantService $detailsPlantService;
@@ -22,33 +23,47 @@ class PlantServiceFacade {
         $this->plantRepositoryFacade->updatePlantStatus($plantId, $status);
     }
 
+    public function submitForReview(string $plantId, string $userId): bool {
+        $plant = $this->detailsPlantService->findById($plantId);
+        if (!$plant) return false;
+        if ($plant->getStatus()->value !== 'DRAFT') return false;
+        if ($plant->getCreatedBy() !== $userId) return false;
+
+        $completePlantProfile = $this->getCompletePlantProfile($plantId);
+        foreach ($completePlantProfile as $profile) {
+            if ($profile == null) return false;
+        }
+
+        $this->plantRepositoryFacade->updatePlantStatus($plantId, 'REVIEW');
+        return true;
+    }
+
+    public function reopenDraft(string $plantId, string $userId): bool {
+        $plant = $this->detailsPlantService->findById($plantId);
+        if (!$plant) return false;
+        if ($plant->getStatus()->value !== 'REJECTED') return false;
+        if ($plant->getCreatedBy() !== $userId) return false;
+
+        $this->plantRepositoryFacade->updatePlantStatus($plantId, 'DRAFT');
+        return true;
+    }
 
     public function getAllPowerPlants(): array {
         return $this->detailsPlantService->getAllPowerPlants();
     }
 
+    public function getMyPowerPlants(string $userId): array {
+        return $this->detailsPlantService->getMyPowerPlants($userId);
+    }
+
   
     public function getPendingApprovalsList(): array {
         $allPlants = $this->detailsPlantService->getAllPowerPlants();
-        
+
         $pendingPlants = array_filter($allPlants, function($plant) {
-            $statusRaw = is_object($plant) && method_exists($plant, 'getStatus') 
-                ? $plant->getStatus() 
-                : (is_array($plant) ? ($plant['status'] ?? '') : '');
-                
-          
-            if ($statusRaw instanceof \UnitEnum) {
-                
-                $statusStr = property_exists($statusRaw, 'value') ? $statusRaw->value : $statusRaw->name;
-            } else {
-               
-                $statusStr = (string)$statusRaw;
-            }
-                
-            return strtoupper($statusStr) === 'PENDING' || strtoupper($statusStr) === 'DRAFT';
+            return ($plant['status'] ?? '') === PlantStatus::REVIEW->value;
         });
 
-        
         return array_values($pendingPlants);
     }
     
@@ -101,7 +116,7 @@ class PlantServiceFacade {
     }
 
     // Geological
-    public function previewGeologicalLocation(float $lat, float $lon): array {
+    public function previewGeologicalLocation(float $lat, float $lon): GeoLocationPreviewDTO {
         return $this->geologicalPlantService->runAutoGeolocation($lat, $lon);
     }
 

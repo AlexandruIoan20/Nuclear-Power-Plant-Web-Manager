@@ -1,0 +1,160 @@
+.button,
+button,
+input[type="submit"] {
+    appearance: none;
+    border: 1px solid var(--yellow);
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.14), rgba(255, 215, 0, 0.05));
+    color: var(--yellow);
+    font: inherit;
+    padding: 12px 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    width: 100%;
+    justify-content: center;
+}
+
+.button:hover,
+button:hover,
+input[type="submit"]:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 18px rgba(255, 215, 0, 0.2);
+    text-decoration: none;
+}
+
+.button.secondary {
+    border-color: rgba(57, 255, 20, 0.7);
+    color: var(--green);
+    background: linear-gradient(180deg, rgba(57, 255, 20, 0.11), rgba(57, 255, 20, 0.03));
+    box-shadow: 0 0 18px rgba(57, 255, 20, 0.08);
+}
+
+.button.danger {
+    border-color: rgba(255, 77, 77, 0.7);
+    color: #ff4d4d;
+    background: linear-gradient(180deg, rgba(255, 77, 77, 0.11), rgba(255, 77, 77, 0.03));
+    box-shadow: 0 0 18px rgba(255, 77, 77, 0.08);
+}
+
+.button.danger:hover {
+    box-shadow: 0 0 22px rgba(255, 77, 77, 0.25);
+}
+
+/* ─── Action groups ─── */
+.hero-actions,
+.card-actions,
+.button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.button-row input[type="submit"],
+.hero-actions .button,
+.hero-actions input[type="submit"] {
+    min-width: 160px;
+}
+
+.actions-spaced {
+    margin-top: 30px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* ─── Actions spaced ─── */
+.actions-spaced {
+    margin-top: 30px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* ─── Actions cell (tables) ─── */
+.actions-cell {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.actions-cell .button {
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    width: auto;
+}
+
+/* ─── Reset button ─── */
+.btn-reset {
+    appearance: none;
+    border: 1px solid rgba(255,215,0,0.3);
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    padding: 11px 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.2s, color 0.2s;
+    width: auto;
+    align-self: flex-end;
+}
+
+.btn-reset:hover {
+    border-color: rgba(255,215,0,0.6);
+    color: var(--yellow);
+}
+
+/* ─── Approve / Reject ─── */
+.btn-approve {
+    appearance: none;
+    border: 1px solid rgba(57,255,20,0.7);
+    background: linear-gradient(180deg, rgba(57,255,20,0.12), rgba(57,255,20,0.04));
+    color: var(--green);
+    font: inherit;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    width: auto;
+}
+
+.btn-approve:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 18px rgba(57,255,20,0.25);
+}
+
+.btn-approve:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-reject {
+    appearance: none;
+    border: 1px solid rgba(255,77,77,0.7);
+    background: linear-gradient(180deg, rgba(255,77,77,0.12), rgba(255,77,77,0.04));
+    color: #ff8787;
+    font: inherit;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    width: auto;
+}
+
+.btn-reject:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 18px rgba(255,77,77,0.2);
+}
+
+.btn-reject:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}

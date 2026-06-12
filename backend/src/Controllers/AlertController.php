@@ -1,6 +1,8 @@
 <?php
 
 require_once __DIR__ . '/../Entities/Alert.php'; 
+require_once __DIR__ . '/../Dto/AlertListDTO.php'; 
+require_once __DIR__ . '/../Dto/ApiResponseDTO.php'; 
 
 class AlertController {
     private AlertService $alertService;
@@ -15,7 +17,7 @@ class AlertController {
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
-            echo json_encode(['status' => 'error', 'message' => 'Metoda nepermisă.']);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Metoda nepermisă.'));
             exit;
         }
 
@@ -30,11 +32,11 @@ class AlertController {
             );
 
             http_response_code(200);
-            echo json_encode(['status' => 'success', 'message' => 'Semnalul senzorului a fost procesat.']);
+            echo json_encode(new ApiResponseDTO(status: 'success', message: 'Semnalul senzorului a fost procesat.'));
         } catch (\Throwable $e) {
             LogService::instance()->error("[SENSOR ERROR] " . $e->getMessage());
             http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
         }
     }
 
@@ -47,31 +49,20 @@ class AlertController {
             $userId = $_SESSION['user_id'] ?? null;
             if (!$userId) {
                 http_response_code(401);
-                echo json_encode(['status' => 'error', 'message' => 'Neautorizat']);
+                echo json_encode(new ApiResponseDTO(status: 'error', message: 'Neautorizat'));
                 exit;
             }
 
             $alerts = $this->alertService->getActivePopups($userId);
 
-            $payload = array_map(function (Alert $alert) {
-                return [
-                    'id' => $alert->getId(),
-                    'plant_id' => $alert->getPlantId(),
-                    'type' => $alert->getType(),
-                    'message' => $alert->getMessage(),
-                    'created_at' => $alert->getCreatedAt()
-                ];
-            }, $alerts);
+            $payload = array_map(fn(Alert $alert) => AlertListDTO::fromEntity($alert), $alerts);
 
-            echo json_encode(['status' => 'success', 'data' => $payload]);
+            echo json_encode(new ApiResponseDTO(status: 'success', data: $payload));
         } catch (\Throwable $e) {
            
             LogService::instance()->error("[ALERT GET ERROR] " . $e->getMessage() . " în " . $e->getFile() . " linia " . $e->getLine());
             http_response_code(500);
-            echo json_encode([
-                'status' => 'error', 
-                'message' => 'Eroare internă: ' . $e->getMessage()
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Eroare internă: ' . $e->getMessage()));
         }
     }
 
@@ -82,7 +73,7 @@ class AlertController {
         try {
             if (!isset($_SESSION['user_id'])) {
                 http_response_code(401);
-                echo json_encode(['status' => 'error', 'message' => 'Neautorizat']);
+                echo json_encode(new ApiResponseDTO(status: 'error', message: 'Neautorizat'));
                 exit;
             }
 
@@ -103,11 +94,11 @@ class AlertController {
 
             $this->alertService->dismissAlert($id);
             LogService::instance()->info("[ALERT] Alertă {$id} marcată ca citită.");
-            echo json_encode(['status' => 'success']);
+            echo json_encode(new ApiResponseDTO(status: 'success'));
         } catch (\Throwable $e) {
             LogService::instance()->error("[ALERT PUT ERROR] " . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
         }
     }
 }

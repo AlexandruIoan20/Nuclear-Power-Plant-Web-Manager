@@ -32,6 +32,14 @@ class DetailsPlantService {
     }
 
     public function updatePlantDetails(array $data, string $id) { 
+        $existing = $this->plantRepositoryFacade->getPlantDetailsById($id);
+        if (!$existing) {
+            throw new Exception("Centrala nu a fost găsită.");
+        }
+        if ($existing->getStatus()->value !== 'DRAFT') {
+            throw new Exception("Nu poți edita o centrală care nu este în status DRAFT.");
+        }
+
         $name = $data['name'] ?? ''; 
         $status = PlantStatus::DRAFT; 
 
@@ -46,11 +54,15 @@ class DetailsPlantService {
         return $this->plantRepositoryFacade->getAllPowerPlants(); 
     }
 
+    public function getMyPowerPlants(string $userId): array {
+        return $this->plantRepositoryFacade->findByUser($userId);
+    }
+
     public function getPlantsByStatus(array $data): array { 
         $status = PlantStatus::tryFrom($data['status']); 
     
         if($status === null) {
-            return ["success" => false, "message" => "Nu exista centrale cu acest status de proiect."];
+            throw new Exception("Nu exista centrale cu acest status de proiect.");
         }
     
         $powerPlants = $this->plantRepositoryFacade->getPlantsByStatus(['status' => $status->value]); 

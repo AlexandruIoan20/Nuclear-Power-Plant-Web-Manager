@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../Services/NotificationService.php';
+require_once __DIR__ . '/../Dto/ApiResponseDTO.php';
 
 class NotificationController {
     private NotificationService $notificationService;
@@ -19,7 +20,7 @@ class NotificationController {
 
             if (!$userId) {
                 http_response_code(401);
-                echo json_encode(['status' => 'error', 'message' => 'Neautorizat']);
+                echo json_encode(new ApiResponseDTO(status: 'error', message: 'Neautorizat'));
                 exit;
             }
 
@@ -31,17 +32,11 @@ class NotificationController {
             };
 
             http_response_code(200);
-            echo json_encode([
-                'status' => 'success',
-                'data' => $notifications
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'success', data: $notifications));
         } catch (\Throwable $e) {
             LogService::instance()->error("[NOTIFICATION ERROR] " . $e->getMessage() . " în " . $e->getFile() . ":" . $e->getLine());
             http_response_code(500);
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Eroare internă: ' . $e->getMessage()
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Eroare internă: ' . $e->getMessage()));
         }
     }
 }

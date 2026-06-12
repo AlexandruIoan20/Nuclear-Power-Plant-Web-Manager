@@ -1,46 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ro">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Centrale</title>
-    <link rel="stylesheet" href="../../../style.css">
-    <script src="../../modules/config/globals.js"></script>
-    <style>
-        .toolbar {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-        .toolbar .button {
-            padding: 6px 14px;
-            font-size: 0.82rem;
-        }
-        .td-actions {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-        }
-        .td-actions .btn-view {
-            padding: 4px 10px;
-            font-size: 0.78rem;
-        }
-        .td-actions .btn-export-json,
-        .td-actions .btn-export-csv {
-            background: none;
-            border: 1px solid #333;
-            border-radius: 3px;
-            padding: 4px 6px;
-            cursor: pointer;
-            color: #888;
-            line-height: 0;
-        }
-        .td-actions .btn-export-json:hover,
-        .td-actions .btn-export-csv:hover {
-            color: var(--green);
-            border-color: var(--green);
-        }
-    </style>
+    <title>Lista Centralelor</title>
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/navbar.css">
+    <link rel="stylesheet" href="../../css/layout.css">
+    <link rel="stylesheet" href="../../css/buttons.css">
+    <link rel="stylesheet" href="../../css/responsive.css">
+    <link rel="stylesheet" href="../../css/tables.css">
+    <link rel="stylesheet" href="../../css/tags.css">
+    <link rel="stylesheet" href="../../css/forms.css">
 </head>
 <body>
     <div class="page-shell">
@@ -55,11 +26,11 @@
         <div class="filter-bar">
             <div class="field">
                 <label for="filter-name">Caută după nume</label>
-                <input type="text" id="filter-name" placeholder="ex. Solar Plant..." autocomplete="off" />
+                <input type="text" id="filter-name" placeholder="ex. Centrală Solară..." autocomplete="off" />
             </div>
             <div class="field">
                 <label for="filter-country">Caută după țară</label>
-                <input type="text" id="filter-country" placeholder="ex. Romania..." autocomplete="off" />
+                <input type="text" id="filter-country" placeholder="ex. România..." autocomplete="off" />
             </div>
             <button class="btn-reset" id="btn-reset">✕ Resetează</button>
         </div>
@@ -74,7 +45,6 @@
                     <tr>
                         <th data-col="name">Nume <span class="sort-icon">↕</span></th>
                         <th data-col="country">Țară <span class="sort-icon">↕</span></th>
-                        <th data-col="id">ID <span class="sort-icon">↕</span></th>
                         <th data-col="coords">Coordonate</th>
                         <th data-col="status">Status <span class="sort-icon">↕</span></th>
                         <th>Acțiuni</th>
@@ -82,7 +52,7 @@
                 </thead>
                 <tbody id="plants-tbody">
                     <tr class="state-row">
-                        <td colspan="7">
+                        <td colspan="5">
                             <span class="spinner-inline"></span> Se încarcă centralele...
                         </td>
                     </tr>

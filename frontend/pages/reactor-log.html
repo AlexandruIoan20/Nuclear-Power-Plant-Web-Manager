@@ -3,32 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuclear Plant Control | Reactor Log</title>
-    <link rel="stylesheet" href="../style.css">
+    <title>Panou Control | Jurnal Reactor</title>
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/navbar.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/buttons.css">
+    <link rel="stylesheet" href="../css/responsive.css">
 </head>
 <body>
     <div class="page-shell">
-        <header class="topbar">
-            <div class="brand">
-                <strong>Nuclear Plant Control</strong>
-                <span>Log reactor</span>
-            </div>
-            <nav class="nav-links">
-                <a href="dashboard.html">Dashboard</a>
-                <a href="reactor.html">Reactor</a>
-                <a href="reactor-log.html" class="active">Log reactor</a>
-                <a href="power-plants/list.html">Lista centralelor</a>
-            </nav>
-        </header>
+        <div id="main-navbar"></div>
         <main class="panel">
-            <p class="eyebrow">REACTOR LOG</p>
+            <p class="eyebrow">JURNAL REACTOR</p>
             <h1>Jurnal reactor</h1>
             <p>Pagină de rutare pentru logurile reactorului și evenimentele operaționale.</p>
             <div class="hero-actions" style="margin-top: 24px; flex-wrap: wrap; gap: 12px;">
-                <a class="button" href="dashboard.html">Înapoi la overview</a>
                 <a class="button secondary" href="power-plants/list.html">Lista centralelor</a>
             </div>
         </main>
     </div>
+
+    <script type="module" src="../modules/ui/navbar.js"></script>
 </body>
 </html>

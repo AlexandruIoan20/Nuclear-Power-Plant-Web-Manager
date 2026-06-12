@@ -1,3 +1,4 @@
+import { powerPlantService } from '../../services/powerPlantService.js';
 import { reactorService } from '../../services/reactorService.js';
 import { ReactorType, CoolingType, ReactorOperationalStatus } from '../../config/enums.js';
 import { showError, showSuccess, clearStatus } from '../../ui/showMessage.js';
@@ -13,12 +14,37 @@ function populateSelect(id, options, selected = "") {
         ).join('');
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function disableForm() {
+    const form = document.getElementById("reactor-form");
+    const inputs = form.querySelectorAll('input, select, textarea, button[type="submit"]');
+    inputs.forEach(el => el.disabled = true);
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
     const form = document.getElementById("reactor-form");
     const statusElement = document.getElementById("status-message");
 
     if (!plantId) {
         showError(statusElement, "ID centrală lipsă din URL.");
+        return;
+    }
+
+    let plantStatus = null;
+    try {
+        const plantData = await powerPlantService.getPlant(plantId);
+        plantStatus = plantData.details?.status || null;
+    } catch (err) {
+        showError(statusElement, "Nu s-a putut verifica statusul centralei.");
+        disableForm();
+        return;
+    }
+
+    if (plantStatus !== 'APPROVED') {
+        const labels = { DRAFT: 'în lucru', REVIEW: 'în verificare', REJECTED: 'respinsă' };
+        showError(statusElement,
+            'Nu se pot crea reactoare pe o centrală ' + (labels[plantStatus] || plantStatus) + '. ' +
+            'Statusul centralei trebuie să fie APPROVED.');
+        disableForm();
         return;
     }
 

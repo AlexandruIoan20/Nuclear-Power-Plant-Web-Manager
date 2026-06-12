@@ -1,7 +1,5 @@
 <?php
 
-require_once __DIR__ . '/../src/Constants/urls.php';
-
 ini_set('session.gc_maxlifetime', 3600);
 ini_set('session.cookie_lifetime', 3600);
 
@@ -56,26 +54,6 @@ header("Access-Control-Expose-Headers: Location");
 // Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
-    exit();
-}
-
-// For testing only
-if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/health') {
-    header('Content-Type: application/json');
-    require_once __DIR__ . '/../src/Services/EmailService.php';
-    try {
-        $emailService = new EmailService();
-        $testData = [
-            'to_email' => 'test@nuc.nuc',
-            'subject' => 'deschidemadacapoti',
-            'message' => 'daca vezi asta inseamna ca paul le are cu programarea.'
-        ];
-        $emailService->sendAlert($testData);
-        echo json_encode(['status' => 'ok', 'mail_system' => 'Email sent successfully to Mailtrap!']);
-    } catch (Exception $e) {
-        http_response_code(500);
-        echo json_encode(['status' => 'error', 'message' => 'Mail system failed: ' . $e->getMessage()]);
-    }
     exit();
 }
 
@@ -143,11 +121,11 @@ require_once __DIR__ . '/../src/Services/StatsService.php';
 require_once __DIR__ . '/../src/Controllers/StatsController.php';
 
 // Database configuration
-$host     = getenv('DB_HOST')     ?: 'db';
-$port     = getenv('DB_PORT')     ?: '5432';
-$dbname   = getenv('DB_NAME')     ?: 'proiect_db';
-$username = getenv('DB_USER')     ?: 'admin';
-$password = getenv('DB_PASSWORD') ?: 'glorierebeja';
+$host     = getenv('DB_HOST');
+$port     = getenv('DB_PORT');
+$dbname   = getenv('DB_NAME');
+$username = getenv('DB_USER');
+$password = getenv('DB_PASSWORD');
 
 $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
 
@@ -182,7 +160,8 @@ $userService = new UserService($userRepository);
 
 $notificationService = new NotificationService($plantServiceFacade, $alertService, $alertRepository);
 $reactorRepository = new ReactorRepository($pdo); 
-$reactorService = new ReactorService($reactorRepository);
+$reactorService = new ReactorService($reactorRepository, $plantRepositoryFacade);
+
 
 $sensorRepository = new SensorRepository($pdo); 
 $sensorTemplateRepository = new SensorTemplateRepository($pdo); 
@@ -196,34 +175,6 @@ $statsService = new StatsService($pdo);
 $statsController = new StatsController($statsService);
 
 LogService::init($pdo);
-
-try {
-    $adminEmail = 'admin@nuclear.ro';
-    $adminUser = $userRepository->findByEmail($adminEmail);
-    $adminPassword = 'admin';
-    if (!$adminUser || !password_verify($adminPassword, $adminUser['password_hash'])) {
-        $hash = password_hash($adminPassword, PASSWORD_BCRYPT, ['cost' => 12]);
-        $pdo->prepare("
-            INSERT INTO users (username, first_name, last_name, email, password_hash, role)
-            VALUES (:username, :first_name, :last_name, :email, :password_hash, :role)
-            ON CONFLICT (email) DO UPDATE SET
-                username = EXCLUDED.username,
-                first_name = EXCLUDED.first_name,
-                last_name = EXCLUDED.last_name,
-                password_hash = EXCLUDED.password_hash,
-                role = EXCLUDED.role
-        ")->execute([
-            'username' => 'admin',
-            'first_name' => 'Admin',
-            'last_name' => 'System',
-            'email' => $adminEmail,
-            'password_hash' => $hash,
-            'role' => 'ADMIN',
-        ]);
-    }
-} catch (Exception $e) {
-    error_log('[DEV ONLY] Eroare la initializarea contului admin: ' . $e->getMessage());
-}
 
 $router = new Router();
 
@@ -265,6 +216,10 @@ $router->get('/api/power-plants/map-data', function() use ($plantServiceFacade) 
 $router->get('/api/power-plants', function () use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList();
 });
+
+$router->get('/api/power-plants/my', auth(null, function() use ($plantServiceFacade) {
+    (new DetailsPlantController($plantServiceFacade))->getMyPowerPlants();
+}));
 
 $router->get('/api/power-plants/filter', function () use ($plantServiceFacade) { 
     (new DetailsPlantController($plantServiceFacade))->getPlantsByStatus(); 
@@ -312,6 +267,22 @@ $router->post('/api/power-plants/coordinates-preview', function () use ($plantSe
 $router->post('/api/power-plants', auth(null, function () use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->handleSavePlantDetails();
 }));
+
+$approvalRepository = new ApprovalRepository($pdo);
+$approvalService = new ApprovalService($approvalRepository);
+$approvalController = new ApprovalController($approvalService);
+
+$router->patch('/api/power-plants/{id}/submit-review', auth(null, function ($plantId) use ($plantServiceFacade) {
+    (new DetailsPlantController($plantServiceFacade))->submitForReview($plantId);
+}));
+
+$router->patch('/api/power-plants/{id}/admin-status', auth('ADMIN', function ($plantId) use ($approvalController) {
+    $approvalController->updateStatus($plantId);
+}));
+
+$router->patch('/api/power-plants/{id}/reopen', auth(null, function ($plantId) use ($plantServiceFacade) {
+    (new DetailsPlantController($plantServiceFacade))->reopenDraft($plantId);
+})); 
 
 $router->post('/api/power-plants/import/batch', auth(null, function () use ($importExportController) {
     $importExportController->importMultiple();
@@ -485,6 +456,23 @@ $router->post('/api/logs/frontend', function () {
     (new LogController())->receiveFrontendLog();
 });
 
+// --- Admin Users ---
+$router->get('/api/admin/users', auth('ADMIN', function() use ($userService) {
+    (new UserController($userService))->adminListUsers();
+}));
+
+$router->get('/api/admin/users/{id}', auth('ADMIN', function($id) use ($userService) {
+    (new UserController($userService))->adminGetUser($id);
+}));
+
+$router->patch('/api/admin/users/{id}/role', auth('ADMIN', function($id) use ($userService) {
+    (new UserController($userService))->adminUpdateRole($id);
+}));
+
+$router->delete('/api/admin/users/{id}', auth('ADMIN', function($id) use ($userService) {
+    (new UserController($userService))->adminDeleteUser($id);
+}));
+
 // --- Authentication ---
 $router->get('/login', function() use ($userService) {
     (new UserController($userService))->handleLogin();
@@ -511,7 +499,7 @@ $router->get('/api/user/status', function() use ($userService) {
 });
 
 // --- Dispatch ---
-$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
-$router->dispatch($method, $uri);
+$router->dispatch($method, $uri); 

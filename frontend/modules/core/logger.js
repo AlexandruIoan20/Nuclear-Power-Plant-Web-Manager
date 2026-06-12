@@ -29,6 +29,7 @@ function getTimestamp() {
 }
 
 function sendToBackend(level, message, context) {
+    ensureUserId();
     const payload = {
         level: level,
         message: message,
@@ -78,8 +79,6 @@ function log(level, message, context) {
         sendToBackend(level, message, context);
     }
 }
-
-ensureUserId();
 
 export const logger = {
     debug: (message, context) => log('DEBUG', message, context),

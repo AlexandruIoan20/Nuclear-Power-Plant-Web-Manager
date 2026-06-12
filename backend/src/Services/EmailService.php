@@ -20,10 +20,10 @@ class EmailService {
         }
 
     
-        $host = getenv('MAIL_HOST') ?: 'sandbox.smtp.mailtrap.io';
-        $port = getenv('MAIL_PORT') ?: 2525;
-        $user = getenv('MAIL_USER') ?: '433cd381d8be35';
-        $pass = getenv('MAIL_PASS') ?: ''; 
+        $host = getenv('MAIL_HOST');
+        $port = getenv('MAIL_PORT');
+        $user = getenv('MAIL_USER');
+        $pass = getenv('MAIL_PASS'); 
 
         $phpmailer = new PHPMailer(true); 
         LogService::instance()->debug("[DEBUG_MAIL] USER CITIT: " . getenv('MAIL_USER'));

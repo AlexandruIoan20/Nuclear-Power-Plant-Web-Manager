@@ -1,6 +1,8 @@
 <?php
 
 require_once __DIR__ . '/../Constants/urls.php';
+require_once __DIR__ . '/../Dto/UserDTO.php';
+require_once __DIR__ . '/../Dto/ApiResponseDTO.php';
 
 class UserController { 
     private UserService $userService; 
@@ -16,7 +18,7 @@ class UserController {
 
     private function redirectIfAuthenticated(): void {
         if (AuthHelper::isAuthenticated()) {
-            header("Location: " . URL_FRONTEND . "/pages/dashboard.html", true, 302);
+            header("Location: " . URL_FRONTEND . "/pages/map.html", true, 302);
             exit;
         }
     }
@@ -25,7 +27,7 @@ class UserController {
         if (AuthHelper::isAuthenticated()) {
             http_response_code(409);
             header('Content-Type: application/json; charset=UTF-8');
-            echo json_encode(['status' => 'error', 'message' => 'Ești deja autentificat.']);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Ești deja autentificat.'));
             exit;
         }
     }
@@ -54,7 +56,7 @@ class UserController {
                 if ($wantsJson) {
                     http_response_code(400);
                     header('Content-Type: application/json; charset=UTF-8');
-                    echo json_encode(['status' => 'error', 'message' => 'Toate câmpurile sunt necesare.']);
+                    echo json_encode(new ApiResponseDTO(status: 'error', message: 'Toate câmpurile sunt necesare.'));
                     return;
                 }
 
@@ -66,7 +68,7 @@ class UserController {
                 if ($wantsJson) {
                     http_response_code(400);
                     header('Content-Type: application/json; charset=UTF-8');
-                    echo json_encode(['status' => 'error', 'message' => 'Parolele nu se potrivesc.']);
+                    echo json_encode(new ApiResponseDTO(status: 'error', message: 'Parolele nu se potrivesc.'));
                     return;
                 }
 
@@ -102,7 +104,7 @@ class UserController {
                 if ($wantsJson) {
                     http_response_code(400);
                     header('Content-Type: application/json; charset=UTF-8');
-                    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+                    echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
                     return;
                 }
 
@@ -134,7 +136,7 @@ class UserController {
                 if ($wantsJson) {
                     http_response_code(400);
                     header('Content-Type: application/json; charset=UTF-8');
-                    echo json_encode(['status' => 'error', 'message' => 'Email și parolă sunt necesare.']);
+                    echo json_encode(new ApiResponseDTO(status: 'error', message: 'Email și parolă sunt necesare.'));
                     return;
                 }
 
@@ -152,7 +154,7 @@ class UserController {
                 if ($wantsJson) {
                     http_response_code(401);
                     header('Content-Type: application/json; charset=UTF-8');
-                    echo json_encode(['status' => 'error', 'message' => 'Email sau parolă incorectă.']);
+                    echo json_encode(new ApiResponseDTO(status: 'error', message: 'Email sau parolă incorectă.'));
                     return;
                 }
 
@@ -161,10 +163,10 @@ class UserController {
             }
 
             // Alocarea datelor în sesiune
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['user_email'] = $user['email'];
-            $_SESSION['user_role'] = $user['role'];
-            $_SESSION['username'] = $user['username'];
+            $_SESSION['user_id'] = $user->id;
+            $_SESSION['user_email'] = $user->email;
+            $_SESSION['user_role'] = $user->role;
+            $_SESSION['username'] = $user->username;
 
             session_regenerate_id(true);
 
@@ -173,12 +175,12 @@ class UserController {
                 echo json_encode([
                     'status' => 'success',
                     'message' => 'Autentificare reușită.',
-                    'redirect' => URL_FRONTEND . '/pages/dashboard.html'
+                    'redirect' => URL_FRONTEND . '/pages/map.html'
                 ]);
                 return;
             }
 
-            $locationString = "Location: " . URL_FRONTEND . "/pages/dashboard.html"; 
+            $locationString = "Location: " . URL_FRONTEND . "/pages/map.html"; 
             header($locationString, true, 302);
             exit;
         }
@@ -200,7 +202,7 @@ class UserController {
         }
 
         session_destroy();
-        $locationString = "Location: " . URL_FRONTEND . "/pages/start.html"; 
+        $locationString = "Location: " . URL_FRONTEND . "/pages/login.html"; 
         header($locationString, true, 302);
         exit;
     }
@@ -210,7 +212,7 @@ class UserController {
 
         if (!isset($_SESSION['user_id'])) {
             http_response_code(401);
-            echo json_encode(['status' => 'error', 'message' => 'Utilizator neautentificat']);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Utilizator neautentificat'));
             return;
         }
 
@@ -218,20 +220,106 @@ class UserController {
 
         if (!$user) {
             http_response_code(404);
-            echo json_encode(['status' => 'error', 'message' => 'Utilizator nu găsit']);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Utilizator nu găsit'));
             return;
         }
 
-        echo json_encode([
-            'status' => 'success',
-            'data' => [
-                'id' => $user['id'],
-                'username' => $user['username'],
-                'email' => $user['email'],
-                'role' => $user['role'],
-                'first_name' => $user['first_name'],
-                'last_name' => $user['last_name']
-            ]
-        ]);
+        echo json_encode(new ApiResponseDTO(status: 'success', data: $user));
+    }
+
+    public function adminListUsers(): void {
+        header('Content-Type: application/json; charset=UTF-8');
+
+        try {
+            $users = $this->userService->getAllUsersForAdmin();
+
+            http_response_code(200);
+            echo json_encode(new ApiResponseDTO(status: 'success', data: $users));
+        } catch (Exception $e) {
+            LogService::instance()->error("[ADMIN LIST USERS ERROR] " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Eroare la încărcarea utilizatorilor.'));
+        }
+    }
+
+    public function adminGetUser(string $id): void {
+        header('Content-Type: application/json; charset=UTF-8');
+
+        $cleanId = trim((string)$id);
+        if (empty($cleanId)) {
+            http_response_code(400);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'ID-ul utilizatorului lipsește.'));
+            return;
+        }
+
+        try {
+            $user = $this->userService->getUserById($cleanId);
+
+            if (!$user) {
+                http_response_code(404);
+                echo json_encode(new ApiResponseDTO(status: 'error', message: 'Utilizatorul nu a fost găsit.'));
+                return;
+            }
+
+            http_response_code(200);
+            echo json_encode(new ApiResponseDTO(status: 'success', data: $user));
+        } catch (Exception $e) {
+            LogService::instance()->error("[ADMIN GET USER ERROR] " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Eroare la încărcarea utilizatorului.'));
+        }
+    }
+
+    public function adminUpdateRole(string $id): void {
+        header('Content-Type: application/json; charset=UTF-8');
+
+        $cleanId = trim((string)$id);
+        if (empty($cleanId)) {
+            http_response_code(400);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'ID-ul utilizatorului lipsește.'));
+            return;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $role = $input['role'] ?? null;
+
+        if (empty($role)) {
+            http_response_code(400);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Rolul este necesar.'));
+            return;
+        }
+
+        try {
+            $this->userService->updateUserRole($cleanId, strtoupper($role));
+
+            http_response_code(200);
+            echo json_encode(new ApiResponseDTO(status: 'success', message: 'Rolul utilizatorului a fost actualizat cu succes.'));
+        } catch (Exception $e) {
+            LogService::instance()->error("[ADMIN UPDATE ROLE ERROR] " . $e->getMessage());
+            http_response_code(400);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
+        }
+    }
+
+    public function adminDeleteUser(string $id): void {
+        header('Content-Type: application/json; charset=UTF-8');
+
+        $cleanId = trim((string)$id);
+        if (empty($cleanId)) {
+            http_response_code(400);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'ID-ul utilizatorului lipsește.'));
+            return;
+        }
+
+        try {
+            $this->userService->deleteUser($cleanId);
+
+            http_response_code(200);
+            echo json_encode(new ApiResponseDTO(status: 'success', message: 'Utilizatorul a fost șters cu succes.'));
+        } catch (Exception $e) {
+            LogService::instance()->error("[ADMIN DELETE USER ERROR] " . $e->getMessage());
+            http_response_code(400);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
+        }
     }
 }

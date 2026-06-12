@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", async() => {
 
                 form.reset(); 
             } catch(error) { 
-                showError(statusElement, "Eroare la salvarea informatiilor despre centrala."); 
+                showError(statusElement, "Eroare la salvarea informațiilor despre centrală."); 
             }
         }); 
     } else { 
@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", async() => {
 
             document.getElementById("name").value = d.name ?? ""; 
         } catch(error) { 
-            showError(statusElement, "Eroare la gasirea datelor centralei."); 
+            showError(statusElement, "Eroare la găsirea datelor centralei."); 
             return; 
         }
 

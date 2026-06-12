@@ -4,12 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reactoare</title>
-    <link rel="stylesheet" href="../../style.css">
-    <script src="../../modules/config/globals.js"></script>
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/navbar.css">
+    <link rel="stylesheet" href="../../css/layout.css">
+    <link rel="stylesheet" href="../../css/buttons.css">
+    <link rel="stylesheet" href="../../css/responsive.css">
+    <link rel="stylesheet" href="../../css/tables.css">
+    <link rel="stylesheet" href="../../css/tags.css">
 </head>
 <body>
     <div class="page-shell">
         <div id="main-navbar"></div>
+
+        <div class="topbar" style="margin-bottom:16px;">
+            <div class="brand">
+                <strong>Reactoare</strong>
+            </div>
+            <div class="nav-links">
+                <button class="button" id="btn-create-reactor">Adaugă Reactor</button>
+                <button class="button secondary" id="btn-back-plant">Înapoi la Centrală</button>
+            </div>
+        </div>
 
         <div class="results-meta" style="margin-bottom: 16px;">
             <div>Total reactoare: <span id="results-count">—</span></div>
@@ -25,7 +40,6 @@
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Cod Reactor</th>
                         <th>Tip</th>
                         <th>Răcire</th>
@@ -37,7 +51,7 @@
                 </thead>
                 <tbody id="reactors-tbody">
                     <tr class="state-row">
-                        <td colspan="8">
+                        <td colspan="7">
                             <span class="spinner-inline"></span> Se încarcă reactoarele...
                         </td>
                     </tr>

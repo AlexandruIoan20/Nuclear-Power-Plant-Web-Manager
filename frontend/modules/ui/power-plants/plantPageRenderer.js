@@ -1,4 +1,5 @@
-import { GetPlantDTO } from '../../dto/GetPlantDTO.js'; 
+import { GetPlantDTO } from '../../dto/GetPlantDTO.js';
+import { renderStatusBadge } from './plantStatusBadge.js';
 
 export function setText(id, value, suffix = '') { 
     const element = document.getElementById(id); 
@@ -14,7 +15,7 @@ export function setText(id, value, suffix = '') {
 export function populatePlantPage(rawData) { 
     const dto = GetPlantDTO(rawData); 
     
-    setText('plant-name', dto.name, ' (UNIDENTIFIED)'); 
+    setText('plant-name', dto.name); 
 
     const locationStr = [dto.country, dto.latitude ? `LAT: ${dto.latitude}` : null, dto.longitude ? `LNG: ${dto.longitude}` : null]
         .filter(Boolean)
@@ -24,14 +25,7 @@ export function populatePlantPage(rawData) {
 
     const statusElement = document.getElementById('plant-status'); 
     if(statusElement && dto.status) { 
-        statusElement.textContent = `STATUS: ${dto.status}`; 
-        statusElement.className = 'tag'; 
-
-        /*
-            TODO: Adaugarea acestor tipuri de enum (?)
-        */ 
-        if(dto.status.toUpperCase() === 'CRITICAL') statusElement.classList.add('danger'); 
-        if(dto.status.toUpperCase() === 'STANDBY') statusElement.classList.add('warn'); 
+        statusElement.outerHTML = renderStatusBadge(dto.status); 
     } else if(statusElement) { 
         statusElement.style.display = 'none'; 
     }
@@ -39,7 +33,7 @@ export function populatePlantPage(rawData) {
     setText('plant-description', dto.description);
     setText('plant-capacity', dto.capacity, ' MW');
     setText('plant-efficiency', dto.estimatedEfficiency, '%');
-    setText('plant-duration', dto.constructionDurationYears, ' YRS');
+    setText('plant-duration', dto.constructionDurationYears, ' Ani');
 
     setText('soil-type', dto.soilType);
     setText('seismic-stability', dto.seismicStability);
@@ -75,7 +69,7 @@ export function populatePlantPage(rawData) {
             td.colSpan = 2;
             td.className = 'empty-state';
             td.style.textAlign = 'center';
-            td.textContent = 'NO CONFIGURATIONS DETECTED.';
+            td.textContent = 'Nicio configurație detectată.';
             tr.appendChild(td);
             tbody.appendChild(tr);
         }

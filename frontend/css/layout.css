@@ -1,0 +1,268 @@
+.topbar,
+.hero,
+.panel,
+.form-panel,
+.status-card,
+.image-frame,
+.notice,
+.login-card,
+.card {
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(10, 10, 10, 0.98), rgba(4, 4, 4, 0.98));
+    box-shadow:
+        0 0 0 1px rgba(255, 215, 0, 0.12) inset,
+        0 0 24px rgba(255, 215, 0, 0.08),
+        0 0 26px rgba(57, 255, 20, 0.05);
+}
+
+.panel,
+.form-panel,
+.login-card,
+.notice {
+    padding: 22px;
+}
+
+.panel h1,
+.form-panel h1 {
+    margin-top: 0;
+}
+
+.hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+    gap: 24px;
+    padding: 28px;
+}
+
+.hero-copy {
+    display: grid;
+    gap: 14px;
+}
+
+.hero-copy h1,
+.hero-copy p {
+    max-width: 62ch;
+}
+
+.hero-start .hero-actions {
+    margin-top: 6px;
+}
+
+.hero-start .stats {
+    margin-top: 10px;
+}
+
+.hero h1,
+.login-card h1 {
+    margin: 0 0 14px;
+    color: var(--yellow);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    line-height: 1.15;
+}
+
+.hero p,
+.login-card p,
+.panel p,
+.status-card p {
+    margin-top: 0;
+    line-height: 1.7;
+    color: #ddd7a9;
+}
+
+/* ─── Login ─── */
+.login-layout {
+    min-height: calc(100vh - 64px);
+    display: grid;
+    place-items: center;
+}
+
+.login-card {
+    width: min(540px, 100%);
+    padding: 28px;
+}
+
+/* ─── Image frame ─── */
+.image-frame {
+    display: grid;
+    align-content: stretch;
+    min-height: 100%;
+    overflow: hidden;
+}
+
+.image-frame svg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.image-frame .caption {
+    padding: 14px 16px;
+    color: var(--muted);
+    border-top: 1px solid rgba(255, 215, 0, 0.14);
+}
+
+.status-card h3 {
+    margin-top: 0;
+}
+
+.card {
+    border: 1px solid rgba(255, 215, 0, 0.18);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 18px;
+}
+
+.card h3 {
+    margin-top: 0;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    align-items: start;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    align-items: start;
+}
+
+.split-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 440px);
+    gap: 24px;
+    align-items: start;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.stat {
+    border: 1px solid rgba(255, 215, 0, 0.18);
+    background: rgba(255, 255, 255, 0.02);
+    padding: 14px;
+}
+
+.stat strong {
+    display: block;
+    font-size: 1.4rem;
+    color: var(--green);
+    margin-bottom: 6px;
+    text-shadow: 0 0 10px rgba(57, 255, 20, 0.25);
+}
+
+/* ─── Breadcrumbs ─── */
+.breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    color: var(--muted);
+    margin-bottom: 16px;
+}
+
+.breadcrumbs a {
+    color: var(--yellow);
+}
+
+.empty-state {
+    padding: 24px;
+    border: 1px dashed rgba(255, 215, 0, 0.22);
+    border-radius: 16px;
+    color: var(--muted);
+}
+
+.section-title {
+    font-size: 1.2rem;
+    color: var(--yellow);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    margin-top: 0;
+}
+
+.footer-note {
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+.error-banner {
+    color: var(--danger);
+}
+
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+    align-items: flex-end;
+}
+
+.filter-bar .field {
+    display: grid;
+    gap: 6px;
+    flex: 1;
+    min-width: 160px;
+}
+
+.table-shell {
+    overflow: auto;
+    border: 1px solid rgba(255, 215, 0, 0.18);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.validate-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.inline-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.inline-status::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--green);
+    box-shadow: 0 0 12px rgba(57, 255, 20, 0.55);
+}
+
+.session-card {
+    margin: 18px 0 26px;
+}
+
+.session-card .inline-status {
+    margin-bottom: 8px;
+}
+
+.session-card h2 {
+    margin: 0 0 6px;
+}
+
+.session-meta {
+    margin: 0;
+    color: var(--muted);
+}

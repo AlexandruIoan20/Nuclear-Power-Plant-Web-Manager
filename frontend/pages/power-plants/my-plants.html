@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centralele Mele</title>
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/navbar.css">
+    <link rel="stylesheet" href="../../css/layout.css">
+    <link rel="stylesheet" href="../../css/buttons.css">
+    <link rel="stylesheet" href="../../css/responsive.css">
+    <link rel="stylesheet" href="../../css/tables.css">
+    <link rel="stylesheet" href="../../css/tags.css">
+    <link rel="stylesheet" href="../../css/forms.css">
+</head>
+<body>
+    <div class="page-shell">
+        <div id="main-navbar"></div>
+
+        <h1>Centralele Mele</h1>
+
+        <div class="results-meta">
+            <div>Rezultate: <span id="results-count">—</span></div>
+        </div>
+
+        <div class="table-shell">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nume</th>
+                        <th>Țară</th>
+                        <th>Status</th>
+                        <th>Actiune</th>
+                    </tr>
+                </thead>
+                <tbody id="plants-tbody">
+                    <tr class="state-row">
+                        <td colspan="4">
+                            <span class="spinner-inline"></span> Se încarcă centralele...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script type="module" src="../../modules/pages/power-plants/my-plants.js"></script>
+    <script type="module" src="../../modules/ui/navbar.js"></script>
+</body>
+</html>

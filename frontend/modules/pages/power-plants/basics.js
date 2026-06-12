@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async() => {
     const statusElement = document.getElementById("status-message"); 
 
     if(!plantId) { 
-        showError(statusElement, "ID-ul centralei nu a fost gasit."); 
+        showError(statusElement, "ID-ul centralei nu a fost găsit."); 
     }
 
     let isEdit = !!basicsId;
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", async() => {
             document.getElementById("description").value = d.description ?? "";
         } catch(error) { 
             logger.error(error.message); 
-            showError(statusElement, "Eroare la gasirea datelor despre centrala."); 
+            showError(statusElement, "Eroare la găsirea datelor despre centrală."); 
             return;
         }
     }
@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", async() => {
                 form.reset(); 
             } catch(error) { 
                 logger.error(error.message); 
-                showError(statusElement, "Eroare la adaugarea informatiilor despre centrala"); 
+                showError(statusElement, "Eroare la adăugarea informațiilor despre centrală"); 
             }
         })
     } else { 
@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", async() => {
 
             try { 
                 await powerPlantService.updateBasics(dto, plantId); 
-                showSuccess(statusElement, "Datele centralei au fost actualzate cu succes!"); 
+                showSuccess(statusElement, "Datele centralei au fost actualizate cu succes!"); 
             } catch(error) { 
                 logger.error(error.message); 
                 showError(statusElement, "Eroare la actualizarea datelor centralei."); 

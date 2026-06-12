@@ -3,30 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuclear Plant Control | Login</title>
-    <link rel="stylesheet" href="../style.css">
-    <script src="../modules/config/globals.js"></script>
+    <title>Panou Control | Autentificare</title>
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/navbar.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/buttons.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/forms.css">
 </head>
 <body>
-    <script>
-        if (window.location.hostname === '127.0.0.1') {
-            window.location.replace(FRONTEND_BASE + window.location.pathname.replace(/\/login\.html$/, '/login.html'));
-        }
-    </script>
-    <script>
-        (async () => {
-            try {
-                const res = await fetch(API_BASE + '/user/status', { credentials: 'include' });
-                if (res.ok) {
-                    window.location.replace(FRONTEND_BASE + '/pages/dashboard.html');
-                }
-            } catch (_) {}
-        })();
-    </script>
+    <script type="module" src="../modules/pages/login.js"></script>
     <div id="main-navbar"></div>
     <div class="page-shell login-layout">
         <section class="login-card" aria-labelledby="login-title">
-            <p class="eyebrow">ACCESS TERMINAL</p>
+            <p class="eyebrow">TERMINAL ACCES</p>
             <h1 id="login-title">Autentificare operator</h1>
             <p>Introdu datele de acces pentru a continua către dashboard-ul de monitorizare.</p>
 
@@ -48,54 +38,6 @@
             </form>
         </section>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const loginForm = document.getElementById('loginForm');
-            const message = document.getElementById('login-message');
-
-            loginForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
-                const submitButton = loginForm.querySelector('input[type="submit"]');
-                if (submitButton) submitButton.disabled = true;
-                message.textContent = '';
-
-                try {
-                  
-                    const formData = new FormData(loginForm);
-                    const urlEncodedData = new URLSearchParams(formData);
-
-                    const response = await fetch(BACKEND_BASE + '/login', {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'fetch',
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-CSRF-Token': await getCsrfToken()
-                        },
-                        body: urlEncodedData,
-                        credentials: 'include',
-                    });
-
-                    const payload = await response.json();
-
-                    if (response.ok && payload.redirect) {
-                        window.location.href = payload.redirect;
-                        return;
-                    }
-
-                    message.style.color = 'var(--danger)';
-                    message.textContent = payload.message || 'Datele de autentificare sunt incorecte.';
-                } catch (error) {
-                    console.error('Eroare la autentificare:', error);
-                    message.style.color = 'var(--danger)';
-                    message.textContent = 'Eroare la conectare. Verificați rețeaua.';
-                } finally {
-                    if (submitButton) submitButton.disabled = false;
-                }
-            });
-        });
-    </script>
 
     <script type="module" src="../modules/ui/navbar.js"></script>
 </body>

@@ -4,11 +4,11 @@
  * și le populează senzorii din template-uri.
  */
 
-$host     = getenv('DB_HOST')     ?: 'db';
-$port     = getenv('DB_PORT')     ?: '5432';
-$dbname   = getenv('DB_NAME')     ?: 'proiect_db';
-$username = getenv('DB_USER')     ?: 'admin';
-$password = getenv('DB_PASSWORD') ?: 'glorierebeja';
+$host     = getenv('DB_HOST');
+$port     = getenv('DB_PORT');
+$dbname   = getenv('DB_NAME');
+$username = getenv('DB_USER');
+$password = getenv('DB_PASSWORD');
 
 $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
 $pdo = new PDO($dsn, $username, $password, [

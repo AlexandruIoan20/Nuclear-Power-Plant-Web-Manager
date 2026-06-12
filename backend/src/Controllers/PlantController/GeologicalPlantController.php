@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../../Services/PlantServiceFacade.php'; 
 require_once __DIR__ . '/../../Dto/GeologicalPlantDataDTO.php'; 
+require_once __DIR__ . '/../../Dto/ApiResponseDTO.php'; 
 
 class GeologicalPlantController { 
     public function __construct(
@@ -16,16 +17,16 @@ class GeologicalPlantController {
 
             if (!$dto) { 
                 http_response_code(404); 
-                echo json_encode(["status" => "error", "message" => "Datele geologice nu au fost găsite."]);
+                echo json_encode(new ApiResponseDTO(status: 'error', message: "Datele geologice nu au fost găsite."));
                 exit;
             }
 
             http_response_code(200); 
-            echo json_encode(["status" => "success", "data" => $dto]); 
+            echo json_encode(new ApiResponseDTO(status: 'success', data: $dto)); 
         } catch (Exception $e) {
             LogService::instance()->error("[ERROR] GET Geological: " . $e->getMessage());
             http_response_code(500);
-            echo json_encode(["status" => "error", "message" => "Eroare la preluarea datelor geologice."]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Eroare la preluarea datelor geologice."));
         }
         exit;
     }
@@ -38,7 +39,7 @@ class GeologicalPlantController {
 
         if (empty($dateFormular)) {
             http_response_code(400);
-            echo json_encode(["status" => "error", "message" => "Nu s-au primit date."]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Nu s-au primit date."));
             exit;
         }
 
@@ -47,21 +48,16 @@ class GeologicalPlantController {
             $fullDto = $this->plantServiceFacade->getGeologicalDataByPlantId($plantId);
             
             http_response_code(201);
-            echo json_encode([
-                'status' => 'success',
-                'message' => 'Datele geologice au fost salvate cu succes.',
+            echo json_encode(new ApiResponseDTO(status: 'success', message: 'Datele geologice au fost salvate cu succes.', data: [
                 'plantId' => $plantId,
                 'geologicalId' => $responseDTO->dataId,
-                'data' => $fullDto
-            ]);
+                'data' => $fullDto,
+            ]));
         } catch (Exception $e) {
             LogService::instance()->error("[ERROR] Create Geological: " . $e->getMessage());
             $code = (str_contains($e->getMessage(), 'Există deja')) ? 409 : 400;
             http_response_code($code);
-            echo json_encode([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
         }
         exit;
     }
@@ -74,7 +70,7 @@ class GeologicalPlantController {
 
         if (empty($dateFormular)) {
             http_response_code(400);
-            echo json_encode(["status" => "error", "message" => "Nu s-au primit date pentru actualizare."]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Nu s-au primit date pentru actualizare."));
             exit;
         }
 
@@ -82,18 +78,12 @@ class GeologicalPlantController {
             $this->plantServiceFacade->updateGeologicalData($dateFormular, $plantId); 
             
             http_response_code(200);
-            echo json_encode([
-                'status' => 'success',
-                'message' => 'Datele geologice au fost actualizate cu succes.'
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'success', message: 'Datele geologice au fost actualizate cu succes.'));
         } catch (Exception $e) { 
             LogService::instance()->error("[ERROR] Update Geological: " . $e->getMessage());
             $code = str_contains($e->getMessage(), 'găsit') ? 404 : 400;
             http_response_code($code);
-            echo json_encode([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ]); 
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
         }
         exit;
     }

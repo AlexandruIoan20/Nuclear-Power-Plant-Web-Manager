@@ -1,6 +1,8 @@
 <?php
 
-class GetPlantDTO {
+require_once __DIR__ . '/BaseDTO.php';
+
+class GetPlantDTO extends BaseDTO {
     public function __construct(
         public readonly PlantDTO $details,
         public readonly ?BasicPlantDataDTO $basic,

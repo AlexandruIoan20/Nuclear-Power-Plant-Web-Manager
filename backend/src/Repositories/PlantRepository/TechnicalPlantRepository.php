@@ -97,6 +97,7 @@ class TechnicalPlantRepository {
                     SELECT :technical_data_id, id, :number_of_reactors 
                     FROM reactor_schema 
                     WHERE reactor_type = :reactor_type AND cooling_type = :cooling_type
+                    LIMIT 1
             ");
     
             foreach ($groupedConfigurations as $key => $group) { 
@@ -158,6 +159,12 @@ class TechnicalPlantRepository {
             LogService::instance()->info("[saveTechnicalData] DONE");
     
         } catch (Exception $e) { 
+
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            
+            LogService::instance()->error("[saveTechnicalData] ROLLBACK triggered");
             LogService::instance()->error("[saveTechnicalData] Eroare la salvare: " . $e->getMessage());
             LogService::instance()->error("[saveTechnicalData] Stack trace: " . $e->getTraceAsString());
             throw new Exception("Eroare la salvarea datelor tehnice: " . $e->getMessage());
@@ -215,6 +222,7 @@ class TechnicalPlantRepository {
                 SELECT :technical_data_id, id, :number_of_reactors 
                 FROM reactor_schema 
                 WHERE reactor_type = :reactor_type AND cooling_type = :cooling_type
+                LIMIT 1
             "); 
 
             foreach ($groupedConfigurations as $group) { 
@@ -272,7 +280,9 @@ class TechnicalPlantRepository {
             $this->pdo->commit();
 
         } catch (Exception $e) {
-            $this->pdo->rollBack();
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
             LogService::instance()->error("[TechnicalPlantRepository] Eroare la actualizare: " . $e->getMessage());
             throw new Exception("Eroare la actualizarea datelor tehnice: " . $e->getMessage());
         }
@@ -280,7 +290,7 @@ class TechnicalPlantRepository {
 
     public function getReactorSchemaByDetails(string $reactorType, string $coolingType): ReactorSchema { 
         $statement = $this->pdo->prepare( 
-            "SELECT * FROM reactor_schema WHERE reactor_type = :reactorType AND cooling_type = :coolingType"
+            "SELECT * FROM reactor_schema WHERE reactor_type = :reactorType AND cooling_type = :coolingType LIMIT 1"
         ); 
 
         $statement->execute([
