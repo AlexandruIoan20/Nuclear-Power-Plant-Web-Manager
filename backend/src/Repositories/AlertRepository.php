@@ -21,14 +21,23 @@ class AlertRepository {
     }
 
     public function getUnreadAlertsForUser(?string $userId = null): array {
-    
-        
-        $stmt = $this->db->query(
-            "SELECT id, plant_id, alert_type, message, is_read, created_at 
-             FROM alerts 
-             WHERE is_read = 0 
-             ORDER BY created_at DESC"
-        );
+        if ($userId !== null) {
+            $stmt = $this->db->prepare(
+                "SELECT a.id, a.plant_id, a.alert_type, a.message, a.is_read, a.created_at 
+                 FROM alerts a
+                 JOIN power_plants p ON a.plant_id = p.id
+                 WHERE a.is_read = 0 AND p.created_by = :userId
+                 ORDER BY a.created_at DESC"
+            );
+            $stmt->execute(['userId' => $userId]);
+        } else {
+            $stmt = $this->db->query(
+                "SELECT id, plant_id, alert_type, message, is_read, created_at 
+                 FROM alerts 
+                 WHERE is_read = 0 
+                 ORDER BY created_at DESC"
+            );
+        }
         
         $alerts = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {

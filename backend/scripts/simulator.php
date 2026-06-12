@@ -13,12 +13,13 @@ require_once __DIR__ . '/../src/Services/EmailService.php';
 require_once __DIR__ . '/../src/Services/SimulatorService/Observers/AlertObserver.php'; 
 require_once __DIR__ . '/../src/Services/SimulatorService/Observers/ScramObserver.php'; 
 require_once __DIR__ . '/../src/Services/SimulatorService/Observers/NotificationObserver.php'; 
+require_once __DIR__ . '/../src/Services/LogService.php'; 
 
-$host = getenv('DB_HOST') ?: 'db';
-$port = getenv('DB_PORT') ?: '5432';
-$dbname = getenv('DB_NAME') ?: 'proiect_db';
-$username = getenv('DB_USER') ?: 'admin';
-$password = getenv('DB_PASSWORD') ?: 'glorierebeja';
+$host = getenv('DB_HOST');
+$port = getenv('DB_PORT');
+$dbname = getenv('DB_NAME');
+$username = getenv('DB_USER');
+$password = getenv('DB_PASSWORD');
 
 $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
 
@@ -32,6 +33,8 @@ try {
     fwrite(STDERR, "[" . date("Y-m-d H:i:s") . "] Eroare conexiune DB: " . $e->getMessage() . "\n");
     exit(1);
 }
+
+LogService::init($db);
 
 $sensorRepository = new SensorRepository($db); 
 $measurementsRepository = new MeasurementsRepository($db); 

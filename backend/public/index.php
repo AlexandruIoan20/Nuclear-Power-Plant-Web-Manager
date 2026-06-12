@@ -1,7 +1,5 @@
 <?php
 
-require_once __DIR__ . '/../src/Constants/urls.php';
-
 ini_set('session.gc_maxlifetime', 3600);
 ini_set('session.cookie_lifetime', 3600);
 
@@ -55,26 +53,6 @@ header("Access-Control-Expose-Headers: Location");
 // Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
-    exit();
-}
-
-// For testing only
-if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/health') {
-    header('Content-Type: application/json');
-    require_once __DIR__ . '/../src/Services/EmailService.php';
-    try {
-        $emailService = new EmailService();
-        $testData = [
-            'to_email' => 'test@nuc.nuc',
-            'subject' => 'deschidemadacapoti',
-            'message' => 'daca vezi asta inseamna ca paul le are cu programarea.'
-        ];
-        $emailService->sendAlert($testData);
-        echo json_encode(['status' => 'ok', 'mail_system' => 'Email sent successfully to Mailtrap!']);
-    } catch (Exception $e) {
-        http_response_code(500);
-        echo json_encode(['status' => 'error', 'message' => 'Mail system failed: ' . $e->getMessage()]);
-    }
     exit();
 }
 
@@ -136,11 +114,11 @@ require_once __DIR__ . '/../src/Services/LogService.php';
 require_once __DIR__ . '/../src/Controllers/LogController.php';
 
 // Database configuration
-$host     = getenv('DB_HOST')     ?: 'db';
-$port     = getenv('DB_PORT')     ?: '5432';
-$dbname   = getenv('DB_NAME')     ?: 'proiect_db';
-$username = getenv('DB_USER')     ?: 'admin';
-$password = getenv('DB_PASSWORD') ?: 'glorierebeja';
+$host     = getenv('DB_HOST');
+$port     = getenv('DB_PORT');
+$dbname   = getenv('DB_NAME');
+$username = getenv('DB_USER');
+$password = getenv('DB_PASSWORD');
 
 $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
 
@@ -183,35 +161,6 @@ $sensorTemplateRepository = new SensorTemplateRepository($pdo);
 $sensorService = new SensorService($sensorRepository, $sensorTemplateRepository, $reactorRepository); 
 $sensorController = new SensorController($sensorService); 
 LogService::init($pdo);
-
-// DEV ONLY - asigura existenta contului admin la runtime
-try {
-    $adminEmail = 'admin@nuclear.ro';
-    $adminUser = $userRepository->findByEmail($adminEmail);
-    $adminPassword = 'admin';
-    if (!$adminUser || !password_verify($adminPassword, $adminUser['password_hash'])) {
-        $hash = password_hash($adminPassword, PASSWORD_BCRYPT, ['cost' => 12]);
-        $pdo->prepare("
-            INSERT INTO users (username, first_name, last_name, email, password_hash, role)
-            VALUES (:username, :first_name, :last_name, :email, :password_hash, :role)
-            ON CONFLICT (email) DO UPDATE SET
-                username = EXCLUDED.username,
-                first_name = EXCLUDED.first_name,
-                last_name = EXCLUDED.last_name,
-                password_hash = EXCLUDED.password_hash,
-                role = EXCLUDED.role
-        ")->execute([
-            'username' => 'admin',
-            'first_name' => 'Admin',
-            'last_name' => 'System',
-            'email' => $adminEmail,
-            'password_hash' => $hash,
-            'role' => 'ADMIN',
-        ]);
-    }
-} catch (Exception $e) {
-    error_log('[DEV ONLY] Eroare la initializarea contului admin: ' . $e->getMessage());
-}
 
 $router = new Router();
 

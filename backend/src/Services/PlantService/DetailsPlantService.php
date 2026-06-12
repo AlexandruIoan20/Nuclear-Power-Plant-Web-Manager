@@ -32,6 +32,14 @@ class DetailsPlantService {
     }
 
     public function updatePlantDetails(array $data, string $id) { 
+        $existing = $this->plantRepositoryFacade->getPlantDetailsById($id);
+        if (!$existing) {
+            throw new Exception("Centrala nu a fost găsită.");
+        }
+        if ($existing->getStatus()->value !== 'DRAFT') {
+            throw new Exception("Nu poți edita o centrală care nu este în status DRAFT.");
+        }
+
         $name = $data['name'] ?? ''; 
         $status = PlantStatus::DRAFT; 
 

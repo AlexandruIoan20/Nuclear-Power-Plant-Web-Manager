@@ -4,11 +4,11 @@
  * și le populează senzorii din template-uri.
  */
 
-$host     = getenv('DB_HOST')     ?: 'db';
-$port     = getenv('DB_PORT')     ?: '5432';
-$dbname   = getenv('DB_NAME')     ?: 'proiect_db';
-$username = getenv('DB_USER')     ?: 'admin';
-$password = getenv('DB_PASSWORD') ?: 'glorierebeja';
+$host     = getenv('DB_HOST');
+$port     = getenv('DB_PORT');
+$dbname   = getenv('DB_NAME');
+$username = getenv('DB_USER');
+$password = getenv('DB_PASSWORD');
 
 $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
 $pdo = new PDO($dsn, $username, $password, [
@@ -96,14 +96,14 @@ $insertReactor = $pdo->prepare("
 ");
 
 // Load entities for sensor population
-require_once __DIR__ . '/src/Helpers/generateUUID.php';
-require_once __DIR__ . '/src/Entities/ReactorType.php';
-require_once __DIR__ . '/src/Entities/SensorType.php';
-require_once __DIR__ . '/src/Entities/SensorQuality.php';
-require_once __DIR__ . '/src/Entities/SensorTemplate.php';
-require_once __DIR__ . '/src/Entities/ReactorSensor.php';
-require_once __DIR__ . '/src/Repositories/SensorRepository.php';
-require_once __DIR__ . '/src/Repositories/SensorTemplateRepository.php';
+require_once __DIR__ . '/../src/Helpers/generateUUID.php';
+require_once __DIR__ . '/../src/Entities/ReactorType.php';
+require_once __DIR__ . '/../src/Entities/SensorType.php';
+require_once __DIR__ . '/../src/Entities/SensorQuality.php';
+require_once __DIR__ . '/../src/Entities/SensorTemplate.php';
+require_once __DIR__ . '/../src/Entities/ReactorSensor.php';
+require_once __DIR__ . '/../src/Repositories/SensorRepository.php';
+require_once __DIR__ . '/../src/Repositories/SensorTemplateRepository.php';
 
 $sensorRepo = new SensorRepository($pdo);
 $templateRepo = new SensorTemplateRepository($pdo);

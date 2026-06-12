@@ -54,25 +54,11 @@ class PlantServiceFacade {
   
     public function getPendingApprovalsList(): array {
         $allPlants = $this->detailsPlantService->getAllPowerPlants();
-        
+
         $pendingPlants = array_filter($allPlants, function($plant) {
-            $statusRaw = is_object($plant) && method_exists($plant, 'getStatus') 
-                ? $plant->getStatus() 
-                : (is_array($plant) ? ($plant['status'] ?? '') : '');
-                
-          
-            if ($statusRaw instanceof \UnitEnum) {
-                
-                $statusStr = property_exists($statusRaw, 'value') ? $statusRaw->value : $statusRaw->name;
-            } else {
-               
-                $statusStr = (string)$statusRaw;
-            }
-                
-            return strtoupper($statusStr) === 'PENDING' || strtoupper($statusStr) === 'DRAFT';
+            return ($plant['status'] ?? '') === PlantStatus::REVIEW->value;
         });
 
-        
         return array_values($pendingPlants);
     }
     
