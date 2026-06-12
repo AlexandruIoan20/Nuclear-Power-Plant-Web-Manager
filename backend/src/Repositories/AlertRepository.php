@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../Services/LogService.php';
+
 class AlertRepository {
     private PDO $db;
 
@@ -18,6 +20,17 @@ class AlertRepository {
             'message' => $alert->getMessage(),
             'is_read' => $alert->isRead() ? 1 : 0
         ]);
+
+        try {
+            $level = in_array($alert->getType(), ['SCRAM', 'EMERGENCY', 'CRITICAL']) ? 'CRITICAL' : 'WARNING';
+            LogService::instance()->$level(
+                "[ALERT REPO] Alertă salvată — {$alert->getType()}: {$alert->getMessage()}",
+                ['plant_id' => $alert->getPlantId(), 'type' => $alert->getType()],
+                $alert->getPlantId()
+            );
+        } catch (\Throwable $e) {
+            error_log("[AlertRepository] Eroare la scrierea logului: " . $e->getMessage());
+        }
     }
 
     public function getUnreadAlertsForUser(?string $userId = null): array {
@@ -62,6 +75,25 @@ class AlertRepository {
             'threshold' => $data['threshold'],
             'message' => $data['message'],
         ]);
+
+        try {
+            $level = ($data['severity'] ?? '') === 'EMERGENCY' ? 'CRITICAL' : 'WARNING';
+            LogService::instance()->$level(
+                "[REACTOR ALERT] Reactor {$data['reactor_id']} / {$data['sensor_type']}: {$data['message']} (val: {$data['value']}, prag: {$data['threshold']})",
+                [
+                    'reactor_id' => $data['reactor_id'],
+                    'plant_id' => $data['plant_id'],
+                    'type' => $data['type'],
+                    'severity' => $data['severity'],
+                    'value' => $data['value'],
+                    'threshold' => $data['threshold'],
+                ],
+                $data['plant_id'],
+                $data['reactor_id']
+            );
+        } catch (\Throwable $e) {
+            error_log("[AlertRepository] Eroare la scrierea logului: " . $e->getMessage());
+        }
     }
 
     public function savePlantEvent(string $plantId, string $type, string $message): void {
@@ -73,6 +105,16 @@ class AlertRepository {
             'alert_type' => $type,
             'message' => $message,
         ]);
+
+        try {
+            LogService::instance()->info(
+                "[PLANT EVENT] {$type}: {$message}",
+                ['plant_id' => $plantId, 'type' => $type],
+                $plantId
+            );
+        } catch (\Throwable $e) {
+            error_log("[AlertRepository] Eroare la scrierea logului: " . $e->getMessage());
+        }
     }
 
     public function getUnreadReactorAlerts(int $limit = 500): array {
@@ -110,6 +152,16 @@ class AlertRepository {
             'plant_id' => $plantId,
             'message' => "Approval request for plant {$plantId} was dismissed.",
         ]);
+
+        try {
+            LogService::instance()->info(
+                "[APPROVAL] Solicitare respinsă pentru planta {$plantId}",
+                ['plant_id' => $plantId, 'type' => 'DISMISSED_APPROVAL'],
+                $plantId
+            );
+        } catch (\Throwable $e) {
+            error_log("[AlertRepository] Eroare la scrierea logului: " . $e->getMessage());
+        }
     }
 
     public function getDismissedApprovalPlantIds(): array {

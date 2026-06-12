@@ -10,6 +10,7 @@ require_once __DIR__ . '/../src/Repositories/AlertRepository.php';
 
 require_once __DIR__ . '/../src/Services/EmailService.php'; 
 
+require_once __DIR__ . '/../src/Services/LogService.php';
 require_once __DIR__ . '/../src/Services/SimulatorService/Observers/AlertObserver.php'; 
 require_once __DIR__ . '/../src/Services/SimulatorService/Observers/ScramObserver.php'; 
 require_once __DIR__ . '/../src/Services/SimulatorService/Observers/NotificationObserver.php'; 
@@ -37,9 +38,10 @@ $sensorRepository = new SensorRepository($db);
 $measurementsRepository = new MeasurementsRepository($db); 
 $reactorRepository = new ReactorRepository($db); 
 $alertRepository = new AlertRepository($db); 
-$emailService = new EmailService(); 
+$emailService = new EmailService();
+LogService::init($db);
 
-$simulatorService = new SimulatorService($sensorRepository, $measurementsRepository, $reactorRepository, SIMULATOR_TICK_INTERVAL); 
+$simulatorService = new SimulatorService($sensorRepository, $measurementsRepository, $reactorRepository, SIMULATOR_TICK_INTERVAL);
 $simulatorService->attachObserver(new AlertObserver($alertRepository)); 
 $simulatorService->attachObserver(new ScramObserver($reactorRepository)); 
 $simulatorService->attachObserver(new NotificationObserver($emailService, $alertRepository)); 

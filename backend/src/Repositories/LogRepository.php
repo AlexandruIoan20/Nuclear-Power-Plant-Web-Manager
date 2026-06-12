@@ -78,4 +78,33 @@ class LogRepository {
         $stmt->execute(['days' => $days]);
         return $stmt->rowCount();
     }
+
+    public function findAfter(string $afterId, int $limit = 50): array {
+        $stmt = $this->db->prepare(
+            "SELECT id, level, message, context, user_id, plant_id, reactor_id, source, request_uri, ip_address, created_at
+             FROM logs
+             WHERE created_at > (SELECT created_at FROM logs WHERE id = :after_id)
+             ORDER BY created_at ASC
+             LIMIT :lim"
+        );
+        $stmt->execute(['after_id' => $afterId, 'lim' => $limit]);
+
+        $logs = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $logs[] = new Log(
+                $row['level'],
+                $row['message'],
+                $row['context'] ? json_decode($row['context'], true) : null,
+                $row['user_id'],
+                $row['plant_id'],
+                $row['reactor_id'],
+                $row['source'],
+                $row['request_uri'],
+                $row['ip_address'],
+                $row['id'],
+                $row['created_at']
+            );
+        }
+        return $logs;
+    }
 }

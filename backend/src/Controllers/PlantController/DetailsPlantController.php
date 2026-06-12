@@ -252,6 +252,12 @@ class DetailsPlantController {
                 );
             }
 
+            LogService::instance()->info(
+                "[PLANT] Status actualizat: {$plantId} → {$newStatus}",
+                null,
+                $plantId
+            );
+
             echo json_encode([ 
                 "status" => "success", 
                 "message" => "Status actualizat cu succes"

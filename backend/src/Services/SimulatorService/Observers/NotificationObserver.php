@@ -49,6 +49,12 @@ class NotificationObserver implements ObserverInterface {
                 'subject' => $subject,
                 'message' => $message,
             ]);
+            LogService::instance()->critical(
+                "[SCRAM] Email trimis la {$targetEmail} — reactor {$event->getReactorId()} | senzor: {$sensor->getSensorCode()} ({$sensor->getSensorType()->value}) = {$event->getValue()}{$unit}",
+                ['value' => $event->getValue(), 'threshold' => $event->getThreshold(), 'target_email' => $targetEmail],
+                $event->getPlantId(),
+                $event->getReactorId()
+            );
         } catch (\Throwable $e) {
             LogService::instance()->error("[SCRAM EMAIL] Eroare trimitere email: " . $e->getMessage());
         }

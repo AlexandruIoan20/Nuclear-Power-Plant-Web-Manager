@@ -33,7 +33,6 @@ class AlertService {
         $alert = new Alert($plantId, $type, $message);
         $this->alertRepository->save($alert);
 
-     
         $ownerEmail = $this->alertRepository->getPlantOwnerEmail($plantId);
         $targetEmail = $ownerEmail ?? 'admin@nuclear.ro'; // Fallback curent
 

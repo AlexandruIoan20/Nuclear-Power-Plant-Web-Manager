@@ -19,6 +19,7 @@ const ADMIN_LINKS = [
     { href: '/pages/admin/index.html', label: 'Admin' },
     { href: '/pages/approvals.html', label: 'Aprobări' },
     { href: '/pages/users.html', label: 'Utilizatori' },
+    { href: '/pages/logs.html', label: 'Logs' },
 ];
 
 function buildLinkHtml(links) {
