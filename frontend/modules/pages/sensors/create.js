@@ -4,9 +4,7 @@ import { getQueryParam } from '../../utils/urlHelper.js';
 import { SensorType, SensorQuality, MeasurementField } from '../../config/sensorEnums.js';
 import { SensorRequestDTO } from '../../dto/SensorRequestDTO.js';
 import { showError, showSuccess, clearStatus } from '../../ui/showMessage.js';
-import { logger } from '../../core/logger.js';
 
-const sensorId = getQueryParam("sensorId");
 const reactorId = getQueryParam("reactorId");
 const plantId = getQueryParam("plantId");
 
@@ -23,20 +21,14 @@ function populateSelect(id, options, selectedValue) {
     ).join('');
 }
 
-function populateThresholds(d) {
-    ['normalMin','normalMax','alarmLow','alarmHigh','alertLow','alertHigh','scramLow','scramHigh'].forEach(f => {
-        document.getElementById(f).value = d[f] ?? '';
-    });
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
-    if (!sensorId) {
-        showError(document.getElementById('status-message'), "ID senzor lipsă din URL.");
-        return;
-    }
-
     const form = document.getElementById('sensor-form');
     const statusElement = document.getElementById('status-message');
+
+    if (!reactorId) {
+        showError(statusElement, "ID reactor lipsă din URL.");
+        return;
+    }
 
     try {
         const reactorResp = await reactorService.getReactor(reactorId);
@@ -51,34 +43,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     populateSelect('status', SensorQuality, 'GOOD');
     populateSelect('measurementField', MeasurementField, '');
 
-    try {
-        const response = await sensorService.get(sensorId);
-        const d = response.data;
-
-        document.getElementById('sensorCode').value = d.sensorCode ?? '';
-        document.getElementById('sensorType').value = d.sensorType ?? '';
-        document.getElementById('description').value = d.description ?? '';
-        document.getElementById('locationZone').value = d.locationZone ?? '';
-        document.getElementById('unitOfMeasure').value = d.unitOfMeasure ?? '';
-        document.getElementById('measurementField').value = d.measurementField ?? '';
-        populateThresholds(d);
-        document.getElementById('status').value = d.status ?? 'GOOD';
-        document.getElementById('isActive').checked = d.isActive !== false;
-
-        if (d.lastCalibration) {
-            document.getElementById('lastCalibration').value = d.lastCalibration.slice(0, 16);
-        }
-        if (d.calibrationDue) {
-            document.getElementById('calibrationDue').value = d.calibrationDue.slice(0, 16);
-        }
-    } catch (error) {
-        logger.error(error.message);
-        showError(statusElement, "Eroare la încărcarea datelor senzorului.");
-        return;
-    }
-
     document.getElementById('btn-cancel')?.addEventListener('click', () => {
         window.location.href = listUrl();
+    });
+
+    document.getElementById('btn-help')?.addEventListener('click', () => {
+        document.getElementById('help-overlay').classList.add('open');
+    });
+
+    document.getElementById('help-close')?.addEventListener('click', () => {
+        document.getElementById('help-overlay').classList.remove('open');
+    });
+
+    document.getElementById('help-overlay')?.addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+            e.currentTarget.classList.remove('open');
+        }
     });
 
     form.addEventListener('submit', async (e) => {
@@ -86,7 +66,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         clearStatus(statusElement);
 
         const getVal = (id) => document.getElementById(id).value;
-        const dto = SensorRequestDTO({
+        const data = {
+            reactorId,
             sensorCode: getVal('sensorCode'),
             sensorType: getVal('sensorType'),
             description: getVal('description'),
@@ -105,14 +86,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             isActive: document.getElementById('isActive').checked,
             lastCalibration: getVal('lastCalibration'),
             calibrationDue: getVal('calibrationDue'),
-        });
+        };
+        const dto = SensorRequestDTO(data);
 
         try {
-            await sensorService.update(sensorId, dto);
-            showSuccess(statusElement, "Senzorul a fost actualizat cu succes!");
+            const result = await sensorService.create({ ...dto, reactorId });
+            showSuccess(statusElement, "Senzorul a fost adăugat cu succes!");
             setTimeout(() => { window.location.href = listUrl(); }, 1200);
         } catch (error) {
-            showError(statusElement, "Eroare la actualizare: " + (error.message || ""));
+            showError(statusElement, "Eroare la creare: " + (error.message || ""));
         }
     });
 });

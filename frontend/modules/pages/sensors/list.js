@@ -107,6 +107,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('btn-populate')?.addEventListener('click', handlePopulate);
 
+    document.getElementById('btn-create')?.addEventListener('click', () => {
+        const url = plantId
+            ? `/pages/sensors/create.html?reactorId=${reactorId}&plantId=${plantId}`
+            : `/pages/sensors/create.html?reactorId=${reactorId}`;
+        window.location.href = url;
+    });
+
     try {
         const reactorResp = await reactorService.getReactor(reactorId);
         reactorType = reactorResp.data?.reactorType || null;
