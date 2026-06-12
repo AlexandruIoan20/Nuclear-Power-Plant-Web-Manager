@@ -24,7 +24,7 @@ class PlantExportImportService {
         $this->sensorRepo = new SensorRepository($this->db);
     }
 
-    // ==================== EXPORT JSON ====================
+    // 
 
     public function exportPlantJson(string $plantId): array {
         $plant = $this->detailsPlantRepo->findById($plantId);
@@ -180,7 +180,7 @@ class PlantExportImportService {
             throw new Exception('Failed to create ZIP archive');
         }
 
-        // --- plants.csv ---
+        
         $plantsHandle = fopen('php://temp', 'r+');
         fputcsv($plantsHandle, ['name', 'status'], escape: '\\');
         foreach ($plants as $p) {
