@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../Services/LogService.php';
+require_once __DIR__ . '/../Entities/Alert.php';
 
 class AlertRepository {
     private PDO $db;

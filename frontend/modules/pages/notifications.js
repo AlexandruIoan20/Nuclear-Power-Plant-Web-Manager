@@ -1,7 +1,7 @@
 import { escapeHtml } from '../utils/escapeHtml.js';
 import { notificationService } from '../services/notificationService.js';
-// TODO: Asigură-te că imporți API_BASE și getCsrfToken dacă folosești apeluri fetch directe mai jos
-// import { API_BASE, getCsrfToken } from '../utils/apiConfig.js'; 
+import { API_BASE } from '../config/api.config.js';
+import { getCsrfToken } from '../core/api.js';
 
 function buildAlertCards(container, notifications) {
     if (notifications.length === 0) {
@@ -32,7 +32,7 @@ function buildAlertCards(container, notifications) {
                 ${escapeHtml(notification.message)}
             </div>
             <div class="notification-meta" style="margin-top: 8px;">
-                TIP: ${escapeHtml(notification.type)} | ROL: ${escapeHtml(notification.target_role)}
+                TIP: ${escapeHtml(notification.type)} | ROL: ${escapeHtml(notification.targetRole)}
             </div>
         `;
         container.appendChild(card);
@@ -59,7 +59,7 @@ function buildPlantCards(container, notifications) {
                 ${escapeHtml(notification.message)}
             </div>
             <div class="notification-meta" style="margin-top: 8px;">
-                TIP: ${escapeHtml(notification.type)} | ROL: ${escapeHtml(notification.target_role)}
+                TIP: ${escapeHtml(notification.type)} | ROL: ${escapeHtml(notification.targetRole)}
             </div>
             <button class="button secondary small dismiss-btn" style="align-self: flex-end; margin-top: 8px;">Dismiss</button>
         `;
@@ -108,11 +108,11 @@ async function loadCategory(category) {
 
         loadingIndicator.style.display = "none";
 
-        if (result.status === 'success' && Array.isArray(result.data)) {
+        if (Array.isArray(result)) {
             if (category === 'alert') {
-                buildAlertCards(container, result.data);
+                buildAlertCards(container, result);
             } else {
-                buildPlantCards(container, result.data);
+                buildPlantCards(container, result);
             }
         }
     } catch (error) {

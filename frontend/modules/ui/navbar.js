@@ -17,14 +17,6 @@ const USER_LINKS = [
     { href: '/pages/notifications.html', label: 'Notificări' },
 ];
 
-// TODO Trebuie bagate in /admin
-const ADMIN_LINKS = [
-    { href: '/pages/admin/index.html', label: 'Admin' },
-    { href: '/pages/approvals.html', label: 'Aprobări' },
-    { href: '/pages/users.html', label: 'Utilizatori' },
-    { href: '/pages/logs.html', label: 'Logs' },
-];
-
 function buildLinkHtml(links) {
     return links.map(link => {
         const isActive = currentPath === link.href;
@@ -35,6 +27,9 @@ function buildLinkHtml(links) {
 
 function renderTopbar(el, links, user) {
     const linksHtml = buildLinkHtml(links);
+
+    const isAdmin = user && user.role && user.role.toUpperCase() === 'ADMIN';
+    const adminLink = isAdmin ? `<a href="/pages/admin/index.html"${currentPath.startsWith('/pages/admin/') ? ' class="active" aria-current="page"' : ''}>Admin</a>` : '';
 
     let userHtml = '';
     if (user) {
@@ -49,8 +44,9 @@ function renderTopbar(el, links, user) {
                 <strong>Panou Control</strong>
             </div>
             <button class="navbar__toggle" id="navbar-toggle" aria-label="Deschide meniul">Meniu</button>
-            <nav class="nav-links" id="navbar-links" aria-label="Navigare principală">
+            <nav class="nav-links" id="navbar-links" aria-label="Navigare principală" style="flex-wrap:nowrap;">
                 ${linksHtml}
+                ${adminLink}
                 <a href="${BACKEND_BASE}/api/rss/power-plants" target="_blank" title="Flux RSS centrale nucleare" style="display:inline-flex;align-items:center;gap:4px;color:var(--orange,#f60);text-decoration:none;font-size:0.82rem;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="18" r="3"/><path d="M4 11a9 9 0 0 1 9 9h-3a6 6 0 0 0-6-6v-3zm0-7a16 16 0 0 1 16 16h-3a13 13 0 0 0-13-13v-3z"/></svg>
                     RSS
@@ -84,8 +80,7 @@ export async function renderNavbar() {
         const result = await response.json();
         if (result.status === 'success' && result.data) {
             const user = result.data;
-            const isAdmin = user.role.toUpperCase() === 'ADMIN';
-            const links = isAdmin ? [...USER_LINKS, ...ADMIN_LINKS] : USER_LINKS;
+            const links = USER_LINKS;
             renderTopbar(el, links, user);
         } else {
             renderTopbar(el, UNAUTH_LINKS);

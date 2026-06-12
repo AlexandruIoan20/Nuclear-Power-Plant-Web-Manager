@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../Entities/Alert.php'; 
 require_once __DIR__ . '/../Dto/AlertListDTO.php'; 
 require_once __DIR__ . '/../Dto/ApiResponseDTO.php'; 
+require_once __DIR__ . '/../Services/LogService.php';
 
 class AlertController {
     private AlertService $alertService;

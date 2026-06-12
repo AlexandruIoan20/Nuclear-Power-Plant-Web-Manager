@@ -1,4 +1,4 @@
-export function ReactorDTO({
+export function ReactorRequestDTO({
     powerPlantId,
     reactorCode,
     reactorType,

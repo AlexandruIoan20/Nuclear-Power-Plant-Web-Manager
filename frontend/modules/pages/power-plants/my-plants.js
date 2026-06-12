@@ -1,11 +1,12 @@
 import { powerPlantService } from '../../services/powerPlantService.js';
 import { renderStatusBadge } from '../../ui/power-plants/plantStatusBadge.js';
+import { clearHeaderState } from '../../ui/form-header/formHeaderState.js'; 
 
 const NAV_MAP = {
-    DRAFT:     { href: (id) => `/pages/power-plants/create.html?id=${encodeURIComponent(id)}`,          label: 'Editează' },
-    REVIEW:    { href: (id) => `/pages/feasibility/report-results.html?id=${encodeURIComponent(id)}`,  label: 'Vezi Raportul' },
-    REJECTED:  { href: (id) => `/pages/feasibility/report-results.html?id=${encodeURIComponent(id)}`,  label: 'Vezi Raportul' },
-    APPROVED:  { href: (id) => `/pages/reactors/list.html?plantId=${encodeURIComponent(id)}`,          label: 'Gestionează' },
+    DRAFT: { href: (id) => `/pages/power-plants/create.html?id=${encodeURIComponent(id)}`, label: 'Editează' },
+    REVIEW: { href: (id) => `/pages/feasibility/report-results.html?id=${encodeURIComponent(id)}`,  label: 'Vezi Raportul' },
+    REJECTED: { href: (id) => `/pages/feasibility/report-results.html?id=${encodeURIComponent(id)}`,  label: 'Vezi Raportul' },
+    APPROVED: { href: (id) => `/pages/reactors/list.html?plantId=${encodeURIComponent(id)}`, label: 'Gestionează' },
 };
 
 function escapeHtml(value) {
@@ -52,9 +53,11 @@ function renderTable(plants) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    clearHeaderState(); 
+    
     try {
         const response = await powerPlantService.getMyPlants();
-        const plants = response.data ?? [];
+        const plants = response ?? [];
         renderTable(plants);
     } catch (error) {
         document.getElementById('plants-tbody').innerHTML =

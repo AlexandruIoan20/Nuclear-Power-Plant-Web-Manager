@@ -32,10 +32,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     showLoading("Se încarcă raportul..."); 
 
     try { 
-        const response = await feasibilityReportService.getReport(plantId); 
-        
-        logger.info({ response }); 
-        if(!response.success) { 
+        const report = await feasibilityReportService.getReport(plantId); 
+
+        logger.info({ report }); 
+        if(!report.reportId) { 
             hideLoading(); 
             alert("A apărut o problemă la căutarea raportului"); 
             return; 
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const btn = document.getElementById('btn-back-to-plant');
         if (btn) btn.href = `/pages/power-plants/finish.html?id=${plantId}`;
 
-        populateFeasibilityReport(response.data); 
+        populateFeasibilityReport(report); 
     } catch(error) {    
         hideLoading(); 
         logger.error(error.message); 

@@ -82,7 +82,7 @@ async function handlePopulate() {
 async function loadSensors() {
     try {
         const response = await sensorService.getByReactor(reactorId);
-        sensors = response.data ?? [];
+        sensors = response ?? [];
         renderTable();
     } catch (error) {
         logger.error(error.message);
@@ -116,10 +116,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         const reactorResp = await reactorService.getReactor(reactorId);
-        reactorType = reactorResp.data?.reactorType || null;
+        reactorType = reactorResp?.reactorType || null;
         const info = document.getElementById('reactor-info');
-        if (info && reactorResp.data) {
-            info.textContent = `Reactor: ${reactorResp.data.reactorCode} (${reactorResp.data.reactorType})`;
+        if (info && reactorResp) {
+            info.textContent = `Reactor: ${reactorResp.reactorCode} (${reactorResp.reactorType})`;
         }
     } catch {
     }

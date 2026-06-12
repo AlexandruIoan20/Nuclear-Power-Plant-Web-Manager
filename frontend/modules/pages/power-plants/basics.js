@@ -22,19 +22,20 @@ document.addEventListener("DOMContentLoaded", async() => {
     if (!isEdit) {
         try {
             const checkResponse = await powerPlantService.getBasics(plantId);
-            if (checkResponse.data && checkResponse.data.id) {
-                saveHeaderState({ basicsId: checkResponse.data.id });
-                window.history.replaceState({}, '', `?id=${plantId}&basicsId=${checkResponse.data.id}`);
+            if (checkResponse && checkResponse.id) {
+                saveHeaderState({ basicsId: checkResponse.id });
+                window.history.replaceState({}, '', `?id=${plantId}&basicsId=${checkResponse.id}`);
                 isEdit = true;
             }
         } catch {
         }
     }
 
+    console.log({ isEdit }); 
+
     if(isEdit) { 
         try { 
-            const response = await powerPlantService.getBasics(plantId);
-            const d = response.data; 
+            const d = await powerPlantService.getBasics(plantId);
             
             document.getElementById("capacity").value = d.capacity ?? "";
             document.getElementById("constructionDurationYears").value = d.constructionDurationYears ?? "";
@@ -59,11 +60,13 @@ document.addEventListener("DOMContentLoaded", async() => {
     
             try { 
                 const response = await powerPlantService.createBasics(dto, plantId); 
-                saveHeaderState({ basicsId: response.basicsId }); 
+
+                console.log({ response }); 
+                saveHeaderState({ basicsId: response.data.id }); 
                 showSuccess(statusElement, "Datele au fost salvate cu succes!"); 
 
-                window.history.replaceState({}, '', `?id=${response.plantId}&basicsId=${response.basicsId}`)
-                window.location.href = `/pages/power-plants/geological.html?id=${response.plantId}`;
+                window.history.replaceState({}, '', `?id=${response.data.plantId}&basicsId=${response.data.id}`)
+                window.location.href = `/pages/power-plants/geological.html?id=${response.data.plantId}`;
 
                 form.reset(); 
             } catch(error) { 

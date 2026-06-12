@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../../Dto/FeasibilityReportDTO.php'; 
 require_once __DIR__ . '/../../Dto/ApiResponseDTO.php'; 
 require_once __DIR__ . '/../../Helpers/TransactionManager.php'; 
+require_once __DIR__ . '/../LogService.php';
 
 class FeasibilityService
 {

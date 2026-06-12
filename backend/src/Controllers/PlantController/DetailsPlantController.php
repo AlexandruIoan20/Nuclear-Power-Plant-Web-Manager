@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../Dto/PlantStatusListDTO.php';
 require_once __DIR__ . '/../../Dto/CoordinatesPreviewResponseDTO.php';
 require_once __DIR__ . '/../../Dto/GeoLocationPreviewDTO.php';
 require_once __DIR__ . '/../../Dto/ApiResponseDTO.php';
+require_once __DIR__ . '/../../Services/LogService.php';
 
 class DetailsPlantController { 
     public function __construct(
@@ -40,7 +41,7 @@ class DetailsPlantController {
         } 
         $dto = GetPlantDTO::fromServiceArray($plant);
     
-        echo json_encode($dto);
+        echo json_encode(new ApiResponseDTO(status: 'success', data: $dto));
     }
 
     public function getPlantDetails(string $id) { 
@@ -99,12 +100,12 @@ class DetailsPlantController {
     public function getPendingApprovalsList(): void {
         header('Content-Type: application/json; charset=UTF-8');
 
-        $plants = $this->plantServiceFacade->getAllPowerPlants();
+        $pendingPlants = $this->plantServiceFacade->getPendingApprovalsList();
 
-        $payload = array_map(fn($plant) => PlantListDTO::fromDbArray($plant), array_filter($plants, fn($p) => strtoupper($p['status'] ?? '') === 'REVIEW'));
+        $payload = array_map(fn($plant) => PlantListDTO::fromDbArray($plant), $pendingPlants);
 
         http_response_code(200);
-        echo json_encode($payload);
+        echo json_encode(new ApiResponseDTO(status: 'success', data: $payload));
         exit;
     }
 
@@ -174,7 +175,7 @@ echo json_encode(new ApiResponseDTO(status: 'success', data: $dtos));
             $responseDTO = $this->plantServiceFacade->savePlantDetails($dateFormular); 
             
             http_response_code(201); 
-            echo json_encode(["status" => "success", "message" => "Centrala a fost salvată cu succes.", "plantId" => $responseDTO->dataId]);
+            echo json_encode(new ApiResponseDTO(status: 'success', message: "Centrala a fost salvată cu succes.", data: ['id' => $responseDTO->dataId]));
             exit; 
         } catch(Exception $e) { 
             LogService::instance()->error("[ERROR] Save Plant: " . $e->getMessage());

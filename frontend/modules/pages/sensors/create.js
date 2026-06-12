@@ -2,7 +2,6 @@ import { sensorService } from '../../services/sensorService.js';
 import { reactorService } from '../../services/reactorService.js';
 import { getQueryParam } from '../../utils/urlHelper.js';
 import { SensorType, SensorQuality, MeasurementField } from '../../config/sensorEnums.js';
-import { SensorRequestDTO } from '../../dto/SensorRequestDTO.js';
 import { showError, showSuccess, clearStatus } from '../../ui/showMessage.js';
 
 const reactorId = getQueryParam("reactorId");
@@ -33,8 +32,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const reactorResp = await reactorService.getReactor(reactorId);
         const ctx = document.getElementById('reactor-context');
-        if (ctx && reactorResp.data) {
-            ctx.textContent = `Reactor: ${reactorResp.data.reactorCode} (${reactorResp.data.reactorType})`;
+        if (ctx && reactorResp) {
+            ctx.textContent = `Reactor: ${reactorResp.reactorCode} (${reactorResp.reactorType})`;
         }
     } catch {
     }
@@ -67,7 +66,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const getVal = (id) => document.getElementById(id).value;
         const data = {
-            reactorId,
             sensorCode: getVal('sensorCode'),
             sensorType: getVal('sensorType'),
             description: getVal('description'),
@@ -87,10 +85,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             lastCalibration: getVal('lastCalibration'),
             calibrationDue: getVal('calibrationDue'),
         };
-        const dto = SensorRequestDTO(data);
 
         try {
-            const result = await sensorService.create({ ...dto, reactorId });
+            const result = await sensorService.create(reactorId, data);
             showSuccess(statusElement, "Senzorul a fost adăugat cu succes!");
             setTimeout(() => { window.location.href = listUrl(); }, 1200);
         } catch (error) {

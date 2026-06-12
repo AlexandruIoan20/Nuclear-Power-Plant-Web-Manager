@@ -6,8 +6,8 @@ export function TechnicalDataRequestDTO({
 }) {
     return {
         numberOfReactors: numberOfReactors !== undefined && numberOfReactors !== null ? Number(numberOfReactors) : null,
-        estimatedEfficiency: estimatedEfficiency ? parseFloat(estimatedEfficiency) : null,
-        operationalRiskLevel: operationalRiskLevel ? parseFloat(operationalRiskLevel) : null,
+        estimatedEfficiency: estimatedEfficiency != null ? parseFloat(estimatedEfficiency) : null,
+        operationalRiskLevel: operationalRiskLevel != null ? parseFloat(operationalRiskLevel) : null,
         reactorConfigurations: reactorConfigurations,
     };
 }

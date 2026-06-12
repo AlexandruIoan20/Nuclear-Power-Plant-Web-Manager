@@ -22,8 +22,8 @@ document.addEventListener("DOMContentLoaded", async() => {
                 const response = await powerPlantService.createPlantDetails(dto);
                 showSuccess(statusElement, "Datele au fost salvate cu succes!"); 
 
-                window.history.replaceState({}, '', `?id=${response.plantId}`); 
-                window.location.href = `/pages/power-plants/basics.html?id=${response.plantId}`;
+                window.history.replaceState({}, '', `?id=${response.data.id}`); 
+                window.location.href = `/pages/power-plants/basics.html?id=${response.data.id}`;
 
                 form.reset(); 
             } catch(error) { 
@@ -32,8 +32,7 @@ document.addEventListener("DOMContentLoaded", async() => {
         }); 
     } else { 
         try { 
-            const response = await powerPlantService.getPlantDetails(plantId); 
-            const d = response.data;  
+            const d = await powerPlantService.getPlantDetails(plantId); 
 
             document.getElementById("name").value = d.name ?? ""; 
         } catch(error) { 

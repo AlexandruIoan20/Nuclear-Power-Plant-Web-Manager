@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../../Services/PlantServiceFacade.php'; 
 require_once __DIR__ . '/../../Dto/GeologicalPlantDataDTO.php'; 
 require_once __DIR__ . '/../../Dto/ApiResponseDTO.php'; 
+require_once __DIR__ . '/../../Services/LogService.php';
 
 class GeologicalPlantController { 
     public function __construct(
@@ -50,7 +51,7 @@ class GeologicalPlantController {
             http_response_code(201);
             echo json_encode(new ApiResponseDTO(status: 'success', message: 'Datele geologice au fost salvate cu succes.', data: [
                 'plantId' => $plantId,
-                'geologicalId' => $responseDTO->dataId,
+                'id' => $responseDTO->dataId,
                 'data' => $fullDto,
             ]));
         } catch (Exception $e) {

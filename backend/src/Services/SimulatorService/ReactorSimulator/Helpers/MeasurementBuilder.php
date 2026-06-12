@@ -46,10 +46,12 @@ class MeasurementBuilder {
 
     private function fieldToSetter(string $field): string {
         $parts = explode('_', $field);
-        $camel = $parts[0];
-        for ($i = 1, $n = count($parts); $i < $n; $i++) {
-            $camel .= ucfirst($parts[$i]);
+        $camel = '';
+        
+        foreach ($parts as $part) {
+            $camel .= ucfirst(strtolower($part));
         }
+        
         return 'set' . $camel;
     }
 

@@ -1,0 +1,27 @@
+export function SensorResponseDTO(data) {
+    return {
+        id: data.id ?? null,
+        reactorId: data.reactorId ?? null,
+        sensorCode: data.sensorCode ?? null,
+        sensorType: data.sensorType ?? null,
+        description: data.description ?? null,
+        locationZone: data.locationZone ?? null,
+        unitOfMeasure: data.unitOfMeasure ?? null,
+        measurementField: data.measurementField ?? null,
+        normalMin: data.normalMin != null ? parseFloat(data.normalMin) : null,
+        normalMax: data.normalMax != null ? parseFloat(data.normalMax) : null,
+        alarmLow: data.alarmLow != null ? parseFloat(data.alarmLow) : null,
+        alarmHigh: data.alarmHigh != null ? parseFloat(data.alarmHigh) : null,
+        alertLow: data.alertLow != null ? parseFloat(data.alertLow) : null,
+        alertHigh: data.alertHigh != null ? parseFloat(data.alertHigh) : null,
+        scramLow: data.scramLow != null ? parseFloat(data.scramLow) : null,
+        scramHigh: data.scramHigh != null ? parseFloat(data.scramHigh) : null,
+        status: data.status ?? null,
+        isActive: data.isActive === true,
+        lastCalibration: data.lastCalibration ?? null,
+        calibrationDue: data.calibrationDue ?? null,
+        currentValue: data.currentValue != null ? parseFloat(data.currentValue) : null,
+        lastReadingAt: data.lastReadingAt ?? null,
+        createdAt: data.createdAt ?? null,
+    };
+}

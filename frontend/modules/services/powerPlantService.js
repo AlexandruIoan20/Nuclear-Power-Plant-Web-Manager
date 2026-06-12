@@ -3,7 +3,15 @@ import { PlantRequestDTO } from '../dto/PlantRequestDTO.js';
 import { BasicDataRequestDTO } from '../dto/BasicDataRequestDTO.js'; 
 import { GeologicalDataRequestDTO } from '../dto/GeologicalDataRequestDTO.js'; 
 import { TechnicalDataRequestDTO } from '../dto/TechnicalDataRequestDTO.js'; 
-import { UpdatePlantStatusRequestDTO } from '../dto/UpdatePlanStatusRequestDTO.js'; 
+import { UpdatePlantStatusRequestDTO } from '../dto/UpdatePlantStatusRequestDTO.js'; 
+import { ImportPlantRequestDTO } from '../dto/ImportPlantRequestDTO.js'; 
+import { ImportPlantsRequestDTO } from '../dto/ImportPlantsRequestDTO.js'; 
+import { PlantDetailsResponseDTO } from '../dto/PlantDetailsResponseDTO.js'; 
+import { BasicDataResponseDTO } from '../dto/BasicDataResponseDTO.js'; 
+import { GeologicalDataResponseDTO } from '../dto/GeologicalDataResponseDTO.js'; 
+import { TechnicalDataResponseDTO } from '../dto/TechnicalDataResponseDTO.js'; 
+import { PlantListResponseDTO } from '../dto/PlantListResponseDTO.js'; 
+import { PlantStatusListResponseDTO } from '../dto/PlantStatusListResponseDTO.js';
 
 export const powerPlantService = { 
     createPlantDetails: (formData) => api.post("/power-plants", PlantRequestDTO(formData)), 
@@ -12,24 +20,48 @@ export const powerPlantService = {
     submitForReview: (plantId) => api.patch(`/power-plants/${plantId}/submit-review`),
     reopenDraft: (plantId) => api.patch(`/power-plants/${plantId}/reopen`),
 
-    getAll: () => api.get("/power-plants"),
-    getMyPlants: () => api.get("/power-plants/my"), 
-    getPlantDetails: (plantId) => api.get(`/power-plants/${plantId}/details`), 
-    getPlant: (plantId) => api.get(`/power-plants/${plantId}`), 
-    getPlantsByStatus: (status) => api.get(`/power-plants/filter?status=${status}`), 
+    getAll: async () => {
+        const response = await api.get("/power-plants");
+        return (response.data ?? []).map(PlantListResponseDTO);
+    },
+    getMyPlants: async () => {
+        const response = await api.get("/power-plants/my");
+        return (response.data ?? []).map(PlantListResponseDTO);
+    },
+    getPlantDetails: async (plantId) => {
+        const response = await api.get(`/power-plants/${plantId}/details`);
+        return PlantDetailsResponseDTO(response.data ?? response);
+    },
+    getPlant: async (plantId) => {
+        const response = await api.get(`/power-plants/${plantId}`);
+        return response.data ?? response;
+    },
+    getPlantsByStatus: async (status) => {
+        const response = await api.get(`/power-plants/filter?status=${status}`);
+        return (response.data ?? []).map(PlantStatusListResponseDTO);
+    },
 
     // Basics 
-    getBasics: (plantId) => api.get(`/power-plants/${plantId}/basics`),
+    getBasics: async (plantId) => {
+        const response = await api.get(`/power-plants/${plantId}/basics`);
+        return BasicDataResponseDTO(response.data ?? response);
+    },
     createBasics: (formData, plantId) => api.post(`/power-plants/${plantId}/basics`, BasicDataRequestDTO(formData)), 
     updateBasics: (formData, plantId) => api.put(`/power-plants/${plantId}/basics`, BasicDataRequestDTO(formData)), 
 
     // Geological 
-    getGeological: (plantId) => api.get(`/power-plants/${plantId}/geological`), 
+    getGeological: async (plantId) => {
+        const response = await api.get(`/power-plants/${plantId}/geological`);
+        return GeologicalDataResponseDTO(response.data ?? response);
+    },
     createGeological: (formData, plantId) => api.post(`/power-plants/${plantId}/geological`, GeologicalDataRequestDTO(formData)), 
     updateGeological: (formData, plantId) => api.put(`/power-plants/${plantId}/geological`, GeologicalDataRequestDTO(formData)), 
 
     // Technical 
-    getTechnical: (plantId) => api.get(`/power-plants/${plantId}/technical`), 
+    getTechnical: async (plantId) => {
+        const response = await api.get(`/power-plants/${plantId}/technical`);
+        return TechnicalDataResponseDTO(response.data ?? response);
+    },
     createTechnical: (formData, plantId) => api.post(`/power-plants/${plantId}/technical`, TechnicalDataRequestDTO(formData)), 
     updateTechnical: (formData, plantId) => api.put(`/power-plants/${plantId}/technical`, TechnicalDataRequestDTO(formData)), 
 
@@ -38,6 +70,6 @@ export const powerPlantService = {
     exportAllPlantsJson: () => api.download(`/power-plants/export`),
     exportPlantCsv: (plantId) => api.download(`/power-plants/${plantId}/export/csv`),
     exportAllPlantsCsv: () => api.download(`/power-plants/export/csv`),
-    importPlant: (data) => api.post(`/power-plants/import`, data),
-    importPlants: (data) => api.post(`/power-plants/import/batch`, data),
+    importPlant: (data) => api.post(`/power-plants/import`, ImportPlantRequestDTO(data)),
+    importPlants: (data) => api.post(`/power-plants/import/batch`, ImportPlantsRequestDTO(data)),
 };  

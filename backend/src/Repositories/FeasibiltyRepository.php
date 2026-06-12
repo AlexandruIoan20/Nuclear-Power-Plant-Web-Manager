@@ -1,5 +1,7 @@
 <?php 
 
+require_once __DIR__ . '/../Services/LogService.php';
+
 class FeasibilityRepository { 
     private PDO $db; 
 

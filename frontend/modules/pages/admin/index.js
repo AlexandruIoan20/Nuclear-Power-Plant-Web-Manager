@@ -4,7 +4,6 @@ import { applyFilters } from '../../ui/power-plants/plantFilters.js';
 import { PlantStatus } from '../../config/enums.js'; 
 import { loadSelect } from '../../ui/selectLoader.js'; 
 import { logger } from '../../core/logger.js';
-
 loadSelect('filter-status', PlantStatus); 
 
 let masterPlants = [];
@@ -81,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         logger.info({ response }); 
 
-        masterPlants = response.data ?? [];
+        masterPlants = response ?? [];
         allPlants = masterPlants;
         applyFilters(allPlants, sortCol, sortDir);
     } catch (error) {

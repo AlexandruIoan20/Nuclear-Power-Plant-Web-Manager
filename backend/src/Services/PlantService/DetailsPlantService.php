@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../Entities/PlantStatus.php';
 require_once __DIR__ . '/../../Entities/Plant.php'; 
 
 require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php'; 
+require_once __DIR__ . '/../LogService.php';
 
 class DetailsPlantService { 
     private PlantRepositoryFacade $plantRepositoryFacade; 

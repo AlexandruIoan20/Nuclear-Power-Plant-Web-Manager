@@ -1,6 +1,5 @@
 import { powerPlantService } from '../../services/powerPlantService.js';
 import { feasibilityReportService } from '../../services/feasibilityReportService.js';
-import { UpdatePlantStatusRequestDTO } from '../../dto/UpdatePlanStatusRequestDTO.js';
 import { getQueryParam } from '../../utils/urlHelper.js';
 import { saveHeaderState, clearHeaderState } from '../../ui/form-header/formHeaderState.js';
 import { renderHeader } from '../../ui/form-header/formHeader.js';
@@ -97,7 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     const response = await feasibilityReportService.createReport(plantId);
                     logger.info({ response });
 
-                    if (response.success) {
+                    if (response.status === 'success') {
                         verifyButton.textContent = "Se actualizează statusul...";
                         try {
                             await powerPlantService.submitForReview(plantId);
@@ -125,8 +124,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             statusMsg.style.color = 'var(--yellow)';
         } else if (status === 'APPROVED') {
             verifyButton.style.display = 'none';
-            statusMsg.innerHTML = '\u2705 Central\u0103 aprobat\u0103. <a href="/pages/reactors/list.html?plantId=' + encodeURIComponent(plantId) + '" style="color:var(--accent);text-decoration:underline;">Gestioneaz\u0103 reactoare</a>';
-            statusMsg.style.color = 'var(--green)';
         } else if (status === 'REJECTED') {
             verifyButton.style.display = 'none';
             statusMsg.textContent = 'Centrala a fost respinsă. Corectați datele și redeschideți proiectul.';

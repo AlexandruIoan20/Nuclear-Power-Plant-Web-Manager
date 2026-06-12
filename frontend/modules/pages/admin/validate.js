@@ -1,6 +1,6 @@
 import { powerPlantService } from '../../services/powerPlantService.js';
 import { feasibilityReportService } from '../../services/feasibilityReportService.js';
-import { UpdatePlantStatusRequestDTO } from '../../dto/UpdatePlanStatusRequestDTO.js';
+import { UpdatePlantStatusRequestDTO } from '../../dto/UpdatePlantStatusRequestDTO.js';
 import { getQueryParam } from '../../utils/urlHelper.js';
 import { populateFeasibilityReport } from '../../ui/feasibility/feasibilityReportRenderer.js';
 import { populatePlantPage } from '../../ui/power-plants/plantPageRenderer.js'; 
@@ -61,9 +61,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (status === 'REVIEW' || status === 'REJECTED') {
             try {
-                const reportData = await feasibilityReportService.getReport(plantId);
-                if (reportData.success) {
-                    populateFeasibilityReport(reportData.data);
+                const feasibilityReport = await feasibilityReportService.getReport(plantId);
+                if (feasibilityReport.reportId) {
+                    populateFeasibilityReport(feasibilityReport);
                 }
             } catch (reportErr) {
                 logger.warn('Raportul nu a putut fi încărcat:', reportErr.message);

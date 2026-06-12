@@ -30,8 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-        const response = await reactorService.getReactor(reactorId);
-        const d = response.data;
+        const d = await reactorService.getReactor(reactorId);
 
         document.getElementById("reactorCode").value = d.reactorCode ?? "";
 
