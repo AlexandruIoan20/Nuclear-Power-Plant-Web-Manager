@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Plants</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../modules/config/globals.js"></script>
+</head>
+<body>
+    <div class="page-shell">
+        <div id="main-navbar"></div>
+
+        <div class="topbar" style="margin-bottom:24px;">
+            <div class="brand">
+                <strong>Import Plants</strong>
+            </div>
+            <div class="nav-links">
+                <a class="button secondary" href="/pages/power-plants/list.html">← Back to List</a>
+            </div>
+        </div>
+
+        <div class="panel" style="max-width: 640px; margin: 0 auto;">
+            <h2 style="margin-bottom: 16px;">Upload JSON File</h2>
+            <p style="margin-bottom: 16px; color: var(--text-muted);">
+                Select a JSON file exported from the system. The file should contain an object with a <code>plants</code> array, or a single plant object.
+            </p>
+
+            <div class="field" style="margin-bottom: 16px;">
+                <label for="file-input">Choose JSON file</label>
+                <input type="file" id="file-input" accept=".json" />
+            </div>
+
+            <div id="preview-area" style="display: none; margin-bottom: 16px;">
+                <h3 style="margin-bottom: 8px;">Plants to import:</h3>
+                <ul id="plant-preview-list" style="margin-bottom: 16px;"></ul>
+                <button class="button" id="btn-confirm-import" disabled>Confirm Import</button>
+                <span id="import-status" style="margin-left: 12px;"></span>
+            </div>
+
+            <div id="result-area" style="display: none;">
+                <h3 style="margin-bottom: 8px;">Import Result</h3>
+                <div id="result-message" style="margin-bottom: 12px;"></div>
+                <div id="result-links"></div>
+                <button class="button secondary" id="btn-import-another" style="margin-top: 12px;">Import Another</button>
+            </div>
+
+            <div id="error-area" style="display: none; color: var(--danger); margin-top: 12px;"></div>
+        </div>
+    </div>
+
+    <script type="module" src="../../modules/ui/navbar.js"></script>
+    <script type="module" src="../../modules/pages/power-plants/import.js"></script>
+</body>
+</html>

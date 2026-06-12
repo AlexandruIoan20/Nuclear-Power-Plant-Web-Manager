@@ -10,6 +10,7 @@ const USER_LINKS = [
     { href: '/pages/dashboard.html', label: 'Dashboard' },
     { href: '/pages/power-plants/list.html', label: 'Centrale' },
     { href: '/pages/power-plants/create.html', label: 'Creare Centrală' },
+    { href: '/pages/statistics.html', label: 'Statistici' },
     { href: '/pages/map.html', label: 'Hartă' },
     { href: '/pages/notifications.html', label: 'Notificări' },
 ];

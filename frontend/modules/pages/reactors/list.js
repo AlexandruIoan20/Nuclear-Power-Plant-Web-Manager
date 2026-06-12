@@ -29,13 +29,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    document.getElementById('plant-id-display').textContent = plantId;
+    if (document.getElementById('plant-id-display')) {
+        document.getElementById('plant-id-display').textContent = plantId;
+    }
 
-    document.getElementById('btn-create-reactor').addEventListener('click', () => {
+    document.getElementById('btn-create-reactor')?.addEventListener('click', () => {
         window.location.href = `/pages/reactors/create.html?plantId=${plantId}`;
     });
 
-    document.getElementById('btn-back-plant').addEventListener('click', () => {
+    document.getElementById('btn-back-plant')?.addEventListener('click', () => {
         window.location.href = `/pages/power-plants/finish.html?id=${plantId}`;
     });
 

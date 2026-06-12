@@ -13,6 +13,12 @@
     <div class="page-shell">
         <div id = "main-navbar"></div>
 
+        <div class="toolbar">
+            <button class="button secondary" id="btn-import">📥 Import</button>
+            <button class="button secondary" id="btn-export-all-json">📄 Export All JSON</button>
+            <button class="button secondary" id="btn-export-all-csv">📦 Export All CSV</button>
+        </div>
+
         <div class="filter-bar">
             <div class="field">
                 <label for="filter-name">Caută după nume</label>
@@ -38,12 +44,12 @@
                         <th data-col="id">ID <span class="sort-icon">↕</span></th>
                         <th data-col="coords">Coordonate</th>
                         <th data-col="status">Status <span class="sort-icon">↕</span></th>
-                        <th></th>
+                        <th>Acțiuni</th>
                     </tr>
                 </thead>
                 <tbody id="plants-tbody">
                     <tr class="state-row">
-                        <td colspan="6">
+                        <td colspan="7">
                             <span class="spinner-inline"></span> Se încarcă centralele...
                         </td>
                     </tr>

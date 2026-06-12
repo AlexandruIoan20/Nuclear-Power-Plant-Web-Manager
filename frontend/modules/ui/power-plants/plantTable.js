@@ -16,7 +16,7 @@ export function renderTable(plants, goTo = null) {
     document.getElementById('results-count').textContent = plants.length;
 
     if (!plants.length) {
-        tbody.innerHTML = `<tr class="state-row"><td colspan="6">Nicio centrală găsită.</td></tr>`;
+        tbody.innerHTML = `<tr class="state-row"><td colspan="7">Nicio centrală găsită.</td></tr>`;
         return;
     }
 
@@ -30,8 +30,10 @@ export function renderTable(plants, goTo = null) {
                 <td class="td-id">${shortId(p.id)}</td>
                 <td class="td-coords">${coords(p.latitude, p.longitude)}</td>
                 <td>${statusTag(p.status)}</td>
-                <td>
+                <td class="td-actions">
                     ${href ? `<a class="btn-view" href="${href}">Vezi →</a>` : ''}
+                    <button class="btn-export-json" data-id="${escapeHtml(p.id)}" title="Export JSON">📄</button>
+                    <button class="btn-export-csv" data-id="${escapeHtml(p.id)}" title="Export CSV">📦</button>
                 </td>
             </tr>
         `;
