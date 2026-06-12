@@ -1,3 +1,5 @@
+import { API_BASE } from '../../config/api.config.js';
+import { powerPlantService } from '../../services/powerPlantService.js';
 import { reactorService } from '../../services/reactorService.js';
 import { getQueryParam } from '../../utils/urlHelper.js';
 import { renderReactorTable } from '../../ui/reactors/reactorTable.js';
@@ -29,15 +31,75 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    document.getElementById('plant-id-display').textContent = plantId;
+    let plantStatus = null;
+    try {
+        const plantData = await powerPlantService.getPlant(plantId);
+        plantStatus = plantData.details?.status || null;
+    } catch (err) {
+        logger.error('Nu s-a putut verifica statusul centralei: ' + err.message);
+    }
 
-    document.getElementById('btn-create-reactor').addEventListener('click', () => {
-        window.location.href = `/pages/reactors/create.html?plantId=${plantId}`;
-    });
+    let isAdmin = false;
+    try {
+        const res = await fetch(API_BASE + '/user/status', { credentials: 'include' });
+        if (res.ok) {
+            const body = await res.json();
+            if (body.status === 'success' && body.data) {
+                isAdmin = body.data.role?.toUpperCase() === 'ADMIN';
+            }
+        }
+    } catch (_) {}
 
-    document.getElementById('btn-back-plant').addEventListener('click', () => {
-        window.location.href = `/pages/power-plants/finish.html?id=${plantId}`;
-    });
+    const container = document.querySelector('.page-shell');
+    let statusMsg = document.getElementById('plant-status-msg');
+    if (!statusMsg) {
+        statusMsg = document.createElement('div');
+        statusMsg.id = 'plant-status-msg';
+        statusMsg.style.padding = '12px 16px';
+        statusMsg.style.borderRadius = '6px';
+        statusMsg.style.marginBottom = '16px';
+        statusMsg.style.fontSize = '0.9rem';
+        container?.insertBefore(statusMsg, container.querySelector('.results-meta'));
+    }
+
+    const createBtn = document.getElementById('btn-create-reactor');
+
+    if (plantStatus === 'APPROVED') {
+        if (isAdmin) {
+            statusMsg.style.display = 'none';
+            if (createBtn) {
+                createBtn.style.display = 'none';
+                const clone = createBtn.cloneNode(true);
+                createBtn.parentNode?.replaceChild(clone, createBtn);
+            }
+        } else {
+            statusMsg.style.display = 'none';
+            if (createBtn) createBtn.style.display = 'inline-block';
+        }
+
+        document.getElementById('btn-back-plant').addEventListener('click', () => {
+            window.location.href = `/pages/power-plants/finish.html?id=${plantId}`;
+        });
+    } else {
+        const labels = { DRAFT: 'în lucru', REVIEW: 'în verificare', REJECTED: 'respinsă' };
+        statusMsg.style.display = 'block';
+        statusMsg.style.background = '#3d2e00';
+        statusMsg.style.color = 'var(--yellow)';
+        statusMsg.style.border = '1px solid var(--yellow)';
+        statusMsg.innerHTML =
+            '⚠️ Centrala este <strong>' + (labels[plantStatus] || plantStatus) + '</strong>. ' +
+            'Reactorii pot fi gestionați doar după aprobarea centralei.';
+
+        if (createBtn) {
+            createBtn.style.display = 'none';
+            const clone = createBtn.cloneNode(true);
+            createBtn.parentNode?.replaceChild(clone, createBtn);
+        }
+
+        document.getElementById('btn-back-plant')?.addEventListener('click', () => {
+            window.location.href = `/pages/power-plants/finish.html?id=${plantId}`;
+        });
+    }
 
     try {
         const response = await reactorService.getReactorsByPlant(plantId);
@@ -47,6 +109,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         logger.error(error.message);
         document.getElementById('reactors-tbody').innerHTML =
             `<tr class="state-row"><td colspan="8">Eroare la încărcarea reactoarelor.</td></tr>`;
+    }
+
+    if (isAdmin) {
+        document.querySelectorAll('.btn-edit-reactor').forEach(el => el.style.display = 'none');
     }
 
     document.getElementById('reactors-tbody').addEventListener('click', (e) => {
@@ -60,11 +126,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.location.href = `/pages/reactors/detail.html?reactorId=${row.dataset.id}&plantId=${plantId}`;
             return;
         }
-        if (e.target.closest('.btn-edit-reactor')) {
+        if (e.target.closest('.btn-edit-reactor') && !isAdmin) {
             window.location.href = `/pages/reactors/edit.html?reactorId=${row.dataset.id}&plantId=${plantId}`;
             return;
         }
         if (e.target.closest('a, button')) return;
-        window.location.href = `/pages/reactors/edit.html?reactorId=${row.dataset.id}&plantId=${plantId}`;
+        if (!isAdmin) {
+            window.location.href = `/pages/reactors/edit.html?reactorId=${row.dataset.id}&plantId=${plantId}`;
+        }
     });
 });

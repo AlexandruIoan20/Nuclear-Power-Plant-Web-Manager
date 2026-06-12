@@ -1,13 +1,12 @@
 const currentPath = window.location.pathname;
 
 const UNAUTH_LINKS = [
-    { href: '/pages/start.html', label: 'Home' },
+    { href: '/pages/index.html', label: 'Home' },
     { href: '/pages/login.html', label: 'Login' },
     { href: '/pages/register.html', label: 'Înregistrare' },
 ];
 
 const USER_LINKS = [
-    { href: '/pages/dashboard.html', label: 'Dashboard' },
     { href: '/pages/power-plants/list.html', label: 'Centrale' },
     { href: '/pages/power-plants/create.html', label: 'Creare Centrală' },
     { href: '/pages/map.html', label: 'Hartă' },
@@ -16,8 +15,6 @@ const USER_LINKS = [
 
 const ADMIN_LINKS = [
     { href: '/pages/admin/index.html', label: 'Admin' },
-    { href: '/pages/approvals.html', label: 'Aprobări' },
-    { href: '/pages/users.html', label: 'Utilizatori' },
 ];
 
 function buildLinkHtml(links) {
@@ -34,8 +31,6 @@ function renderTopbar(el, links, user) {
     let userHtml = '';
     if (user) {
         userHtml = `
-            <span style="color:var(--muted);margin:0 4px;">|</span>
-            <span style="color:var(--green);text-transform:uppercase;letter-spacing:0.06em;font-size:0.82rem;">${user.username}</span>
             <a href="${BACKEND_BASE}/logout" class="button secondary" style="width:auto;padding:6px 12px;font-size:0.78rem;">Logout</a>
         `;
     }
@@ -68,7 +63,7 @@ export async function renderNavbar() {
         const result = await response.json();
         if (result.status === 'success' && result.data) {
             const user = result.data;
-            const isAdmin = user.role === 'admin';
+            const isAdmin = user.role.toUpperCase() === 'ADMIN';
             const links = isAdmin ? [...USER_LINKS, ...ADMIN_LINKS] : USER_LINKS;
             renderTopbar(el, links, user);
         } else {

@@ -175,15 +175,16 @@ $userService = new UserService($userRepository);
 
 $notificationService = new NotificationService($plantServiceFacade, $alertService);
 $reactorRepository = new ReactorRepository($pdo); 
-$reactorService = new ReactorService($reactorRepository);
+$reactorService = new ReactorService($reactorRepository, $plantRepositoryFacade);
+
 
 $sensorRepository = new SensorRepository($pdo); 
 $sensorTemplateRepository = new SensorTemplateRepository($pdo); 
 $sensorService = new SensorService($sensorRepository, $sensorTemplateRepository, $reactorRepository); 
 $sensorController = new SensorController($sensorService); 
-
 LogService::init($pdo);
 
+// DEV ONLY - asigura existenta contului admin la runtime
 try {
     $adminEmail = 'admin@nuclear.ro';
     $adminUser = $userRepository->findByEmail($adminEmail);
@@ -284,8 +285,20 @@ $router->post('/api/power-plants', auth(null, function () use ($plantServiceFaca
     (new DetailsPlantController($plantServiceFacade))->handleSavePlantDetails();
 }));
 
-$router->patch('/api/power-plants/{id}/status', auth(null, function ($plantId) use ($plantServiceFacade){ 
-    (new DetailsPlantController($plantServiceFacade)->updateStatus($plantId)); 
+$approvalRepository = new ApprovalRepository($pdo);
+$approvalService = new ApprovalService($approvalRepository);
+$approvalController = new ApprovalController($approvalService);
+
+$router->patch('/api/power-plants/{id}/submit-review', auth(null, function ($plantId) use ($plantServiceFacade) {
+    (new DetailsPlantController($plantServiceFacade))->submitForReview($plantId);
+}));
+
+$router->patch('/api/power-plants/{id}/admin-status', auth('ADMIN', function ($plantId) use ($approvalController) {
+    $approvalController->updateStatus($plantId);
+}));
+
+$router->patch('/api/power-plants/{id}/reopen', auth(null, function ($plantId) use ($plantServiceFacade) {
+    (new DetailsPlantController($plantServiceFacade))->reopenDraft($plantId);
 })); 
 
 $router->put('/api/power-plants/{id}/details', auth(null, function ($id) use ($plantServiceFacade) {
@@ -436,6 +449,23 @@ $router->get('/api/logs', auth('ADMIN', function () {
 $router->post('/api/logs/frontend', function () {
     (new LogController())->receiveFrontendLog();
 });
+
+// --- Admin Users ---
+$router->get('/api/admin/users', auth('ADMIN', function() use ($userService) {
+    (new UserController($userService))->adminListUsers();
+}));
+
+$router->get('/api/admin/users/{id}', auth('ADMIN', function($id) use ($userService) {
+    (new UserController($userService))->adminGetUser($id);
+}));
+
+$router->patch('/api/admin/users/{id}/role', auth('ADMIN', function($id) use ($userService) {
+    (new UserController($userService))->adminUpdateRole($id);
+}));
+
+$router->delete('/api/admin/users/{id}', auth('ADMIN', function($id) use ($userService) {
+    (new UserController($userService))->adminDeleteUser($id);
+}));
 
 // --- Authentication ---
 $router->get('/login', function() use ($userService) {

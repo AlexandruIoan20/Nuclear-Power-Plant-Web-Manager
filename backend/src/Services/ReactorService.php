@@ -1,6 +1,7 @@
 <?php 
 
 require_once __DIR__ . '/../Repositories/ReactorRepository.php'; 
+require_once __DIR__ . '/../Repositories/PlantRepositoryFacade.php'; 
 
 require_once __DIR__ . '/../Dto/ReactorDetailsDTO.php'; 
 require_once __DIR__ . '/../Dto/ReactorListDTO.php'; 
@@ -11,9 +12,11 @@ require_once __DIR__  . '/../Entities/ReactorOperationalStatus.php';
 
 class ReactorService { 
     private ReactorRepository $reactorRepository; 
+    private PlantRepositoryFacade $plantRepositoryFacade; 
 
-    public function __construct(ReactorRepository $reactorRepository) { 
+    public function __construct(ReactorRepository $reactorRepository, PlantRepositoryFacade $plantRepositoryFacade) { 
         $this->reactorRepository = $reactorRepository; 
+        $this->plantRepositoryFacade = $plantRepositoryFacade; 
     }
 
     public function getReactor(string $id): ?ReactorDetailsDTO { 
@@ -37,6 +40,7 @@ class ReactorService {
 
     public function createReactor(array $data): string { 
         $this->validateCreationData($data); 
+        $this->ensurePlantApproved($data['powerPlantId']);
 
         $reactorType = ReactorType::tryFrom($data['reactorType']); 
         $coolingType = CoolingType::tryFrom($data['coolingType']); 
@@ -72,6 +76,7 @@ class ReactorService {
     public function updateReactor(string $id, array $data): void { 
         $reactor = $this->reactorRepository->findById($id); 
         if(!$reactor) throw new Exception("Reactorul cu ID-ul $id nu a fost gasit pentru actualizare."); 
+        $this->ensurePlantApproved($reactor->getPowerPlantId());
 
         if(isset($data['reactorCode'])) { 
             if(empty(trim($data['reactorCode']))) throw new Exception("reactorCode nu poate fi gol"); 
@@ -114,29 +119,44 @@ class ReactorService {
     public function deleteReactor(string $id): void { 
         $reactor = $this->reactorRepository->findById($id); 
         if(!$reactor) throw new Exception("Reactorul cu ID-ul $id nu a fost gasit pentru stergere"); 
+        $this->ensurePlantApproved($reactor->getPowerPlantId()); 
 
         $this->reactorRepository->delete($id); 
     }
 
     private function validateCreationData(array $data): void {
         if (empty($data['powerPlantId']) || !$this->isValidUuid($data['powerPlantId'])) {
-            throw new \Exception("Eroare de validare: powerPlantId lipsește sau are un format UUID invalid.");
+            throw new Exception("Eroare de validare: powerPlantId lipsește sau are un format UUID invalid.");
         }
 
         if (empty($data['reactorCode']) || !is_string($data['reactorCode'])) {
-            throw new \Exception("Eroare de validare: reactorCode este obligatoriu și trebuie să fie string.");
+            throw new Exception("Eroare de validare: reactorCode este obligatoriu și trebuie să fie string.");
         }
 
         if (empty($data['reactorType']) || !ReactorType::tryFrom($data['reactorType'])) {
-            throw new \Exception("Eroare de validare: reactorType lipsește sau este invalid.");
+            throw new Exception("Eroare de validare: reactorType lipsește sau este invalid.");
         }
 
         if (empty($data['coolingType']) || !CoolingType::tryFrom($data['coolingType'])) {
-            throw new \Exception("Eroare de validare: coolingType lipsește sau este invalid.");
+            throw new Exception("Eroare de validare: coolingType lipsește sau este invalid.");
         }
     }
 
     private function isValidUuid(string $uuid): bool {
         return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $uuid) === 1;
+    }
+
+    private function ensurePlantApproved(string $plantId): void {
+        $plant = $this->plantRepositoryFacade->getPlantDetailsById($plantId);
+        if (!$plant) {
+            throw new Exception("Centrala cu ID-ul $plantId nu a fost găsită.");
+        }
+
+        if ($plant->getStatus()->value !== 'APPROVED') {
+            throw new Exception(
+                "Nu se pot gestiona reactoare decât pe centrale aprobate. " .
+                "Statusul curent al centralei: " . $plant->getStatus()->value
+            );
+        }
     }
 }

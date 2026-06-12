@@ -4,12 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="../../../style.css">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/navbar.css">
+    <link rel="stylesheet" href="../../css/layout.css">
+    <link rel="stylesheet" href="../../css/buttons.css">
+    <link rel="stylesheet" href="../../css/responsive.css">
+    <link rel="stylesheet" href="../../css/tables.css">
+    <link rel="stylesheet" href="../../css/tags.css">
+    <link rel="stylesheet" href="../../css/forms.css">
     <script src="../../modules/config/globals.js"></script>
 </head>
 <body>
     <div class = "page-shell">
         <div id = "main-navbar"></div>
+        <div id="admin-navbar"></div>
 
         <div class="filter-bar">
             <div class="field">
@@ -39,7 +47,6 @@
                     <tr>
                         <th data-col="name">Nume <span class="sort-icon">↕</span></th>
                         <th data-col="country">Țară <span class="sort-icon">↕</span></th>
-                        <th data-col="id">ID <span class="sort-icon">↕</span></th>
                         <th data-col="coords">Coordonate</th>
                         <th data-col="status">Status <span class="sort-icon">↕</span></th>
                         <th></th>
@@ -47,7 +54,7 @@
                 </thead>
                 <tbody id="plants-tbody">
                     <tr class="state-row">
-                        <td colspan="6">
+                        <td colspan="5">
                             <span class="spinner-inline"></span> Se încarcă centralele...
                         </td>
                     </tr>
@@ -56,6 +63,7 @@
         </div>
     </div>
     <script type = "module" src = "../../modules/ui/navbar.js" ></script>
+    <script type = "module" src = "../../modules/ui/adminNavbar.js"></script>
     <script type = "module" src = "../../modules/pages/admin/index.js"></script>
 </body>
 </html>

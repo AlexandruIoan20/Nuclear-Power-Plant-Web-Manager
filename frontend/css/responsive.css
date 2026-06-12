@@ -1,0 +1,42 @@
+/* ─── Topbar / Hero / Stats ─── */
+@media (max-width: 900px) {
+    .hero {
+        grid-template-columns: 1fr;
+    }
+
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ─── Split layout / Card grid ─── */
+@media (max-width: 1100px) {
+    .split-layout,
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ─── Grid-2 / Grid-3 ─── */
+@media (max-width: 900px) {
+    .grid-2,
+    .grid-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ─── Filter bar ─── */
+@media (max-width: 600px) {
+    .filter-bar .field { min-width: 100%; }
+    .btn-reset { width: 100%; }
+}
+
+/* ─── Validate layout ─── */
+@media (max-width: 1000px) {
+    .validate-layout { grid-template-columns: 1fr; }
+}

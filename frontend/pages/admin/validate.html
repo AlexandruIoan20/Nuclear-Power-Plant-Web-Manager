@@ -4,13 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Validare Centrală</title>
-    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/navbar.css">
+    <link rel="stylesheet" href="../../css/layout.css">
+    <link rel="stylesheet" href="../../css/buttons.css">
+    <link rel="stylesheet" href="../../css/responsive.css">
+    <link rel="stylesheet" href="../../css/forms.css">
     <script src="../../modules/config/globals.js"></script>
 </head>
 <body>
 <div class="page-shell">
 
     <div id="main-navbar"></div>
+    <div id="admin-navbar"></div>
 
     <div class="validate-layout">
 
@@ -134,8 +140,15 @@
         </div>
 
     </div>
+
+    <div id="action-bar" style="display:flex; gap:12px; justify-content:center; margin-top:24px;">
+        <button id="btn-approve" class="button" style="display:none;">Aproba</button>
+        <button id="btn-reject" class="button" style="display:none; color:#a06060; border-color:rgba(160,96,96,0.4);">Respinge</button>
+    </div>
+
 </div>
     <script type="module" src="../../modules/pages/admin/validate.js"></script>
     <script type = "module" src = "../../modules/ui/navbar.js"></script>
+    <script type = "module" src = "../../modules/ui/adminNavbar.js"></script>
 </body>
 </html>

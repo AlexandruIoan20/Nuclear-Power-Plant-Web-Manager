@@ -54,6 +54,11 @@ class DetailsPlantController {
         header('Content-Type: application/json; charset=UTF-8');
 
         $plants = $this->plantServiceFacade->getAllPowerPlants();
+
+        if (!AuthHelper::isAuthenticated()) {
+            $plants = array_values(array_filter($plants, fn($p) => ($p['status'] ?? '') === 'APPROVED'));
+        }
+
         $payload = [];
 
         foreach ($plants as $plant) {
@@ -84,7 +89,7 @@ class DetailsPlantController {
 
         foreach ($plants as $plant) {
             $status = $plant['status'] ?? '';
-            if (strtoupper($status) === 'APPROVED') {
+            if (strtoupper($status) !== 'REVIEW') {
                 continue;
             }
 
@@ -115,6 +120,10 @@ class DetailsPlantController {
             http_response_code(400);
             echo json_encode(["status" => "error", "message" => "Parametrul 'status' lipseste"]);
             return;
+        }
+
+        if (!AuthHelper::isAuthenticated()) {
+            $status = 'APPROVED';
         }
     
         $data = ['status' => $status];
@@ -150,6 +159,7 @@ class DetailsPlantController {
         header('Content-Type: application/json; charset=UTF-8');
 
         $plants = $this->plantServiceFacade->getAllPowerPlants();
+        $plants = array_values(array_filter($plants, fn($p) => ($p['status'] ?? '') === 'APPROVED'));
 
         $dtos = array_map(function ($plant) {
             $hasCoordinates = $plant['latitude'] !== null && $plant['longitude'] !== null;
@@ -240,6 +250,73 @@ class DetailsPlantController {
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Eroare la actualizare statusului: " . $e->getMessage()]);
             exit;
+        }
+    }
+
+    public function submitForReview(string $plantId): void {
+        header('Content-Type: application/json; charset=UTF-8');
+
+        $userId = AuthHelper::getCurrentUserId();
+        if (!$userId) {
+            http_response_code(401);
+            echo json_encode(['status' => 'error', 'message' => 'Neautorizat.']);
+            exit;
+        }
+
+        try {
+            $result = $this->plantServiceFacade->submitForReview($plantId, $userId);
+
+            if (!$result) {
+                http_response_code(400);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Nu se poate trimite spre verificare. ' .
+                        'Verificați: statusul să fie DRAFT, datele să fie complete și să fiți proprietarul.'
+                ]);
+                exit;
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Centrala a fost trimisă spre verificare (status REVIEW).'
+            ]);
+        } catch (Exception $e) {
+            LogService::instance()->error("[ERROR] Submit Review: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Eroare: ' . $e->getMessage()]);
+        }
+    }
+
+    public function reopenDraft(string $plantId): void {
+        header('Content-Type: application/json; charset=UTF-8');
+
+        $userId = AuthHelper::getCurrentUserId();
+        if (!$userId) {
+            http_response_code(401);
+            echo json_encode(['status' => 'error', 'message' => 'Neautorizat.']);
+            exit;
+        }
+
+        try {
+            $result = $this->plantServiceFacade->reopenDraft($plantId, $userId);
+
+            if (!$result) {
+                http_response_code(400);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Nu se poate redeschide centrala. Statusul curent trebuie să fie REJECTED.'
+                ]);
+                exit;
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Centrala a fost redeschisă (status DRAFT).'
+            ]);
+        } catch (Exception $e) {
+            LogService::instance()->error("[ERROR] Reopen Draft: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Eroare: ' . $e->getMessage()]);
         }
     }
 

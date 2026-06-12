@@ -1,4 +1,5 @@
-import { GetPlantDTO } from '../../dto/GetPlantDTO.js'; 
+import { GetPlantDTO } from '../../dto/GetPlantDTO.js';
+import { renderStatusBadge } from './plantStatusBadge.js';
 
 export function setText(id, value, suffix = '') { 
     const element = document.getElementById(id); 
@@ -24,14 +25,7 @@ export function populatePlantPage(rawData) {
 
     const statusElement = document.getElementById('plant-status'); 
     if(statusElement && dto.status) { 
-        statusElement.textContent = `STATUS: ${dto.status}`; 
-        statusElement.className = 'tag'; 
-
-        /*
-            TODO: Adaugarea acestor tipuri de enum (?)
-        */ 
-        if(dto.status.toUpperCase() === 'CRITICAL') statusElement.classList.add('danger'); 
-        if(dto.status.toUpperCase() === 'STANDBY') statusElement.classList.add('warn'); 
+        statusElement.outerHTML = renderStatusBadge(dto.status); 
     } else if(statusElement) { 
         statusElement.style.display = 'none'; 
     }

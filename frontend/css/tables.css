@@ -1,0 +1,22 @@
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.12);
+    text-align: left;
+}
+
+th {
+    color: var(--yellow);
+    background: rgba(255, 215, 0, 0.05);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+tbody tr:hover {
+    background: rgba(57, 255, 20, 0.04);
+}

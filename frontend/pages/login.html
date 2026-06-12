@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuclear Plant Control | Login</title>
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/navbar.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/buttons.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/forms.css">
     <script src="../modules/config/globals.js"></script>
 </head>
 <body>
@@ -18,7 +23,7 @@
             try {
                 const res = await fetch(API_BASE + '/user/status', { credentials: 'include' });
                 if (res.ok) {
-                    window.location.replace(FRONTEND_BASE + '/pages/dashboard.html');
+                    window.location.replace(FRONTEND_BASE + '/pages/map.html');
                 }
             } catch (_) {}
         })();

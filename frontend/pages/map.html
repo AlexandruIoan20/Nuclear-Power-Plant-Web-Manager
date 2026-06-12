@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuclear Plant Control | Hartă</title>
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/navbar.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/buttons.css">
+    <link rel="stylesheet" href="../css/responsive.css">
     <script src="../modules/config/globals.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
@@ -68,7 +72,7 @@
                 const res = await fetch(API_BASE + '/power-plants/map-data');
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 const payload = await res.json();
-                const plants = Array.isArray(payload.data) ? payload.data : [];
+                const plants = Array.isArray(payload.data) ? payload.data.filter(p => p.status === 'APPROVED') : [];
 
                 if (plants.length === 0) {
                     statusEl.textContent = 'Nu există centrale cu coordonate.';

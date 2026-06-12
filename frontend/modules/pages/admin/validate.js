@@ -2,7 +2,7 @@ import { powerPlantService } from '../../services/powerPlantService.js';
 import { feasibilityReportService } from '../../services/feasibilityReportService.js';
 import { UpdatePlantStatusRequestDTO } from '../../dto/UpdatePlanStatusRequestDTO.js';
 import { getQueryParam } from '../../utils/urlHelper.js';
-import { populateFeasibilityReport } from '../feasibility/report-results.js'; 
+import { populateFeasibilityReport } from '../../ui/feasibility/feasibilityReportRenderer.js';
 import { populatePlantPage } from '../../ui/power-plants/plantPageRenderer.js'; 
 import { logger } from '../../core/logger.js';
 
@@ -11,19 +11,19 @@ const plantId = getQueryParam('id');
 async function updateStatus(status) {
     const btnApprove = document.getElementById('btn-approve');
     const btnReject  = document.getElementById('btn-reject');
-    btnApprove.disabled = true;
-    btnReject.disabled  = true;
+    if (btnApprove) btnApprove.disabled = true;
+    if (btnReject) btnReject.disabled  = true;
 
     try {
-        await powerPlantService.updateStatus(
+        await powerPlantService.updateStatusAdmin(
             UpdatePlantStatusRequestDTO({ status }), plantId
         );
         window.location.href = '/pages/admin.html';
     } catch (e) {
         logger.error(e);
         alert(`Eroare la actualizarea statusului: ${e.message}`);
-        btnApprove.disabled = false;
-        btnReject.disabled  = false;
+        if (btnApprove) btnApprove.disabled = false;
+        if (btnReject) btnReject.disabled  = false;
     }
 }
 
@@ -52,25 +52,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     showLoading('Se încarcă datele...');
 
     try {
-        const [plantData, reportData] = await Promise.all([
-            powerPlantService.getPlant(plantId),
-            feasibilityReportService.getReport(plantId),
-        ]);
-
-        logger.info({ plantData, reportData }); 
+        const plantData = await powerPlantService.getPlant(plantId);
         hideLoading();
 
         populatePlantPage(plantData);
 
-        if (reportData.success) {
-            populateFeasibilityReport(reportData.data);
+        const status = plantData.details?.status || '';
+
+        if (status === 'REVIEW' || status === 'REJECTED') {
+            try {
+                const reportData = await feasibilityReportService.getReport(plantId);
+                if (reportData.success) {
+                    populateFeasibilityReport(reportData.data);
+                }
+            } catch (reportErr) {
+                logger.warn('Raportul nu a putut fi încărcat:', reportErr.message);
+            }
         }
 
-        document.getElementById('btn-approve').disabled = false;
-        document.getElementById('btn-reject').disabled  = false;
+        const btnApprove = document.getElementById('btn-approve');
+        const btnReject  = document.getElementById('btn-reject');
 
-        document.getElementById('btn-approve').addEventListener('click', () => updateStatus('APPROVED'));
-        document.getElementById('btn-reject').addEventListener('click',  () => updateStatus('REJECTED'));
+        if (status === 'REVIEW' && btnApprove && btnReject) {
+            btnApprove.style.display = '';
+            btnReject.style.display = '';
+            btnApprove.disabled = false;
+            btnReject.disabled  = false;
+
+            btnApprove.addEventListener('click', () => updateStatus('APPROVED'));
+            btnReject.addEventListener('click',  () => updateStatus('REJECTED'));
+        }
 
     } catch (e) {
         hideLoading();

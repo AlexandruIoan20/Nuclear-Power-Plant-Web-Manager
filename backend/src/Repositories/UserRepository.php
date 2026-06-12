@@ -45,7 +45,7 @@ class UserRepository {
         return $result ?: null;
     }
 
-    public function findById($id): ?array {
+    public function findById(string $id): ?array {
         $stmt = $this->db->prepare("SELECT id, username, first_name, last_name, email, role FROM users WHERE id = :id LIMIT 1");
         $stmt->execute(['id' => $id]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -57,5 +57,26 @@ class UserRepository {
         $stmt->execute(['username' => $username]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ?: null;
+    }
+
+    public function findAllForAdmin(): array {
+        $stmt = $this->db->query("SELECT id, username, first_name, last_name, email, role, created_at FROM users ORDER BY created_at DESC");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function updateRole(string $id, string $role): void {
+        $stmt = $this->db->prepare("UPDATE users SET role = :role WHERE id = :id");
+        $stmt->execute(['role' => $role, 'id' => $id]);
+    }
+
+    public function delete(string $id): void {
+        $stmt = $this->db->prepare("DELETE FROM users WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+    }
+
+    public function countByRole(string $role): int {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE role = :role");
+        $stmt->execute(['role' => $role]);
+        return (int) $stmt->fetchColumn();
     }
 }

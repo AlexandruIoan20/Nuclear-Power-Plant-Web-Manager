@@ -16,7 +16,7 @@ class UserController {
 
     private function redirectIfAuthenticated(): void {
         if (AuthHelper::isAuthenticated()) {
-            header("Location: " . URL_FRONTEND . "/pages/dashboard.html", true, 302);
+            header("Location: " . URL_FRONTEND . "/pages/map.html", true, 302);
             exit;
         }
     }
@@ -173,12 +173,12 @@ class UserController {
                 echo json_encode([
                     'status' => 'success',
                     'message' => 'Autentificare reușită.',
-                    'redirect' => URL_FRONTEND . '/pages/dashboard.html'
+                    'redirect' => URL_FRONTEND . '/pages/map.html'
                 ]);
                 return;
             }
 
-            $locationString = "Location: " . URL_FRONTEND . "/pages/dashboard.html"; 
+            $locationString = "Location: " . URL_FRONTEND . "/pages/map.html"; 
             header($locationString, true, 302);
             exit;
         }
@@ -200,7 +200,7 @@ class UserController {
         }
 
         session_destroy();
-        $locationString = "Location: " . URL_FRONTEND . "/pages/start.html"; 
+        $locationString = "Location: " . URL_FRONTEND . "/pages/login.html"; 
         header($locationString, true, 302);
         exit;
     }
@@ -233,5 +233,113 @@ class UserController {
                 'last_name' => $user['last_name']
             ]
         ]);
+    }
+
+    public function adminListUsers(): void {
+        header('Content-Type: application/json; charset=UTF-8');
+
+        try {
+            $users = $this->userService->getAllUsersForAdmin();
+
+            http_response_code(200);
+            echo json_encode([
+                'status' => 'success',
+                'data' => $users
+            ]);
+        } catch (Exception $e) {
+            LogService::instance()->error("[ADMIN LIST USERS ERROR] " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Eroare la încărcarea utilizatorilor.']);
+        }
+    }
+
+    public function adminGetUser(string $id): void {
+        header('Content-Type: application/json; charset=UTF-8');
+
+        $cleanId = trim((string)$id);
+        if (empty($cleanId)) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'ID-ul utilizatorului lipsește.']);
+            return;
+        }
+
+        try {
+            $user = $this->userService->getUserById($cleanId);
+
+            if (!$user) {
+                http_response_code(404);
+                echo json_encode(['status' => 'error', 'message' => 'Utilizatorul nu a fost găsit.']);
+                return;
+            }
+
+            http_response_code(200);
+            echo json_encode([
+                'status' => 'success',
+                'data' => $user
+            ]);
+        } catch (Exception $e) {
+            LogService::instance()->error("[ADMIN GET USER ERROR] " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Eroare la încărcarea utilizatorului.']);
+        }
+    }
+
+    public function adminUpdateRole(string $id): void {
+        header('Content-Type: application/json; charset=UTF-8');
+
+        $cleanId = trim((string)$id);
+        if (empty($cleanId)) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'ID-ul utilizatorului lipsește.']);
+            return;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $role = $input['role'] ?? null;
+
+        if (empty($role)) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'Rolul este necesar.']);
+            return;
+        }
+
+        try {
+            $this->userService->updateUserRole($cleanId, strtoupper($role));
+
+            http_response_code(200);
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Rolul utilizatorului a fost actualizat cu succes.'
+            ]);
+        } catch (Exception $e) {
+            LogService::instance()->error("[ADMIN UPDATE ROLE ERROR] " . $e->getMessage());
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function adminDeleteUser(string $id): void {
+        header('Content-Type: application/json; charset=UTF-8');
+
+        $cleanId = trim((string)$id);
+        if (empty($cleanId)) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'ID-ul utilizatorului lipsește.']);
+            return;
+        }
+
+        try {
+            $this->userService->deleteUser($cleanId);
+
+            http_response_code(200);
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Utilizatorul a fost șters cu succes.'
+            ]);
+        } catch (Exception $e) {
+            LogService::instance()->error("[ADMIN DELETE USER ERROR] " . $e->getMessage());
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
     }
 }

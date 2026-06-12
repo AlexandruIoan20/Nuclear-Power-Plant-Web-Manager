@@ -22,6 +22,30 @@ class PlantServiceFacade {
         $this->plantRepositoryFacade->updatePlantStatus($plantId, $status);
     }
 
+    public function submitForReview(string $plantId, string $userId): bool {
+        $plant = $this->detailsPlantService->findById($plantId);
+        if (!$plant) return false;
+        if ($plant->getStatus()->value !== 'DRAFT') return false;
+        if ($plant->getCreatedBy() !== $userId) return false;
+
+        $completePlantProfile = $this->getCompletePlantProfile($plantId);
+        foreach ($completePlantProfile as $profile) {
+            if ($profile == null) return false;
+        }
+
+        $this->plantRepositoryFacade->updatePlantStatus($plantId, 'REVIEW');
+        return true;
+    }
+
+    public function reopenDraft(string $plantId, string $userId): bool {
+        $plant = $this->detailsPlantService->findById($plantId);
+        if (!$plant) return false;
+        if ($plant->getStatus()->value !== 'REJECTED') return false;
+        if ($plant->getCreatedBy() !== $userId) return false;
+
+        $this->plantRepositoryFacade->updatePlantStatus($plantId, 'DRAFT');
+        return true;
+    }
 
     public function getAllPowerPlants(): array {
         return $this->detailsPlantService->getAllPowerPlants();

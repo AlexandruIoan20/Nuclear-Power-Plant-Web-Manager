@@ -1,0 +1,156 @@
+.form-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 22px;
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(10,10,10,0.98), rgba(4,4,4,0.98));
+    box-shadow:
+        0 0 0 1px rgba(255,215,0,0.08) inset,
+        0 0 24px rgba(255,215,0,0.06);
+    margin-bottom: 24px;
+}
+
+.form-nav__brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--yellow);
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: bold;
+}
+
+.form-nav__toggle {
+    display: none;
+    background: transparent;
+    border: 1px solid rgba(255,215,0,0.35);
+    color: var(--yellow);
+    padding: 8px 14px;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.form-nav__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 1px solid;
+    font-family: "Courier New", monospace;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    white-space: nowrap;
+}
+
+.nav-btn__icon {
+    font-size: 1rem;
+}
+
+.nav-btn__badge {
+    font-size: 0.7rem;
+    padding: 2px 7px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.nav-btn--current {
+    border-color: var(--yellow);
+    background: rgba(255,215,0,0.12);
+    color: var(--yellow);
+    cursor: default;
+    box-shadow: 0 0 16px rgba(255,215,0,0.2);
+}
+
+.nav-btn__badge--active {
+    background: rgba(255,215,0,0.2);
+    color: var(--yellow);
+    border: 1px solid rgba(255,215,0,0.4);
+}
+
+.nav-btn--done {
+    border-color: rgba(57,255,20,0.6);
+    background: rgba(57,255,20,0.05);
+    color: var(--green);
+}
+
+.nav-btn--done:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 16px rgba(57,255,20,0.18);
+    text-decoration: none;
+}
+
+.nav-btn__badge--done {
+    background: rgba(57,255,20,0.12);
+    color: var(--green);
+    border: 1px solid rgba(57,255,20,0.3);
+}
+
+.nav-btn--empty {
+    border-color: rgba(255,215,0,0.25);
+    background: transparent;
+    color: var(--muted);
+}
+
+.nav-btn--empty:hover {
+    border-color: rgba(255,215,0,0.6);
+    color: var(--yellow);
+    text-decoration: none;
+}
+
+.nav-btn__badge--empty {
+    background: rgba(255,255,255,0.04);
+    color: var(--muted);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.nav-btn--disabled {
+    border-color: rgba(255,255,255,0.08);
+    background: transparent;
+    color: rgba(255,255,255,0.2);
+    cursor: not-allowed;
+}
+
+.nav-btn__badge--locked {
+    background: transparent;
+    color: rgba(255,255,255,0.2);
+}
+
+@media (max-width: 768px) {
+    .form-nav__toggle {
+        display: block;
+    }
+
+    .form-nav__links {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+        padding-top: 10px;
+    }
+
+    .form-nav__links--open {
+        display: flex;
+    }
+
+    .nav-btn {
+        width: 100%;
+        justify-content: space-between;
+        padding: 12px 16px;
+    }
+}

@@ -16,13 +16,12 @@ export function renderReactorTable(reactors, plantId) {
     document.getElementById('results-count').textContent = reactors.length;
 
     if (!reactors.length) {
-        tbody.innerHTML = '<tr class="state-row"><td colspan="8">Niciun reactor găsit.</td></tr>';
+        tbody.innerHTML = '<tr class="state-row"><td colspan="7">Niciun reactor găsit.</td></tr>';
         return;
     }
 
     tbody.innerHTML = reactors.map(r => `
         <tr data-id="${escapeHtml(r.id)}">
-            <td class="td-id">${shortId(r.id)}</td>
             <td>${escapeHtml(r.reactorCode ?? '—')}</td>
             <td>${escapeHtml(r.reactorType ?? '—')}</td>
             <td>${escapeHtml(r.coolingType ?? '—')}</td>
@@ -47,7 +46,4 @@ function statusTag(status) {
     return '<span class="tag ' + cls + '">' + status.replace(/_/g, ' ') + '</span>';
 }
 
-function shortId(id) {
-    if (!id) return '—';
-    return '<span title="' + id + '">' + id.slice(0, 8) + '…</span>';
-}
+
