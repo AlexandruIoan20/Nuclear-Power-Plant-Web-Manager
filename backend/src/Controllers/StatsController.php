@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../Services/StatsService.php';
+require_once __DIR__ . '/../Dto/ApiResponseDTO.php';
 
 class StatsController {
     private StatsService $service;
@@ -11,7 +12,7 @@ class StatsController {
 
     public function getAll(): void {
         header('Content-Type: application/json; charset=UTF-8');
-        echo json_encode($this->service->getAll());
+        echo json_encode(new ApiResponseDTO(status: 'success', data: $this->service->getAll()));
     }
 
     public function getMeasurements(): void {
@@ -19,6 +20,6 @@ class StatsController {
         $hours = isset($_GET['hours']) ? max(1, min(168, (int)$_GET['hours'])) : 24;
 
         header('Content-Type: application/json; charset=UTF-8');
-        echo json_encode($this->service->getMeasurements($reactorId, $hours));
+        echo json_encode(new ApiResponseDTO(status: 'success', data: $this->service->getMeasurements($reactorId, $hours)));
     }
 }

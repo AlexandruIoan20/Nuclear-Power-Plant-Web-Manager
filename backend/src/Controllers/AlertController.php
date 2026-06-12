@@ -80,7 +80,7 @@ class AlertController {
             if ($id === 'all') {
                 $this->alertService->dismissAllAlerts();
                 LogService::instance()->info("[ALERT] Toate alertele au fost marcate ca citite.");
-                echo json_encode(['status' => 'success', 'message' => 'Toate alertele au fost marcate ca citite.']);
+                echo json_encode(new ApiResponseDTO(status: 'success', message: 'Toate alertele au fost marcate ca citite.'));
                 return;
             }
 
@@ -88,7 +88,7 @@ class AlertController {
                 $plantId = substr($id, 9);
                 $this->alertService->dismissApproval($plantId);
                 LogService::instance()->info("[ALERT] Solicitare ascunsă pentru planta {$plantId}.");
-                echo json_encode(['status' => 'success', 'message' => 'Solicitarea a fost ascunsă.']);
+                echo json_encode(new ApiResponseDTO(status: 'success', message: 'Solicitarea a fost ascunsă.'));
                 return;
             }
 

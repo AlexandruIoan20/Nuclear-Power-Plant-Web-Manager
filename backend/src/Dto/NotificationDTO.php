@@ -14,6 +14,19 @@ class NotificationDTO extends BaseDTO {
         public readonly ?string $targetEmail = null,
     ) {}
 
+    public function jsonSerialize(): array {
+        return [
+            'id' => $this->id,
+            'type' => $this->type,
+            'severity' => $this->severity,
+            'title' => $this->title,
+            'message' => $this->message,
+            'date' => $this->date,
+            'target_role' => $this->targetRole,
+            'target_email' => $this->targetEmail,
+        ];
+    }
+
     public static function fromAlert(string $alertId, string $alertType, string $alertMessage, ?string $alertDate): self {
         return new self(
             id: 'alert_' . $alertId,
