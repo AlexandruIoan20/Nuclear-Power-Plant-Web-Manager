@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../Dto/CreateDataResponseDTO.php';
 require_once __DIR__ . '/../Dto/GeologicalPlantDataDTO.php';
 require_once __DIR__ . '/../Dto/GeoLocationPreviewDTO.php';
+require_once __DIR__ . '/../Dto/CoordinatesPreviewResponseDTO.php';
 
 class PlantServiceFacade {
     private DetailsPlantService $detailsPlantService;
@@ -70,6 +71,26 @@ class PlantServiceFacade {
     public function getPlantsByStatus(array $data): array { 
         $powerPlants = $this->detailsPlantService->getPlantsByStatus($data); 
         return $powerPlants;
+    }
+
+    public function getCountries(): array {
+        return $this->detailsPlantService->getCountries();
+    }
+
+    public function plantPreviewCoordinates(float $lat, float $lon): CoordinatesPreviewResponseDTO {
+        $latNorm = round($lat, 6);
+        $lonNorm = round($lon, 6);
+        $label = number_format($latNorm, 6, '.', '') . ', ' . number_format($lonNorm, 6, '.', '');
+
+        $geoPreview = $this->geologicalPlantService->runAutoGeolocation($latNorm, $lonNorm);
+
+        return CoordinatesPreviewResponseDTO::fromGeoPreview(
+            latitude: $latNorm,
+            longitude: $lonNorm,
+            coordinatesLabel: $label,
+            country: $geoPreview->country,
+            geoPreview: $geoPreview,
+        );
     }
 
     public function getPlantDetailsById(string $plantId): ?Plant {

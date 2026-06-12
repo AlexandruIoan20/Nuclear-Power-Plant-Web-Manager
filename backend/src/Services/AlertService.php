@@ -55,6 +55,10 @@ class AlertService {
         $this->alertRepository->markAllAsRead();
     }
 
+    public function savePlantEvent(string $plantId, string $type, string $message): void {
+        $this->alertRepository->savePlantEvent($plantId, $type, $message);
+    }
+
     public function dismissApproval(string $plantId): void {
         $this->alertRepository->dismissApproval($plantId);
     }

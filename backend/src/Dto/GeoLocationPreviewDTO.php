@@ -4,6 +4,7 @@ require_once __DIR__ . '/BaseDTO.php';
 
 class GeoLocationPreviewDTO extends BaseDTO {
     public function __construct(
+        public readonly ?string $country = null,
         public readonly ?string $soilType = null,
         public readonly ?string $waterSourceType = null,
         public readonly ?float $seismicStability = null,
@@ -17,6 +18,7 @@ class GeoLocationPreviewDTO extends BaseDTO {
 
     public static function fromArray(array $data): self {
         return new self(
+            country: $data['country'] ?? null,
             soilType: self::stringify($data['soilType'] ?? null),
             waterSourceType: self::stringify($data['waterSourceType'] ?? null),
             seismicStability: $data['seismicStability'] ?? null,

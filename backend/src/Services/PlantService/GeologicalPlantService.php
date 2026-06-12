@@ -28,6 +28,7 @@ class GeologicalPlantService {
         $lonNorm = round($lon, 6);
 
         $result = [
+            'country' => null,
             'soilType' => null,
             'waterSourceType' => WaterSourceType::FRESH_WATER,
             'seismicStability' => null,
@@ -56,6 +57,7 @@ class GeologicalPlantService {
 
             if ($geoResp !== false) {
                 $geoData = json_decode($geoResp, true);
+                $result['country'] = $geoData['countryName'] ?? null;
                 if (isset($geoData['localityInfo']['administrative'])) {
                     $adminLevels = count($geoData['localityInfo']['administrative']);
                     $result['populationDensity'] = (float) min(1000.0, $adminLevels * 120.0);
@@ -151,6 +153,7 @@ class GeologicalPlantService {
         }
 
         return new GeoLocationPreviewDTO(
+            country: $result['country'],
             soilType: self::stringifyEnum($result['soilType']),
             waterSourceType: self::stringifyEnum($result['waterSourceType']),
             seismicStability: $result['seismicStability'],

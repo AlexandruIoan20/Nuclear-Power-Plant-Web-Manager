@@ -1,5 +1,6 @@
 <?php 
 
+require_once __DIR__ . '/../../Services/AlertService.php';
 require_once __DIR__ . '/../../Dto/PlantDTO.php';
 require_once __DIR__ . '/../../Dto/PlantDetailsDTO.php'; 
 require_once __DIR__ . '/../../Dto/GetPlantDTO.php';  
@@ -7,26 +8,19 @@ require_once __DIR__ . '/../../Dto/PlantListDTO.php';
 require_once __DIR__ . '/../../Dto/PlantMapDTO.php';
 require_once __DIR__ . '/../../Dto/PlantStatusListDTO.php';
 require_once __DIR__ . '/../../Dto/CoordinatesPreviewResponseDTO.php';
-require_once __DIR__ . '/../../Dto/GeoLocationPreviewDTO.php';
 require_once __DIR__ . '/../../Dto/ApiResponseDTO.php';
 
 class DetailsPlantController { 
     public function __construct(
         private PlantServiceFacade $plantServiceFacade,
-        private ?AlertRepository $alertRepository = null
+        private AlertService $alertService,
     ) {}
-
-    public function setAlertRepository(AlertRepository $repo): void {
-        $this->alertRepository = $repo;
-    }
 
     public function getCountries() { 
         header('Content-Type: application/json; charset=UTF-8');
         
-        $countries = require __DIR__ . '/../../Constants/countries.php';
-        
         http_response_code(200);
-        echo json_encode($countries);
+        echo json_encode($this->plantServiceFacade->getCountries());
         exit;
     }
 
@@ -99,12 +93,11 @@ class DetailsPlantController {
     public function getPendingApprovalsList(): void {
         header('Content-Type: application/json; charset=UTF-8');
 
-        $plants = $this->plantServiceFacade->getAllPowerPlants();
-
-        $payload = array_map(fn($plant) => PlantListDTO::fromDbArray($plant), array_filter($plants, fn($p) => strtoupper($p['status'] ?? '') === 'REVIEW'));
+        $plants = $this->plantServiceFacade->getPendingApprovalsList();
+        $payload = array_map(fn($plant) => PlantListDTO::fromDbArray($plant), $plants);
 
         http_response_code(200);
-        echo json_encode($payload);
+        echo json_encode(new ApiResponseDTO(status: 'success', data: $payload));
         exit;
     }
 
@@ -125,16 +118,13 @@ class DetailsPlantController {
     
         $data = ['status' => $status];
     
-        LogService::instance()->debug("[DEBUG] Date getPlantsByStatus: " . print_r($data, true));
-    
         try { 
             $powerPlants = $this->plantServiceFacade->getPlantsByStatus($data); 
-            LogService::instance()->info("powerPlants in controller:  " . print_r($powerPlants, true));
 
             $dtos = array_map(fn($plant) => PlantStatusListDTO::fromDbArray($plant), $powerPlants);
             
             http_response_code(200); 
-echo json_encode(new ApiResponseDTO(status: 'success', data: $dtos));
+            echo json_encode(new ApiResponseDTO(status: 'success', data: $dtos));
         } catch(Exception $e) { 
             LogService::instance()->error("[ERROR] GET Plants By Status: " . $e->getMessage());
             http_response_code(500);
@@ -207,21 +197,19 @@ echo json_encode(new ApiResponseDTO(status: 'success', data: $dtos));
                 exit; 
             } 
 
-            if ($this->alertRepository) {
-                $newStatus = $dateFormular['status'] ?? '';
-                $plant = $this->plantServiceFacade->getPlantDetailsById($plantId);
-                $plantName = $plant ? $plant->getName() : $plantId;
-                $type = match (strtoupper($newStatus)) {
-                    'APPROVED' => 'PLANT_APPROVED',
-                    'REJECTED' => 'PLANT_REJECTED',
-                    default => 'PLANT_STATUS_CHANGE',
-                };
-                $this->alertRepository->savePlantEvent(
-                    $plantId,
-                    $type,
-                    "Centrala \"{$plantName}\" a fost actualizată la statusul: {$newStatus}"
-                );
-            }
+            $newStatus = $dateFormular['status'] ?? '';
+            $plant = $this->plantServiceFacade->getPlantDetailsById($plantId);
+            $plantName = $plant ? $plant->getName() : $plantId;
+            $type = match (strtoupper($newStatus)) {
+                'APPROVED' => 'PLANT_APPROVED',
+                'REJECTED' => 'PLANT_REJECTED',
+                default => 'PLANT_STATUS_CHANGE',
+            };
+            $this->alertService->savePlantEvent(
+                $plantId,
+                $type,
+                "Centrala \"{$plantName}\" a fost actualizată la statusul: {$newStatus}"
+            );
 
             LogService::instance()->info(
                 "[PLANT] Status actualizat: {$plantId} → {$newStatus}",
@@ -343,49 +331,15 @@ echo json_encode(new ApiResponseDTO(status: 'success', data: $dtos));
             exit;
         }
 
-        $latNorm = round($lat, 6);
-        $lonNorm = round($lon, 6);
-        $label = number_format($latNorm, 6, '.', '') . ', ' . number_format($lonNorm, 6, '.', '');
-
-        $country = null;
-
-  
-        $opts = [
-            'http' => [
-                'method' => 'GET',
-                'header' => "Accept: application/json\r\nUser-Agent: NuclearProjectBackend/1.0\r\n",
-                'ignore_errors' => true,
-                'timeout' => 1.5
-            ]
-        ];
-        $context = stream_context_create($opts);
-
-     
         try {
-            $geoQuery = http_build_query(['latitude' => $latNorm, 'longitude' => $lonNorm, 'localityLanguage' => 'ro']);
-            $geoUrl = "https://api.bigdatacloud.net/data/reverse-geocode-client?{$geoQuery}";
-            $geoResp = file_get_contents($geoUrl, false, $context);
-            
-            if ($geoResp !== false) {
-                $geoData = json_decode($geoResp, true);
-                if (!empty($geoData['countryName'])) {
-                    $country = $geoData['countryName'];
-                }
-            }
+            $responseDTO = $this->plantServiceFacade->plantPreviewCoordinates($lat, $lon);
+            http_response_code(200);
+            echo json_encode(new ApiResponseDTO(status: 'success', data: $responseDTO));
         } catch (Throwable $e) {
-            LogService::instance()->error("[PREVIEW ERROR] Nu am putut lua țara: " . $e->getMessage());
+            LogService::instance()->error("[PREVIEW ERROR] " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Eroare la procesarea coordonatelor.'));
         }
-
-        // Pre-compute all geological fields from coordinates
-        try {
-            $geoPreviewDTO = $this->plantServiceFacade->previewGeologicalLocation($latNorm, $lonNorm);
-        } catch (Throwable $e) {
-            LogService::instance()->error("[PREVIEW ERROR] Nu am putut calcula datele geologice: " . $e->getMessage());
-            $geoPreviewDTO = new GeoLocationPreviewDTO();
-        }
-
-        http_response_code(200);
-        echo json_encode(new ApiResponseDTO(status: 'success', data: CoordinatesPreviewResponseDTO::fromGeoPreview($latNorm, $lonNorm, $label, $country, $geoPreviewDTO)));
         exit;
     }
 }
