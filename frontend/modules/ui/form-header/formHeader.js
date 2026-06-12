@@ -86,9 +86,9 @@ function buildFinishButton(allCompleted, plantId) {
     // Toate secțiunile completate → buton activ
     if (allCompleted) {
         return `
-            <a href="/pages/power-plants/finish.html?id=${plantId}" class="nav-btn nav-btn--empty">
+            <a href="/pages/power-plants/finish.html?id=${plantId}" class="nav-btn nav-btn--done">
                 <span class="nav-btn__label">Finalizare</span>
-                <span class="nav-btn__badge nav-btn__badge--empty">Necompletat</span>
+                <span class="nav-btn__badge nav-btn__badge--done">Disponibil</span>
             </a>
         `;
     }

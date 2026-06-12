@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             statusMsg.style.color = 'var(--yellow)';
         } else if (status === 'APPROVED') {
             verifyButton.style.display = 'none';
-            statusMsg.innerHTML = '✅ Centrală aprobată. <a href="/pages/reactors/list.html?plantId=' + plantId + '" style="color:var(--accent);text-decoration:underline;">Gestionează reactoare</a>';
+            statusMsg.innerHTML = '\u2705 Central\u0103 aprobat\u0103. <a href="/pages/reactors/list.html?plantId=' + encodeURIComponent(plantId) + '" style="color:var(--accent);text-decoration:underline;">Gestioneaz\u0103 reactoare</a>';
             statusMsg.style.color = 'var(--green)';
         } else if (status === 'REJECTED') {
             verifyButton.style.display = 'none';

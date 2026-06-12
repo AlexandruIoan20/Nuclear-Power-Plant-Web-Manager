@@ -3,13 +3,26 @@ import { logger } from './logger.js';
 
 let csrfToken = null; 
 
-async function getCsrfToken() { 
+export async function getCsrfToken() { 
     if(csrfToken) return csrfToken; 
     const response = await fetch(`${API_BASE}/csrf-token`, { credentials: 'include'}); 
     const data = await response.json(); 
 
     csrfToken = data.csrf_token; 
     return csrfToken; 
+}
+
+async function parseResponseBody(response) {
+    const contentType = response.headers.get('Content-Type') || '';
+    if (response.status === 204) return null;
+    if (contentType.includes('application/json')) {
+        try {
+            return await response.json();
+        } catch {
+            return null;
+        }
+    }
+    return null;
 }
 
 async function request(method, endpoint, body = null) { 
@@ -27,12 +40,14 @@ async function request(method, endpoint, body = null) {
     if(body) options.body = JSON.stringify(body); 
 
     const response = await fetch(`${API_BASE}${endpoint}`, { ...options, credentials: 'include' }); 
-    const data = await response.json(); 
+    const data = await parseResponseBody(response);
+
     if(!response.ok) {
-        logger.error(`API ${method} ${endpoint} esuata`, { status: response.status, message: data.message });
+        const message = data?.message || response.statusText || 'Eroare necunoscuta';
+        logger.error(`API ${method} ${endpoint} esuata`, { status: response.status, message });
         throw { 
             status: response.status,
-            message: data.message
+            message
         }; 
     }
 

@@ -51,7 +51,7 @@ export const ReactorOperationalStatus = [
 
 export const PlantStatus = [
     { value: "APPROVED", label: "Aprobate" }, 
-    { value: "REJECTED", label: "Respinse" },
+    { value: "REJECTED", label: "Respins\u0103" },
     { value: "REVIEW", label: "In verificare" }, 
     { value: "DRAFT", label: "In lucru" }, 
 ]

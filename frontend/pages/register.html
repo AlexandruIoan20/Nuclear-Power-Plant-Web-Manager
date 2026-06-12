@@ -10,24 +10,9 @@
     <link rel="stylesheet" href="../css/buttons.css">
     <link rel="stylesheet" href="../css/responsive.css">
     <link rel="stylesheet" href="../css/forms.css">
-    <script src="../modules/config/globals.js"></script>
 </head>
 <body>
-    <script>
-        if (window.location.hostname === '127.0.0.1') {
-            window.location.replace(FRONTEND_BASE + window.location.pathname.replace(/\/register\.html$/, '/register.html'));
-        }
-    </script>
-    <script>
-        (async () => {
-            try {
-                const res = await fetch(API_BASE + '/user/status', { credentials: 'include' });
-                if (res.ok) {
-                    window.location.replace(FRONTEND_BASE + '/pages/map.html');
-                }
-            } catch (_) {}
-        })();
-    </script>
+    <script type="module" src="../modules/pages/register.js"></script>
     <div id="main-navbar"></div>
     <div class="page-shell login-layout">
         <section class="login-card" aria-labelledby="register-title">
@@ -69,46 +54,6 @@
             </form>
         </section>
     </div>
-
-    <script>
-        document.getElementById('registerForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-            const password = document.getElementById('password').value;
-            const passwordConfirm = document.getElementById('password_confirm').value;
-            const message = document.getElementById('register-message');
-
-            if (password !== passwordConfirm) {
-                message.textContent = 'Parolele nu se potrivesc.';
-                return;
-            }
-
-            try {
-                const response = await fetch(BACKEND_BASE + '/register', {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'fetch',
-                        'X-CSRF-Token': await getCsrfToken()
-                    },
-                    body: new FormData(event.target),
-                    credentials: 'include',
-                });
-
-                const payload = await response.json();
-
-                if (response.ok && payload.redirect) {
-                    window.location.href = payload.redirect;
-                    return;
-                }
-
-                message.textContent = payload.message || 'Contul nu a putut fi creat.';
-            } catch (error) {
-                console.error('Eroare la înregistrare:', error);
-                message.textContent = 'Eroare la conectare.';
-            }
-        });
-    </script>
 
     <script type="module" src="../modules/ui/navbar.js"></script>
 </body>

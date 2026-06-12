@@ -1,3 +1,5 @@
+import { API_BASE, BACKEND_BASE } from '../config/api.config.js';
+
 const currentPath = window.location.pathname;
 
 const UNAUTH_LINKS = [

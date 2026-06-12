@@ -149,7 +149,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 saveHeaderState({ geologicalId: response.geologicalId }); 
                 showSuccess(statusElement, "Datele au fost salvate cu succes!"); 
 
-                window.location.href = `/pages/power-plants/geological.html?id=${response.plantId}&geologicalId=${response.geologicalId}`;
+                window.location.href = `/pages/power-plants/technical.html?id=${response.plantId}`;
 
                 console.log({ response }); 
 

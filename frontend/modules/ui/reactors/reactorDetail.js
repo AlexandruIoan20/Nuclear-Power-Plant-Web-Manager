@@ -1,10 +1,10 @@
 export function formatSensorVal(v) {
-    if (v === null || v === undefined) return '<span class="value-na">—</span>';
+    if (v === null || v === undefined) return null;
     if (typeof v === 'number') {
         if (Number.isInteger(v)) return v.toLocaleString('ro-RO');
         return v.toLocaleString('ro-RO', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
     }
-    return v;
+    return String(v);
 }
 
 export function sensorStatusLabel(s) {
@@ -25,22 +25,84 @@ export function createSensorCard(s) {
     const pct = barPct(s.value, s.normalMin, s.normalMax);
     const barWidth = pct !== null ? pct + '%' : '0%';
 
-    card.innerHTML =
-        '<div class="sensor-header">' +
-            '<div>' +
-                '<div class="sensor-code">' + s.code + '</div>' +
-                '<div class="sensor-type">' + s.type + (s.location ? ' · ' + s.location : '') + '</div>' +
-            '</div>' +
-            '<span class="sensor-status-badge ' + s.status + '">' + sensorStatusLabel(s.status) + '</span>' +
-        '</div>' +
-        '<div class="sensor-value" id="sv-' + s.id + '">' + formatSensorVal(s.value) + '<span class="sensor-unit">' + (s.unit || '') + '</span></div>' +
-        (s.description ? '<div class="sensor-location">' + s.description + '</div>' : '') +
-        '<div class="sensor-bar-wrap"><div class="sensor-bar-fill" id="sb-' + s.id + '" style="width:' + barWidth + '"></div></div>' +
-        '<div class="sensor-thresholds">' +
-            (s.scramLow !== null ? '<span>Scram ' + s.scramLow + ' / ' + s.scramHigh + '</span>' : '') +
-            (s.alertLow !== null ? '<span>Alert ' + s.alertLow + ' / ' + s.alertHigh + '</span>' : '') +
-            (s.alarmLow !== null ? '<span>Alarm ' + s.alarmLow + ' / ' + s.alarmHigh + '</span>' : '') +
-        '</div>';
+    const header = document.createElement('div');
+    header.className = 'sensor-header';
+
+    const headerLeft = document.createElement('div');
+    const codeEl = document.createElement('div');
+    codeEl.className = 'sensor-code';
+    codeEl.textContent = s.code;
+    headerLeft.appendChild(codeEl);
+
+    const typeEl = document.createElement('div');
+    typeEl.className = 'sensor-type';
+    typeEl.textContent = s.type + (s.location ? ' · ' + s.location : '');
+    headerLeft.appendChild(typeEl);
+    header.appendChild(headerLeft);
+
+    const badge = document.createElement('span');
+    badge.className = 'sensor-status-badge ' + s.status;
+    badge.textContent = sensorStatusLabel(s.status);
+    header.appendChild(badge);
+
+    card.appendChild(header);
+
+    const valueEl = document.createElement('div');
+    valueEl.className = 'sensor-value';
+    valueEl.id = 'sv-' + s.id;
+
+    const formatted = formatSensorVal(s.value);
+    if (formatted === null) {
+        const na = document.createElement('span');
+        na.className = 'value-na';
+        na.textContent = '\u2014';
+        valueEl.appendChild(na);
+    } else {
+        valueEl.appendChild(document.createTextNode(formatted));
+    }
+
+    const unitEl = document.createElement('span');
+    unitEl.className = 'sensor-unit';
+    unitEl.textContent = s.unit || '';
+    valueEl.appendChild(unitEl);
+
+    card.appendChild(valueEl);
+
+    if (s.description) {
+        const descEl = document.createElement('div');
+        descEl.className = 'sensor-location';
+        descEl.textContent = s.description;
+        card.appendChild(descEl);
+    }
+
+    const barWrap = document.createElement('div');
+    barWrap.className = 'sensor-bar-wrap';
+    const barFill = document.createElement('div');
+    barFill.className = 'sensor-bar-fill';
+    barFill.id = 'sb-' + s.id;
+    barFill.style.width = barWidth;
+    barWrap.appendChild(barFill);
+    card.appendChild(barWrap);
+
+    const thresholds = document.createElement('div');
+    thresholds.className = 'sensor-thresholds';
+
+    if (s.scramLow !== null) {
+        const span = document.createElement('span');
+        span.textContent = 'Scram ' + s.scramLow + ' / ' + s.scramHigh;
+        thresholds.appendChild(span);
+    }
+    if (s.alertLow !== null) {
+        const span = document.createElement('span');
+        span.textContent = 'Alert ' + s.alertLow + ' / ' + s.alertHigh;
+        thresholds.appendChild(span);
+    }
+    if (s.alarmLow !== null) {
+        const span = document.createElement('span');
+        span.textContent = 'Alarm ' + s.alarmLow + ' / ' + s.alarmHigh;
+        thresholds.appendChild(span);
+    }
+    card.appendChild(thresholds);
 
     return card;
 }
@@ -49,9 +111,42 @@ export function updateSensorCard(s) {
     const valEl = document.getElementById('sv-' + s.id);
     if (!valEl) return;
 
-    const newHtml = formatSensorVal(s.value) + '<span class="sensor-unit">' + (s.unit || '') + '</span>';
-    if (valEl.innerHTML !== newHtml) {
-        valEl.innerHTML = newHtml;
+    const formatted = formatSensorVal(s.value);
+
+    const textContent = Array.from(valEl.childNodes)
+        .filter(n => n.nodeType === Node.TEXT_NODE)
+        .map(n => n.nodeValue)
+        .join('');
+
+    const expectedText = formatted === null ? '\u2014' : formatted;
+    const hasChanged = textContent !== expectedText;
+
+    if (hasChanged) {
+        while (valEl.firstChild && valEl.firstChild.nodeType === Node.TEXT_NODE) {
+            valEl.removeChild(valEl.firstChild);
+        }
+        const valueSpan = valEl.querySelector('.value-na');
+        if (formatted === null) {
+            if (!valueSpan) {
+                const na = document.createElement('span');
+                na.className = 'value-na';
+                na.textContent = '\u2014';
+                valEl.insertBefore(na, valEl.firstChild);
+            }
+        } else {
+            if (valueSpan) valueSpan.remove();
+            valEl.insertBefore(document.createTextNode(expectedText), valEl.firstChild);
+        }
+    }
+
+    const unitEl = valEl.querySelector('.sensor-unit');
+    const newUnit = s.unit || '';
+    const unitChanged = unitEl && unitEl.textContent !== newUnit;
+    if (unitChanged) {
+        unitEl.textContent = newUnit;
+    }
+
+    if (hasChanged || unitChanged) {
         valEl.classList.remove('flash');
         void valEl.offsetWidth;
         valEl.classList.add('flash');

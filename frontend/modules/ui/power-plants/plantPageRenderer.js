@@ -15,7 +15,7 @@ export function setText(id, value, suffix = '') {
 export function populatePlantPage(rawData) { 
     const dto = GetPlantDTO(rawData); 
     
-    setText('plant-name', dto.name, ' (UNIDENTIFIED)'); 
+    setText('plant-name', dto.name); 
 
     const locationStr = [dto.country, dto.latitude ? `LAT: ${dto.latitude}` : null, dto.longitude ? `LNG: ${dto.longitude}` : null]
         .filter(Boolean)

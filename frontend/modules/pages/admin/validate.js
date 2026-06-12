@@ -18,7 +18,7 @@ async function updateStatus(status) {
         await powerPlantService.updateStatusAdmin(
             UpdatePlantStatusRequestDTO({ status }), plantId
         );
-        window.location.href = '/pages/admin.html';
+        window.location.href = '/pages/admin/index.html';
     } catch (e) {
         logger.error(e);
         alert(`Eroare la actualizarea statusului: ${e.message}`);
