@@ -70,6 +70,10 @@ class DetailsPlantService {
         return $powerPlants; 
     }
 
+    public function getCountries(): array {
+        return require __DIR__ . '/../../Constants/countries.php';
+    }
+
     public function findById(string $plantId) { 
         $plant = $this->plantRepositoryFacade->getPlantDetailsById($plantId); 
 

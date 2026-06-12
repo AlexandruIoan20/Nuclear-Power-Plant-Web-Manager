@@ -1,6 +1,7 @@
 import { powerPlantService } from '../../services/powerPlantService.js';
 import { clearHeaderState } from '../../ui/form-header/formHeaderState.js';
 import { applyFilters } from '../../ui/power-plants/plantFilters.js';
+import { PlantListResponseDTO } from '../../dto/PlantListResponseDTO.js';
 import { logger } from '../../core/logger.js';
 import { clearHeaderState } from '../../ui/form-header/formHeaderState.js'; 
 
@@ -75,7 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const response = await powerPlantService.getAll();
 
-        allPlants = response ?? [];
+        allPlants = (response.data ?? []).map(p => PlantListResponseDTO(p));
 
         // Delegate export
         applyFilters(allPlants, sortCol, sortDir, goTo);

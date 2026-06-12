@@ -51,18 +51,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
         const rawData = await powerPlantService.getPlant(plantId);
         logger.info({ rawData });
-        populatePlantPage(rawData);
+        populatePlantPage(rawData.data);
 
-        if (rawData.details) {
+        const plantData = rawData.data;
+        if (plantData.details) {
             saveHeaderState({
-                basicsId: rawData.basic?.id,
-                geologicalId: rawData.geological?.id,
-                technicalId: rawData.technical?.id,
+                basicsId: plantData.basic?.id,
+                geologicalId: plantData.geological?.id,
+                technicalId: plantData.technical?.id,
             });
             renderHeader();
         }
 
-        const status = rawData.details?.status || 'DRAFT';
+        const status = plantData.details?.status || 'DRAFT';
         const verifyButton = document.getElementById("btn-verify");
         const originalBtnText = verifyButton.textContent; 
         const container = document.querySelector('.nav-links');
@@ -77,7 +78,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         if (status === 'DRAFT') {
-            if (isComplete(rawData)) {
+            if (isComplete(plantData)) {
                 verifyButton.disabled = false;
                 verifyButton.style.display = 'inline-block';
                 statusMsg.textContent = '';
@@ -122,8 +123,32 @@ document.addEventListener("DOMContentLoaded", async () => {
             verifyButton.style.display = 'none';
             statusMsg.textContent = 'Centrala este în așteptarea validării de către un administrator.';
             statusMsg.style.color = 'var(--yellow)';
+
+            let withdrawBtn = document.getElementById('btn-withdraw');
+            if (!withdrawBtn) {
+                withdrawBtn = document.createElement('button');
+                withdrawBtn.id = 'btn-withdraw';
+                withdrawBtn.className = 'button';
+                withdrawBtn.textContent = 'Retrage din verificare';
+                container?.appendChild(withdrawBtn);
+            }
+            withdrawBtn.style.display = 'inline-block';
+            withdrawBtn.addEventListener('click', async () => {
+                withdrawBtn.disabled = true;
+                withdrawBtn.textContent = 'Se retrage...';
+                try {
+                    await powerPlantService.reopenDraft(plantId);
+                    window.location.reload();
+                } catch (error) {
+                    logger.error(error.message);
+                    withdrawBtn.disabled = false;
+                    withdrawBtn.textContent = 'Retrage din verificare';
+                    alert('Eroare la retragerea centralei.');
+                }
+            });
         } else if (status === 'APPROVED') {
             verifyButton.style.display = 'none';
+            statusMsg.style.display = 'none';
         } else if (status === 'REJECTED') {
             verifyButton.style.display = 'none';
             statusMsg.textContent = 'Centrala a fost respinsă. Corectați datele și redeschideți proiectul.';

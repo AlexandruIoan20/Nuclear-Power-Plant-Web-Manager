@@ -29,6 +29,7 @@ class GeologicalPlantService {
         $lonNorm = round($lon, 6);
 
         $result = [
+            'country' => null,
             'soilType' => null,
             'waterSourceType' => WaterSourceType::FRESH_WATER,
             'seismicStability' => null,
@@ -53,10 +54,11 @@ class GeologicalPlantService {
         try {
             $geoQuery = http_build_query(['latitude' => $latNorm, 'longitude' => $lonNorm, 'localityLanguage' => 'ro']);
             $geoUrl = "https://api.bigdatacloud.net/data/reverse-geocode-client?{$geoQuery}";
-            $geoResp = file_get_contents($geoUrl, false, $context);
+            $geoResp = @file_get_contents($geoUrl, false, $context);
 
             if ($geoResp !== false) {
                 $geoData = json_decode($geoResp, true);
+                $result['country'] = $geoData['countryName'] ?? null;
                 if (isset($geoData['localityInfo']['administrative'])) {
                     $adminLevels = count($geoData['localityInfo']['administrative']);
                     $result['populationDensity'] = (float) min(1000.0, $adminLevels * 120.0);
@@ -70,7 +72,7 @@ class GeologicalPlantService {
         try {
             $seismicQuery = http_build_query(['format' => 'geojson', 'starttime' => '2000-01-01', 'latitude' => $latNorm, 'longitude' => $lonNorm, 'maxradiuskm' => 120, 'minmagnitude' => 4.0]);
             $seismicUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query?{$seismicQuery}";
-            $seismicResp = file_get_contents($seismicUrl, false, $context);
+            $seismicResp = @file_get_contents($seismicUrl, false, $context);
 
             if ($seismicResp !== false) {
                 $seismicData = json_decode($seismicResp, true);
@@ -84,7 +86,7 @@ class GeologicalPlantService {
         try {
             $floodQuery = http_build_query(['latitude' => $latNorm, 'longitude' => $lonNorm, 'daily' => 'river_discharge', 'forecast_days' => 1]);
             $floodUrl = "https://flood-api.open-meteo.com/v1/flood?{$floodQuery}";
-            $floodResp = file_get_contents($floodUrl, false, $context);
+            $floodResp = @file_get_contents($floodUrl, false, $context);
 
             if ($floodResp !== false) {
                 $floodData = json_decode($floodResp, true);
@@ -112,7 +114,7 @@ class GeologicalPlantService {
                 'forecast_days' => 1
             ]);
             $soilUrl = "https://api.open-meteo.com/v1/forecast?{$soilQuery}";
-            $soilResp = file_get_contents($soilUrl, false, $context);
+            $soilResp = @file_get_contents($soilUrl, false, $context);
 
             if ($soilResp !== false) {
                 $soilData = json_decode($soilResp, true);
@@ -125,7 +127,7 @@ class GeologicalPlantService {
 
         try {
             $soilUrl = "https://rest.isric.org/soilgrids/v2.0/properties/query?lon={$lonNorm}&lat={$latNorm}&property=clay&property=sand&property=silt&depth=30-60cm&value=mean";
-            $soilResp = file_get_contents($soilUrl, false, $context);
+            $soilResp = @file_get_contents($soilUrl, false, $context);
 
             if ($soilResp !== false) {
                 $sData = json_decode($soilResp, true);
@@ -152,6 +154,7 @@ class GeologicalPlantService {
         }
 
         return new GeoLocationPreviewDTO(
+            country: $result['country'],
             soilType: self::stringifyEnum($result['soilType']),
             waterSourceType: self::stringifyEnum($result['waterSourceType']),
             seismicStability: $result['seismicStability'],

@@ -49,7 +49,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         populateFeasibilityReport(report); 
     } catch(error) {    
         hideLoading(); 
-        logger.error(error.message); 
-        alert("A apărut o eroare la căutarea raportului"); 
+        logger.error(error.message);
+        const shell = document.querySelector('.page-shell');
+        if (shell) {
+            shell.innerHTML = `
+                <div style="text-align:center;padding:60px 20px;">
+                    <h2 style="color:var(--red);margin-bottom:16px;">Eroare la încărcarea raportului</h2>
+                    <p style="color:var(--muted);margin-bottom:24px;">${error.message || 'A apărut o eroare necunoscută.'}</p>
+                    <a href="/pages/power-plants/finish.html?id=${plantId}" class="button" style="display:inline-block;">Înapoi la centrală</a>
+                </div>
+            `;
+        }
     }
 }); 

@@ -52,7 +52,15 @@ class AlertService {
     }
 
     public function dismissAllAlerts(): void {
-        $this->alertRepository->markAllAsRead();
+        $this->alertRepository->markAllAlertsAsRead();
+    }
+
+    public function dismissAllPlantEvents(): void {
+        $this->alertRepository->markAllPlantEventsAsRead();
+    }
+
+    public function savePlantEvent(string $plantId, string $type, string $message): void {
+        $this->alertRepository->savePlantEvent($plantId, $type, $message);
     }
 
     public function dismissApproval(string $plantId): void {

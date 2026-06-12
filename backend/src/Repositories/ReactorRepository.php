@@ -37,6 +37,18 @@ class ReactorRepository {
         return array_map(fn($row) => $this->mapRowToEntity($row), $rows);
     }
 
+    public function findAllFromApprovedPlants(): array {
+        $statement = $this->db->query(
+            "SELECT r.* FROM reactor r
+             JOIN power_plants p ON r.power_plant_id = p.id
+             WHERE p.status = 'APPROVED'
+             ORDER BY r.created_at DESC"
+        );
+        $rows = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(fn($row) => $this->mapRowToEntity($row), $rows);
+    }
+
     public function save(Reactor $r): void {
         $sql = "INSERT INTO reactor (
                     id, power_plant_id, reactor_code, reactor_type, cooling_type, operational_status,

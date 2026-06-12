@@ -1,14 +1,17 @@
 <?php
 
 require_once __DIR__ . '/../Services/ApprovalService.php';
+require_once __DIR__ . '/../Services/AlertService.php';
 require_once __DIR__ . '/../Dto/ApiResponseDTO.php';
 require_once __DIR__ . '/../Services/LogService.php';
 
 class ApprovalController {
     private ApprovalService $approvalService;
+    private AlertService $alertService;
 
-    public function __construct(ApprovalService $approvalService) {
+    public function __construct(ApprovalService $approvalService, AlertService $alertService) {
         $this->approvalService = $approvalService;
+        $this->alertService = $alertService;
     }
 
     public function updateStatus(string $plantId): void {
@@ -36,6 +39,14 @@ class ApprovalController {
             } else {
                 $this->approvalService->reject($cleanPlantId);
             }
+
+            $type = $newStatus === 'APPROVED' ? 'PLANT_APPROVED' : 'PLANT_REJECTED';
+
+            $this->alertService->savePlantEvent(
+                $cleanPlantId,
+                $type,
+                "Centrala a fost actualizată la statusul: {$newStatus}"
+            );
 
             http_response_code(200);
             echo json_encode(new ApiResponseDTO(status: 'success', message: 'Statusul centralei a fost actualizat cu succes în: ' . $newStatus));

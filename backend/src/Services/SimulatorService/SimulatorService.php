@@ -44,7 +44,7 @@ class SimulatorService {
         }
 
         while($this->running) { 
-            $reactors = $this->reactorRepository->findAll(); 
+            $reactors = $this->reactorRepository->findAllFromApprovedPlants(); 
              
             foreach($reactors as $reactor) { 
                 if(!$this->shouldSimulate($reactor)) continue; 

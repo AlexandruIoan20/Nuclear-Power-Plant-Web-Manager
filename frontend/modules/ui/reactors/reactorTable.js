@@ -11,12 +11,16 @@ function escapeHtml(value) {
     });
 }
 
+function shortId(id) {
+    return id ? id.substring(0, 8) + '...' : '—';
+}
+
 export function renderReactorTable(reactors, plantId, readonly) {
     const tbody = document.getElementById('reactors-tbody');
     document.getElementById('results-count').textContent = reactors.length;
 
     if (!reactors.length) {
-        tbody.innerHTML = '<tr class="state-row"><td colspan="7">Niciun reactor găsit.</td></tr>';
+        tbody.innerHTML = '<tr class="state-row"><td colspan="8">Niciun reactor găsit.</td></tr>';
         return;
     }
 

@@ -27,7 +27,7 @@ class FeasibilityController {
 
         LogService::instance()->info("[FeasibilityController] Citire raport pentru plantId={$powerPlantId}");
         $response = $this->feasibilityService->getFeasibilityReport($powerPlantId); 
-        $statusCode = $response->status === 'success' ? 200 : 404; 
+        $statusCode = 200; 
         http_response_code($statusCode); 
 
         echo json_encode($response); 

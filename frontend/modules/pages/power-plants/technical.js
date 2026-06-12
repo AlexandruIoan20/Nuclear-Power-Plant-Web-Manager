@@ -74,6 +74,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         return; 
     }
 
+    let plantStatus = null;
+    try {
+        const plantResp = await powerPlantService.getPlant(plantId);
+        plantStatus = plantResp.data?.details?.status || null;
+    } catch {
+    }
+
+    const isApproved = plantStatus === 'APPROVED';
+
     addButton.addEventListener("click", () => {
         const block = createReactorBlock(reactorIndex); 
         container.appendChild(block); 
@@ -81,10 +90,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     }); 
 
     container.addEventListener("click", (e) => {
-        if(e.target.classList.contains("remove-reactor-btn")) { 
+        if(e.target.classList.contains("remove-reactor-btn")) {
+            if (isApproved) return;
             e.target.closest(".reactor-block").remove(); 
         }
-    }); 
+    });
+
+    if (isApproved) {
+        addButton.style.display = 'none';
+        showError(statusElement, 'Centrala este aprobată. Configurațiile reactoarelor nu mai pot fi modificate.');
+        const submitBtn = document.getElementById('submit-btn');
+        if (submitBtn) submitBtn.disabled = true;
+    }
 
     let isEdit = !!technicalId;
 
@@ -121,6 +138,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
+    if (isApproved) {
+        document.querySelectorAll('.remove-reactor-btn').forEach(btn => btn.style.display = 'none');
+    }
+
     if(!isEdit) { 
         form.addEventListener("submit", async(e) => { 
             e.preventDefault(); 
@@ -136,10 +157,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             try { 
                 const response = await powerPlantService.createTechnical(dto, plantId); 
-                saveHeaderState({ technicalId: response.data.id }); 
+                saveHeaderState({ technicalId: response.data.dataId }); 
                 showSuccess(statusElement, "Datele tehnice au fost salvate cu succes!"); 
 
-                window.history.replaceState({}, "", `?id=${response.data.plantId}&technicalId=${response.data.id}`); 
+                window.history.replaceState({}, "", `?id=${response.data.plantId}&technicalId=${response.data.dataId}`); 
                 window.location.href = `/pages/power-plants/finish.html?id=${response.data.plantId}`; 
 
                 form.reset(); 

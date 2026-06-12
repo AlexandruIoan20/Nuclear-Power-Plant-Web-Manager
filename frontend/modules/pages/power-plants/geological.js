@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             try { 
                 const response = await powerPlantService.createGeological(dto, plantId); 
-                saveHeaderState({ geologicalId: response.data.id }); 
+                saveHeaderState({ geologicalId: response.data.dataId }); 
                 showSuccess(statusElement, "Datele au fost salvate cu succes!"); 
 
                 window.location.href = `/pages/power-plants/technical.html?id=${response.data.plantId}`;

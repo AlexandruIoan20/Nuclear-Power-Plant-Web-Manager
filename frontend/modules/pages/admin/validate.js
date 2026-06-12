@@ -55,9 +55,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const plantData = await powerPlantService.getPlant(plantId);
         hideLoading();
 
-        populatePlantPage(plantData);
+        populatePlantPage(plantData.data);
 
-        const status = plantData.details?.status || '';
+        const status = plantData.data.details?.status || '';
 
         if (status === 'REVIEW' || status === 'REJECTED') {
             try {

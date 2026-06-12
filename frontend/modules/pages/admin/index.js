@@ -1,6 +1,7 @@
 import { powerPlantService } from '../../services/powerPlantService.js'; 
 import { clearHeaderState, } from '../../ui/form-header/formHeaderState.js'; 
 import { applyFilters } from '../../ui/power-plants/plantFilters.js'; 
+import { PlantListResponseDTO } from '../../dto/PlantListResponseDTO.js'; 
 import { PlantStatus } from '../../config/enums.js'; 
 import { loadSelect } from '../../ui/selectLoader.js'; 
 import { logger } from '../../core/logger.js';
@@ -80,7 +81,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         logger.info({ response }); 
 
-        masterPlants = response ?? [];
+        masterPlants = (response.data ?? []).map(p => PlantListResponseDTO(p));
         allPlants = masterPlants;
         applyFilters(allPlants, sortCol, sortDir);
     } catch (error) {

@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../Services/PlantServiceFacade.php';
 require_once __DIR__ . '/../../Dto/TechnicalPlantDataDTO.php'; 
 require_once __DIR__ . '/../../Dto/ApiResponseDTO.php'; 
 require_once __DIR__ . '/../../Services/LogService.php';
+require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php'; 
 
 class TechnicalPlantController { 
     public function __construct(
@@ -40,10 +41,14 @@ class TechnicalPlantController {
             
             http_response_code(200);
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(new ApiResponseDTO(status: 'success', message: 'Datele tehnice au fost salvate cu succes.', data: [
-                'plantId' => $plantId,
-                'id' => $responseDTO->dataId,
-            ]));
+            echo json_encode(new ApiResponseDTO(
+                status: 'success',
+                data: new CreateDataResponseDTO(
+                    dataId: $responseDTO->dataId,
+                    plantId: $plantId,
+                    message: 'Datele tehnice au fost salvate cu succes.'
+                )
+            ));
         } catch(Exception $e) { 
             LogService::instance()->error("[ERROR] POST Tech Data Create: " . $e->getMessage());
         

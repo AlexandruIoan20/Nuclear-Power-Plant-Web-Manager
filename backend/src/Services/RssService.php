@@ -111,134 +111,67 @@ class RssService {
                 ? date(DATE_RSS, strtotime($plant['created_at']))
                 : date(DATE_RSS);
 
-            $categories = [];
-            $reactorLines = '';
-            $totalCapacityMw = 0.0;
+            if (empty($reactors)) {
+                continue;
+            }
+
             foreach ($reactors as $r) {
-                $type = $r->getReactorType()->value;
-                $categories[] = $type;
+                $reactorId = $r->getId();
+                $reactorCode = $r->getReactorCode();
+                $reactorType = $r->getReactorType()->value;
                 $cooling = $r->getCoolingType()->value;
                 $powerMw = $r->getElectricalPowerMw();
+
+                $xml .= '<item>';
+                $xml .= '<title>' . htmlspecialchars($reactorCode) . ' — ' . htmlspecialchars($name) . ' (' . htmlspecialchars($country) . ')</title>';
+                $xml .= '<link>' . URL_FRONTEND . '/pages/reactors/detail.html?reactorId=' . urlencode($reactorId) . '&amp;plantId=' . urlencode($id) . '</link>';
+                $xml .= '<guid isPermaLink="false">' . $reactorId . '</guid>';
+                $xml .= '<pubDate>' . $pubDate . '</pubDate>';
+
+                $xml .= '<category>' . htmlspecialchars($reactorType) . '</category>';
+
+                if (!empty($plant['created_by'])) {
+                    $xml .= '<author>' . htmlspecialchars($plant['created_by']) . '</author>';
+                }
+
+                $xml .= '<description><![CDATA[';
+                $xml .= '<h2>' . htmlspecialchars($reactorCode) . '</h2>';
+                $xml .= '<table>';
+
+                $xml .= '<tr><td><strong>Centrală</strong></td><td>' . htmlspecialchars($name) . '</td></tr>';
+                $xml .= '<tr><td><strong>Țară</strong></td><td>' . htmlspecialchars($country) . '</td></tr>';
+                $xml .= '<tr><td><strong>Tip reactor</strong></td><td>' . $this->reactorTypeLabel($reactorType) . '</td></tr>';
+                $xml .= '<tr><td><strong>Răcire</strong></td><td>' . $this->coolingTypeLabel($cooling) . '</td></tr>';
                 if ($powerMw !== null) {
-                    $totalCapacityMw += $powerMw;
+                    $xml .= '<tr><td><strong>Putere electrică</strong></td><td>' . number_format($powerMw, 0) . ' MWe</td></tr>';
                 }
-                $reactorLines .= sprintf(
-                    '   • %s: %s, răcire %s',
-                    htmlspecialchars($r->getReactorCode()),
-                    $this->reactorTypeLabel($type),
-                    $this->coolingTypeLabel($cooling)
-                );
-                if ($powerMw !== null) {
-                    $reactorLines .= sprintf(', %d MWe', (int)$powerMw);
-                }
-                $reactorLines .= "<br/>\n";
-            }
-            $categories = array_unique($categories);
+                $xml .= '<tr><td><strong>Statut centrală</strong></td><td>' . $this->statusLabel($status) . '</td></tr>';
+                $operStatus = $r->getOperationalStatus()->value;
+                $xml .= '<tr><td><strong>Status operare</strong></td><td>' . htmlspecialchars($operStatus) . '</td></tr>';
 
-            $xml .= '<item>';
-            $xml .= '<title>' . htmlspecialchars($name) . ' (' . htmlspecialchars($country) . ')</title>';
-            $xml .= '<link>' . URL_FRONTEND . '/pages/power-plants/details.html?id=' . urlencode($id) . '</link>';
-            $xml .= '<guid isPermaLink="false">' . $id . '</guid>';
-            $xml .= '<pubDate>' . $pubDate . '</pubDate>';
-
-            foreach ($categories as $cat) {
-                $xml .= '<category>' . htmlspecialchars($cat) . '</category>';
-            }
-
-            if (!empty($plant['created_by'])) {
-                $xml .= '<author>' . htmlspecialchars($plant['created_by']) . '</author>';
-            }
-
-            $xml .= '<description><![CDATA[';
-            $xml .= '<h2>' . htmlspecialchars($name) . '</h2>';
-            $xml .= '<table>';
-
-            $xml .= '<tr><td><strong>Țară</strong></td><td>' . htmlspecialchars($country) . '</td></tr>';
-            if ($geo) {
-                $lat = $geo->getLatitude();
-                $lon = $geo->getLongitude();
-                if ($lat !== null && $lon !== null) {
-                    $xml .= '<tr><td><strong>Coordonate</strong></td><td>' . sprintf('%.4f, %.4f', $lat, $lon) . '</td></tr>';
-                }
-            }
-            $xml .= '<tr><td><strong>Statut</strong></td><td>' . $this->statusLabel($status) . '</td></tr>';
-
-            if (!empty($reactors)) {
-                $xml .= '<tr><td><strong>Reactoare</strong></td><td>' . count($reactors) . '</td></tr>';
-            }
-            if ($tech) {
-                $eff = $tech->getEstimatedEfficiency();
-                if ($eff !== null) {
-                    $xml .= '<tr><td><strong>Randament estimat</strong></td><td>' . (int)$eff . '%</td></tr>';
-                }
-                $numReactorConfigs = count($tech->getReactorConfigurations());
-                if ($numReactorConfigs > 0) {
-                    $xml .= '<tr><td><strong>Configurații reactor</strong></td><td>';
-                    $configLines = [];
-                    foreach ($tech->getReactorConfigurations() as $rc) {
-                        $configLines[] = $this->reactorTypeLabel($rc->getType()->value)
-                            . ' + '
-                            . $this->coolingTypeLabel($rc->getCooling()->value);
+                if ($geo) {
+                    $lat = $geo->getLatitude();
+                    $lon = $geo->getLongitude();
+                    if ($lat !== null && $lon !== null) {
+                        $xml .= '<tr><td><strong>Coordonate</strong></td><td>' . sprintf('%.4f, %.4f', $lat, $lon) . '</td></tr>';
                     }
-                    $xml .= implode('<br/>', $configLines);
-                    $xml .= '</td></tr>';
                 }
-            }
-            if ($basic) {
-                $cap = $basic->getCapacity();
-                if ($cap !== null) {
-                    $xml .= '<tr><td><strong>Capacitate instalată</strong></td><td>' . number_format($cap, 0) . ' MW</td></tr>';
+                if ($basic) {
+                    $cap = $basic->getCapacity();
+                    if ($cap !== null) {
+                        $xml .= '<tr><td><strong>Capacitate instalată</strong></td><td>' . number_format($cap, 0) . ' MW</td></tr>';
+                    }
+                    $desc = $basic->getDescription();
+                    if (!empty($desc)) {
+                        $xml .= '<tr><td colspan="2"><br/><em>' . htmlspecialchars($desc) . '</em></td></tr>';
+                    }
                 }
-                if ($totalCapacityMw > 0) {
-                    $xml .= '<tr><td><strong>Capacitate electrică totală</strong></td><td>' . number_format($totalCapacityMw, 0) . ' MWe</td></tr>';
-                }
-                $dur = $basic->getConstructionDurationYears();
-                if ($dur !== null) {
-                    $xml .= '<tr><td><strong>Durata de construcție</strong></td><td>' . $dur . ' ani</td></tr>';
-                }
-                $desc = $basic->getDescription();
-                if (!empty($desc)) {
-                    $xml .= '<tr><td colspan="2"><br/><em>' . htmlspecialchars($desc) . '</em></td></tr>';
-                }
-            }
 
-            $xml .= '</table>';
+                $xml .= '</table>';
 
-            if (!empty($reactorLines)) {
-                $xml .= '<h3>Detalii reactoare</h3>';
-                $xml .= $reactorLines;
+                $xml .= ']]></description>';
+                $xml .= '</item>';
             }
-
-            if ($geo) {
-                $details = [];
-                $seismic = $geo->getSeismicStability();
-                if ($seismic !== null) {
-                    $details[] = 'Stabilitate seismică: ' . number_format($seismic, 1) . '/10';
-                }
-                $flood = $geo->getFloodRisk();
-                if ($flood !== null) {
-                    $details[] = 'Risc inundații: ' . number_format($flood, 1) . '/10';
-                }
-                $waterP = $geo->getWaterProximity();
-                if ($waterP !== null) {
-                    $details[] = 'Distanță sursă apă: ' . number_format($waterP, 2) . ' km';
-                }
-                $pop = $geo->getPopulationDensity();
-                if ($pop !== null) {
-                    $details[] = 'Densitate populație: ' . number_format($pop, 0) . ' loc/km²';
-                }
-                $transport = $geo->getTransportInfrastructureScore();
-                if ($transport !== null) {
-                    $details[] = 'Infrastructură transport: ' . number_format($transport, 1) . '/10';
-                }
-                if (!empty($details)) {
-                    $xml .= '<h3>Amplasament</h3>';
-                    $xml .= implode('<br/>', $details);
-                }
-            }
-
-            $xml .= ']]></description>';
-            $xml .= '</item>';
         }
 
         $xml .= '</channel>';

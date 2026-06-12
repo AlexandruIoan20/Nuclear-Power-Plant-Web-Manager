@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../Services/PlantService/BasicPlantService.php';
 require_once __DIR__ . '/../../Dto/BasicPlantDataDTO.php'; 
 require_once __DIR__ . '/../../Dto/ApiResponseDTO.php'; 
 require_once __DIR__ . '/../../Services/LogService.php';
+require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php'; 
 
 class BasicPlantController { 
     public function __construct(
@@ -44,10 +45,14 @@ class BasicPlantController {
             $responseDTO = $this->plantServiceFacade->saveBasicData($dateFormular, $plantId); 
             
             http_response_code(200);
-            echo json_encode(new ApiResponseDTO(status: 'success', message: 'Datele de bază au fost salvate cu succes.', data: [
-                'plantId' => $plantId,
-                'id' => $responseDTO->dataId,
-            ]));
+            echo json_encode(new ApiResponseDTO(
+                status: 'success',
+                data: new CreateDataResponseDTO(
+                    dataId: $responseDTO->dataId,
+                    plantId: $plantId,
+                    message: 'Datele de bază au fost salvate cu succes.'
+                )
+            ));
 
         } catch(Exception $e) { 
             LogService::instance()->error("[ERROR] POST Basic Data: " . $e->getMessage());

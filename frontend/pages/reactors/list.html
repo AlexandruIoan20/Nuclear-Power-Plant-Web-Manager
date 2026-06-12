@@ -21,8 +21,8 @@
                 <strong>Reactoare</strong>
             </div>
             <div class="nav-links">
-                <button class="button" id="btn-create-reactor">Adaugă Reactor</button>
-                <button class="button secondary" id="btn-back-plant">Înapoi la Centrală</button>
+                
+                <button class="button secondary" id="btn-back-plant" type="button">Înapoi la Centrală</button>
             </div>
         </div>
 
@@ -31,15 +31,11 @@
             <span id="plant-id-display" style="display:none;"></span>
         </div>
 
-        <div style="display:flex;gap:8px;margin-bottom:16px;">
-            <button class="button" id="btn-create-reactor" type="button">+ Adaugă Reactor</button>
-            <button class="button secondary" id="btn-back-plant" type="button">← Înapoi la Centrală</button>
-        </div>
-
         <div class="table-shell">
             <table>
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th>Cod Reactor</th>
                         <th>Tip</th>
                         <th>Răcire</th>
@@ -51,7 +47,7 @@
                 </thead>
                 <tbody id="reactors-tbody">
                     <tr class="state-row">
-                        <td colspan="7">
+                        <td colspan="8">
                             <span class="spinner-inline"></span> Se încarcă reactoarele...
                         </td>
                     </tr>

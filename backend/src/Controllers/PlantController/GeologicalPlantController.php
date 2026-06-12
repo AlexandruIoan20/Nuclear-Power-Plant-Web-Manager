@@ -3,7 +3,11 @@
 require_once __DIR__ . '/../../Services/PlantServiceFacade.php'; 
 require_once __DIR__ . '/../../Dto/GeologicalPlantDataDTO.php'; 
 require_once __DIR__ . '/../../Dto/ApiResponseDTO.php'; 
+<<<<<<< HEAD
 require_once __DIR__ . '/../../Services/LogService.php';
+=======
+require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php'; 
+>>>>>>> merge-1
 
 class GeologicalPlantController { 
     public function __construct(
@@ -46,14 +50,16 @@ class GeologicalPlantController {
 
         try {
             $responseDTO = $this->plantServiceFacade->saveGeologicalData($dateFormular, $plantId);
-            $fullDto = $this->plantServiceFacade->getGeologicalDataByPlantId($plantId);
             
             http_response_code(201);
-            echo json_encode(new ApiResponseDTO(status: 'success', message: 'Datele geologice au fost salvate cu succes.', data: [
-                'plantId' => $plantId,
-                'id' => $responseDTO->dataId,
-                'data' => $fullDto,
-            ]));
+            echo json_encode(new ApiResponseDTO(
+                status: 'success',
+                data: new CreateDataResponseDTO(
+                    dataId: $responseDTO->dataId,
+                    plantId: $plantId,
+                    message: 'Datele geologice au fost salvate cu succes.'
+                )
+            ));
         } catch (Exception $e) {
             LogService::instance()->error("[ERROR] Create Geological: " . $e->getMessage());
             $code = (str_contains($e->getMessage(), 'Există deja')) ? 409 : 400;
