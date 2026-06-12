@@ -91,11 +91,12 @@ document.addEventListener('DOMContentLoaded', () => {
             resultArea.style.display = 'block';
             previewArea.style.display = 'none';
 
-            if (response.success) {
-                resultMessage.textContent = response.message || 'Import successful!';
+            if (response.status === 'success') {
+                const body = response.data ?? response;
+                resultMessage.textContent = body.message || 'Import successful!';
                 resultMessage.style.color = 'var(--success)';
 
-                const ids = response.plant_ids || (response.plant_id ? [response.plant_id] : []);
+                const ids = body.plant_ids || (body.plant_id ? [body.plant_id] : []);
                 if (ids.length > 0) {
                     resultLinks.innerHTML = '<strong>Created plants:</strong><ul>' +
                         ids.map(id => `<li><a href="/pages/power-plants/finish.html?id=${id}">View plant → ${id.slice(0, 8)}...</a></li>`).join('') +

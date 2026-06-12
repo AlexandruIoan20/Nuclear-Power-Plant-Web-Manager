@@ -1,8 +1,9 @@
 <?php
 
 require_once __DIR__ . '/../../Services/PlantService/BasicPlantService.php'; 
-require_once __DIR__ . '../../../Dto/BasicPlantDataDTO.php'; 
+require_once __DIR__ . '/../../Dto/BasicPlantDataDTO.php'; 
 require_once __DIR__ . '/../../Dto/ApiResponseDTO.php'; 
+require_once __DIR__ . '/../../Services/LogService.php';
 require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php'; 
 
 class BasicPlantController { 

@@ -3,6 +3,7 @@ import { clearHeaderState } from '../../ui/form-header/formHeaderState.js';
 import { applyFilters } from '../../ui/power-plants/plantFilters.js';
 import { PlantListResponseDTO } from '../../dto/PlantListResponseDTO.js';
 import { logger } from '../../core/logger.js';
+import { clearHeaderState } from '../../ui/form-header/formHeaderState.js'; 
 
 let allPlants = [];
 let sortCol = 'name';

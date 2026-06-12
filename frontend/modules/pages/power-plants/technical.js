@@ -108,10 +108,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!isEdit) {
         try {
             const checkResponse = await powerPlantService.getTechnical(plantId);
-            if (checkResponse.data && checkResponse.data.id) {
-                saveHeaderState({ technicalId: checkResponse.data.id });
-                window.history.replaceState({}, '', `?id=${plantId}&technicalId=${checkResponse.data.id}`);
-                reactorIndex = checkResponse.data.reactorConfigurations?.length ?? 0;
+            if (checkResponse && checkResponse.id) {
+                saveHeaderState({ technicalId: checkResponse.id });
+                window.history.replaceState({}, '', `?id=${plantId}&technicalId=${checkResponse.id}`);
+                reactorIndex = checkResponse.reactorConfigs?.length ?? 0;
                 isEdit = true;
             }
         } catch {
@@ -120,14 +120,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if(isEdit) { 
         try { 
-            const response = await powerPlantService.getTechnical(plantId); 
-            const d = response.data; 
+            const d = await powerPlantService.getTechnical(plantId); 
 
             document.getElementById("estimated_efficiency").value = d.estimatedEfficiency ?? "";
             document.getElementById("operational_risk_level").value = d.operationalRiskLevel ?? "";
 
-            if (d.reactorConfigurations && d.reactorConfigurations.length > 0) {
-                d.reactorConfigurations.forEach(config => {
+            if (d.reactorConfigs && d.reactorConfigs.length > 0) {
+                d.reactorConfigs.forEach(config => {
                     const block = createReactorBlock(reactorIndex, config.reactorType, config.coolingType);
                     container.appendChild(block);
                     reactorIndex++;

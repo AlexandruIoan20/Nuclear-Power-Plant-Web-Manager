@@ -2,7 +2,6 @@ import { sensorService } from '../../services/sensorService.js';
 import { reactorService } from '../../services/reactorService.js';
 import { getQueryParam } from '../../utils/urlHelper.js';
 import { SensorType, SensorQuality, MeasurementField } from '../../config/sensorEnums.js';
-import { SensorRequestDTO } from '../../dto/SensorRequestDTO.js';
 import { showError, showSuccess, clearStatus } from '../../ui/showMessage.js';
 import { logger } from '../../core/logger.js';
 
@@ -41,8 +40,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const reactorResp = await reactorService.getReactor(reactorId);
         const ctx = document.getElementById('reactor-context');
-        if (ctx && reactorResp.data) {
-            ctx.textContent = `Reactor: ${reactorResp.data.reactorCode} (${reactorResp.data.reactorType})`;
+        if (ctx && reactorResp) {
+            ctx.textContent = `Reactor: ${reactorResp.reactorCode} (${reactorResp.reactorType})`;
         }
     } catch {
     }
@@ -53,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         const response = await sensorService.get(sensorId);
-        const d = response.data;
+        const d = response;
 
         document.getElementById('sensorCode').value = d.sensorCode ?? '';
         document.getElementById('sensorType').value = d.sensorType ?? '';
@@ -86,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         clearStatus(statusElement);
 
         const getVal = (id) => document.getElementById(id).value;
-        const dto = SensorRequestDTO({
+        const data = {
             sensorCode: getVal('sensorCode'),
             sensorType: getVal('sensorType'),
             description: getVal('description'),
@@ -105,10 +104,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             isActive: document.getElementById('isActive').checked,
             lastCalibration: getVal('lastCalibration'),
             calibrationDue: getVal('calibrationDue'),
-        });
+        };
 
         try {
-            await sensorService.update(sensorId, dto);
+            await sensorService.update(sensorId, data);
             showSuccess(statusElement, "Senzorul a fost actualizat cu succes!");
             setTimeout(() => { window.location.href = listUrl(); }, 1200);
         } catch (error) {

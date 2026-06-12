@@ -30,7 +30,6 @@ export function renderReactorTable(reactors, plantId, readonly) {
             : `<button class="btn-delete-reactor button" style="font-size:0.72rem;padding:4px 8px;width:auto;color:#a06060;border-color:rgba(160,96,96,0.4);">Șterge</button>`;
 
         return `<tr data-id="${escapeHtml(r.id)}">
-            <td class="td-id">${shortId(r.id)}</td>
             <td>${escapeHtml(r.reactorCode ?? '—')}</td>
             <td>${escapeHtml(r.reactorType ?? '—')}</td>
             <td>${escapeHtml(r.coolingType ?? '—')}</td>

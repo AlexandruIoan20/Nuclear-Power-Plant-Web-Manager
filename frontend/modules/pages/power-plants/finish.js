@@ -1,6 +1,5 @@
 import { powerPlantService } from '../../services/powerPlantService.js';
 import { feasibilityReportService } from '../../services/feasibilityReportService.js';
-import { UpdatePlantStatusRequestDTO } from '../../dto/UpdatePlanStatusRequestDTO.js';
 import { getQueryParam } from '../../utils/urlHelper.js';
 import { saveHeaderState, clearHeaderState } from '../../ui/form-header/formHeaderState.js';
 import { renderHeader } from '../../ui/form-header/formHeader.js';

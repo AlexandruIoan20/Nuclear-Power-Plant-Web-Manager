@@ -1,6 +1,11 @@
 <?php 
 
 require_once __DIR__ . '/../../Helpers/generateUUID.php';
+require_once __DIR__ . '/../../Services/LogService.php';
+require_once __DIR__ . '/../../Entities/TechnicalPlantData.php';
+require_once __DIR__ . '/../../Entities/ReactorType.php';
+require_once __DIR__ . '/../../Entities/CoolingType.php';
+require_once __DIR__ . '/../../Entities/ReactorSchema.php';
 
 class TechnicalPlantRepository { 
     private PDO $pdo; 

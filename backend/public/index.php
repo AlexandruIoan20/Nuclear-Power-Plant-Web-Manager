@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../src/Constants/urls.php'; 
+
 ini_set('session.gc_maxlifetime', 3600);
 ini_set('session.cookie_lifetime', 3600);
 
@@ -121,10 +123,9 @@ require_once __DIR__ . '/../src/Controllers/PlantController/ImportExportControll
 require_once __DIR__ . '/../src/Services/StatsService.php';
 require_once __DIR__ . '/../src/Controllers/StatsController.php';
 
-// Database configuration
-$host     = getenv('DB_HOST');
-$port     = getenv('DB_PORT');
-$dbname   = getenv('DB_NAME');
+$host = getenv('DB_HOST');
+$port = getenv('DB_PORT');
+$dbname = getenv('DB_NAME');
 $username = getenv('DB_USER');
 $password = getenv('DB_PASSWORD');
 
@@ -425,8 +426,7 @@ $router->post('/api/power-plants/{id}/feasibility', auth(null, function ($id) us
     (new FeasibilityController($feasibilityService))->generate($id);
 }));
 
-$router->get('/api/power-plants/{id}/feasibility', auth(null, function ($id) use ($feasibilityService, $plantServiceFacade) {
-    checkPlantOwnership($id, $plantServiceFacade);
+$router->get('/api/power-plants/{id}/feasibility', auth(null, function ($id) use ($feasibilityService) {
     (new FeasibilityController($feasibilityService))->getLastByPlantId($id);
 }));
 

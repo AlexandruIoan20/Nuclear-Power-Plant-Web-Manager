@@ -18,7 +18,7 @@ export function renderAdminNavbar() {
 
     el.innerHTML = `
         <div class="topbar" style="margin-bottom:16px;justify-content:center;">
-            <nav class="nav-links">
+            <nav class="nav-links" style="flex-wrap:nowrap;">
                 ${linksHtml}
             </nav>
         </div>

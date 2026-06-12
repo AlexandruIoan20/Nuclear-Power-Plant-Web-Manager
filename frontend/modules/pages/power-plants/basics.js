@@ -22,19 +22,20 @@ document.addEventListener("DOMContentLoaded", async() => {
     if (!isEdit) {
         try {
             const checkResponse = await powerPlantService.getBasics(plantId);
-            if (checkResponse.data && checkResponse.data.id) {
-                saveHeaderState({ basicsId: checkResponse.data.id });
-                window.history.replaceState({}, '', `?id=${plantId}&basicsId=${checkResponse.data.id}`);
+            if (checkResponse && checkResponse.id) {
+                saveHeaderState({ basicsId: checkResponse.id });
+                window.history.replaceState({}, '', `?id=${plantId}&basicsId=${checkResponse.id}`);
                 isEdit = true;
             }
         } catch {
         }
     }
 
+    console.log({ isEdit }); 
+
     if(isEdit) { 
         try { 
-            const response = await powerPlantService.getBasics(plantId);
-            const d = response.data; 
+            const d = await powerPlantService.getBasics(plantId);
             
             document.getElementById("capacity").value = d.capacity ?? "";
             document.getElementById("constructionDurationYears").value = d.constructionDurationYears ?? "";

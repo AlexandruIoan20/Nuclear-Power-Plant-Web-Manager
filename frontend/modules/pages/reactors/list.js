@@ -6,6 +6,8 @@ import { getQueryParam } from '../../utils/urlHelper.js';
 import { renderReactorTable } from '../../ui/reactors/reactorTable.js';
 import { logger } from '../../core/logger.js';
 
+import { clearHeaderState } from '../../ui/form-header/formHeaderState.js'; 
+
 const plantId = getQueryParam("plantId");
 
 let reactors = [];
@@ -28,7 +30,7 @@ function handleDelete(id) {
 document.addEventListener('DOMContentLoaded', async () => {
     if (!plantId) {
         document.getElementById('reactors-tbody').innerHTML =
-            `<tr class="state-row"><td colspan="8">ID centrală lipsă din URL.</td></tr>`;
+            `<tr class="state-row"><td colspan="7">ID centrală lipsă din URL.</td></tr>`;
         return;
     }
 
@@ -87,7 +89,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         logger.error(error.message);
         document.getElementById('reactors-tbody').innerHTML =
-            `<tr class="state-row"><td colspan="8">Eroare la încărcarea reactoarelor.</td></tr>`;
+            `<tr class="state-row"><td colspan="7">Eroare la încărcarea reactoarelor.</td></tr>`;
     }
 
     if (isAdmin) {
@@ -107,6 +109,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (e.target.closest('.btn-edit-reactor') && !isAdmin) {
             window.location.href = `/pages/reactors/edit.html?reactorId=${row.dataset.id}&plantId=${plantId}`;
+            return;
+        }
+        if (e.target.closest('.btn-sensors-reactor')) {
+            window.location.href = `/pages/sensors/list.html?reactorId=${row.dataset.id}&plantId=${plantId}`;
             return;
         }
         

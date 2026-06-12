@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../Constants/urls.php';
+require_once __DIR__ . '/../Dto/ApiResponseDTO.php';
 
 class AuthHelper {
     
@@ -32,10 +33,7 @@ class AuthHelper {
         
         if ($_SESSION['user_role'] !== $requiredRole) {
             http_response_code(403);
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Acces interzis: rolul utilizatorului nu corespunde'
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Acces interzis: rolul utilizatorului nu corespunde'));
             exit;
         }
     }
@@ -45,10 +43,7 @@ class AuthHelper {
         
         if (!in_array($_SESSION['user_role'], $allowedRoles)) {
             http_response_code(403);
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Acces interzis: rolul utilizatorului nu este autorizat'
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Acces interzis: rolul utilizatorului nu este autorizat'));
             exit;
         }
     }

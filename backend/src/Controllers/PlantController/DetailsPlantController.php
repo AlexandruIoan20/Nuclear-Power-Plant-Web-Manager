@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../Dto/PlantMapDTO.php';
 require_once __DIR__ . '/../../Dto/PlantStatusListDTO.php';
 require_once __DIR__ . '/../../Dto/CoordinatesPreviewResponseDTO.php';
 require_once __DIR__ . '/../../Dto/ApiResponseDTO.php';
+require_once __DIR__ . '/../../Services/LogService.php';
 
 class DetailsPlantController { 
     public function __construct(
@@ -88,8 +89,9 @@ class DetailsPlantController {
     public function getPendingApprovalsList(): void {
         header('Content-Type: application/json; charset=UTF-8');
 
-        $plants = $this->plantServiceFacade->getPendingApprovalsList();
-        $payload = array_map(fn($plant) => PlantListDTO::fromDbArray($plant), $plants);
+        $pendingPlants = $this->plantServiceFacade->getPendingApprovalsList();
+
+        $payload = array_map(fn($plant) => PlantListDTO::fromDbArray($plant), $pendingPlants);
 
         http_response_code(200);
         echo json_encode(new ApiResponseDTO(status: 'success', data: $payload));
@@ -157,7 +159,7 @@ class DetailsPlantController {
             $responseDTO = $this->plantServiceFacade->savePlantDetails($dateFormular); 
             
             http_response_code(201); 
-            echo json_encode(["status" => "success", "message" => "Centrala a fost salvată cu succes.", "plantId" => $responseDTO->dataId]);
+            echo json_encode(new ApiResponseDTO(status: 'success', message: "Centrala a fost salvată cu succes.", data: ['id' => $responseDTO->dataId]));
             exit; 
         } catch(Exception $e) { 
             LogService::instance()->error("[ERROR] Save Plant: " . $e->getMessage());

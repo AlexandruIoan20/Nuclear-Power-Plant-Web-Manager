@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../Entities/Alert.php'; 
 require_once __DIR__ . '/../Dto/AlertListDTO.php'; 
 require_once __DIR__ . '/../Dto/ApiResponseDTO.php'; 
+require_once __DIR__ . '/../Services/LogService.php';
 
 class AlertController {
     private AlertService $alertService;
@@ -95,7 +96,7 @@ class AlertController {
                 $plantId = substr($id, 9);
                 $this->alertService->dismissApproval($plantId);
                 LogService::instance()->info("[ALERT] Solicitare ascunsă pentru planta {$plantId}.");
-                echo json_encode(['status' => 'success', 'message' => 'Solicitarea a fost ascunsă.']);
+                echo json_encode(new ApiResponseDTO(status: 'success', message: 'Solicitarea a fost ascunsă.'));
                 return;
             }
 

@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../../Services/PlantService/PlantExportImportService.php';
+require_once __DIR__ . '/../../Dto/ApiResponseDTO.php';
 
 class ImportExportController {
     private PlantExportImportService $service;
@@ -71,17 +72,14 @@ class ImportExportController {
             $newId = $this->service->importPlant($plantData);
             header('Content-Type: application/json; charset=UTF-8');
             echo json_encode([
-                'success' => true,
+                'status' => 'success',
                 'message' => 'Plant imported successfully',
                 'plant_id' => $newId,
             ]);
         } catch (Exception $e) {
             http_response_code(400);
             header('Content-Type: application/json; charset=UTF-8');
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
         }
     }
 
@@ -105,17 +103,14 @@ class ImportExportController {
             $newIds = $this->service->importPlants($plantsData);
             header('Content-Type: application/json; charset=UTF-8');
             echo json_encode([
-                'success' => true,
+                'status' => 'success',
                 'message' => count($newIds) . ' plant(s) imported successfully',
                 'plant_ids' => $newIds,
             ]);
         } catch (Exception $e) {
             http_response_code(400);
             header('Content-Type: application/json; charset=UTF-8');
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
         }
     }
 
@@ -144,6 +139,6 @@ class ImportExportController {
     private function error(string $message): void {
         http_response_code(404);
         header('Content-Type: application/json; charset=UTF-8');
-        echo json_encode(['status' => 'error', 'message' => $message]);
+        echo json_encode(new ApiResponseDTO(status: 'error', message: $message));
     }
 }

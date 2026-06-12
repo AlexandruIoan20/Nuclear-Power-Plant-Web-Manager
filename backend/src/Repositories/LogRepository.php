@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../Entities/Log.php';
+
 class LogRepository {
     private PDO $db;
 

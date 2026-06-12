@@ -1,7 +1,7 @@
 export function BasicDataRequestDTO({ capacity, constructionDurationYears, description}) { 
     return {
-        capacity: parseFloat(capacity), 
-        constructionDurationYears: parseInt(constructionDurationYears), 
+        capacity: capacity != null ? parseFloat(capacity) : null, 
+        constructionDurationYears: constructionDurationYears != null ? parseInt(constructionDurationYears) : null, 
         description
     }
 }

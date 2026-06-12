@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../Entities/User.php';
+
 class UserRepository { 
     private PDO $db; 
 

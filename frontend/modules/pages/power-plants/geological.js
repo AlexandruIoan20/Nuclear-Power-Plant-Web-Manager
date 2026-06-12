@@ -51,9 +51,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!isEdit) {
         try {
             const checkResponse = await powerPlantService.getGeological(plantId);
-            if (checkResponse.data && checkResponse.data.id) {
-                saveHeaderState({ geologicalId: checkResponse.data.id });
-                window.history.replaceState({}, '', `?id=${plantId}&geologicalId=${checkResponse.data.id}`);
+            if (checkResponse && checkResponse.id) {
+                saveHeaderState({ geologicalId: checkResponse.id });
+                window.history.replaceState({}, '', `?id=${plantId}&geologicalId=${checkResponse.id}`);
                 isEdit = true;
             }
         } catch {
@@ -62,8 +62,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (isEdit) {
         try {
-            const response = await powerPlantService.getGeological(plantId);
-            const d = response.data;
+            const d = await powerPlantService.getGeological(plantId);
             document.getElementById("country").value = d.country ?? "";
             document.getElementById("latitude").value = d.latitude ?? "";
             document.getElementById("longitude").value = d.longitude ?? "";

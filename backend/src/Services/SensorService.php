@@ -10,6 +10,7 @@ require_once __DIR__ . '/../Dto/ReactorStreamDTO.php';
 
 require_once __DIR__ . '/../Entities/ReactorType.php'; 
 require_once __DIR__ . '/../Entities/SensorType.php'; 
+require_once __DIR__ . '/LogService.php';
 
 class SensorService { 
     private SensorRepository $sensorRepository; 

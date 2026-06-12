@@ -32,21 +32,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     showLoading("Se încarcă raportul..."); 
 
     try { 
-        const response = await feasibilityReportService.getReport(plantId); 
-        
-        logger.info({ response }); 
-        if(response.status !== 'success') { 
-            hideLoading();
-            const shell = document.querySelector('.page-shell');
-            if (shell) {
-                shell.innerHTML = `
-                    <div style="text-align:center;padding:60px 20px;">
-                        <h2 style="color:var(--yellow);margin-bottom:16px;">Raportul nu a fost găsit</h2>
-                        <p style="color:var(--muted);margin-bottom:24px;">Nu a fost generat încă un raport de fezabilitate pentru această centrală.</p>
-                        <a href="/pages/power-plants/finish.html?id=${plantId}" class="button" style="display:inline-block;">Înapoi la centrală</a>
-                    </div>
-                `;
-            }
+        const report = await feasibilityReportService.getReport(plantId); 
+
+        logger.info({ report }); 
+        if(!report.reportId) { 
+            hideLoading(); 
+            alert("A apărut o problemă la căutarea raportului"); 
             return; 
         }
 
@@ -55,7 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const btn = document.getElementById('btn-back-to-plant');
         if (btn) btn.href = `/pages/power-plants/finish.html?id=${plantId}`;
 
-        populateFeasibilityReport(response.data); 
+        populateFeasibilityReport(report); 
     } catch(error) {    
         hideLoading(); 
         logger.error(error.message);

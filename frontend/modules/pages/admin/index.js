@@ -5,7 +5,6 @@ import { PlantListResponseDTO } from '../../dto/PlantListResponseDTO.js';
 import { PlantStatus } from '../../config/enums.js'; 
 import { loadSelect } from '../../ui/selectLoader.js'; 
 import { logger } from '../../core/logger.js';
-
 loadSelect('filter-status', PlantStatus); 
 
 let masterPlants = [];

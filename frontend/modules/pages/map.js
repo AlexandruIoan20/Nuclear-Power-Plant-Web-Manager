@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const payload = await mapService.getMapData();
-        const plants = Array.isArray(payload.data) ? payload.data : [];
+        const plants = Array.isArray(payload) ? payload.filter(p => p.status === 'APPROVED') : [];
 
         if (plants.length === 0) {
             statusEl.textContent = 'Nu există centrale cu coordonate.';

@@ -4,6 +4,7 @@ require_once __DIR__ . '/PlantServiceFacade.php';
 require_once __DIR__ . '/AlertService.php';
 require_once __DIR__ . '/../Repositories/AlertRepository.php';
 require_once __DIR__ . '/../Entities/Alert.php';
+require_once __DIR__ . '/../Dto/NotificationDTO.php';
 
 class NotificationService {
     private PlantServiceFacade $plantService;
@@ -29,16 +30,15 @@ class NotificationService {
             }
             $key = $alert->getPlantId() . '|' . $alertType . '|' . substr($alert->getMessage(), 0, 60) . '|' . date('YmdHi', strtotime($alert->getCreatedAt()));
             $seen[$key] = true;
-            $notifications[] = [
-                'id' => 'alert_' . $alert->getId(),
-                'type' => 'SENSOR_ALERT',
-                'severity' => $alertType,
-                'title' => 'Avertizare Senzor: ' . $alertType,
-                'message' => $alert->getMessage(),
-                'date' => $alert->getCreatedAt() ?: date('Y-m-d H:i:s'),
-                'target_role' => 'ALL',
-                'target_email' => null
-            ];
+            $notifications[] = new NotificationDTO(
+                id: 'alert_' . $alert->getId(),
+                type: 'SENSOR_ALERT',
+                severity: $alertType,
+                title: 'Avertizare Senzor: ' . $alertType,
+                message: $alert->getMessage(),
+                date: $alert->getCreatedAt() ?: date('Y-m-d H:i:s'),
+                targetRole: 'ALL',
+            );
         }
 
         $reactorAlerts = $this->alertRepository->getUnreadReactorAlerts();
@@ -49,20 +49,19 @@ class NotificationService {
                 continue;
             }
             $seen[$key] = true;
-            $notifications[] = [
-                'id' => 'reactor_alert_' . $ra['id'],
-                'type' => 'SENSOR_ALERT',
-                'severity' => $ra['type'] ?? 'ALERT',
-                'title' => 'Avertizare Senzor: ' . ($ra['type'] ?? 'ALERT'),
-                'message' => $ra['message'],
-                'date' => $ra['created_at'] ?: date('Y-m-d H:i:s'),
-                'target_role' => 'ALL',
-                'target_email' => null
-            ];
+            $notifications[] = new NotificationDTO(
+                id: 'reactor_alert_' . $ra['id'],
+                type: 'SENSOR_ALERT',
+                severity: $ra['type'] ?? 'ALERT',
+                title: 'Avertizare Senzor: ' . ($ra['type'] ?? 'ALERT'),
+                message: $ra['message'],
+                date: $ra['created_at'] ?: date('Y-m-d H:i:s'),
+                targetRole: 'ALL',
+            );
         }
 
-        usort($notifications, function($a, $b) {
-            return strtotime($b['date']) <=> strtotime($a['date']);
+        usort($notifications, function(NotificationDTO $a, NotificationDTO $b) {
+            return strtotime($b->date) <=> strtotime($a->date);
         });
 
         return $notifications;
@@ -74,16 +73,15 @@ class NotificationService {
         $plantEvents = $this->alertRepository->getPlantEvents();
 
         foreach ($plantEvents as $event) {
-            $notifications[] = [
-                'id' => 'plant_' . $event->getId(),
-                'type' => 'PLANT_EVENT',
-                'severity' => 'INFO',
-                'title' => $this->getPlantEventTitle($event->getType()),
-                'message' => $event->getMessage(),
-                'date' => $event->getCreatedAt() ?: date('Y-m-d H:i:s'),
-                'target_role' => 'ADMIN',
-                'target_email' => null
-            ];
+            $notifications[] = new NotificationDTO(
+                id: 'plant_' . $event->getId(),
+                type: 'PLANT_EVENT',
+                severity: 'INFO',
+                title: $this->getPlantEventTitle($event->getType()),
+                message: $event->getMessage(),
+                date: $event->getCreatedAt() ?: date('Y-m-d H:i:s'),
+                targetRole: 'ADMIN',
+            );
         }
 
         if ($userRole === 'ADMIN') {
@@ -105,21 +103,20 @@ class NotificationService {
                     continue;
                 }
 
-                $notifications[] = [
-                    'id' => 'approval_' . $plantId,
-                    'type' => 'SYSTEM_APPROVAL',
-                    'severity' => 'INFO',
-                    'title' => 'Solicitare de Aprobare',
-                    'message' => 'Facilitatea nucleară "' . $plantName . '" necesită validare operațională.',
-                    'date' => $timestamp,
-                    'target_role' => 'ADMIN',
-                    'target_email' => null
-                ];
+                $notifications[] = new NotificationDTO(
+                    id: 'approval_' . $plantId,
+                    type: 'SYSTEM_APPROVAL',
+                    severity: 'INFO',
+                    title: 'Solicitare de Aprobare',
+                    message: 'Facilitatea nucleară "' . $plantName . '" necesită validare operațională.',
+                    date: $timestamp,
+                    targetRole: 'ADMIN',
+                );
             }
         }
 
-        usort($notifications, function($a, $b) {
-            return strtotime($b['date']) <=> strtotime($a['date']);
+        usort($notifications, function(NotificationDTO $a, NotificationDTO $b) {
+            return strtotime($b->date) <=> strtotime($a->date);
         });
 
         return $notifications;

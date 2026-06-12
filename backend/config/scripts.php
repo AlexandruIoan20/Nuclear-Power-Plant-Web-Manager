@@ -11,6 +11,6 @@
  *   docker compose logs -f cleanup
  */
 
-define('SIMULATOR_TICK_INTERVAL', 1);
-define('AGGREGATOR_INTERVAL', 10);
+define('SIMULATOR_TICK_INTERVAL', 3);
+define('AGGREGATOR_INTERVAL', 60);
 define('CLEANUP_INTERVAL', 3600);

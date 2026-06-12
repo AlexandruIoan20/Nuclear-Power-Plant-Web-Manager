@@ -3,7 +3,11 @@
 require_once __DIR__ . '/../../Services/PlantServiceFacade.php'; 
 require_once __DIR__ . '/../../Dto/GeologicalPlantDataDTO.php'; 
 require_once __DIR__ . '/../../Dto/ApiResponseDTO.php'; 
+<<<<<<< HEAD
+require_once __DIR__ . '/../../Services/LogService.php';
+=======
 require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php'; 
+>>>>>>> merge-1
 
 class GeologicalPlantController { 
     public function __construct(
