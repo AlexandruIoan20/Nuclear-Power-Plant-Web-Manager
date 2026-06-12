@@ -18,6 +18,8 @@ class SensorController {
         header("Connection: keep-alive");
         header("X-Accel-Buffering: no");
 
+        session_write_close();
+
         while (ob_get_level()) ob_end_clean();
         ob_implicit_flush(true);
 

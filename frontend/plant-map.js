@@ -54,23 +54,23 @@
         const markerBounds = [];
 
         plants.forEach((plant) => {
-            if (!plant.has_coordinates) {
+            if (!plant.hasCoordinates) {
                 return;
             }
 
             const marker = L.marker([plant.latitude, plant.longitude]).addTo(map);
             const popupHtml = `
                 <div class="map-popup">
-                    <strong>${escapeHtml(plant.popup_title || 'Centrală')}</strong>
-                    <span>${escapeHtml(plant.popup_subtitle || 'Țară nespecificată')}</span>
-                    <span class="map-popup-meta">${escapeHtml(plant.coordinates_label || '')}</span>
-                    <a class="button secondary" href="${escapeHtml(plant.edit_url || '#')}">Mergi la editare</a>
+                    <strong>${escapeHtml(plant.popupTitle || 'Centrală')}</strong>
+                    <span>${escapeHtml(plant.popupSubtitle || 'Țară nespecificată')}</span>
+                    <span class="map-popup-meta">${escapeHtml(plant.coordinatesLabel || '')}</span>
+                    <a class="button secondary" href="${escapeHtml(plant.editUrl || '#')}">Mergi la editare</a>
                 </div>
             `;
 
             marker.bindPopup(popupHtml);
             marker.on('click', () => {
-                window.location.href = plant.edit_url;
+                window.location.href = plant.editUrl;
             });
             markerBounds.push([plant.latitude, plant.longitude]);
         });
@@ -167,7 +167,7 @@
                 countryInput.value = payload.country;
             }
             setMarker(payload.latitude, payload.longitude, false);
-            setStatus(payload.message || payload.coordinates_label || 'Locație validată de backend.');
+            setStatus(payload.message || payload.coordinatesLabel || 'Locație validată de backend.');
         }
 
         if (hasInitialCoordinates) {

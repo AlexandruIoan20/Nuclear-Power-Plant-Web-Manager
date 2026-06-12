@@ -19,6 +19,21 @@ class NotificationObserver implements ObserverInterface {
     }
 
     public function update(ViolationEvent $event): void {
+        $sensor = $event->getSensor();
+        $unit = $sensor->getUnitOfMeasure() ?? '';
+
+        try {
+            $this->alertRepository->saveReactorAlert($event->toAlertData());
+            LogService::instance()->info(
+                "[ALERT] Salvată alertă reactor {$event->getReactorId()} — {$event->getSeverity()}: {$sensor->getSensorCode()} = {$event->getValue()}{$unit}",
+                ['reactor_id' => $event->getReactorId(), 'severity' => $event->getSeverity(), 'value' => $event->getValue()],
+                $event->getPlantId(),
+                $event->getReactorId()
+            );
+        } catch (\Throwable $e) {
+            LogService::instance()->error("[ALERT DB] Eroare salvare alertă: " . $e->getMessage());
+        }
+
         if ($event->getSeverity() !== 'EMERGENCY') {
             return;
         }
@@ -32,9 +47,6 @@ class NotificationObserver implements ObserverInterface {
 
         $ownerEmail = $this->alertRepository->getPlantOwnerEmail($event->getPlantId());
         $targetEmail = $ownerEmail ?? getenv('ALERT_EMAIL_FALLBACK') ?: 'admin@nuclear.ro';
-
-        $sensor = $event->getSensor();
-        $unit = $sensor->getUnitOfMeasure() ?? '';
 
         $subject = "EMERGENCY: SCRAM pe reactorul {$event->getReactorId()}";
         $message = "Reactorul {$event->getReactorId()} a fost oprit de urgență.\n\n"

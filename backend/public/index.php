@@ -28,6 +28,8 @@ if(!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'OPTIONS', 'HEAD'])) {
     }
 } 
 
+require_once __DIR__ . '/../src/Constants/urls.php';
+
 $allowedOrigins = [
     URL_FRONTEND,
     URL_BACKEND,
@@ -59,7 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/../src/Helpers/TransactionManager.php'; 
 
-require_once __DIR__ . '/../src/Constants/urls.php';
 require_once __DIR__ . '/../src/Router.php';
 require_once __DIR__ . '/../src/Entities/User.php';
 require_once __DIR__ . '/../src/Repositories/UserRepository.php';
@@ -201,32 +202,32 @@ $router->get('/api/csrf-token', function() {
     echo json_encode(['csrf_token' => $_SESSION['csrf_token'] ?? '']); 
 }); 
 
-$router->get('/api/countries', function () use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->getCountries();
+$router->get('/api/countries', function () use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getCountries();
 });
 
-$router->get('/api/power-plants/list', function() use ($plantServiceFacade) { 
-    (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList(); 
+$router->get('/api/power-plants/list', function() use ($plantServiceFacade, $alertService) { 
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getPowerPlantsList(); 
 }); 
 
-$router->get('/api/power-plants/map-data', function() use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->getPowerPlantsMapData();
+$router->get('/api/power-plants/map-data', function() use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getPowerPlantsMapData();
 });
 
-$router->get('/api/power-plants', function () use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList();
+$router->get('/api/power-plants', function () use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getPowerPlantsList();
 });
 
-$router->get('/api/power-plants/my', auth(null, function() use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->getMyPowerPlants();
+$router->get('/api/power-plants/my', auth(null, function() use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getMyPowerPlants();
 }));
 
-$router->get('/api/power-plants/filter', function () use ($plantServiceFacade) { 
-    (new DetailsPlantController($plantServiceFacade))->getPlantsByStatus(); 
+$router->get('/api/power-plants/filter', function () use ($plantServiceFacade, $alertService) { 
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getPlantsByStatus(); 
 }); 
 
-$router->get('/api/power-plants/pending-approvals', auth(null, function() use ($plantServiceFacade) { 
-    (new DetailsPlantController($plantServiceFacade))->getPendingApprovalsList(); 
+$router->get('/api/power-plants/pending-approvals', auth(null, function() use ($plantServiceFacade, $alertService) { 
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getPendingApprovalsList(); 
 }));
 
 $router->get('/api/power-plants/export/csv', auth(null, function () use ($importExportController) {
@@ -245,12 +246,12 @@ $router->get('/api/power-plants/{id}/export', auth(null, function ($id) use ($im
     $importExportController->exportSingle($id);
 }));
 
-$router->get('/api/power-plants/{id}', function ($id) use ($plantServiceFacade) { 
-    (new DetailsPlantController($plantServiceFacade))->getPlant($id); 
+$router->get('/api/power-plants/{id}', function ($id) use ($plantServiceFacade, $alertService) { 
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getPlant($id); 
 }); 
 
-$router->get('/api/power-plants/{id}/details', function ($id) use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->getPlantDetails($id);
+$router->get('/api/power-plants/{id}/details', function ($id) use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getPlantDetails($id);
 });
 
 $router->get('/api/rss/power-plants', function () use ($rssController) {
@@ -258,30 +259,30 @@ $router->get('/api/rss/power-plants', function () use ($rssController) {
 });
 
 // Validare coordonate — nu modifică date, doar validează
-$router->post('/api/power-plants/coordinates-preview', function () use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->previewCoordinates();
+$router->post('/api/power-plants/coordinates-preview', function () use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->previewCoordinates();
 });
 
 // RUTE PROTEJATE (orice utilizator autentificat)
 
-$router->post('/api/power-plants', auth(null, function () use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->handleSavePlantDetails();
+$router->post('/api/power-plants', auth(null, function () use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->handleSavePlantDetails();
 }));
 
 $approvalRepository = new ApprovalRepository($pdo);
 $approvalService = new ApprovalService($approvalRepository);
-$approvalController = new ApprovalController($approvalService);
+$approvalController = new ApprovalController($approvalService, $alertService);
 
-$router->patch('/api/power-plants/{id}/submit-review', auth(null, function ($plantId) use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->submitForReview($plantId);
+$router->patch('/api/power-plants/{id}/submit-review', auth(null, function ($plantId) use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->submitForReview($plantId);
 }));
 
 $router->patch('/api/power-plants/{id}/admin-status', auth('ADMIN', function ($plantId) use ($approvalController) {
     $approvalController->updateStatus($plantId);
 }));
 
-$router->patch('/api/power-plants/{id}/reopen', auth(null, function ($plantId) use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->reopenDraft($plantId);
+$router->patch('/api/power-plants/{id}/reopen', auth(null, function ($plantId) use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->reopenDraft($plantId);
 })); 
 
 $router->post('/api/power-plants/import/batch', auth(null, function () use ($importExportController) {
@@ -301,14 +302,12 @@ $router->get('/api/stats/measurements', auth(null, function () use ($statsContro
     $statsController->getMeasurements();
 }));
 
-$router->patch('/api/power-plants/{id}/status', auth(null, function ($plantId) use ($plantServiceFacade, $alertRepository){ 
-    $ctrl = new DetailsPlantController($plantServiceFacade);
-    $ctrl->setAlertRepository($alertRepository);
-    $ctrl->updateStatus($plantId); 
+$router->patch('/api/power-plants/{id}/status', auth(null, function ($plantId) use ($plantServiceFacade, $alertService){ 
+    (new DetailsPlantController($plantServiceFacade, $alertService))->updateStatus($plantId); 
 })); 
 
-$router->put('/api/power-plants/{id}/details', auth(null, function ($id) use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->handleUpdatePlantDetails($id);
+$router->put('/api/power-plants/{id}/details', auth(null, function ($id) use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->handleUpdatePlantDetails($id);
 }));
 
 $router->get('/api/power-plants/{id}/basics', auth(null, function ($id) use ($plantServiceFacade) {
@@ -497,6 +496,9 @@ $router->get('/logout', function() use ($userService) {
 $router->get('/api/user/status', function() use ($userService) {
     (new UserController($userService))->getUserStatus();
 });
+
+
+$router->post('/api/email/send', auth(null, function () use ($emailController) { $emailController->handleSendEmail(); }));
 
 // --- Dispatch ---
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

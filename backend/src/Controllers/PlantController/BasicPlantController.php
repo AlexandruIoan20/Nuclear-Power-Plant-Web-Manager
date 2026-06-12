@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../../Services/PlantService/BasicPlantService.php'; 
 require_once __DIR__ . '../../../Dto/BasicPlantDataDTO.php'; 
 require_once __DIR__ . '/../../Dto/ApiResponseDTO.php'; 
+require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php'; 
 
 class BasicPlantController { 
     public function __construct(
@@ -28,6 +29,7 @@ class BasicPlantController {
     }
 
     public function createBasicPlantData(string $plantId) { 
+        header('Content-Type: application/json; charset=UTF-8');
         $jsonPayload = file_get_contents('php://input');
         $dateFormular = json_decode($jsonPayload, true);
         
@@ -42,12 +44,14 @@ class BasicPlantController {
             $responseDTO = $this->plantServiceFacade->saveBasicData($dateFormular, $plantId); 
             
             http_response_code(200);
-            echo json_encode([
-                'status' => 'success', 
-                'message' => 'Datele de bază au fost salvate cu succes.',
-                'plantId' => $plantId,  
-                "basicsId" => $responseDTO->dataId
-            ]);
+            echo json_encode(new ApiResponseDTO(
+                status: 'success',
+                data: new CreateDataResponseDTO(
+                    dataId: $responseDTO->dataId,
+                    plantId: $plantId,
+                    message: 'Datele de bază au fost salvate cu succes.'
+                )
+            ));
 
         } catch(Exception $e) { 
             LogService::instance()->error("[ERROR] POST Basic Data: " . $e->getMessage());
@@ -59,6 +63,7 @@ class BasicPlantController {
 
 
     public function updateBasicPlantData(string $plantId) { 
+        header('Content-Type: application/json; charset=UTF-8');
         $jsonPayload = file_get_contents('php://input');
         $dateFormular = json_decode($jsonPayload, true);
         

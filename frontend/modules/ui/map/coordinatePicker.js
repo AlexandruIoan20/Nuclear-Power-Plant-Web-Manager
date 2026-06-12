@@ -86,7 +86,7 @@ export function setupCoordinatePickerMap({
         }
 
         setMarker(payload.latitude, payload.longitude, false);
-        setStatus(payload.message || payload.coordinates_label || 'Locație validată de backend.');
+        setStatus(payload.message || payload.coordinatesLabel || 'Locație validată de backend.');
 
         if (typeof onPreview === 'function') {
             onPreview(payload);

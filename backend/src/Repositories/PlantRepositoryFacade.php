@@ -44,7 +44,7 @@ class PlantRepositoryFacade {
     }
 
     public function updatePlantStatus(string $plantId, string $status): void {
-        $this->detailsPlantRepository->updateStatus($plantId, $status);
+        $this->detailsPlantRepository->updateStatus(['status' => $status], $plantId);
     }
 
     

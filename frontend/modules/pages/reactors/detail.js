@@ -88,6 +88,19 @@ function handleStreamData(data) {
         return;
     }
 
+    let needsRebuild = false;
+    for (const s of data.sensors) {
+        if (!document.getElementById('sv-' + s.id)) {
+            needsRebuild = true;
+            break;
+        }
+    }
+
+    if (needsRebuild) {
+        buildSensorGrid(data.sensors);
+        return;
+    }
+
     for (const s of data.sensors) {
         sensorCache.set(s.id, s);
         updateSensorCard(s);

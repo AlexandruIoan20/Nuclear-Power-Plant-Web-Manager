@@ -1,4 +1,5 @@
 import { powerPlantService } from '../../services/powerPlantService.js';
+import { PlantListResponseDTO } from '../../dto/PlantListResponseDTO.js';
 import { renderStatusBadge } from '../../ui/power-plants/plantStatusBadge.js';
 
 const NAV_MAP = {
@@ -16,7 +17,8 @@ function escapeHtml(value) {
 }
 
 function navigate(plant) {
-    const entry = NAV_MAP[plant.status] || NAV_MAP.DRAFT;
+    const entry = NAV_MAP[plant.status];
+    if (!entry) return;
     window.location.href = entry.href(plant.id);
 }
 
@@ -30,13 +32,16 @@ function renderTable(plants) {
     }
 
     tbody.innerHTML = plants.map(p => {
-        const entry = NAV_MAP[p.status] || NAV_MAP.DRAFT;
+        const entry = NAV_MAP[p.status];
+        const actionsHtml = entry
+            ? `<a href="${entry.href(p.id)}" class="button" style="width:auto;padding:6px 12px;font-size:0.78rem;">${entry.label}</a>`
+            : '';
         return `
             <tr data-id="${escapeHtml(p.id)}" data-status="${escapeHtml(p.status)}" style="cursor:pointer;">
                 <td class="td-name">${escapeHtml(p.name || '—')}</td>
                 <td>${escapeHtml(p.country || '—')}</td>
                 <td>${renderStatusBadge(p.status)}</td>
-                <td><a href="${entry.href(p.id)}" class="button" style="width:auto;padding:6px 12px;font-size:0.78rem;">${entry.label}</a></td>
+                <td>${actionsHtml}</td>
             </tr>
         `;
     }).join('');
@@ -54,7 +59,7 @@ function renderTable(plants) {
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const response = await powerPlantService.getMyPlants();
-        const plants = response.data ?? [];
+        const plants = (response.data ?? []).map(p => PlantListResponseDTO(p));
         renderTable(plants);
     } catch (error) {
         document.getElementById('plants-tbody').innerHTML =

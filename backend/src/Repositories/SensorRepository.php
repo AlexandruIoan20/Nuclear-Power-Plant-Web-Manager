@@ -44,12 +44,20 @@ class SensorRepository {
             'description', 'location_zone', 'unit_of_measure', 'measurement_field',
             'normal_min', 'normal_max', 'alarm_low', 'alarm_high',
             'alert_low', 'alert_high', 'scram_low', 'scram_high',
+            'status', 'is_active',
+            'current_value',
         ];
 
         $placeholders = [];
         $values = [];
 
         foreach ($sensors as $s) {
+            $normalMin = $s->getNormalMin();
+            $normalMax = $s->getNormalMax();
+            $initialValue = ($normalMin !== null && $normalMax !== null)
+                ? ($normalMin + $normalMax) / 2
+                : 0;
+
             $valueGroup = [
                 $s->getId(),
                 $s->getReactorId(),
@@ -59,14 +67,17 @@ class SensorRepository {
                 $s->getLocationZone(),
                 $s->getUnitOfMeasure(),
                 $s->getMeasurementField(),
-                $s->getNormalMin(),
-                $s->getNormalMax(),
+                $normalMin,
+                $normalMax,
                 $s->getAlarmLow(),
                 $s->getAlarmHigh(),
                 $s->getAlertLow(),
                 $s->getAlertHigh(),
                 $s->getScramLow(),
                 $s->getScramHigh(),
+                $s->getStatus()->value,
+                $s->getIsActive() ? 1 : 0,
+                $initialValue,
             ];
 
             $placeholders[] = '(' . implode(', ', array_fill(0, count($valueGroup), '?')) . ')';

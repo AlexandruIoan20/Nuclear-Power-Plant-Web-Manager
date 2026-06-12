@@ -64,9 +64,13 @@ class AlertRepository {
         $stmt->execute(['id' => $id]);
     }
 
-    public function markAllAsRead(): void {
-        $this->db->exec("UPDATE alerts SET is_read = 1 WHERE is_read = 0");
+    public function markAllAlertsAsRead(): void {
+        $this->db->exec("UPDATE alerts SET is_read = 1 WHERE is_read = 0 AND alert_type NOT IN ('PLANT_STATUS_CHANGE','PLANT_APPROVED','PLANT_REJECTED')");
         $this->db->exec("UPDATE reactor_alerts SET is_read = 1 WHERE is_read = 0");
+    }
+
+    public function markAllPlantEventsAsRead(): void {
+        $this->db->exec("UPDATE alerts SET is_read = 1 WHERE is_read = 0 AND alert_type IN ('PLANT_STATUS_CHANGE','PLANT_APPROVED','PLANT_REJECTED')");
     }
 
     public function saveReactorAlert(array $data): void {

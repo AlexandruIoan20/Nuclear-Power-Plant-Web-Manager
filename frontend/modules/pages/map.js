@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const payload = await mapService.getMapData();
-        const plants = Array.isArray(payload.data) ? payload.data.filter(p => p.status === 'APPROVED') : [];
+        const plants = Array.isArray(payload.data) ? payload.data : [];
 
         if (plants.length === 0) {
             statusEl.textContent = 'Nu există centrale cu coordonate.';
@@ -30,13 +30,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             <article class="map-item">
                 <h3>${escapeHtml(p.name || 'Centrală')}</h3>
                 <div class="map-item-meta">${escapeHtml(p.country || '')}</div>
-                <div class="map-item-meta">${escapeHtml(p.coordinates_label || '')}</div>
-                <div class="map-item-actions"><a class="button secondary" href="${escapeHtml(p.edit_url)}">Editează</a></div>
+                <div class="map-item-meta">${escapeHtml(p.coordinatesLabel || '')}</div>
+                <div class="map-item-actions"><a class="button secondary" href="${escapeHtml(p.editUrl)}">Editează</a></div>
             </article>
         `).join('');
 
         window.PlantMap.setupPlantsOverviewMap({ mapId: 'plants-map', plants });
-        statusEl.textContent = `${plants.filter(p => p.has_coordinates).length} centrală(e) afișată(e)`;
+        statusEl.textContent = `${plants.filter(p => p.hasCoordinates).length} centrală(e) afișată(e)`;
     } catch (err) {
         console.error('Map load error', err);
         statusEl.textContent = 'Eroare la încărcarea hărții.';
