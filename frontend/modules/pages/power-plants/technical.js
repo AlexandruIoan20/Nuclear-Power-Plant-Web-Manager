@@ -12,10 +12,6 @@ const technicalId = urlTechnicalId ?? getHeaderState().technicalId ?? null;
 
 let reactorIndex = 0;
 
-/*
-    Adauga in DOM inputuri pentru customizarea unei scheme de reactor
-    Numarul final de astfel de inputuri trebuie sa fie egal cu number_of_reactors din inputul din HTML 
-*/
 function createReactorBlock(index, selectedReactorType = "", selectedCoolingType = "") { 
     const block = document.createElement("div"); 
     block.className = "reactor-block"; 
@@ -110,7 +106,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             const response = await powerPlantService.getTechnical(plantId); 
             const d = response.data; 
 
-            document.getElementById("number_of_reactors").value = d.numberOfReactors ?? "";
             document.getElementById("estimated_efficiency").value = d.estimatedEfficiency ?? "";
             document.getElementById("operational_risk_level").value = d.operationalRiskLevel ?? "";
 
@@ -132,11 +127,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             e.preventDefault(); 
             clearStatus(statusElement); 
 
+            const configs = collectReactorConfigs();
             const dto = TechnicalDataRequestDTO({
-                numberOfReactors: document.getElementById("number_of_reactors").value,
+                numberOfReactors: configs.length,
                 estimatedEfficiency: document.getElementById("estimated_efficiency").value,
                 operationalRiskLevel: document.getElementById("operational_risk_level").value,
-                reactorConfigurations: collectReactorConfigs(),
+                reactorConfigurations: configs,
             });
 
             try { 
@@ -159,11 +155,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             e.preventDefault(); 
             clearStatus(statusElement); 
 
+            const configs = collectReactorConfigs();
             const dto = TechnicalDataRequestDTO({
-                numberOfReactors: document.getElementById("number_of_reactors").value,
+                numberOfReactors: configs.length,
                 estimatedEfficiency: document.getElementById("estimated_efficiency").value,
                 operationalRiskLevel: document.getElementById("operational_risk_level").value,
-                reactorConfigurations: collectReactorConfigs(),
+                reactorConfigurations: configs,
             });
 
             try { 

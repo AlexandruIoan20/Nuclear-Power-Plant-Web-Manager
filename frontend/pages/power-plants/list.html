@@ -3,15 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Centrale</title>
     <link rel="stylesheet" href="../../../style.css">
     <script src="../../modules/config/globals.js"></script>
-</head>
-<body>
+    <style>
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .toolbar .button {
+            padding: 6px 14px;
+            font-size: 0.82rem;
+        }
+        .td-actions {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .td-actions .btn-view {
+            padding: 4px 10px;
+            font-size: 0.78rem;
+        }
+        .td-actions .btn-export-json,
+        .td-actions .btn-export-csv {
+            background: none;
+            border: 1px solid #333;
+            border-radius: 3px;
+            padding: 4px 6px;
+            cursor: pointer;
+            color: #888;
+            line-height: 0;
+        }
+        .td-actions .btn-export-json:hover,
+        .td-actions .btn-export-csv:hover {
+            color: var(--green);
+            border-color: var(--green);
+        }
+    </style>
 </head>
 <body>
     <div class="page-shell">
-        <div id = "main-navbar"></div>
+        <div id="main-navbar"></div>
+
+        <div class="toolbar">
+            <button class="button secondary" id="btn-import">Import</button>
+            <button class="button secondary" id="btn-export-all-json">Export JSON</button>
+            <button class="button secondary" id="btn-export-all-csv">Export CSV</button>
+        </div>
 
         <div class="filter-bar">
             <div class="field">
@@ -38,12 +77,12 @@
                         <th data-col="id">ID <span class="sort-icon">↕</span></th>
                         <th data-col="coords">Coordonate</th>
                         <th data-col="status">Status <span class="sort-icon">↕</span></th>
-                        <th></th>
+                        <th>Acțiuni</th>
                     </tr>
                 </thead>
                 <tbody id="plants-tbody">
                     <tr class="state-row">
-                        <td colspan="6">
+                        <td colspan="7">
                             <span class="spinner-inline"></span> Se încarcă centralele...
                         </td>
                     </tr>

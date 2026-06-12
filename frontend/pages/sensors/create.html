@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaugă Senzor Nou</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../modules/config/globals.js"></script>
+    <style>
+        .help-modal-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.65);
+            display: none;
+            justify-content: center;
+            align-items: flex-start;
+            overflow-y: auto;
+            padding: 2rem 1rem;
+        }
+        .help-modal-overlay.open { display: flex; }
+        .help-modal {
+            background: #1a1a1a;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 1.5rem 2rem;
+            position: relative;
+        }
+        .help-modal h2 { margin-top: 0; }
+        .help-modal h3 { margin: 1.25rem 0 0.5rem; }
+        .help-modal table {
+            font-size: 0.72rem;
+            margin-bottom: 1rem;
+        }
+        .help-modal table th { white-space: nowrap; }
+        .help-modal .help-close {
+            position: sticky; top: 0; float: right;
+            background: none; border: none;
+            color: var(--muted); font-size: 1.4rem;
+            cursor: pointer;
+        }
+        .help-modal .help-close:hover { color: #fff; }
+        .help-modal code {
+            background: rgba(255,255,255,0.06);
+            padding: 0 4px;
+            border-radius: 2px;
+            font-size: 0.68rem;
+        }
+        .help-modal .badge-type {
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: 3px;
+            margin-right: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <div id="main-navbar"></div>
+        <main class="form-panel login-card" style="margin: 0 auto;">
+            <div style="margin-bottom:16px;color:var(--muted);font-size:0.78rem;" id="reactor-context"></div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                <h2 style="margin:0;">Adaugă Senzor Nou</h2>
+                <button type="button" class="button secondary" id="btn-help" style="font-size:0.75rem;">Ajutor</button>
+            </div>
+
+            <form id="sensor-form">
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="sensorCode">Cod Senzor:</label>
+                        <input type="text" id="sensorCode" name="sensorCode" required />
+                    </div>
+
+                    <div class="field">
+                        <label for="sensorType">Tip Senzor:</label>
+                        <select id="sensorType" name="sensorType" required></select>
+                    </div>
+
+                    <div class="field">
+                        <label for="description">Descriere:</label>
+                        <textarea id="description" name="description" rows="2"></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label for="locationZone">Zonă Amplasare:</label>
+                        <input type="text" id="locationZone" name="locationZone" />
+                    </div>
+
+                    <div class="field">
+                        <label for="unitOfMeasure">Unitate de Măsură:</label>
+                        <input type="text" id="unitOfMeasure" name="unitOfMeasure" />
+                    </div>
+
+                    <div class="field">
+                        <label for="measurementField">Câmp Măsurare:</label>
+                        <select id="measurementField" name="measurementField"></select>
+                    </div>
+                </div>
+
+                <hr style="margin: 2rem 0;">
+                <h3>Threshold-uri</h3>
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="normalMin">Normal Min:</label>
+                        <input type="number" id="normalMin" name="normalMin" step="any" />
+                    </div>
+                    <div class="field">
+                        <label for="normalMax">Normal Max:</label>
+                        <input type="number" id="normalMax" name="normalMax" step="any" />
+                    </div>
+                    <div class="field">
+                        <label for="alarmLow">Alarmă Low:</label>
+                        <input type="number" id="alarmLow" name="alarmLow" step="any" />
+                    </div>
+                    <div class="field">
+                        <label for="alarmHigh">Alarmă High:</label>
+                        <input type="number" id="alarmHigh" name="alarmHigh" step="any" />
+                    </div>
+                    <div class="field">
+                        <label for="alertLow">Alertă Low:</label>
+                        <input type="number" id="alertLow" name="alertLow" step="any" />
+                    </div>
+                    <div class="field">
+                        <label for="alertHigh">Alertă High:</label>
+                        <input type="number" id="alertHigh" name="alertHigh" step="any" />
+                    </div>
+                    <div class="field">
+                        <label for="scramLow">Scram Low:</label>
+                        <input type="number" id="scramLow" name="scramLow" step="any" />
+                    </div>
+                    <div class="field">
+                        <label for="scramHigh">Scram High:</label>
+                        <input type="number" id="scramHigh" name="scramHigh" step="any" />
+                    </div>
+                </div>
+
+                <hr style="margin: 2rem 0;">
+                <h3>Status și Calibrare</h3>
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="status">Status:</label>
+                        <select id="status" name="status"></select>
+                    </div>
+
+                    <div class="field field-checkbox">
+                        <label>
+                            <input type="checkbox" id="isActive" name="isActive" checked />
+                            Activ
+                        </label>
+                    </div>
+
+                    <div class="field">
+                        <label for="lastCalibration">Ultima Calibrare:</label>
+                        <input type="datetime-local" id="lastCalibration" name="lastCalibration" />
+                    </div>
+
+                    <div class="field">
+                        <label for="calibrationDue">Următoarea Calibrare:</label>
+                        <input type="datetime-local" id="calibrationDue" name="calibrationDue" />
+                    </div>
+                </div>
+
+                <hr style="margin: 2rem 0;">
+
+                <div class="card-actions">
+                    <button type="submit" class="button" id="submit-btn">Adaugă</button>
+                    <button type="button" class="button secondary" id="btn-cancel">Anulează</button>
+                </div>
+
+                <div id="status-message" style="margin-top: 18px;"></div>
+            </form>
+        </main>
+    </div>
+
+    <div class="help-modal-overlay" id="help-overlay">
+        <div class="help-modal">
+            <button class="help-close" id="help-close">&times;</button>
+            <h2>Manual de Utilizare – Senzori</h2>
+            <p style="color:var(--muted);font-size:0.75rem;">Informații de referință pentru configurarea senzorilor.</p>
+
+            <h3>Tipuri de reactoare</h3>
+            <table>
+                <thead><tr><th>Cod</th><th>Denumire</th><th>Descriere</th></tr></thead>
+                <tbody>
+                    <tr><td><code>PWR</code></td><td>Pressurized Water Reactor</td><td>Apă ușoară sub presiune</td></tr>
+                    <tr><td><code>BWR</code></td><td>Boiling Water Reactor</td><td>Apă în fierbere, abur direct la turbină</td></tr>
+                    <tr><td><code>PHWR</code></td><td>Pressurized Heavy Water Reactor</td><td>Apă grea sub presiune (CANDU)</td></tr>
+                    <tr><td><code>FBR</code></td><td>Fast Breeder Reactor</td><td>Neutroni rapizi, răcit cu sodiu lichid</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Tipuri de senzori</h3>
+            <table>
+                <thead><tr><th>Cod enum</th><th>Tip</th><th>Descriere</th></tr></thead>
+                <tbody>
+                    <tr><td><code>THERMOCOUPLE</code></td><td>Termocuplu</td><td>Măsoară temperatura</td></tr>
+                    <tr><td><code>PRESSURE_TRANSDUCER</code></td><td>Traductor de presiune</td><td>Măsoară presiunea</td></tr>
+                    <tr><td><code>NEUTRON_DETECTOR</code></td><td>Detector de neutroni</td><td>Flux neutronic / putere reactor</td></tr>
+                    <tr><td><code>FLOW_METER</code></td><td>Debitmetru</td><td>Debitul unui fluid</td></tr>
+                    <tr><td><code>RADIATION_MONITOR</code></td><td>Monitor de radiații</td><td>Doza de radiații ambientale</td></tr>
+                    <tr><td><code>VIBRATION_SENSOR</code></td><td>Senzor de vibrații</td><td>Vibrațiile utilajelor</td></tr>
+                    <tr><td><code>LEVEL_SENSOR</code></td><td>Senzor de nivel</td><td>Nivelul unui fluid într-un vas</td></tr>
+                    <tr><td><code>ACTIVITY_MONITOR</code></td><td>Monitor de activitate</td><td>Activitatea specifică a unui fluid</td></tr>
+                    <tr><td><code>SEISMIC_SENSOR</code></td><td>Senzor seismic</td><td>Mișcări seismice</td></tr>
+                    <tr><td><code>HYDROGEN_DETECTOR</code></td><td>Detector de hidrogen</td><td>Concentrația de H₂</td></tr>
+                    <tr><td><code>VALVE_POSITION</code></td><td>Poziție valvă</td><td>Deschiderea unei valve</td></tr>
+                    <tr><td><code>PUMP_SPEED</code></td><td>Viteză pompă</td><td>Turația unei pompe</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Prefixe coduri senzori</h3>
+            <table>
+                <thead><tr><th>Prefix</th><th>Tip senzor</th></tr></thead>
+                <tbody>
+                    <tr><td><code>TI-</code></td><td>Temperatură (Thermocouple)</td></tr>
+                    <tr><td><code>PR-</code></td><td>Presiune (Pressure)</td></tr>
+                    <tr><td><code>FM-</code></td><td>Debit (Flow Meter)</td></tr>
+                    <tr><td><code>NI-</code></td><td>Neutroni (Neutron Indicator)</td></tr>
+                    <tr><td><code>RM-</code></td><td>Radiații (Radiation Monitor)</td></tr>
+                    <tr><td><code>LI-</code></td><td>Nivel (Level Indicator)</td></tr>
+                    <tr><td><code>VI-</code></td><td>Vibrații (Vibration)</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Câmpuri de măsură (<code>measurement_field</code>)</h3>
+            <table>
+                <thead><tr><th>measurement_field</th><th>Unitate</th><th>Descriere</th></tr></thead>
+                <tbody>
+                    <tr><td><code>temp_coolant_out</code></td><td>°C</td><td>Temperatura agentului la ieșirea din reactor</td></tr>
+                    <tr><td><code>temp_coolant_in</code></td><td>°C</td><td>Temperatura agentului la intrarea în reactor</td></tr>
+                    <tr><td><code>temp_fuel_center</code></td><td>°C</td><td>Temperatura în centrul combustibilului</td></tr>
+                    <tr><td><code>temp_moderator</code></td><td>°C</td><td>Temperatura moderatorului (PHWR)</td></tr>
+                    <tr><td><code>pressure</code></td><td>MPa</td><td>Presiunea în circuitul primar</td></tr>
+                    <tr><td><code>steam_pressure</code></td><td>MPa</td><td>Presiunea aburului în secundar</td></tr>
+                    <tr><td><code>flow_rate_primary</code></td><td>m³/h</td><td>Debitul în circuitul primar</td></tr>
+                    <tr><td><code>flow_rate_secondary</code></td><td>m³/h</td><td>Debitul în circuitul secundar (FBR)</td></tr>
+                    <tr><td><code>steam_flow_rate</code></td><td>t/h</td><td>Debitul de abur către turbină (BWR)</td></tr>
+                    <tr><td><code>power_percent</code></td><td>%Pn</td><td>Puterea reactorului</td></tr>
+                    <tr><td><code>neutron_flux</code></td><td>n/cm²/s</td><td>Fluxul neutronic</td></tr>
+                    <tr><td><code>level_reactor_vessel</code></td><td>%</td><td>Nivelul apei/sodiului în vas</td></tr>
+                    <tr><td><code>activity_primary</code></td><td>Bq/L</td><td>Activitatea agentului primar</td></tr>
+                    <tr><td><code>dose_rate_control_room</code></td><td>mSv/h</td><td>Doza în sala de comandă (PWR)</td></tr>
+                    <tr><td><code>dose_rate_reactor_bldg</code></td><td>mSv/h</td><td>Doza în clădirea reactorului</td></tr>
+                    <tr><td><code>vibration</code></td><td>mm/s</td><td>Vibrații ale utilajelor</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Configurație per tip reactor</h3>
+
+            <h4 style="color:#7ab8d4;">PWR — Pressurized Water Reactor</h4>
+            <table>
+                <thead><tr><th>Cod</th><th>Tip</th><th>measurement_field</th><th>Locație</th></tr></thead>
+                <tbody>
+                    <tr><td>TI-001</td><td>THERMOCOUPLE</td><td><code>temp_coolant_out</code></td><td>Bucla 1 / Ieșire reactor</td></tr>
+                    <tr><td>TI-002</td><td>THERMOCOUPLE</td><td><code>temp_coolant_in</code></td><td>Bucla 1 / Intrare reactor</td></tr>
+                    <tr><td>TI-003</td><td>THERMOCOUPLE</td><td><code>temp_fuel_center</code></td><td>Miez activ / Zona centrală</td></tr>
+                    <tr><td>PR-001</td><td>PRESSURE_TRANSDUCER</td><td><code>pressure</code></td><td>Presurizor</td></tr>
+                    <tr><td>PR-002</td><td>PRESSURE_TRANSDUCER</td><td><code>steam_pressure</code></td><td>Generator aburi 1 / Secundar</td></tr>
+                    <tr><td>FM-001</td><td>FLOW_METER</td><td><code>flow_rate_primary</code></td><td>Pompa P-1A</td></tr>
+                    <tr><td>NI-001</td><td>NEUTRON_DETECTOR</td><td><code>power_percent</code></td><td>Excore / Detector A</td></tr>
+                    <tr><td>NI-002</td><td>NEUTRON_DETECTOR</td><td><code>neutron_flux</code></td><td>Excore / Detector B</td></tr>
+                    <tr><td>RM-001</td><td>RADIATION_MONITOR</td><td><code>activity_primary</code></td><td>Bypass purificare</td></tr>
+                    <tr><td>RM-002</td><td>RADIATION_MONITOR</td><td><code>dose_rate_control_room</code></td><td>Hol reactor</td></tr>
+                    <tr><td>LI-001</td><td>LEVEL_SENSOR</td><td><code>level_reactor_vessel</code></td><td>Presurizor</td></tr>
+                    <tr><td>VI-001</td><td>VIBRATION_SENSOR</td><td><code>vibration</code></td><td>Pompa P-1A / Lagăre</td></tr>
+                </tbody>
+            </table>
+
+            <h4 style="color:#7ab8d4;">BWR — Boiling Water Reactor</h4>
+            <table>
+                <thead><tr><th>Cod</th><th>Tip</th><th>measurement_field</th><th>Locație</th></tr></thead>
+                <tbody>
+                    <tr><td>NI-001</td><td>NEUTRON_DETECTOR</td><td><code>power_percent</code></td><td>Incinta reactor</td></tr>
+                    <tr><td>TI-001</td><td>THERMOCOUPLE</td><td><code>temp_coolant_out</code></td><td>Miez activ / Ieșire</td></tr>
+                    <tr><td>TI-002</td><td>THERMOCOUPLE</td><td><code>temp_fuel_center</code></td><td>Miez / Zona centrală</td></tr>
+                    <tr><td>PR-001</td><td>PRESSURE_TRANSDUCER</td><td><code>pressure</code></td><td>Vas reactor</td></tr>
+                    <tr><td>PR-002</td><td>PRESSURE_TRANSDUCER</td><td><code>steam_pressure</code></td><td>Linie abur / Turbină</td></tr>
+                    <tr><td>FM-001</td><td>FLOW_METER</td><td><code>flow_rate_primary</code></td><td>Pompa RC-1A</td></tr>
+                    <tr><td>FM-002</td><td>FLOW_METER</td><td><code>steam_flow_rate</code></td><td>Linie abur principal</td></tr>
+                    <tr><td>RM-001</td><td>RADIATION_MONITOR</td><td><code>activity_primary</code></td><td>Linie abur</td></tr>
+                    <tr><td>RM-002</td><td>RADIATION_MONITOR</td><td><code>dose_rate_reactor_bldg</code></td><td>Clădire reactor</td></tr>
+                    <tr><td>LI-001</td><td>LEVEL_SENSOR</td><td><code>level_reactor_vessel</code></td><td>Vas reactor</td></tr>
+                    <tr><td>VI-001</td><td>VIBRATION_SENSOR</td><td><code>vibration</code></td><td>Pompa RC-1A / Lagăre</td></tr>
+                </tbody>
+            </table>
+
+            <h4 style="color:#7ab8d4;">PHWR — Pressurized Heavy Water Reactor (CANDU)</h4>
+            <table>
+                <thead><tr><th>Cod</th><th>Tip</th><th>measurement_field</th><th>Locație</th></tr></thead>
+                <tbody>
+                    <tr><td>NI-001</td><td>NEUTRON_DETECTOR</td><td><code>power_percent</code></td><td>Miez activ / Detector A</td></tr>
+                    <tr><td>TI-001</td><td>THERMOCOUPLE</td><td><code>temp_coolant_out</code></td><td>Canale combustibil / Ieșire</td></tr>
+                    <tr><td>TI-002</td><td>THERMOCOUPLE</td><td><code>temp_coolant_in</code></td><td>Canale combustibil / Intrare</td></tr>
+                    <tr><td>TI-003</td><td>THERMOCOUPLE</td><td><code>temp_fuel_center</code></td><td>Miez / Fascicul combustibil</td></tr>
+                    <tr><td>TI-004</td><td>THERMOCOUPLE</td><td><code>temp_moderator</code></td><td>Calandria / Miez moderator</td></tr>
+                    <tr><td>PR-001</td><td>PRESSURE_TRANSDUCER</td><td><code>pressure</code></td><td>Colector circuit primar</td></tr>
+                    <tr><td>PR-002</td><td>PRESSURE_TRANSDUCER</td><td><code>steam_pressure</code></td><td>Generator aburi 1 / Secundar</td></tr>
+                    <tr><td>FM-001</td><td>FLOW_METER</td><td><code>flow_rate_primary</code></td><td>Pompa PH-1A</td></tr>
+                    <tr><td>FM-002</td><td>FLOW_METER</td><td><code>steam_flow_rate</code></td><td>Linie abur / Turbină</td></tr>
+                    <tr><td>RM-001</td><td>RADIATION_MONITOR</td><td><code>activity_primary</code></td><td>Circuit purificare moderator</td></tr>
+                    <tr><td>RM-002</td><td>RADIATION_MONITOR</td><td><code>dose_rate_reactor_bldg</code></td><td>Clădire reactor</td></tr>
+                    <tr><td>LI-001</td><td>LEVEL_SENSOR</td><td><code>level_reactor_vessel</code></td><td>Calandria</td></tr>
+                    <tr><td>VI-001</td><td>VIBRATION_SENSOR</td><td><code>vibration</code></td><td>Pompa PH-1A / Lagăre</td></tr>
+                </tbody>
+            </table>
+
+            <h4 style="color:#7ab8d4;">FBR — Fast Breeder Reactor</h4>
+            <table>
+                <thead><tr><th>Cod</th><th>Tip</th><th>measurement_field</th><th>Locație</th></tr></thead>
+                <tbody>
+                    <tr><td>NI-001</td><td>NEUTRON_DETECTOR</td><td><code>power_percent</code></td><td>Miez activ / Detector A</td></tr>
+                    <tr><td>TI-001</td><td>THERMOCOUPLE</td><td><code>temp_coolant_out</code></td><td>Miez / Ieșire sodiu</td></tr>
+                    <tr><td>TI-002</td><td>THERMOCOUPLE</td><td><code>temp_coolant_in</code></td><td>Miez / Intrare sodiu</td></tr>
+                    <tr><td>TI-003</td><td>THERMOCOUPLE</td><td><code>temp_fuel_center</code></td><td>Miez / Zona fisibilă</td></tr>
+                    <tr><td>PR-001</td><td>PRESSURE_TRANSDUCER</td><td><code>pressure</code></td><td>Circuit primar</td></tr>
+                    <tr><td>PR-002</td><td>PRESSURE_TRANSDUCER</td><td><code>steam_pressure</code></td><td>Generator abur 1 / Secundar</td></tr>
+                    <tr><td>FM-001</td><td>FLOW_METER</td><td><code>flow_rate_primary</code></td><td>Pompa SP-1A</td></tr>
+                    <tr><td>FM-002</td><td>FLOW_METER</td><td><code>flow_rate_secondary</code></td><td>Pompa SI-1A</td></tr>
+                    <tr><td>RM-001</td><td>RADIATION_MONITOR</td><td><code>activity_primary</code></td><td>Bypass Na-24</td></tr>
+                    <tr><td>RM-002</td><td>RADIATION_MONITOR</td><td><code>dose_rate_reactor_bldg</code></td><td>Clădire reactor</td></tr>
+                    <tr><td>LI-001</td><td>LEVEL_SENSOR</td><td><code>level_reactor_vessel</code></td><td>Vas reactor</td></tr>
+                    <tr><td>VI-001</td><td>VIBRATION_SENSOR</td><td><code>vibration</code></td><td>Pompa SP-1A / Stator</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module" src="../../modules/ui/navbar.js"></script>
+    <script type="module" src="../../modules/pages/sensors/create.js"></script>
+</body>
+</html>

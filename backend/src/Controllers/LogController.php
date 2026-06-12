@@ -9,6 +9,7 @@ class LogController {
         $level = $_GET['level'] ?? null;
         $limit = min((int)($_GET['limit'] ?? 100), 500);
         $offset = max((int)($_GET['offset'] ?? 0), 0);
+        $afterId = $_GET['after_id'] ?? null;
 
         $validLevels = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'];
         if ($level !== null && !in_array(strtoupper($level), $validLevels)) {
@@ -18,8 +19,13 @@ class LogController {
         }
 
         try {
-            $logs = LogService::instance()->getRepository()->findRecent($limit, $level ? strtoupper($level) : null, $offset);
-            $total = LogService::instance()->getRepository()->countByLevel($level ? strtoupper($level) : null);
+            if ($afterId !== null) {
+                $logs = LogService::instance()->getRepository()->findAfter($afterId, $limit, $level ? strtoupper($level) : null);
+                $total = LogService::instance()->getRepository()->countByLevel($level ? strtoupper($level) : null);
+            } else {
+                $logs = LogService::instance()->getRepository()->findRecent($limit, $level ? strtoupper($level) : null, $offset);
+                $total = LogService::instance()->getRepository()->countByLevel($level ? strtoupper($level) : null);
+            }
 
             $data = array_map(function (Log $log) {
                 return [
@@ -44,6 +50,7 @@ class LogController {
                 'total' => $total,
                 'limit' => $limit,
                 'offset' => $offset,
+                'has_more' => count($data) >= $limit,
             ]);
         } catch (Exception $e) {
             http_response_code(500);

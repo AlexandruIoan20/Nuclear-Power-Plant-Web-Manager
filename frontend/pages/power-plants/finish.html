@@ -6,6 +6,10 @@
     <title>Document</title>
     <link rel="stylesheet" href="../../style.css">
     <script src="../../modules/config/globals.js"></script>
+    <style>
+        .nav-links { display: flex; align-items: center; gap: 8px; }
+        .nav-links .button { padding: 6px 14px; font-size: 0.82rem; }
+    </style>
 </head>
 <body>
     <div class="page-shell">
@@ -18,8 +22,10 @@
             </div>
             <div class="nav-links">
                 <span id="plant-status" class="tag"></span>
+                <button class="button secondary" id="btn-export-json">Export JSON</button>
+                <button class="button secondary" id="btn-export-csv">Export CSV</button>
                 <button class="button" id="btn-verify">VERIFICĂ</button>
-                <a class="button secondary" href="/pages/dashboard.html">🏠 Home</a>
+                <a class="button secondary" href="/pages/dashboard.html">Home</a>
             </div>
         </div>
     

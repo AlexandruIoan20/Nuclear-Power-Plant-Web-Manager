@@ -21,8 +21,8 @@
         .notification-card.scram { border-color: var(--danger, #dc3545); }
         .notification-card.alarm { border-color: #ffc107; }
         .notification-card.alert { border-color: #fd7e14; }
-        .notification-card.info { border-color: var(--primary, #0d6efd); }
-        
+        .notification-card.info { border-color: var(--primary, #0d6efb); }
+
         .notification-header {
             display: flex;
             justify-content: space-between;
@@ -42,6 +42,48 @@
             color: #ccc;
             line-height: 1.5;
         }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-top: 24px;
+            border-bottom: 2px solid var(--border, #333);
+        }
+        .tab {
+            padding: 12px 28px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            color: var(--text-muted, #888);
+            font-size: 1rem;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .tab:hover {
+            color: var(--text, #fff);
+        }
+        .tab.active {
+            color: var(--primary, #0d6efb);
+            border-bottom-color: var(--primary, #0d6efb);
+        }
+        .tab-badge {
+            display: inline-block;
+            background: var(--primary, #0d6efb);
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 2px 7px;
+            border-radius: 10px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 
@@ -53,14 +95,19 @@
             <h1>Centrul de Notificări</h1>
             <p>Istoricul consolidat al alertelor de la senzori și al solicitărilor administrative.</p>
 
+            <div class="tabs">
+                <button class="tab active" data-tab="alert">Alerte</button>
+                <button class="tab" data-tab="plant">Centrale</button>
+            </div>
+
             <div id="loading-indicator" class="inline-status" style="margin-top: 20px;">
                 Se interoghează serverul...
             </div>
-            
+
             <div id="error-message" style="color: var(--danger); display: none; margin-top: 20px;"></div>
 
-            <div id="notifications-container" style="margin-top: 32px;">
-            </div>
+            <div id="tab-alert" class="tab-content active" style="margin-top: 32px;"></div>
+            <div id="tab-plant" class="tab-content" style="margin-top: 32px;"></div>
 
         </main>
     </div>
@@ -79,66 +126,174 @@
             });
         }
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            const container = document.getElementById("notifications-container");
+        function buildAlertCards(container, notifications) {
+            if (notifications.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted); text-align: center;">Nu există alerte de senzori.</p>`;
+                return;
+            }
+
+            const toolbar = document.createElement("div");
+            toolbar.style.cssText = "display: flex; justify-content: flex-end; margin-bottom: 16px;";
+            const markBtn = document.createElement("button");
+            markBtn.className = "button secondary small";
+            markBtn.textContent = "Mark All as Read";
+            markBtn.addEventListener("click", markAllAsRead);
+            toolbar.appendChild(markBtn);
+            container.appendChild(toolbar);
+
+            notifications.forEach(notification => {
+                const card = document.createElement("div");
+                const severityClass = notification.severity.toLowerCase();
+                card.className = `notification-card ${severityClass}`;
+
+                card.innerHTML = `
+                    <div class="notification-header">
+                        <span class="notification-title">${escapeHtml(notification.title)}</span>
+                        <span class="notification-meta">${escapeHtml(notification.date)}</span>
+                    </div>
+                    <div class="notification-body">
+                        ${escapeHtml(notification.message)}
+                    </div>
+                    <div class="notification-meta" style="margin-top: 8px;">
+                        TYPE: ${escapeHtml(notification.type)} | ROLE CLEARANCE: ${escapeHtml(notification.target_role)}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function buildPlantCards(container, notifications) {
+            if (notifications.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted); text-align: center;">Nu există notificări de centrale.</p>`;
+                return;
+            }
+
+            notifications.forEach(notification => {
+                const card = document.createElement("div");
+                const severityClass = notification.severity.toLowerCase();
+                card.className = `notification-card ${severityClass}`;
+
+                card.innerHTML = `
+                    <div class="notification-header">
+                        <span class="notification-title">${escapeHtml(notification.title)}</span>
+                        <span class="notification-meta">${escapeHtml(notification.date)}</span>
+                    </div>
+                    <div class="notification-body">
+                        ${escapeHtml(notification.message)}
+                    </div>
+                    <div class="notification-meta" style="margin-top: 8px;">
+                        TYPE: ${escapeHtml(notification.type)} | ROLE CLEARANCE: ${escapeHtml(notification.target_role)}
+                    </div>
+                    <button class="button secondary small dismiss-btn" style="align-self: flex-end;">Dismiss</button>
+                `;
+
+                const dismissBtn = card.querySelector('.dismiss-btn');
+                dismissBtn.addEventListener('click', async () => {
+                    const rawId = notification.id.replace(/^(plant_|approval_)/, '');
+                    const prefix = notification.id.startsWith('plant_') ? 'plant_' : 'approval_';
+                    const requestId = prefix === 'plant_' ? rawId : notification.id;
+                    try {
+                        const resp = await fetch(`${API_BASE}/alerts/${requestId}/read`, {
+                            method: "PUT",
+                            headers: { "X-CSRF-Token": await getCsrfToken() },
+                            credentials: "include"
+                        });
+                        if (!resp.ok) throw new Error("Eroare la dismiss");
+                        card.remove();
+                        const remaining = container.querySelectorAll('.notification-card');
+                        if (remaining.length === 0) {
+                            container.innerHTML = `<p style="color: var(--text-muted); text-align: center;">Nu există notificări de centrale.</p>`;
+                        }
+                    } catch (e) {
+                        alert("Eroare: " + e.message);
+                    }
+                });
+
+                container.appendChild(card);
+            });
+        }
+
+        async function loadCategory(category) {
+            const container = document.getElementById(`tab-${category}`);
             const loadingIndicator = document.getElementById("loading-indicator");
             const errorMessage = document.getElementById("error-message");
 
+            container.innerHTML = "";
+            loadingIndicator.style.display = "block";
+            errorMessage.style.display = "none";
+
             try {
-                const response = await fetch(API_BASE + "/notifications", {
+                const response = await fetch(`${API_BASE}/notifications?category=${category}`, {
                     credentials: 'include'
                 });
-                
+
                 if (response.status === 401) {
                     window.location.href = "login.html";
                     return;
                 }
-                
-               
+
                 const result = await response.json();
 
                 if (!response.ok) {
-                    
                     throw new Error(result.message || `Eroare HTTP ${response.status}`);
                 }
 
                 loadingIndicator.style.display = "none";
 
                 if (result.status === 'success' && Array.isArray(result.data)) {
-                    if (result.data.length === 0) {
-                        container.innerHTML = `<p style="color: var(--text-muted); text-align: center;">Nu există nicio notificare înregistrată în sistem.</p>`;
-                        return;
+                    if (category === 'alert') {
+                        buildAlertCards(container, result.data);
+                    } else {
+                        buildPlantCards(container, result.data);
                     }
-
-                    result.data.forEach(notification => {
-                        const card = document.createElement("div");
-                        const severityClass = notification.severity.toLowerCase();
-                        card.className = `notification-card ${severityClass}`;
-
-                        card.innerHTML = `
-                            <div class="notification-header">
-                                <span class="notification-title">${escapeHtml(notification.title)}</span>
-                                <span class="notification-meta">${escapeHtml(notification.date)}</span>
-                            </div>
-                            <div class="notification-body">
-                                ${escapeHtml(notification.message)}
-                            </div>
-                            <div class="notification-meta" style="margin-top: 8px;">
-                                TYPE: ${escapeHtml(notification.type)} | ROLE CLEARANCE: ${escapeHtml(notification.target_role)}
-                            </div>
-                        `;
-                        container.appendChild(card);
-                    });
                 }
             } catch (error) {
                 loadingIndicator.style.display = "none";
                 errorMessage.style.display = "block";
                 errorMessage.innerHTML = `<strong>Eroare comunicație:</strong> ${escapeHtml(error.message)}`;
-            console.error("Eroare fetch notificări:", error);
+                console.error("Eroare fetch notificări:", error);
             }
+        }
+
+        async function markAllAsRead() {
+            const btn = document.querySelector("#tab-alert .button.secondary.small");
+            if (btn) { btn.disabled = true; btn.textContent = "Se marchează..."; }
+            try {
+                const response = await fetch(`${API_BASE}/alerts/all/read`, {
+                    method: "PUT",
+                    headers: { "X-CSRF-Token": await getCsrfToken() },
+                    credentials: "include"
+                });
+                if (!response.ok) {
+                    const result = await response.json();
+                    throw new Error(result.message || `Eroare ${response.status}`);
+                }
+                await loadCategory("alert");
+            } catch (error) {
+                alert("Eroare: " + error.message);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const tabs = document.querySelectorAll(".tab");
+            tabs.forEach(tab => {
+                tab.addEventListener("click", () => {
+                    tabs.forEach(t => t.classList.remove("active"));
+                    tab.classList.add("active");
+
+                    document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
+                    const target = document.getElementById(`tab-${tab.dataset.tab}`);
+                    if (target) target.classList.add("active");
+
+                    loadCategory(tab.dataset.tab);
+                });
+            });
+
+            await loadCategory("alert");
         });
     </script>
 
     <script type="module" src="../modules/ui/navbar.js"></script>
 </body>
+
 </html>

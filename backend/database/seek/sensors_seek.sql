@@ -81,7 +81,7 @@ VALUES
 ('FBR','TI-001','THERMOCOUPLE','Temperatura sodiu la iesirea din miez','Miez activ / Iesire sodiu',
  '°C','temp_coolant_out',400,600,390,620,380,650,360,700),
 ('FBR','TI-002','THERMOCOUPLE','Temperatura sodiu la intrarea in miez','Miez activ / Intrare sodiu',
- '°C','temp_coolant_in',350,430,340,440,330,450,310,470),
+ '°C','temp_coolant_in',320,420,300,440,280,450,260,470),
 ('FBR','TI-003','THERMOCOUPLE','Temperatura combustibil - centrul miezului','Miez activ / Zona fisibila',
  '°C','temp_fuel_center',600,1100,580,1150,550,1200,500,1300),
 ('FBR','PR-001','PRESSURE_TRANSDUCER','Presiune sodiu circuit primar','Circuit primar / Zona pompa',

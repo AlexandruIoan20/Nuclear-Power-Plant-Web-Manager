@@ -10,6 +10,7 @@ require_once __DIR__ . '/Helpers/MeasurementBuilder.php';
 require_once __DIR__ . '/Helpers/ReactorWearCalculator.php';
 require_once __DIR__ . '/../Observers/SubjectTrait.php';
 require_once __DIR__ . '/../Observers/ViolationEvent.php';
+require_once __DIR__ . '/../../../Services/LogService.php';
 
 abstract class AbstractReactorSimulator {
     use SubjectTrait;
@@ -81,6 +82,31 @@ abstract class AbstractReactorSimulator {
             . " | P=" . $power . "% | Tout=" . $tOut . "°C | P=" . $pres . " MPa | Φ=" . $flux
             . " | wear=" . sprintf('%.4f', $reactor->getWearIndex())
             . PHP_EOL;
+
+        try {
+            $violationCount = count($violations);
+            $hasIssues = $violationCount > 0;
+            $level = $hasIssues ? 'WARNING' : 'INFO';
+            $issueTag = $hasIssues ? " | {$violationCount} violări" : '';
+            LogService::instance()->$level(
+                "[TICK] {$reactor->getReactorCode()} | P={$power}% | Tout={$tOut}°C | P={$pres} MPa | Φ={$flux} | wear=" . sprintf('%.4f', $reactor->getWearIndex()) . $issueTag,
+                [
+                    'reactor_id' => $reactorId,
+                    'plant_id' => $reactor->getPowerPlantId(),
+                    'power_percent' => $measurement->getPowerPercent(),
+                    'temp_coolant_out' => $measurement->getTempCoolantOut(),
+                    'pressure' => $measurement->getPressure(),
+                    'neutron_flux' => $measurement->getNeutronFlux(),
+                    'wear_index' => $reactor->getWearIndex(),
+                    'violations' => $violationCount,
+                    'status' => $reactor->getOperationalStatus()->value,
+                ],
+                $reactor->getPowerPlantId(),
+                $reactorId
+            );
+        } catch (\Throwable $e) {
+            error_log("[Simulator] Eroare la scrierea logului: " . $e->getMessage());
+        }
     }
 
     abstract protected function applyPhysicalCorrelation(array &$newValues, array $sensors, Reactor $reactor): void;

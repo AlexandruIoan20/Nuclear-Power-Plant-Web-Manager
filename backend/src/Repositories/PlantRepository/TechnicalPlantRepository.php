@@ -1,5 +1,7 @@
 <?php 
 
+require_once __DIR__ . '/../../Helpers/generateUUID.php';
+
 class TechnicalPlantRepository { 
     private PDO $pdo; 
 
@@ -48,9 +50,6 @@ class TechnicalPlantRepository {
         try {
             LogService::instance()->info("[saveTechnicalData] START");
             LogService::instance()->info("[saveTechnicalData] TechnicalPlantData: " . print_r($technicalPlantData, true));
-    
-            $this->pdo->beginTransaction();
-            LogService::instance()->info("[saveTechnicalData] Transaction started");
     
             $statement = $this->pdo->prepare("INSERT INTO technical_data (
                     id, power_plant_id, number_of_reactors, estimated_efficiency, operational_risk_level,
@@ -122,12 +121,43 @@ class TechnicalPlantRepository {
                 LogService::instance()->info("[saveTechnicalData] reactor_plant_data inserted successfully for key '$key'");
             }
     
-            $this->pdo->commit();
-            LogService::instance()->info("[saveTechnicalData] Transaction committed - DONE");
+            $plantShort = substr($technicalPlantData->getPowerPlantId(), 0, 8);
+            $seq = 0;
+            $reactorInsert = $this->pdo->prepare("
+                INSERT INTO reactor (
+                    id, power_plant_id, reactor_code, reactor_type, cooling_type,
+                    operational_status, thermal_power_mw, electrical_power_mw,
+                    fuel_cycle_days, current_cycle_day, wear_index, design_lifetime_yr,
+                    created_at
+                ) VALUES (
+                    :id, :power_plant_id, :reactor_code, :reactor_type, :cooling_type,
+                    :operational_status, NULL, NULL,
+                    :fuel_cycle_days, :current_cycle_day, :wear_index, :design_lifetime_yr,
+                    NOW()
+                )
+            ");
+
+            foreach ($groupedConfigurations as $group) {
+                for ($i = 0; $i < $group['quantity']; $i++) {
+                    $seq++;
+                    $reactorInsert->execute([
+                        'id' => generateUUID(),
+                        'power_plant_id' => $technicalPlantData->getPowerPlantId(),
+                        'reactor_code' => 'AUTO-' . $plantShort . '-' . $seq,
+                        'reactor_type' => $group['type'],
+                        'cooling_type' => $group['cooling'],
+                        'operational_status' => 'SHUTDOWN',
+                        'fuel_cycle_days' => 365,
+                        'current_cycle_day' => 0,
+                        'wear_index' => 0.0000,
+                        'design_lifetime_yr' => 40,
+                    ]);
+                }
+            }
+
+            LogService::instance()->info("[saveTechnicalData] DONE");
     
         } catch (Exception $e) { 
-            $this->pdo->rollBack();
-            LogService::instance()->error("[saveTechnicalData] ROLLBACK triggered");
             LogService::instance()->error("[saveTechnicalData] Eroare la salvare: " . $e->getMessage());
             LogService::instance()->error("[saveTechnicalData] Stack trace: " . $e->getTraceAsString());
             throw new Exception("Eroare la salvarea datelor tehnice: " . $e->getMessage());
@@ -197,6 +227,45 @@ class TechnicalPlantRepository {
 
                 if ($insertRelationStatement->rowCount() === 0) {
                     throw new Exception("Configurația reactorului (" . $group['type'] . " - " . $group['cooling'] . ") nu există în catalog.");
+                }
+            }
+
+            $deleteReactors = $this->pdo->prepare(
+                "DELETE FROM reactor WHERE power_plant_id = :plant_id AND reactor_code LIKE 'AUTO-%'"
+            );
+            $deleteReactors->execute(['plant_id' => $technicalPlantData->getPowerPlantId()]);
+
+            $plantShort = substr($technicalPlantData->getPowerPlantId(), 0, 8);
+            $seq = 0;
+            $reactorInsert = $this->pdo->prepare("
+                INSERT INTO reactor (
+                    id, power_plant_id, reactor_code, reactor_type, cooling_type,
+                    operational_status, thermal_power_mw, electrical_power_mw,
+                    fuel_cycle_days, current_cycle_day, wear_index, design_lifetime_yr,
+                    created_at
+                ) VALUES (
+                    :id, :power_plant_id, :reactor_code, :reactor_type, :cooling_type,
+                    :operational_status, NULL, NULL,
+                    :fuel_cycle_days, :current_cycle_day, :wear_index, :design_lifetime_yr,
+                    NOW()
+                )
+            ");
+
+            foreach ($groupedConfigurations as $group) {
+                for ($i = 0; $i < $group['quantity']; $i++) {
+                    $seq++;
+                    $reactorInsert->execute([
+                        'id' => generateUUID(),
+                        'power_plant_id' => $technicalPlantData->getPowerPlantId(),
+                        'reactor_code' => 'AUTO-' . $plantShort . '-' . $seq,
+                        'reactor_type' => $group['type'],
+                        'cooling_type' => $group['cooling'],
+                        'operational_status' => 'SHUTDOWN',
+                        'fuel_cycle_days' => 365,
+                        'current_cycle_day' => 0,
+                        'wear_index' => 0.0000,
+                        'design_lifetime_yr' => 40,
+                    ]);
                 }
             }
 

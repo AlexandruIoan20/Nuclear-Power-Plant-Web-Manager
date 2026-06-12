@@ -11,7 +11,7 @@ function escapeHtml(value) {
     });
 }
 
-export function renderReactorTable(reactors, plantId) {
+export function renderReactorTable(reactors, plantId, readonly) {
     const tbody = document.getElementById('reactors-tbody');
     document.getElementById('results-count').textContent = reactors.length;
 
@@ -20,8 +20,12 @@ export function renderReactorTable(reactors, plantId) {
         return;
     }
 
-    tbody.innerHTML = reactors.map(r => `
-        <tr data-id="${escapeHtml(r.id)}">
+    tbody.innerHTML = reactors.map(r => {
+        const deleteBtn = readonly
+            ? ''
+            : `<button class="btn-delete-reactor button" style="font-size:0.72rem;padding:4px 8px;width:auto;color:#a06060;border-color:rgba(160,96,96,0.4);">Șterge</button>`;
+
+        return `<tr data-id="${escapeHtml(r.id)}">
             <td class="td-id">${shortId(r.id)}</td>
             <td>${escapeHtml(r.reactorCode ?? '—')}</td>
             <td>${escapeHtml(r.reactorType ?? '—')}</td>
@@ -31,11 +35,12 @@ export function renderReactorTable(reactors, plantId) {
             <td>${r.electricalPowerMw != null ? r.electricalPowerMw + ' MW' : '—'}</td>
             <td class="td-actions">
                 <button class="btn-monitor-reactor button" style="font-size:0.72rem;padding:4px 8px;width:auto;margin-right:3px;">Live</button>
+                <button class="btn-sensors-reactor button" style="font-size:0.72rem;padding:4px 8px;width:auto;margin-right:3px;">Senzori</button>
                 <button class="btn-edit-reactor button" style="font-size:0.72rem;padding:4px 8px;width:auto;margin-right:3px;">Editează</button>
-                <button class="btn-delete-reactor button" style="font-size:0.72rem;padding:4px 8px;width:auto;color:#a06060;border-color:rgba(160,96,96,0.4);">Șterge</button>
+                ${deleteBtn}
             </td>
-        </tr>
-    `).join('');
+        </tr>`;
+    }).join('');
 }
 
 function statusTag(status) {

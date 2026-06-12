@@ -24,10 +24,6 @@ class TechnicalPlantService {
             throw new Exception("Există deja date tehnice pentru această centrală. Te rugăm să folosești metoda de UPDATE (PUT/PATCH).");
         }
 
-        $numberOfReactors = (isset($data['numberOfReactors']) && $data['numberOfReactors'] !== '') 
-            ? (int) $data['numberOfReactors'] 
-            : null;
-
         $estimatedEfficiency = (isset($data['estimatedEfficiency']) && $data['estimatedEfficiency'] !== '') 
             ? (float) $data['estimatedEfficiency'] 
             : null;
@@ -39,6 +35,8 @@ class TechnicalPlantService {
         $reactorConfigurations = (isset($data['reactorConfigurations']) && is_array($data['reactorConfigurations'])) 
             ? $data['reactorConfigurations'] 
             : [];
+
+        $numberOfReactors = count($reactorConfigurations);
 
         $technicalPlantData = new TechnicalPlantData($plantId, null, $numberOfReactors, $estimatedEfficiency, $operationalRiskLevel); 
 
@@ -57,9 +55,6 @@ class TechnicalPlantService {
     public function update(array $data, string $plantId): void { 
         $currentPlantData = $this->plantRepositoryFacade->getTechnicalDataByPlantId($plantId); 
 
-        $numberOfReactors = $data['numberOfReactors'] ?? ''; 
-        $numberOfReactors = ($numberOfReactors !== '') ? $numberOfReactors : null; 
-
         $estimatedEfficiency = $data['estimatedEfficiency'] ?? ''; 
         $estimatedEfficiency = ($estimatedEfficiency !== '') ? $estimatedEfficiency : null; 
 
@@ -67,6 +62,8 @@ class TechnicalPlantService {
         $operationalRiskLevel = ($operationalRiskLevel !== '') ? $operationalRiskLevel : null; 
 
         $reactorConfigurations = $data['reactorConfigurations'] ?? []; 
+
+        $numberOfReactors = count($reactorConfigurations);
 
         $technicalPlantData = new TechnicalPlantData($plantId, $currentPlantData->getId(), $numberOfReactors, $estimatedEfficiency, $operationalRiskLevel); 
 
