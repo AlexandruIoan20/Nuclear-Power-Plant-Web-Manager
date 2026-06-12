@@ -180,7 +180,7 @@ $rssController = new RssController($rssService);
 $userRepository = new UserRepository($pdo);
 $userService = new UserService($userRepository);
 
-$notificationService = new NotificationService($plantServiceFacade, $alertService);
+$notificationService = new NotificationService($plantServiceFacade, $alertService, $alertRepository);
 $reactorRepository = new ReactorRepository($pdo); 
 $reactorService = new ReactorService($reactorRepository);
 
@@ -330,8 +330,10 @@ $router->get('/api/stats/measurements', auth(null, function () use ($statsContro
     $statsController->getMeasurements();
 }));
 
-$router->patch('/api/power-plants/{id}/status', auth(null, function ($plantId) use ($plantServiceFacade){ 
-    (new DetailsPlantController($plantServiceFacade)->updateStatus($plantId)); 
+$router->patch('/api/power-plants/{id}/status', auth(null, function ($plantId) use ($plantServiceFacade, $alertRepository){ 
+    $ctrl = new DetailsPlantController($plantServiceFacade);
+    $ctrl->setAlertRepository($alertRepository);
+    $ctrl->updateStatus($plantId); 
 })); 
 
 $router->put('/api/power-plants/{id}/details', auth(null, function ($id) use ($plantServiceFacade) {

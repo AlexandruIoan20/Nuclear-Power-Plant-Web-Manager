@@ -51,4 +51,12 @@ class AlertService {
     public function dismissAlert(string $alertId): void {
         $this->alertRepository->markAsRead($alertId);
     }
+
+    public function dismissAllAlerts(): void {
+        $this->alertRepository->markAllAsRead();
+    }
+
+    public function dismissApproval(string $plantId): void {
+        $this->alertRepository->dismissApproval($plantId);
+    }
 }

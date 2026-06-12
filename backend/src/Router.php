@@ -25,7 +25,7 @@ class Router {
 
     public function dispatch(string $requestMethod, string $requestUri): void {
         foreach ($this->routes as $route) {
-            $pattern = preg_replace('/\{([a-zA-Z0-9\-]+)\}/', '([a-zA-Z0-9\-]+)', $route['uri']);
+            $pattern = preg_replace('/\{([a-zA-Z0-9\-]+)\}/', '([a-zA-Z0-9_.\-]+)', $route['uri']);
             $pattern = "#^" . $pattern . "$#";
 
             if ($route['method'] === $requestMethod && preg_match($pattern, $requestUri, $matches)) {

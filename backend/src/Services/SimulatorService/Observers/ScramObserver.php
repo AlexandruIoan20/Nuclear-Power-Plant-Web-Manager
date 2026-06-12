@@ -8,6 +8,9 @@ require_once __DIR__ . '/../../../Entities/ReactorOperationalStatus.php';
 class ScramObserver implements ObserverInterface {
     private ReactorRepository $reactorRepository;
 
+    private const DEBOUNCE_SECONDS = 60;
+    private array $lastScramTime = [];
+
     public function __construct(ReactorRepository $reactorRepository) {
         $this->reactorRepository = $reactorRepository;
     }
@@ -18,6 +21,13 @@ class ScramObserver implements ObserverInterface {
         if ($severity !== 'EMERGENCY' && $severity !== 'ALERT') {
             return;
         }
+
+        $key = $event->getReactorId() . '|' . $severity;
+        $now = time();
+        if (isset($this->lastScramTime[$key]) && ($now - $this->lastScramTime[$key]) < self::DEBOUNCE_SECONDS) {
+            return;
+        }
+        $this->lastScramTime[$key] = $now;
 
         $reactor = $this->reactorRepository->findById($event->getReactorId());
         if ($reactor === null) {

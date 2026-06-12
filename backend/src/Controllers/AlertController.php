@@ -80,6 +80,19 @@ class AlertController {
                 exit;
             }
 
+            if ($id === 'all') {
+                $this->alertService->dismissAllAlerts();
+                echo json_encode(['status' => 'success', 'message' => 'Toate alertele au fost marcate ca citite.']);
+                return;
+            }
+
+            if (str_starts_with($id, 'approval_')) {
+                $plantId = substr($id, 9);
+                $this->alertService->dismissApproval($plantId);
+                echo json_encode(['status' => 'success', 'message' => 'Solicitarea a fost ascunsă.']);
+                return;
+            }
+
             $this->alertService->dismissAlert($id);
             echo json_encode(['status' => 'success']);
         } catch (\Throwable $e) {
