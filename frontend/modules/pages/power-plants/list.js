@@ -1,7 +1,6 @@
 import { powerPlantService } from '../../services/powerPlantService.js';
 import { clearHeaderState } from '../../ui/form-header/formHeaderState.js';
 import { applyFilters } from '../../ui/power-plants/plantFilters.js';
-import { PlantListResponseDTO } from '../../dto/PlantListResponseDTO.js';
 import { logger } from '../../core/logger.js';
 import { clearHeaderState } from '../../ui/form-header/formHeaderState.js'; 
 
@@ -50,7 +49,6 @@ document.querySelectorAll('th[data-col]').forEach(th => {
 document.addEventListener('DOMContentLoaded', async () => {
     clearHeaderState();
 
-    // ---- Export All ----
     document.getElementById('btn-export-all-json').addEventListener('click', async () => {
         try {
             await powerPlantService.exportAllPlantsJson();
@@ -67,21 +65,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // ---- Import ----
     document.getElementById('btn-import').addEventListener('click', () => {
         window.location.href = '/pages/power-plants/import.html';
     });
 
-    // ---- Load plants ----
     try {
         const response = await powerPlantService.getAll();
 
-        allPlants = (response.data ?? []).map(p => PlantListResponseDTO(p));
+        allPlants = response ?? [];
 
-        // Delegate export
         applyFilters(allPlants, sortCol, sortDir, goTo);
 
-        // Attach per-row export buttons (delegated via event bubbling)
         document.getElementById('plants-tbody').addEventListener('click', async (e) => {
             const btn = e.target.closest('button');
             if (!btn) return;

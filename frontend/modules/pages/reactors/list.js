@@ -6,8 +6,6 @@ import { getQueryParam } from '../../utils/urlHelper.js';
 import { renderReactorTable } from '../../ui/reactors/reactorTable.js';
 import { logger } from '../../core/logger.js';
 
-import { clearHeaderState } from '../../ui/form-header/formHeaderState.js'; 
-
 const plantId = getQueryParam("plantId");
 
 let reactors = [];
@@ -36,8 +34,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let plantStatus = null;
     try {
-        const plantResp = await powerPlantService.getPlant(plantId);
-        plantStatus = plantResp.data?.details?.status || null;
+        const plantData = await powerPlantService.getPlant(plantId);
+        plantStatus = plantData.details?.status || null;
     } catch (err) {
         logger.error('Nu s-a putut verifica statusul centralei: ' + err.message);
     }
@@ -67,25 +65,68 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const createBtn = document.getElementById('btn-create-reactor');
 
-    
+    if (plantStatus === 'APPROVED') {
+        if (isAdmin) {
+            statusMsg.style.display = 'none';
+            if (createBtn) {
+                createBtn.style.display = 'none';
+                const clone = createBtn.cloneNode(true);
+                createBtn.parentNode?.replaceChild(clone, createBtn);
+            }
+        } else {
+            statusMsg.style.display = 'none';
+            if (createBtn) createBtn.style.display = 'inline-block';
+        }
 
-    document.getElementById('btn-back-plant')?.addEventListener('click', () => {
-        window.location.href = `/pages/power-plants/finish.html?id=${plantId}`;
-    });
+        document.getElementById('btn-back-plant').addEventListener('click', () => {
+            window.location.href = `/pages/power-plants/finish.html?id=${plantId}`;
+        });
+    } else {
+        const labels = { DRAFT: 'în lucru', REVIEW: 'în verificare', REJECTED: 'respinsă' };
+        statusMsg.style.display = 'block';
+        statusMsg.style.background = '#3d2e00';
+        statusMsg.style.color = 'var(--yellow)';
+        statusMsg.style.border = '1px solid var(--yellow)';
+        statusMsg.innerHTML =
+            '⚠️ Centrala este <strong>' + (labels[plantStatus] || plantStatus) + '</strong>. ' +
+            'Reactorii pot fi gestionați doar după aprobarea centralei.';
+
+        if (createBtn) {
+            createBtn.style.display = 'none';
+            const clone = createBtn.cloneNode(true);
+            createBtn.parentNode?.replaceChild(clone, createBtn);
+        }
+
+        document.getElementById('btn-back-plant')?.addEventListener('click', () => {
+            window.location.href = `/pages/power-plants/finish.html?id=${plantId}`;
+        });
+    }
 
     let technicalLocked = false;
     try {
-        const plantResp2 = await powerPlantService.getPlant(plantId);
-        technicalLocked = !!(plantResp2.data?.technical?.id);
+        const plantResponse = await powerPlantService.getPlant(plantId);
+        technicalLocked = !!(plantResponse.technical?.id);
     } catch {
     }
 
-    
+    if (technicalLocked) {
+        const createBtn = document.getElementById('btn-create-reactor');
+        if (createBtn) {
+            createBtn.textContent = 'Configurație automată';
+            createBtn.disabled = true;
+            createBtn.style.opacity = '0.5';
+            createBtn.style.cursor = 'not-allowed';
+        }
+    } else {
+        document.getElementById('btn-create-reactor')?.addEventListener('click', () => {
+            window.location.href = `/pages/reactors/create.html?plantId=${plantId}`;
+        });
+    }
 
     try {
         const response = await reactorService.getReactorsByPlant(plantId);
-        reactors = response.data ?? [];
-        renderTable(technicalLocked || plantStatus === 'APPROVED');
+        reactors = response ?? [];
+        renderTable(technicalLocked);
     } catch (error) {
         logger.error(error.message);
         document.getElementById('reactors-tbody').innerHTML =
@@ -99,11 +140,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('reactors-tbody').addEventListener('click', (e) => {
         const row = e.target.closest('tr[data-id]');
         if (!row) return;
-        if (!technicalLocked && plantStatus !== 'APPROVED' && e.target.closest('.btn-delete-reactor')) {
+        if (!technicalLocked && e.target.closest('.btn-delete-reactor')) {
             handleDelete(row.dataset.id);
             return;
         }
-        if (e.target.closest('.btn-monitor-reactor') || e.target.closest('.btn-sensors-reactor')) {
+        if (e.target.closest('.btn-monitor-reactor')) {
             window.location.href = `/pages/reactors/detail.html?reactorId=${row.dataset.id}&plantId=${plantId}`;
             return;
         }
