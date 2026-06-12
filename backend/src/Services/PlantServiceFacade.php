@@ -1,6 +1,9 @@
 <?php
 
-require_once __DIR__ . '/../Dto/CreateDataResponseDTO.php'; 
+require_once __DIR__ . '/../Dto/CreateDataResponseDTO.php';
+require_once __DIR__ . '/../Dto/GeologicalPlantDataDTO.php';
+require_once __DIR__ . '/../Dto/GeoLocationPreviewDTO.php';
+require_once __DIR__ . '/../Dto/CoordinatesPreviewResponseDTO.php';
 
 class PlantServiceFacade {
     private DetailsPlantService $detailsPlantService;
@@ -17,9 +20,77 @@ class PlantServiceFacade {
         $this->technicalPlantService = new TechnicalPlantService($this->plantRepositoryFacade);
     }
 
-    // Details
+    public function updatePlantStatus(string $plantId, string $status): void {
+        $this->plantRepositoryFacade->updatePlantStatus($plantId, $status);
+    }
+
+    public function submitForReview(string $plantId, string $userId): bool {
+        $plant = $this->detailsPlantService->findById($plantId);
+        if (!$plant) return false;
+        if ($plant->getStatus()->value !== 'DRAFT') return false;
+        if ($plant->getCreatedBy() !== $userId) return false;
+
+        $completePlantProfile = $this->getCompletePlantProfile($plantId);
+        foreach ($completePlantProfile as $profile) {
+            if ($profile == null) return false;
+        }
+
+        $this->plantRepositoryFacade->updatePlantStatus($plantId, 'REVIEW');
+        return true;
+    }
+
+    public function reopenDraft(string $plantId, string $userId): bool {
+        $plant = $this->detailsPlantService->findById($plantId);
+        if (!$plant) return false;
+        if (!in_array($plant->getStatus()->value, ['REJECTED', 'REVIEW'], true)) return false;
+        if ($plant->getCreatedBy() !== $userId) return false;
+
+        $this->plantRepositoryFacade->updatePlantStatus($plantId, 'DRAFT');
+        return true;
+    }
+
     public function getAllPowerPlants(): array {
         return $this->detailsPlantService->getAllPowerPlants();
+    }
+
+    public function getMyPowerPlants(string $userId): array {
+        return $this->detailsPlantService->getMyPowerPlants($userId);
+    }
+
+  
+    public function getPendingApprovalsList(): array {
+        $allPlants = $this->detailsPlantService->getAllPowerPlants();
+
+        $pendingPlants = array_filter($allPlants, function($plant) {
+            return ($plant['status'] ?? '') === PlantStatus::REVIEW->value;
+        });
+
+        return array_values($pendingPlants);
+    }
+    
+    public function getPlantsByStatus(array $data): array { 
+        $powerPlants = $this->detailsPlantService->getPlantsByStatus($data); 
+        return $powerPlants;
+    }
+
+    public function getCountries(): array {
+        return $this->detailsPlantService->getCountries();
+    }
+
+    public function plantPreviewCoordinates(float $lat, float $lon): CoordinatesPreviewResponseDTO {
+        $latNorm = round($lat, 6);
+        $lonNorm = round($lon, 6);
+        $label = number_format($latNorm, 6, '.', '') . ', ' . number_format($lonNorm, 6, '.', '');
+
+        $geoPreview = $this->geologicalPlantService->runAutoGeolocation($latNorm, $lonNorm);
+
+        return CoordinatesPreviewResponseDTO::fromGeoPreview(
+            latitude: $latNorm,
+            longitude: $lonNorm,
+            coordinatesLabel: $label,
+            country: $geoPreview->country,
+            geoPreview: $geoPreview,
+        );
     }
 
     public function getPlantDetailsById(string $plantId): ?Plant {
@@ -28,6 +99,24 @@ class PlantServiceFacade {
 
     public function savePlantDetails(array $data): CreateDataResponseDTO {
         return $this->detailsPlantService->savePlantDetails($data);
+    }
+
+    public function updateStatus(array $data, string $plantId) { 
+        if (!isset($data['status'])) return false; 
+
+        $status = PlantStatus::tryFrom($data['status']);
+        if($status == null) return false; 
+
+        $plantData = $this->plantRepositoryFacade->getPlantDetailsById($plantId); 
+        if($plantData->getStatus()->value == $status->value) return false; 
+
+        $completePlantProfile = $this->getCompletePlantProfile($plantId); 
+        foreach($completePlantProfile as $profile) { 
+            if($profile == null) return false; 
+        }
+
+        $this->detailsPlantService->updateStatus($data, $plantId);
+        return true; 
     }
 
     public function updatePlantDetails(array $data, string $plantId): void {
@@ -48,8 +137,12 @@ class PlantServiceFacade {
     }
 
     // Geological
-    public function getGeologicalDataByPlantId(string $plantId): ?GeologicalPlantData {
-        return $this->geologicalPlantService->findByPlantId($plantId);
+    public function previewGeologicalLocation(float $lat, float $lon): GeoLocationPreviewDTO {
+        return $this->geologicalPlantService->runAutoGeolocation($lat, $lon);
+    }
+
+    public function getGeologicalDataByPlantId(string $plantId): ?GeologicalPlantDataDTO {
+        return $this->geologicalPlantService->getGeologicalData($plantId);
     }
 
     public function saveGeologicalData(array $data, string $plantId): CreateDataResponseDTO {
@@ -59,7 +152,6 @@ class PlantServiceFacade {
     public function updateGeologicalData(array $data, string $plantId): void {
         $this->geologicalPlantService->update($data, $plantId);
     }
-
     
     // Technical 
     public function getTechnicalDataByPlantId(string $plantId): ?TechnicalPlantData {

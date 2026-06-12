@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear Plant Control | Logs</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="../modules/config/globals.js"></script>
+    <style>
+        .terminal {
+            background: #0c0c0c;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.8rem;
+            line-height: 1.6;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .terminal-header {
+            background: #1a1a1a;
+            border-bottom: 1px solid #2a2a2a;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .terminal-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .terminal-dot.red { background: #ff5f56; }
+        .terminal-dot.yellow { background: #ffbd2e; }
+        .terminal-dot.green { background: #27c93f; }
+        .terminal-controls {
+            margin-left: auto;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .terminal-controls select,
+        .terminal-controls input {
+            background: #111;
+            border: 1px solid #333;
+            color: #ccc;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-family: inherit;
+        }
+        .terminal-controls select:focus,
+        .terminal-controls input:focus {
+            outline: none;
+            border-color: #555;
+        }
+        .terminal-controls input {
+            width: 120px;
+        }
+        .terminal-body {
+            height: 70vh;
+            overflow-y: auto;
+            padding: 8px 14px;
+            position: relative;
+        }
+        .terminal-body::-webkit-scrollbar { width: 6px; }
+        .terminal-body::-webkit-scrollbar-track { background: #0c0c0c; }
+        .terminal-body::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        .log-line {
+            white-space: pre-wrap;
+            word-break: break-all;
+            padding: 0;
+            display: flex;
+            gap: 6px;
+        }
+        .log-timestamp { color: #555; flex-shrink: 0; }
+        .log-level { flex-shrink: 0; width: 7ch; font-weight: bold; }
+        .log-level.DEBUG { color: #6c757d; }
+        .log-level.INFO { color: #0d6efb; }
+        .log-level.WARNING { color: #ffc107; }
+        .log-level.ERROR { color: #fd7e14; }
+        .log-level.CRITICAL { color: #dc3545; }
+        .log-message { color: #d4d4d4; flex: 1; }
+        .terminal-status {
+            color: #555;
+            font-size: 0.72rem;
+            border-top: 1px solid #2a2a2a;
+            padding: 4px 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .terminal-empty {
+            color: #555;
+            text-align: center;
+            padding: 40px 0;
+        }
+        .clear-btn {
+            background: transparent;
+            border: 1px solid #444;
+            color: #888;
+            padding: 3px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.72rem;
+            font-family: inherit;
+        }
+        .clear-btn:hover { border-color: #888; color: #ccc; }
+        .auto-scroll-indicator {
+            position: sticky;
+            bottom: 0;
+            text-align: center;
+            padding: 2px;
+            background: rgba(12,12,12,0.9);
+            border-top: 1px solid #2a2a2a;
+            cursor: pointer;
+            color: #555;
+            font-size: 0.72rem;
+            display: none;
+        }
+        .auto-scroll-indicator.visible { display: block; }
+        .auto-scroll-indicator:hover { color: #ccc; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .polling-dot {
+            display: inline-block;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #27c93f;
+            margin-right: 4px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        .polling-dot.paused { background: #ff5f56; animation: none; }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <div id="main-navbar"></div>
+        <main class="panel">
+            <h1 style="margin-bottom:0;">Logs</h1>
+            <div class="terminal">
+                <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <div class="terminal-controls">
+                        <select id="level-filter">
+                            <option value="">ALL</option>
+                            <option value="DEBUG">DEBUG</option>
+                            <option value="INFO">INFO</option>
+                            <option value="WARNING">WARNING</option>
+                            <option value="ERROR">ERROR</option>
+                            <option value="CRITICAL">CRITICAL</option>
+                        </select>
+                        <input type="text" id="search-input" placeholder="search...">
+                        <button class="clear-btn" id="clear-btn">clear</button>
+                    </div>
+                </div>
+                <div id="terminal-body" class="terminal-body">
+                    <div class="terminal-empty">Se așteaptă datele...</div>
+                </div>
+                <div id="auto-scroll-indicator" class="auto-scroll-indicator">↓</div>
+                <div class="terminal-status">
+                    <span id="polling-status"><span class="polling-dot"></span> live</span>
+                    <span id="log-count"></span>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, function (c) {
+                const m = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+                return m[c] || c;
+            });
+        }
+        const body = document.getElementById('terminal-body');
+        const levelFilter = document.getElementById('level-filter');
+        const searchInput = document.getElementById('search-input');
+        const clearBtn = document.getElementById('clear-btn');
+        const logCount = document.getElementById('log-count');
+        const pollingStatus = document.getElementById('polling-status');
+        const scrollIndicator = document.getElementById('auto-scroll-indicator');
+
+        let allLogs = [];
+        let lastId = null;
+        let polling = true;
+        let autoScroll = true;
+        let pollTimer = null;
+
+        function formatTimestamp(ts) {
+            if (!ts) return '---';
+            const d = new Date(ts);
+            const pad = n => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        }
+
+        function matchesSearch(log) {
+            const q = searchInput.value.trim().toLowerCase();
+            if (!q) return true;
+            return log.message.toLowerCase().includes(q)
+                || (log.context && JSON.stringify(log.context).toLowerCase().includes(q))
+                || (log.reactor_id && log.reactor_id.toLowerCase().includes(q))
+                || (log.plant_id && log.plant_id.toLowerCase().includes(q));
+        }
+
+        function render() {
+            const level = levelFilter.value;
+            const filtered = allLogs.filter(log => {
+                if (level && log.level !== level) return false;
+                return matchesSearch(log);
+            });
+            if (filtered.length === 0) {
+                body.innerHTML = '<div class="terminal-empty">niciun rezultat</div>';
+                logCount.textContent = `${filtered.length}/${allLogs.length}`;
+                return;
+            }
+            let html = '';
+            for (const log of filtered) {
+                html += `<div class="log-line">
+                    <span class="log-timestamp">${escapeHtml(formatTimestamp(log.created_at))}</span>
+                    <span class="log-level ${escapeHtml(log.level)}">${escapeHtml(log.level)}</span>
+                    <span class="log-message">${escapeHtml(log.message)}</span>
+                </div>`;
+            }
+            body.innerHTML = html;
+            logCount.textContent = `${filtered.length}/${allLogs.length}`;
+            if (autoScroll) {
+                body.scrollTop = body.scrollHeight;
+                scrollIndicator.classList.remove('visible');
+            }
+        }
+
+        async function poll() {
+            if (!polling) return;
+            try {
+                const params = new URLSearchParams({ limit: '100' });
+                if (lastId) params.set('after_id', lastId);
+                if (levelFilter.value) params.set('level', levelFilter.value);
+                const resp = await fetch(`${API_BASE}/logs?${params}`, { credentials: 'include' });
+                if (resp.status === 401) { window.location.href = '/pages/login.html'; return; }
+                if (resp.status === 403) {
+                    body.innerHTML = '<div class="terminal-empty" style="color:#dc3545;">acces interzis</div>';
+                    polling = false;
+                    pollingStatus.innerHTML = '<span class="polling-dot paused"></span> oprit';
+                    return;
+                }
+                const result = await resp.json();
+                if (result.status === 'success' && Array.isArray(result.data)) {
+                    const incoming = result.data;
+                    if (incoming.length > 0) {
+                        if (lastId === null) {
+                            allLogs = incoming;
+                        } else {
+                            const existingIds = new Set(allLogs.map(l => l.id));
+                            for (const log of incoming) {
+                                if (!existingIds.has(log.id)) allLogs.push(log);
+                            }
+                        }
+                        if (allLogs.length > 5000) allLogs = allLogs.slice(-2500);
+                        lastId = incoming[incoming.length - 1].id;
+                        render();
+                    } else if (lastId === null) {
+                        allLogs = [];
+                        render();
+                    }
+                }
+            } catch (e) {
+                pollingStatus.innerHTML = '<span class="polling-dot paused"></span> offline';
+            }
+            if (polling) pollTimer = setTimeout(poll, 3000);
+        }
+
+        function startPolling() {
+            polling = true;
+            pollingStatus.innerHTML = '<span class="polling-dot"></span> live';
+            clearTimeout(pollTimer);
+            poll();
+        }
+        function stopPolling() {
+            polling = false;
+            clearTimeout(pollTimer);
+            pollingStatus.innerHTML = '<span class="polling-dot paused"></span> pauză';
+        }
+
+        body.addEventListener('scroll', function () {
+            const atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 50;
+            if (!atBottom && autoScroll) { autoScroll = false; }
+            else if (atBottom && !autoScroll) { autoScroll = true; scrollIndicator.classList.remove('visible'); }
+            if (atBottom) scrollIndicator.classList.remove('visible');
+        });
+        scrollIndicator.addEventListener('click', function () {
+            autoScroll = true;
+            body.scrollTop = body.scrollHeight;
+            scrollIndicator.classList.remove('visible');
+        });
+        levelFilter.addEventListener('change', function () {
+            stopPolling();
+            allLogs = [];
+            lastId = null;
+            render();
+            startPolling();
+        });
+        searchInput.addEventListener('input', function () { render(); });
+        clearBtn.addEventListener('click', function () { allLogs = []; lastId = null; render(); stopPolling(); startPolling(); });
+        document.addEventListener('DOMContentLoaded', function () { startPolling(); });
+    </script>
+    <script type="module" src="../modules/ui/navbar.js"></script>
+</body>
+</html>

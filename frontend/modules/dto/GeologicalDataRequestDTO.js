@@ -8,7 +8,10 @@ export function GeologicalDataRequestDTO({
     waterFlowRate,
     populationDensity,
     transportInfrastructureScore,
-    geologicalRiskScore
+    geologicalRiskScore,
+    country,
+    latitude,
+    longitude
 }) {
     return {
         soilType: soilType || null,
@@ -21,5 +24,8 @@ export function GeologicalDataRequestDTO({
         populationDensity: populationDensity ? parseFloat(populationDensity) : null,
         transportInfrastructureScore: transportInfrastructureScore ? parseFloat(transportInfrastructureScore) : null,
         geologicalRiskScore: geologicalRiskScore ? parseFloat(geologicalRiskScore) : null,
+        country: country || null,
+        latitude: latitude ? parseFloat(latitude) : null,
+        longitude: longitude ? parseFloat(longitude) : null,
     };
 }

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizare Centrală</title>
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/navbar.css">
+    <link rel="stylesheet" href="../../css/layout.css">
+    <link rel="stylesheet" href="../../css/buttons.css">
+    <link rel="stylesheet" href="../../css/responsive.css">
+    <link rel="stylesheet" href="../../css/forms.css">
+    <link rel="stylesheet" href="../../css/wizard-nav.css">
+</head>
+<body>
+    <div class="page-shell">
+        <div id="main-navbar"></div>
+        <div id="form-header"></div>
+        <div class="topbar" style="margin-bottom:24px;">
+            <div class="brand">
+                <strong id="plant-name"></strong>
+                <span id="plant-location"></span>
+            </div>
+            <div class="nav-links">
+                <span id="plant-status" class="tag"></span>
+                <button class="button secondary" id="btn-export-json">Export JSON</button>
+                <button class="button secondary" id="btn-export-csv">Export CSV</button>
+                <button class="button" id="btn-verify">VERIFICĂ</button>
+            </div>
+        </div>
+    
+        <div class="panel" style="margin-bottom: 24px;">
+            <h1 style="font-size: 1.2rem; color: var(--yellow); text-transform: uppercase; margin-bottom: 12px;">
+                Prezentare Generală
+            </h1>
+            <p id="plant-description"></p>
+            
+            <div class="stats">
+                <div class="stat">
+                    <strong id="plant-capacity"></strong>
+                    <span class="eyebrow">CAPACITATE TOTALĂ</span>
+                </div>
+                <div class="stat">
+                    <strong id="plant-efficiency"></strong>
+                    <span class="eyebrow">EFICIENȚĂ EST.</span>
+                </div>
+                <div class="stat">
+                    <strong id="plant-duration"></strong>
+                    <span class="eyebrow">DURATĂ CONSTRUCȚIE</span>
+                </div>
+            </div>
+        </div>
+    
+        <div class="split-layout">
+            
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                
+                <div class="card">
+                    <h3 style="color: var(--yellow); text-transform: uppercase; margin-bottom: 16px; margin-top: 0;">
+                        Profil Geologic & Mediu
+                    </h3>
+                    <div class="grid-2">
+                        <div>
+                            <span class="helper">Tip Sol</span>
+                            <div id="soil-type" style="margin-bottom: 12px;"></div>
+                        </div>
+                        <div>
+                            <span class="helper">Stabilitate Seismică</span>
+                            <div id="seismic-stability" style="margin-bottom: 12px;"></div>
+                        </div>
+                        <div>
+                            <span class="helper">Risc Inundații</span>
+                            <div id="flood-risk" style="margin-bottom: 12px;"></div>
+                        </div>
+                        <div>
+                            <span class="helper">Sursă Apă</span>
+                            <div id="water-source" style="margin-bottom: 12px;"></div>
+                        </div>
+                        <div>
+                            <span class="helper">Debit Apă</span>
+                            <div id="water-flow" style="margin-bottom: 12px;"></div>
+                        </div>
+                        <div>
+                            <span class="helper">Nivel Pânză Freatică</span>
+                            <div id="groundwater-level"></div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3 style="color: var(--yellow); text-transform: uppercase; margin-bottom: 16px; margin-top: 0;">
+                        Configurații Reactoare
+                    </h3>
+                    <div class="table-shell">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tip Reactor</th>
+                                    <th>Sistem Răcire</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reactors-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+            </div>
+    
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                
+                <div class="status-card">
+                    <h3 style="color: var(--yellow); text-transform: uppercase; margin-bottom: 16px; margin-top: 0;">
+                        Analiză Risc
+                    </h3>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <span class="helper">Nivel Risc Operațional</span>
+                        <div style="margin-top: 8px;">
+                            <span id="operational-risk" class="tag"></span>
+                        </div>
+                    </div>
+    
+                    <div style="margin-bottom: 16px;">
+                        <span class="helper">Scor Risc Geologic</span>
+                        <div id="geo-risk-score" style="font-size: 1.2rem; color: var(--text); margin-top: 4px;"></div>
+                    </div>
+                    
+                    <div>
+                        <span class="helper">Infrastructură Transport</span>
+                        <div id="transport-score" style="font-size: 1.2rem; color: var(--text); margin-top: 4px;"></div>
+                    </div>
+                </div>
+                
+            </div>
+    
+        </div>
+    </div>
+
+    <script type="module" src="../../modules/ui/form-header/formHeader.js"></script>
+    <script type="module" src="../../modules/ui/navbar.js"></script>
+    <script type="module" src="../../modules/pages/power-plants/finish.js"></script>
+</body>
+</html>

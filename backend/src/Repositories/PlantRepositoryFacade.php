@@ -1,5 +1,12 @@
 <?php
 
+require_once __DIR__ . '/../Services/LogService.php';
+require_once __DIR__ . '/../Entities/Plant.php';
+require_once __DIR__ . '/../Entities/BasicPlantData.php';
+require_once __DIR__ . '/../Entities/GeologicalPlantData.php';
+require_once __DIR__ . '/../Entities/TechnicalPlantData.php';
+require_once __DIR__ . '/../Entities/ReactorSchema.php';
+
 class PlantRepositoryFacade { 
     private DetailsPlantRepository $detailsPlantRepository;
     private BasicPlantRepository $basicPlantRepository;
@@ -20,10 +27,10 @@ class PlantRepositoryFacade {
             $geologicalData = $this->geologicalPlantRepository->findByPlantId($plantId); 
             $technicalData = $this->technicalPlantRepository->findByPlantId($plantId); 
 
-            error_log("[DEBUG] Testare Plant ID: " . $plantId);
-            error_log("[DEBUG] Basic Data: " . ($basicData ? 'GASIT' : 'LIPSESTE'));
-            error_log("[DEBUG] Geological Data: " . ($geologicalData ? 'GASIT' : 'LIPSESTE'));
-            error_log("[DEBUG] Technical Data: " . ($technicalData ? 'GASIT' : 'LIPSESTE'));
+            LogService::instance()->debug("[DEBUG] Testare Plant ID: " . $plantId);
+            LogService::instance()->debug("[DEBUG] Basic Data: " . ($basicData ? 'GASIT' : 'LIPSESTE'));
+            LogService::instance()->debug("[DEBUG] Geological Data: " . ($geologicalData ? 'GASIT' : 'LIPSESTE'));
+            LogService::instance()->debug("[DEBUG] Technical Data: " . ($technicalData ? 'GASIT' : 'LIPSESTE'));
             
             if(!$basicData || !$geologicalData || !$technicalData) { 
                 return null; 
@@ -38,14 +45,28 @@ class PlantRepositoryFacade {
                 'reactor_schemas' => $reactorSchemas
             ];
         } catch(Exception $e) { 
-            error_log("[PLANT FACADE ERROR] Eroare la asamblarea datelor centralei: " . $e->getMessage()); 
+            LogService::instance()->error("[PLANT FACADE ERROR] Eroare la asamblarea datelor centralei: " . $e->getMessage());
             throw new Exception("Eroare la asamblarea datelor de fezabilitate.");
         }
     }
 
+    public function updatePlantStatus(string $plantId, string $status): void {
+        $this->detailsPlantRepository->updateStatus(['status' => $status], $plantId);
+    }
+
+    
+
     // Details 
     public function getAllPowerPlants(): array {
         return $this->detailsPlantRepository->findAll();
+    }
+
+    public function findByUser(string $userId): array {
+        return $this->detailsPlantRepository->findByUser($userId);
+    }
+
+    public function getPlantsByStatus(array $data): array { 
+        return $this->detailsPlantRepository->getPlantsByStatus($data); 
     }
 
     public function getPlantDetailsById(string $plantId): ?Plant {
@@ -54,6 +75,10 @@ class PlantRepositoryFacade {
 
     public function savePlantDetails(Plant $plant): void {
         $this->detailsPlantRepository->save($plant);
+    }
+
+    public function updateStatus(array $data, string $plantId): void { 
+        $this->detailsPlantRepository->updateStatus($data, $plantId); 
     }
 
     public function updatePlantDetails(Plant $plant): void {
@@ -79,8 +104,8 @@ class PlantRepositoryFacade {
         return $this->geologicalPlantRepository->findByPlantId($plantId);
     }
 
-    public function saveGeologicalData(GeologicalPlantData $geoData): void {
-        $this->geologicalPlantRepository->save($geoData);
+    public function saveGeologicalData(GeologicalPlantData $geoData): bool {
+        return $this->geologicalPlantRepository->save($geoData);
     }
 
     public function updateGeologicalData(GeologicalPlantData $geoData): void {

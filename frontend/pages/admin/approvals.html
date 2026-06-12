@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ro">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panou Control | Aprobări</title>
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/navbar.css">
+    <link rel="stylesheet" href="../../css/layout.css">
+    <link rel="stylesheet" href="../../css/buttons.css">
+    <link rel="stylesheet" href="../../css/responsive.css">
+    <link rel="stylesheet" href="../../css/tables.css">
+    <link rel="stylesheet" href="../../css/tags.css">
+    <link rel="stylesheet" href="../../css/forms.css">
+</head>
+
+<body>
+    <div class="page-shell">
+        <div id="main-navbar"></div>
+        <div id="admin-navbar"></div>
+        <main class="panel">
+            <p class="eyebrow">APROBĂRI</p>
+            <h1>Aprobări în așteptare</h1>
+            <p>Validarea centralelor electrice introduse în sistem și trimiterea lor în stadiul operațional.</p>
+
+            <div class="stats">
+                <div class="stat"><strong id="stat-pending">00</strong><span>cereri în așteptare</span></div>
+                <div class="stat"><strong id="stat-approved-today">--</strong><span>stare audit</span></div>
+                <div class="stat"><strong>ADMIN</strong><span>privilegii necesare</span></div>
+            </div>
+
+            <div id="status-message" style="margin-top: 20px; font-weight: 500;"></div>
+
+            <div class="table-container" style="margin-top: 24px; overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <th style="padding: 12px;">Nume Facilitate</th>
+                            <th style="padding: 12px;">Țară origine</th>
+                            <th style="padding: 12px;">Locație exactă (Lat/Lon)</th>
+                            <th style="padding: 12px;">Status</th>
+                            <th style="padding: 12px; text-align: right;">Decizie operațională</th>
+                        </tr>
+                    </thead>
+                    <tbody id="approvals-table-body">
+                        <tr>
+                            <td colspan="5" style="padding: 20px; text-align: center; color: var(--text-muted);">Se încarcă cererile de la server...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+        </main>
+    </div>
+
+    <script type="module" src="../../modules/pages/admin/approvals.js"></script>
+    <script type="module" src="../../modules/ui/navbar.js"></script>
+    <script type="module" src="../../modules/ui/adminNavbar.js"></script>
+</body>
+</html>

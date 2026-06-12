@@ -1,8 +1,8 @@
 <?php 
 
-require_once __DIR__ . '../../../../Entities/SoilType.php'; 
-require_once __DIR__ . '../../../../Entities/CoolingType.php'; 
-require_once __DIR__ . '../../../../Entities/WaterSourceType.php'; 
+require_once __DIR__ . '/../../../Entities/SoilType.php'; 
+require_once __DIR__ . '/../../../Entities/CoolingType.php'; 
+require_once __DIR__ . '/../../../Entities/WaterSourceType.php'; 
 require_once __DIR__ . '/AbstractFeasibilityChecker.php'; 
 
 class GeologicalCriticalChecker extends AbstractFeasibilityChecker { 
@@ -79,10 +79,7 @@ class GeologicalCriticalChecker extends AbstractFeasibilityChecker {
         }
 
         if (!empty($criticalErrors)) {
-            return [
-                'status' => 'REJECTED',
-                'errors' => array_unique($criticalErrors)
-            ];
+            return ['status' => 'REJECTED', 'errors' => array_unique($criticalErrors)];
         }
 
         return parent::check($plantData); 

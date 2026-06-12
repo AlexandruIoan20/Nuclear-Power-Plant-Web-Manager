@@ -1,11 +1,15 @@
 <?php 
 
 require_once __DIR__ . '/../Entities/GeologicalPlantData.php'; 
+require_once __DIR__ . '/BaseDTO.php';
 
-class GeologicalPlantDataDTO { 
+class GeologicalPlantDataDTO extends BaseDTO { 
     public function __construct(
         public readonly string $id,
         public readonly string $powerPlantId,
+        public readonly ?string $country,
+        public readonly ?float $latitude,
+        public readonly ?float $longitude,
         public readonly ?string $soilType,
         public readonly ?string $waterSourceType,
         public readonly ?float $seismicStability,
@@ -15,15 +19,20 @@ class GeologicalPlantDataDTO {
         public readonly ?float $waterFlowRate,
         public readonly ?float $populationDensity,
         public readonly ?float $transportInfrastructureScore,
-        public readonly ?float $geologicalRiskScore
+        public readonly ?float $geologicalRiskScore,
+        public readonly ?string $createdAt,
+        public readonly ?string $updatedAt
     ) {}
 
     public static function fromEntity(GeologicalPlantData $g): self { 
         return new self ( 
             id: $g->getId(), 
             powerPlantId: $g->getPowerPlantId(), 
-            soilType: $g->getSoilType()->value ?? null, 
-            waterSourceType: $g->getWaterSourceType()->value ?? null, 
+            country: $g->getCountry(), 
+            latitude: $g->getLatitude(), 
+            longitude: $g->getLongitude(), 
+            soilType: $g->getSoilType()?->value, 
+            waterSourceType: $g->getWaterSourceType()?->value, 
             seismicStability: $g->getSeismicStability(), 
             floodRisk: $g->getFloodRisk(), 
             groundwaterLevel: $g->getGroundwaterLevel(), 
@@ -31,7 +40,9 @@ class GeologicalPlantDataDTO {
             waterFlowRate: $g->getWaterFlowRate(), 
             populationDensity: $g->getPopulationDensity(), 
             transportInfrastructureScore: $g->getTransportInfrastructureScore(), 
-            geologicalRiskScore: $g->getGeologicalRiskScore(), 
+            geologicalRiskScore: $g->getGeologicalRiskScore(),
+            createdAt: $g->getCreatedAt(),
+            updatedAt: $g->getUpdatedAt()
         ); 
     }
 }

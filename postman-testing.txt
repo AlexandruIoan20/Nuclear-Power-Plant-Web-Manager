@@ -1,0 +1,10 @@
+pm.sendRequest('http://localhost:8081/api/csrf-token', (err, res) => {
+    if (!err) {
+        const token = res.json().csrf_token;
+        pm.request.headers.add({
+            key: 'X-CSRF-Token',
+            value: token
+        });
+    }
+});
+

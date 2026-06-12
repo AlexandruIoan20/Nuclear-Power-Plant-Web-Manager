@@ -4,6 +4,7 @@ require_once __DIR__ . '/Strategies/BwrStrategy.php';
 require_once __DIR__ . '/Strategies/FbrStrategy.php';
 require_once __DIR__ . '/Strategies/PhwrStrategy.php';
 require_once __DIR__ . '/Strategies/PwrStrategy.php'; 
+require_once __DIR__ . '/Strategies/ConfigHelper.php';
 
 require_once __DIR__ . '/../../../Entities/PlantStatus.php'; 
 require_once __DIR__ . '/../../../Entities/ReactorType.php'; 
@@ -40,15 +41,17 @@ class ScoringChecker extends AbstractFeasibilityChecker {
 
         $averageNsviScore = round($totalWeightedScore / $totalReactors, 2);
 
+        $scoringCfg = FeasibilityConfigHelper::get()['scoring'];
+
         $finalEvaluation = [ 
-            'nvsi_score' => $averageNsviScore, 
+            'nsvi_score' => $averageNsviScore, 
             'deficiencies' => $allDeficiencies
         ]; 
 
-        if ($averageNsviScore >= 80.0) {
+        if ($averageNsviScore >= $scoringCfg['nsvi_approved_min']) {
             $finalEvaluation['status'] = 'APPROVED';
             $finalEvaluation['message'] = "Amplasament aprobat. Indice NSVI: {$averageNsviScore}/100.";
-        } elseif ($averageNsviScore >= 50.0) {
+        } elseif ($averageNsviScore >= $scoringCfg['nsvi_review_min']) {
             $finalEvaluation['status'] = 'REVIEW';
             $finalEvaluation['message'] = "Amplasament marginal. Indice NSVI: {$averageNsviScore}/100. Analizați deficiențele tehnologice mixte.";
         } else {

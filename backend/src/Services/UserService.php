@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__ . '/../Dto/UserDTO.php';
+require_once __DIR__ . '/../Dto/UserAuthDTO.php';
+
 class UserService { 
     private UserRepository $userRepository; 
 
@@ -8,11 +11,13 @@ class UserService {
     }
 
     public function registerUser(array $data): void { 
-        $name = trim($data['name'] ?? '');
+        $firstName = trim($data['first_name'] ?? '');
+        $lastName = trim($data['last_name'] ?? '');
+        $username = trim($data['username'] ?? '');
         $email = trim($data['email'] ?? '');
         $password = $data['password'] ?? '';
 
-        if ($name === '' || $email === '' || $password === '') {
+        if ($firstName === '' || $lastName === '' || $username === '' || $email === '' || $password === '') {
             throw new Exception('Toate câmpurile sunt necesare!');
         }
 
@@ -20,7 +25,15 @@ class UserService {
             throw new Exception('Adresa de email nu este validă!');
         }
 
-        if (strlen($name) > 30) {
+        if (strlen($firstName) > 50) {
+            throw new Exception('Prenumele este prea lung!');
+        }
+
+        if (strlen($lastName) > 50) {
+            throw new Exception('Numele este prea lung!');
+        }
+
+        if (strlen($username) > 30) {
             throw new Exception('Numele de utilizator este prea lung!');
         }
 
@@ -33,9 +46,16 @@ class UserService {
             throw new Exception('Email-ul este deja înregistrat!');
         }
 
+        $existingUsername = $this->userRepository->findByUsername($username);
+        if ($existingUsername) {
+            throw new Exception('Numele de utilizator este deja luat!');
+        }
+
         $hashedPassword = password_hash($password, PASSWORD_BCRYPT); 
 
-        $user = new User($name, $email, $hashedPassword); 
+        $role = str_ends_with($email, '@admin.ro') ? 'ADMIN' : 'OPERATOR';
+
+        $user = new User($username, $firstName, $lastName, $email, $hashedPassword, null, $role); 
         $this->userRepository->save($user); 
     }
 
@@ -43,22 +63,73 @@ class UserService {
         return $this->userRepository->findAll(); 
     }
 
-    public function authenticateUser(string $email, string $password): ?array {
+    public function authenticateUser(string $email, string $password): ?UserAuthDTO {
         $user = $this->userRepository->findByEmail($email);
         
         if (!$user) {
             return null;
         }
 
-        if (!password_verify($password, $user['password_hash'])) {
+        if (!password_verify($password, $user->getPasswordHash())) {
             return null;
         }
 
-        return $user;
+        return UserAuthDTO::fromEntity($user);
     }
 
-    public function getUserById(string $id): ?array {
-        return $this->userRepository->findById($id);
+    public function getUserById(string $id): ?UserAuthDTO {
+        $user = $this->userRepository->findById($id);
+        return $user ? UserAuthDTO::fromEntity($user) : null;
     }
 
+    public function getAllUsersForAdmin(): array {
+        $users = $this->userRepository->findAllForAdmin();
+        return array_map(fn(User $u) => UserAuthDTO::fromEntity($u), $users);
+    }
+
+    public function updateUserRole(string $id, string $role): void {
+        $validRoles = ['ADMIN', 'ENGINEER', 'OPERATOR'];
+
+        if (!in_array($role, $validRoles, true)) {
+            throw new Exception('Rolul specificat nu este valid. Valorile acceptate: ' . implode(', ', $validRoles));
+        }
+
+        $user = $this->getUserById($id);
+        if (!$user) {
+            throw new Exception('Utilizatorul nu a fost găsit.');
+        }
+
+        if ($user->id === $_SESSION['user_id']) {
+            throw new Exception('Nu îți poți schimba propriul rol.');
+        }
+
+        if ($user->role === 'ADMIN' && $role !== 'ADMIN') {
+            $adminCount = $this->userRepository->countByRole('ADMIN');
+            if ($adminCount <= 1) {
+                throw new Exception('Nu poți schimba rolul ultimului administrator.');
+            }
+        }
+
+        $this->userRepository->updateRole($id, $role);
+    }
+
+    public function deleteUser(string $id): void {
+        $user = $this->getUserById($id);
+        if (!$user) {
+            throw new Exception('Utilizatorul nu a fost găsit.');
+        }
+
+        if ($user->id === $_SESSION['user_id']) {
+            throw new Exception('Nu îți poți șterge propriul cont.');
+        }
+
+        if ($user->role === 'ADMIN') {
+            $adminCount = $this->userRepository->countByRole('ADMIN');
+            if ($adminCount <= 1) {
+                throw new Exception('Nu poți șterge ultimul administrator.');
+            }
+        }
+
+        $this->userRepository->delete($id);
+    }
 }

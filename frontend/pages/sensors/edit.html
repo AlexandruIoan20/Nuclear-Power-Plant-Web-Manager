@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editează Senzor</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../modules/config/globals.js"></script>
+</head>
+<body>
+    <div class="page-shell">
+        <div id="main-navbar"></div>
+        <main class="form-panel login-card" style="margin: 0 auto;">
+            <div style="margin-bottom:16px;color:var(--muted);font-size:0.78rem;" id="reactor-context"></div>
+            <h2 id="form-title">Editează Senzor</h2>
+
+            <form id="sensor-form">
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="sensorCode">Cod Senzor:</label>
+                        <input type="text" id="sensorCode" name="sensorCode" required />
+                    </div>
+
+                    <div class="field">
+                        <label for="sensorType">Tip Senzor:</label>
+                        <select id="sensorType" name="sensorType" required></select>
+                    </div>
+
+                    <div class="field">
+                        <label for="description">Descriere:</label>
+                        <textarea id="description" name="description" rows="2"></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label for="locationZone">Zonă Amplasare:</label>
+                        <input type="text" id="locationZone" name="locationZone" />
+                    </div>
+
+                    <div class="field">
+                        <label for="unitOfMeasure">Unitate de Măsură:</label>
+                        <input type="text" id="unitOfMeasure" name="unitOfMeasure" />
+                    </div>
+
+                    <div class="field">
+                        <label for="measurementField">Câmp Măsurare:</label>
+                        <select id="measurementField" name="measurementField"></select>
+                    </div>
+                </div>
+
+                <hr style="margin: 2rem 0;">
+                <h3>Threshold-uri</h3>
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="normalMin">Normal Min:</label>
+                        <input type="number" id="normalMin" name="normalMin" step="any" />
+                    </div>
+                    <div class="field">
+                        <label for="normalMax">Normal Max:</label>
+                        <input type="number" id="normalMax" name="normalMax" step="any" />
+                    </div>
+                    <div class="field">
+                        <label for="alarmLow">Alarmă Low:</label>
+                        <input type="number" id="alarmLow" name="alarmLow" step="any" />
+                    </div>
+                    <div class="field">
+                        <label for="alarmHigh">Alarmă High:</label>
+                        <input type="number" id="alarmHigh" name="alarmHigh" step="any" />
+                    </div>
+                    <div class="field">
+                        <label for="alertLow">Alertă Low:</label>
+                        <input type="number" id="alertLow" name="alertLow" step="any" />
+                    </div>
+                    <div class="field">
+                        <label for="alertHigh">Alertă High:</label>
+                        <input type="number" id="alertHigh" name="alertHigh" step="any" />
+                    </div>
+                    <div class="field">
+                        <label for="scramLow">Scram Low:</label>
+                        <input type="number" id="scramLow" name="scramLow" step="any" />
+                    </div>
+                    <div class="field">
+                        <label for="scramHigh">Scram High:</label>
+                        <input type="number" id="scramHigh" name="scramHigh" step="any" />
+                    </div>
+                </div>
+
+                <hr style="margin: 2rem 0;">
+                <h3>Status și Calibrare</h3>
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="status">Status:</label>
+                        <select id="status" name="status"></select>
+                    </div>
+
+                    <div class="field field-checkbox">
+                        <label>
+                            <input type="checkbox" id="isActive" name="isActive" checked />
+                            Activ
+                        </label>
+                    </div>
+
+                    <div class="field">
+                        <label for="lastCalibration">Ultima Calibrare:</label>
+                        <input type="datetime-local" id="lastCalibration" name="lastCalibration" />
+                    </div>
+
+                    <div class="field">
+                        <label for="calibrationDue">Următoarea Calibrare:</label>
+                        <input type="datetime-local" id="calibrationDue" name="calibrationDue" />
+                    </div>
+                </div>
+
+                <hr style="margin: 2rem 0;">
+
+                <div class="card-actions">
+                    <button type="submit" class="button" id="submit-btn">Salvează</button>
+                    <button type="button" class="button secondary" id="btn-cancel">Anulează</button>
+                </div>
+
+                <div id="status-message" style="margin-top: 18px;"></div>
+            </form>
+        </main>
+    </div>
+
+    <script type="module" src="../../modules/ui/navbar.js"></script>
+    <script type="module" src="../../modules/pages/sensors/edit.js"></script>
+</body>
+</html>

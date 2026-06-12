@@ -418,3 +418,22 @@ input[type="submit"]:hover {
         justify-content: center;
     }
 }
+
+.nav-btn--finish {
+    border-color: var(--yellow);
+    background: rgba(255, 215, 0, 0.1);
+    color: var(--yellow);
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.15);
+}
+
+.nav-btn--finish:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 22px rgba(255, 215, 0, 0.3);
+    text-decoration: none;
+}
+
+.nav-btn__badge--finish {
+    background: rgba(255, 215, 0, 0.15);
+    color: var(--yellow);
+    border: 1px solid rgba(255, 215, 0, 0.4);
+}

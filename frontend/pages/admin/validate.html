@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validare Centrală</title>
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/navbar.css">
+    <link rel="stylesheet" href="../../css/layout.css">
+    <link rel="stylesheet" href="../../css/buttons.css">
+    <link rel="stylesheet" href="../../css/responsive.css">
+    <link rel="stylesheet" href="../../css/forms.css">
+</head>
+<body>
+<div class="page-shell">
+
+    <div id="main-navbar"></div>
+    <div id="admin-navbar"></div>
+
+    <div class="validate-layout">
+
+        <!-- STANGA: Plant -->
+        <div style="display:flex; flex-direction:column; gap:24px;">
+
+            <div class="panel">
+                <h1 class="section-title">Prezentare Generală</h1>
+                <p id="plant-description"></p>
+                <div class="stats">
+                    <div class="stat">
+                        <strong id="plant-capacity"></strong>
+                        <span class="eyebrow">CAPACITATE TOTALĂ</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="plant-efficiency"></strong>
+                        <span class="eyebrow">EFICIENȚĂ ESTIMATĂ</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="plant-duration"></strong>
+                        <span class="eyebrow">DURATĂ CONSTRUCȚIE</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="section-title">Profil Geologic & Mediu</h3>
+                <div class="grid-2">
+                    <div>
+                        <span class="helper">Tip Sol</span>
+                        <div id="soil-type" style="margin-bottom:12px;"></div>
+                    </div>
+                    <div>
+                        <span class="helper">Stabilitate Seismică</span>
+                        <div id="seismic-stability" style="margin-bottom:12px;"></div>
+                    </div>
+                    <div>
+                        <span class="helper">Risc Inundații</span>
+                        <div id="flood-risk" style="margin-bottom:12px;"></div>
+                    </div>
+                    <div>
+                        <span class="helper">Sursă Apă</span>
+                        <div id="water-source" style="margin-bottom:12px;"></div>
+                    </div>
+                    <div>
+                        <span class="helper">Debit Apă</span>
+                        <div id="water-flow" style="margin-bottom:12px;"></div>
+                    </div>
+                    <div>
+                        <span class="helper">Nivel Pânză Freatică</span>
+                        <div id="groundwater-level"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="section-title">Configurații Reactoare</h3>
+                <div class="table-shell">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tip Reactor</th>
+                                <th>Sistem Răcire</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reactors-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="status-card">
+                <h3 class="section-title">Analiză Risc</h3>
+                <div style="margin-bottom:16px;">
+                    <span class="helper">Nivel Risc Operațional</span>
+                    <div style="margin-top:8px;">
+                        <span id="operational-risk" class="tag"></span>
+                    </div>
+                </div>
+                <div style="margin-bottom:16px;">
+                    <span class="helper">Scor Risc Geologic</span>
+                    <div id="geo-risk-score" style="font-size:1.2rem; color:var(--text); margin-top:4px;"></div>
+                </div>
+                <div>
+                    <span class="helper">Infrastructură Transport</span>
+                    <div id="transport-score" style="font-size:1.2rem; color:var(--text); margin-top:4px;"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- DREAPTA: Raport -->
+        <div style="display:flex; flex-direction:column; gap:24px;">
+
+            <div class="panel">
+                <h1 class="section-title">Rezumat Evaluare</h1>
+                <p id="report-message"></p>
+                <div class="stats">
+                    <div class="stat" style="border-color:rgba(57,255,20,0.4);">
+                        <strong id="report-nsvi-score" style="font-size:2.2rem; margin-bottom:2px;"></strong>
+                        <span class="eyebrow">SCOR NSVI</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="section-title">Deficiențe Detectate</h3>
+                <div class="table-shell">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:50px;">#</th>
+                                <th>Detalii Deficiență</th>
+                                <th style="width:140px; text-align:right;">Impact Scor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deficiencies-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="action-bar" style="display:flex; gap:12px; justify-content:center; margin-top:24px;">
+        <button id="btn-approve" class="button" style="display:none;">Aprobă</button>
+        <button id="btn-reject" class="button" style="display:none; color:#a06060; border-color:rgba(160,96,96,0.4);">Respinge</button>
+    </div>
+
+</div>
+    <script type="module" src="../../modules/pages/admin/validate.js"></script>
+    <script type = "module" src = "../../modules/ui/navbar.js"></script>
+    <script type = "module" src = "../../modules/ui/adminNavbar.js"></script>
+</body>
+</html>

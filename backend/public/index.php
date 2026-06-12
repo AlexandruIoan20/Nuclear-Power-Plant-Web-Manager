@@ -1,51 +1,69 @@
 <?php
 
+require_once __DIR__ . '/../src/Constants/urls.php'; 
+
+ini_set('session.gc_maxlifetime', 3600);
+ini_set('session.cookie_lifetime', 3600);
+
+// SameSite=Lax is sufficient because frontend (port 5500) and backend (port 8081)
+// are same-site (same host, different ports). No Secure flag needed over HTTP for development.
 session_start([
     'cookie_samesite' => 'Lax',
-    'cookie_secure' => false,
     'cookie_httponly' => true,
 ]);
 
-// Allow specific local origins or any localhost/127.0.0.1 origin (useful for Live Server variations)
-$allowedOrigins = [
-    'http://localhost:5500',
-    'http://localhost:8081',
-    'http://127.0.0.1:5500',
-];
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if ($origin) {
-    if ($origin === 'null') {
-        header('Access-Control-Allow-Origin: null');
-    } else {
-        $isAllowed = in_array($origin, $allowedOrigins, true) || (bool)preg_match('#^https?://(localhost|127\.0\.0\.1)(:\d+)?$#', $origin);
-        if ($isAllowed) {
-            header("Access-Control-Allow-Origin: $origin");
-        } else {
-            header("Access-Control-Allow-Origin: {$allowedOrigins[0]}");
+if(empty($_SESSION['csrf_token'])) { 
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); 
+}
+
+if(!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'OPTIONS', 'HEAD'])) { 
+    $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $skipCsrf = $requestPath === '/api/logs/frontend';
+    if (!$skipCsrf) {
+        $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''; 
+        if(empty($token) || !hash_equals($_SESSION['csrf_token'], $token)) { 
+            http_response_code(403); 
+            header('Content-Type: application/json'); 
+            echo json_encode(['status' => 'error', 'message' => 'Invalid CSRF token' ]); 
+            exit; 
         }
     }
-} else {
-    // No origin header (direct requests) — default to first allowed origin
-    header("Access-Control-Allow-Origin: {$allowedOrigins[0]}");
+} 
+
+require_once __DIR__ . '/../src/Constants/urls.php';
+
+$allowedOrigins = [
+    URL_FRONTEND,
+    URL_BACKEND,
+    'http://127.0.0.1:5500',
+];
+
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+if ($origin) {
+    $isAllowed = in_array($origin, $allowedOrigins, true);
+    if ($isAllowed) {
+        header("Access-Control-Allow-Origin: $origin");
+        header("Access-Control-Allow-Credentials: true");
+    } else {
+        http_response_code(403);
+        die();
+    }
 }
+
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
-header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-Token");
 header("Access-Control-Expose-Headers: Location");
 
+// Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
-if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) === '/health') {
-    header('Content-Type: application/json');
-    echo json_encode(['status' => 'ok']);
-    exit();
-}
+require_once __DIR__ . '/../src/Helpers/TransactionManager.php'; 
 
 require_once __DIR__ . '/../src/Router.php';
-
 require_once __DIR__ . '/../src/Entities/User.php';
 require_once __DIR__ . '/../src/Repositories/UserRepository.php';
 require_once __DIR__ . '/../src/Services/UserService.php';
@@ -57,6 +75,9 @@ require_once __DIR__ . '/../src/Repositories/PlantRepository/BasicPlantRepositor
 require_once __DIR__ . '/../src/Repositories/PlantRepository/GeologicalPlantRepository.php';
 require_once __DIR__ . '/../src/Repositories/PlantRepository/TechnicalPlantRepository.php';
 require_once __DIR__ . '/../src/Repositories/FeasibiltyRepository.php';
+require_once __DIR__ . '/../src/Repositories/ReactorRepository.php'; 
+require_once __DIR__ . '/../src/Repositories/SensorRepository.php'; 
+require_once __DIR__ . '/../src/Repositories/SensorTemplateRepository.php'; 
 
 require_once __DIR__ . '/../src/Services/PlantService/DetailsPlantService.php';
 require_once __DIR__ . '/../src/Services/PlantService/BasicPlantService.php';
@@ -67,133 +88,391 @@ require_once __DIR__ . '/../src/Services/FeasibilityService/FeasibilityService.p
 require_once __DIR__ . '/../src/Repositories/PlantRepositoryFacade.php';
 require_once __DIR__ . '/../src/Services/PlantServiceFacade.php';
 require_once __DIR__ . '/../src/Services/FeasibilityService/FeasibilityServiceFactory.php';
+require_once __DIR__ . '/../src/Services/ReactorService.php'; 
+require_once __DIR__ . '/../src/Services/SensorService.php'; 
 
 require_once __DIR__ . '/../src/Controllers/PlantController/DetailsPlantController.php';
 require_once __DIR__ . '/../src/Controllers/PlantController/BasicPlantController.php';
 require_once __DIR__ . '/../src/Controllers/PlantController/GeologicalPlantController.php';
 require_once __DIR__ . '/../src/Controllers/PlantController/TechnicalPlantController.php';
 require_once __DIR__ . '/../src/Controllers/FeasibilitController.php';
+require_once __DIR__ . '/../src/Controllers/ApprovalController.php';
+require_once __DIR__ . '/../src/Controllers/ReactorController.php'; 
+require_once __DIR__ . '/../src/Controllers/SensorController.php'; 
 
-$host     = getenv('DB_HOST')     ?: 'db';
-$port     = getenv('DB_PORT')     ?: '5432';
-$dbname   = getenv('DB_NAME')     ?: 'proiect_db';
-$username = getenv('DB_USER')     ?: 'admin';
-$password = getenv('DB_PASSWORD') ?: 'glorierebeja';
+require_once __DIR__ . '/../src/Services/EmailService.php';
+require_once __DIR__ . '/../src/Controllers/EmailController.php';
+
+require_once __DIR__ . '/../src/Services/RssService.php';
+require_once __DIR__ . '/../src/Controllers/RssController.php';
+
+
+require_once __DIR__ . '/../src/Repositories/AlertRepository.php';
+require_once __DIR__ . '/../src/Services/AlertService.php';
+require_once __DIR__ . '/../src/Controllers/AlertController.php';
+
+require_once __DIR__ . '/../src/Services/NotificationService.php';
+require_once __DIR__ . '/../src/Controllers/NotificationController.php';
+
+require_once __DIR__ . '/../src/Services/LogService.php';
+require_once __DIR__ . '/../src/Controllers/LogController.php';
+
+require_once __DIR__ . '/../src/Services/PlantService/PlantExportImportService.php';
+require_once __DIR__ . '/../src/Controllers/PlantController/ImportExportController.php';
+
+require_once __DIR__ . '/../src/Services/StatsService.php';
+require_once __DIR__ . '/../src/Controllers/StatsController.php';
+
+// Database configuration
+$host     = getenv('DB_HOST');
+$port     = getenv('DB_PORT');
+$dbname   = getenv('DB_NAME');
+$username = getenv('DB_USER');
+$password = getenv('DB_PASSWORD');
 
 $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
 
 try {
     $pdo = new PDO($dsn, $username, $password, [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES   => false,
     ]);
 } catch (PDOException $e) {
     http_response_code(500);
-    die(json_encode(["status" => "error", "message" => "Conexiune la baza de date esuata."]));
+    die(json_encode(["status" => "error", "message" => "Database connection failed."]));
 }
 
-$adminEmail = 'admin@nuclear.ro';
-$adminPasswordHash = '$2y$12$pLgjMWjlhKbYoAAvRByCMuLnj3l5JlYl03QHgkgZwHci6c8Q59U.i';
-
-$adminInsert = $pdo->prepare(
-    'INSERT INTO users (username, first_name, last_name, email, password_hash, role) VALUES (:username, :first_name, :last_name, :email, :password_hash, :role) ON CONFLICT (email) DO UPDATE SET username = EXCLUDED.username, first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, password_hash = EXCLUDED.password_hash, role = EXCLUDED.role'
-);
-$adminInsert->execute([
-    'username' => 'admin',
-    'first_name' => 'Admin',
-    'last_name' => 'System',
-    'email' => $adminEmail,
-    'password_hash' => $adminPasswordHash,
-    'role' => 'ADMIN',
-]);
+$transactionManager = new TransactionManager($pdo); 
 
 $plantRepositoryFacade = new PlantRepositoryFacade($pdo);
-$plantServiceFacade    = new PlantServiceFacade($plantRepositoryFacade);
-$feasibilityService    = FeasibilityServiceFactory::create($pdo, $plantRepositoryFacade);
+$plantServiceFacade = new PlantServiceFacade($plantRepositoryFacade);
+$feasibilityService = FeasibilityServiceFactory::create($pdo, $plantRepositoryFacade, $transactionManager);
+
+$emailService = new EmailService();
+$emailController = new EmailController($emailService);
+
+$alertRepository = new AlertRepository($pdo);
+$alertService = new AlertService($alertRepository, $emailService);
+
+$rssService = new RssService($pdo);
+$rssController = new RssController($rssService);    
 
 $userRepository = new UserRepository($pdo);
 $userService = new UserService($userRepository);
 
+$notificationService = new NotificationService($plantServiceFacade, $alertService, $alertRepository);
+$reactorRepository = new ReactorRepository($pdo); 
+$reactorService = new ReactorService($reactorRepository, $plantRepositoryFacade);
+
+
+$sensorRepository = new SensorRepository($pdo); 
+$sensorTemplateRepository = new SensorTemplateRepository($pdo); 
+$sensorService = new SensorService($sensorRepository, $sensorTemplateRepository, $reactorRepository); 
+$sensorController = new SensorController($sensorService); 
+
+$plantExportImportService = new PlantExportImportService($pdo);
+$importExportController = new ImportExportController($plantExportImportService);
+
+$statsService = new StatsService($pdo);
+$statsController = new StatsController($statsService);
+
+LogService::init($pdo);
+
 $router = new Router();
 
-// --- Countries ---
-$router->get('/api/countries', function() use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->getCountries();
-});
+// Wrapper de autentificare
+function auth(?string $role, callable $handler): callable {
+    return function (...$args) use ($role, $handler) {
+        if (!AuthHelper::isAuthenticated()) {
+            http_response_code(401);
+            header('Content-Type: application/json; charset=UTF-8');
+            echo json_encode(['status' => 'error', 'message' => 'Neautorizat: autentificare necesară']);
+            exit;
+        }
+        if ($role !== null) {
+            AuthHelper::requireRole($role);
+        }
+        $handler(...$args);
+    };
+}
 
-// --- Power Plants ---
-$router->get('/api/power-plants/list', function() use ($plantServiceFacade) { 
-    (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList(); 
+// RUTE PUBLICE (fără autentificare)
+
+$router->get('/api/csrf-token', function() { 
+    header('Content-Type: application/json'); 
+    echo json_encode(['csrf_token' => $_SESSION['csrf_token'] ?? '']); 
 }); 
 
-$router->get('/api/power-plants/map-data', function() use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->getPowerPlantsMapData();
+$router->get('/api/countries', function () use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getCountries();
 });
 
-$router->get('/api/power-plants', function () use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList();
+$router->get('/api/power-plants/list', function() use ($plantServiceFacade, $alertService) { 
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getPowerPlantsList(); 
+}); 
+
+$router->get('/api/power-plants/map-data', function() use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getPowerPlantsMapData();
 });
 
-$router->post('/api/power-plants', function () use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->handleSavePlantDetails();
+$router->get('/api/power-plants', function () use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getPowerPlantsList();
 });
 
-// --- Details ---
-$router->get('/api/power-plants/{id}/details', function ($id) use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->getPlantDetails($id);
+$router->get('/api/power-plants/my', auth(null, function() use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getMyPowerPlants();
+}));
+
+$router->get('/api/power-plants/filter', function () use ($plantServiceFacade, $alertService) { 
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getPlantsByStatus(); 
+}); 
+
+$router->get('/api/power-plants/pending-approvals', auth(null, function() use ($plantServiceFacade, $alertService) { 
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getPendingApprovalsList(); 
+}));
+
+$router->get('/api/power-plants/export/csv', auth(null, function () use ($importExportController) {
+    $importExportController->exportMultipleCsv();
+}));
+
+$router->get('/api/power-plants/export', auth(null, function () use ($importExportController) {
+    $importExportController->exportMultiple();
+}));
+
+$router->get('/api/power-plants/{id}/export/csv', auth(null, function ($id) use ($importExportController) {
+    $importExportController->exportSingleCsv($id);
+}));
+
+$router->get('/api/power-plants/{id}/export', auth(null, function ($id) use ($importExportController) {
+    $importExportController->exportSingle($id);
+}));
+
+$router->get('/api/power-plants/{id}', function ($id) use ($plantServiceFacade, $alertService) { 
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getPlant($id); 
+}); 
+
+$router->get('/api/power-plants/{id}/details', function ($id) use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->getPlantDetails($id);
 });
 
-$router->put('/api/power-plants/{id}/details', function ($id) use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->handleUpdatePlantDetails($id);
+$router->get('/api/rss/power-plants', function () use ($rssController) {
+    $rssController->handleGetPlantsFeed();
 });
 
-// --- Basics ---
-$router->get('/api/power-plants/{id}/basics', function ($id) use ($plantServiceFacade) {
+// Validare coordonate — nu modifică date, doar validează
+$router->post('/api/power-plants/coordinates-preview', function () use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->previewCoordinates();
+});
+
+// RUTE PROTEJATE (orice utilizator autentificat)
+
+$router->post('/api/power-plants', auth(null, function () use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->handleSavePlantDetails();
+}));
+
+$approvalRepository = new ApprovalRepository($pdo);
+$approvalService = new ApprovalService($approvalRepository);
+$approvalController = new ApprovalController($approvalService, $alertService);
+
+$router->patch('/api/power-plants/{id}/submit-review', auth(null, function ($plantId) use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->submitForReview($plantId);
+}));
+
+$router->patch('/api/power-plants/{id}/admin-status', auth('ADMIN', function ($plantId) use ($approvalController) {
+    $approvalController->updateStatus($plantId);
+}));
+
+$router->patch('/api/power-plants/{id}/reopen', auth(null, function ($plantId) use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->reopenDraft($plantId);
+})); 
+
+$router->post('/api/power-plants/import/batch', auth(null, function () use ($importExportController) {
+    $importExportController->importMultiple();
+}));
+
+$router->post('/api/power-plants/import', auth(null, function () use ($importExportController) {
+    $importExportController->importSingle();
+}));
+
+// --- Statistics ---
+$router->get('/api/stats', auth(null, function () use ($statsController) {
+    $statsController->getAll();
+}));
+
+$router->get('/api/stats/measurements', auth(null, function () use ($statsController) {
+    $statsController->getMeasurements();
+}));
+
+$router->patch('/api/power-plants/{id}/status', auth(null, function ($plantId) use ($plantServiceFacade, $alertService){ 
+    (new DetailsPlantController($plantServiceFacade, $alertService))->updateStatus($plantId); 
+})); 
+
+$router->put('/api/power-plants/{id}/details', auth(null, function ($id) use ($plantServiceFacade, $alertService) {
+    (new DetailsPlantController($plantServiceFacade, $alertService))->handleUpdatePlantDetails($id);
+}));
+
+$router->get('/api/power-plants/{id}/basics', auth(null, function ($id) use ($plantServiceFacade) {
     (new BasicPlantController($plantServiceFacade))->getBasicPlantData($id);
-});
+}));
 
-$router->post('/api/power-plants/coordinates-preview', function() use ($plantServiceFacade) {
-    (new DetailsPlantController($plantServiceFacade))->previewCoordinates();
-});
-
-$router->post('/api/power-plants/{id}/basic-save', function($id) use ($plantServiceFacade) {
+$router->post('/api/power-plants/{id}/basics', auth(null, function ($id) use ($plantServiceFacade) {
     (new BasicPlantController($plantServiceFacade))->createBasicPlantData($id);
-});
+}));
 
-$router->post('/api/power-plants/{id}/basics', function ($id) use ($plantServiceFacade) {
-    (new BasicPlantController($plantServiceFacade))->createBasicPlantData($id);
-});
-
-$router->put('/api/power-plants/{id}/basics', function ($id) use ($plantServiceFacade) {
+$router->put('/api/power-plants/{id}/basics', auth(null, function ($id) use ($plantServiceFacade) {
     (new BasicPlantController($plantServiceFacade))->updateBasicPlantData($id);
-});
+}));
 
-// --- Geological ---
-$router->get('/api/power-plants/{id}/geological', function ($id) use ($plantServiceFacade) {
+$router->get('/api/power-plants/{id}/geological', auth(null, function ($id) use ($plantServiceFacade) {
     (new GeologicalPlantController($plantServiceFacade))->getGeologicalPlantData($id);
-});
+}));
 
-$router->post('/api/power-plants/{id}/geological', function ($id) use ($plantServiceFacade) {
+$router->post('/api/power-plants/{id}/geological', auth(null, function ($id) use ($plantServiceFacade) {
     (new GeologicalPlantController($plantServiceFacade))->createGeologicalPlantData($id);
-});
+}));
 
-$router->put('/api/power-plants/{id}/geological', function ($id) use ($plantServiceFacade) {
+$router->put('/api/power-plants/{id}/geological', auth(null, function ($id) use ($plantServiceFacade) {
     (new GeologicalPlantController($plantServiceFacade))->updateGeologicalPlantData($id);
-});
+}));
 
-// --- Technical ---
-$router->get('/api/power-plants/{id}/technical', function ($id) use ($plantServiceFacade) {
+$router->get('/api/power-plants/{id}/technical', auth(null, function ($id) use ($plantServiceFacade) {
     (new TechnicalPlantController($plantServiceFacade))->getTechnicalPlantData($id);
-});
+}));
 
-$router->post('/api/power-plants/{id}/technical', function ($id) use ($plantServiceFacade) {
+$router->post('/api/power-plants/{id}/technical', auth(null, function ($id) use ($plantServiceFacade) {
     (new TechnicalPlantController($plantServiceFacade))->createTechnicalPlantData($id);
+}));
+
+$router->put('/api/power-plants/{id}/technical', auth(null, function ($id) use ($plantServiceFacade) {
+    (new TechnicalPlantController($plantServiceFacade))->updateTechnicalPlantData($id);
+}));
+
+$router->get('/api/reactors', auth(null, function () use ($reactorService, $sensorService) {
+    (new ReactorController($reactorService, $sensorService))->getAllReactors();
+}));
+
+$router->get('/api/reactors/{id}/stream', auth(null, function ($id) use ($sensorController) { 
+    $sensorController->stream($id); 
+}));
+
+$router->get('/api/reactors/{id}', auth(null, function ($id) use ($reactorService, $sensorService) {
+    (new ReactorController($reactorService, $sensorService))->getReactor($id);
+}));
+
+$router->get('/api/power-plants/{plantId}/reactors', auth(null, function ($plantId) use ($reactorService, $sensorService) {
+    (new ReactorController($reactorService, $sensorService))->getReactorsByPlant($plantId);
+}));
+
+$router->post('/api/reactors', auth(null, function () use ($reactorService, $sensorService) {
+    (new ReactorController($reactorService, $sensorService))->createReactor();
+}));
+
+$router->put('/api/reactors/{id}', auth(null, function ($id) use ($reactorService, $sensorService) {
+    (new ReactorController($reactorService, $sensorService))->updateReactor($id);
+}));
+
+$router->delete('/api/reactors/{id}', auth(null, function ($id) use ($reactorService, $sensorService) {
+    (new ReactorController($reactorService, $sensorService))->deleteReactor($id);
+}));
+
+// RUTE SENZORI
+
+$router->get('/api/reactors/{reactorId}/sensors', auth(null, function ($reactorId) use ($sensorController) {
+    $sensorController->getSensorsByReactor($reactorId);
+}));
+
+$router->get('/api/sensors/{id}', auth(null, function ($id) use ($sensorController) {
+    $sensorController->getSensor($id);
+}));
+
+$router->post('/api/sensors', auth(null, function () use ($sensorController) {
+    $sensorController->createSensor();
+}));
+
+$router->put('/api/sensors/{id}', auth(null, function ($id) use ($sensorController) {
+    $sensorController->updateSensor($id);
+}));
+
+$router->delete('/api/sensors/{id}', auth(null, function ($id) use ($sensorController) {
+    $sensorController->deleteSensor($id);
+}));
+
+$router->post('/api/reactors/{reactorId}/sensors/populate', auth(null, function ($reactorId) use ($sensorController) {
+    $sensorController->populateSensors($reactorId);
+}));
+
+// RUTE FEZABILITATE (cu verificare proprietar)
+
+function checkPlantOwnership(string $plantId, PlantServiceFacade $service): void {
+    $plant = $service->getPlantDetailsById($plantId);
+    if (!$plant) {
+        http_response_code(404);
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode(['status' => 'error', 'message' => 'Centrala nu a fost găsită.']);
+        exit;
+    }
+    $role = AuthHelper::getCurrentUserRole();
+    if ($role !== 'ADMIN' && $plant->getCreatedBy() !== AuthHelper::getCurrentUserId()) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode(['status' => 'error', 'message' => 'Acces interzis: nu aveți drepturi asupra acestei centrale.']);
+        exit;
+    }
+}
+
+$router->post('/api/power-plants/{id}/feasibility', auth(null, function ($id) use ($feasibilityService, $plantServiceFacade) {
+    error_log("[FeasibilityRoute] POST /api/power-plants/{$id}/feasibility de catre user=" . (AuthHelper::getCurrentUserId() ?? '?') . " rol=" . (AuthHelper::getCurrentUserRole() ?? '?'));
+    checkPlantOwnership($id, $plantServiceFacade);
+    (new FeasibilityController($feasibilityService))->generate($id);
+}));
+
+$router->get('/api/power-plants/{id}/feasibility', auth(null, function ($id) use ($feasibilityService, $plantServiceFacade) {
+    checkPlantOwnership($id, $plantServiceFacade);
+    (new FeasibilityController($feasibilityService))->getLastByPlantId($id);
+}));
+
+$router->get('/api/notifications', auth(null, function () use ($notificationService) {
+    (new NotificationController($notificationService))->getNotifications();
+}));
+
+$router->post('/api/alerts/receive', auth(null, function () use ($alertService) {
+    (new AlertController($alertService))->receiveAlert();
+}));
+
+$router->get('/api/alerts/unread', auth(null, function () use ($alertService) {
+    (new AlertController($alertService))->getUnread();
+}));
+
+$router->put('/api/alerts/{id}/read', auth(null, function ($id) use ($alertService) {
+    (new AlertController($alertService))->markRead($id);
+}));
+
+// --- Logging ---
+$router->get('/api/logs', auth('ADMIN', function () {
+    (new LogController())->getLogs();
+}));
+
+$router->post('/api/logs/frontend', function () {
+    (new LogController())->receiveFrontendLog();
 });
 
-$router->put('/api/power-plants/{id}/technical', function ($id) use ($plantServiceFacade) {
-    (new TechnicalPlantController($plantServiceFacade))->updateTechnicalPlantData($id);
-});
+// --- Admin Users ---
+$router->get('/api/admin/users', auth('ADMIN', function() use ($userService) {
+    (new UserController($userService))->adminListUsers();
+}));
+
+$router->get('/api/admin/users/{id}', auth('ADMIN', function($id) use ($userService) {
+    (new UserController($userService))->adminGetUser($id);
+}));
+
+$router->patch('/api/admin/users/{id}/role', auth('ADMIN', function($id) use ($userService) {
+    (new UserController($userService))->adminUpdateRole($id);
+}));
+
+$router->delete('/api/admin/users/{id}', auth('ADMIN', function($id) use ($userService) {
+    (new UserController($userService))->adminDeleteUser($id);
+}));
 
 // --- Authentication ---
 $router->get('/login', function() use ($userService) {
@@ -209,4 +488,22 @@ $router->get('/register', function() use ($userService) {
 });
 
 $router->post('/register', function() use ($userService) {
-    (new UserController($userService))->handle
+    (new UserController($userService))->handleRegister();
+});
+
+$router->get('/logout', function() use ($userService) {
+    (new UserController($userService))->handleLogout();
+});
+
+$router->get('/api/user/status', function() use ($userService) {
+    (new UserController($userService))->getUserStatus();
+});
+
+
+$router->post('/api/email/send', auth(null, function () use ($emailController) { $emailController->handleSendEmail(); }));
+
+// --- Dispatch ---
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$method = $_SERVER['REQUEST_METHOD'];
+
+$router->dispatch($method, $uri); 

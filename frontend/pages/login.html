@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panou Control | Autentificare</title>
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/navbar.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/buttons.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/forms.css">
+</head>
+<body>
+    <script type="module" src="../modules/pages/login.js"></script>
+    <div id="main-navbar"></div>
+    <div class="page-shell login-layout">
+        <section class="login-card" aria-labelledby="login-title">
+            <p class="eyebrow">TERMINAL ACCES</p>
+            <h1 id="login-title">Autentificare operator</h1>
+            <p>Introdu datele de acces pentru a continua către dashboard-ul de monitorizare.</p>
+
+            <div id="login-message" class="footer-note" aria-live="polite" style="margin-bottom: 16px; min-height: 1.2rem;"></div>
+
+            <form class="field-grid" id="loginForm" method="post">
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" placeholder="operator@nuclear.ro" autocomplete="email" required>
+                </div>
+                <div class="field">
+                    <label for="password">Parolă</label>
+                    <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
+                </div>
+                <div class="button-row">
+                    <input type="submit" value="Conectare">
+                    <a class="button secondary" href="register.html">Nu ai cont? Creează cont</a>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <script type="module" src="../modules/ui/navbar.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista Centralelor</title>
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/navbar.css">
+    <link rel="stylesheet" href="../../css/layout.css">
+    <link rel="stylesheet" href="../../css/buttons.css">
+    <link rel="stylesheet" href="../../css/responsive.css">
+    <link rel="stylesheet" href="../../css/tables.css">
+    <link rel="stylesheet" href="../../css/tags.css">
+    <link rel="stylesheet" href="../../css/forms.css">
+</head>
+<body>
+    <div class="page-shell">
+        <div id="main-navbar"></div>
+
+        <div class="toolbar">
+            <button class="button secondary" id="btn-import">Import</button>
+            <button class="button secondary" id="btn-export-all-json">Export JSON</button>
+            <button class="button secondary" id="btn-export-all-csv">Export CSV</button>
+        </div>
+
+        <div class="filter-bar">
+            <div class="field">
+                <label for="filter-name">Caută după nume</label>
+                <input type="text" id="filter-name" placeholder="ex. Centrală Solară..." autocomplete="off" />
+            </div>
+            <div class="field">
+                <label for="filter-country">Caută după țară</label>
+                <input type="text" id="filter-country" placeholder="ex. România..." autocomplete="off" />
+            </div>
+            <button class="btn-reset" id="btn-reset">✕ Resetează</button>
+        </div>
+
+        <div class="results-meta">
+            <div>Rezultate: <span id="results-count">—</span></div>
+        </div>
+
+        <div class="table-shell">
+            <table>
+                <thead>
+                    <tr>
+                        <th data-col="name">Nume <span class="sort-icon">↕</span></th>
+                        <th data-col="country">Țară <span class="sort-icon">↕</span></th>
+                        <th data-col="coords">Coordonate</th>
+                        <th data-col="status">Status <span class="sort-icon">↕</span></th>
+                        <th>Acțiuni</th>
+                    </tr>
+                </thead>
+                <tbody id="plants-tbody">
+                    <tr class="state-row">
+                        <td colspan="5">
+                            <span class="spinner-inline"></span> Se încarcă centralele...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script type = "module" src = "../../modules/pages/power-plants/list.js"></script>
+    <script type = "module" src = "../../modules/ui/navbar.js"></script>
+</body>
+</html>

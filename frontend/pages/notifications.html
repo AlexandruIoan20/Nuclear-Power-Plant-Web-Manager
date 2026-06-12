@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ro">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear Plant Control | Notificări</title>
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/navbar.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/buttons.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <style>
+        .notification-card {
+            background-color: var(--surface, #1e1e1e);
+            border-left: 4px solid var(--border);
+            padding: 20px;
+            margin-bottom: 16px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .notification-card.scram { border-color: var(--danger, #dc3545); }
+        .notification-card.alarm { border-color: #ffc107; }
+        .notification-card.alert { border-color: #fd7e14; }
+        .notification-card.info { border-color: var(--primary, #0d6efb); }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .notification-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+        .notification-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+        .notification-body {
+            color: #ccc;
+            line-height: 1.5;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-top: 24px;
+            border-bottom: 2px solid var(--border, #333);
+        }
+        .tab {
+            padding: 12px 28px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            color: var(--text-muted, #888);
+            font-size: 1rem;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .tab:hover {
+            color: var(--text, #fff);
+        }
+        .tab.active {
+            color: var(--primary, #0d6efb);
+            border-bottom-color: var(--primary, #0d6efb);
+        }
+        .tab-badge {
+            display: inline-block;
+            background: var(--primary, #0d6efb);
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 2px 7px;
+            border-radius: 10px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-shell">
+        <div id="main-navbar"></div>
+        <main class="panel">
+            <p class="eyebrow">SYSTEM LOGS</p>
+            <h1>Centrul de Notificări</h1>
+            <p>Istoricul consolidat al alertelor de la senzori și al solicitărilor administrative.</p>
+
+            <div class="tabs">
+                <button class="tab active" data-tab="alert">Alerte</button>
+                <button class="tab" data-tab="plant">Centrale</button>
+            </div>
+
+            <div id="loading-indicator" class="inline-status" style="margin-top: 20px;">
+                Se interoghează serverul...
+            </div>
+
+            <div id="error-message" style="color: var(--danger); display: none; margin-top: 20px;"></div>
+
+            <div id="tab-alert" class="tab-content active" style="margin-top: 32px;"></div>
+            <div id="tab-plant" class="tab-content" style="margin-top: 32px;"></div>
+
+        </main>
+    </div>
+
+    <script type="module" src="../modules/pages/notifications.js"></script>
+    <script type="module" src="../modules/ui/navbar.js"></script>
+</body>
+
+</html>

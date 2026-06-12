@@ -5,7 +5,7 @@ export function TechnicalDataRequestDTO({
     reactorConfigurations = []
 }) {
     return {
-        numberOfReactors: numberOfReactors ? parseInt(numberOfReactors) : null,
+        numberOfReactors: numberOfReactors !== undefined && numberOfReactors !== null ? Number(numberOfReactors) : null,
         estimatedEfficiency: estimatedEfficiency ? parseFloat(estimatedEfficiency) : null,
         operationalRiskLevel: operationalRiskLevel ? parseFloat(operationalRiskLevel) : null,
         reactorConfigurations: reactorConfigurations,

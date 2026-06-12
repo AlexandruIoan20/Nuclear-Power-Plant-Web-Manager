@@ -1,37 +1,25 @@
 <?php
 
-class PlantDTO {
-    public string $id;
-    public string $name;
-    public string $country;
-    public ?float $latitude;
-    public ?float $longitude;
-    public string $status;
+require_once __DIR__ . '/BaseDTO.php';
 
+class PlantDTO extends BaseDTO {
     public function __construct(
-        string $id,
-        string $name,
-        string $country,
-        ?float $latitude,
-        ?float $longitude,
-        string $status
-    ) {
-        $this->id = $id;
-        $this->name = $name;
-        $this->country = $country;
-        $this->latitude = $latitude;
-        $this->longitude = $longitude;
-        $this->status = $status;
-    }
+        public readonly string $id,
+        public readonly string $name,
+        public readonly string $status,
+        public readonly ?string $createdBy = null,
+        public readonly ?string $createdAt = null,
+        public readonly ?string $updatedAt = null,
+    ) {}
 
     public static function fromEntity(Plant $plant): self {
         return new self(
-            $plant->getId(),
-            $plant->getName(),
-            $plant->getCountry(),
-            $plant->getLatitude(),
-            $plant->getLongitude(),
-            $plant->getStatus()->name 
+            id: $plant->getId(),
+            name: $plant->getName(),
+            status: $plant->getStatus()->name,
+            createdBy: $plant->getCreatedBy(),
+            createdAt: $plant->getCreatedAt(),
+            updatedAt: $plant->getUpdatedAt()
         );
     }
 }

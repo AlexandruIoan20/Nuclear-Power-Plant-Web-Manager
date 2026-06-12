@@ -2,6 +2,9 @@
 
 require_once __DIR__ . '/../../Services/PlantServiceFacade.php'; 
 require_once __DIR__ . '/../../Dto/GeologicalPlantDataDTO.php'; 
+require_once __DIR__ . '/../../Dto/ApiResponseDTO.php'; 
+require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php'; 
+require_once __DIR__ . '/../../Services/LogService.php'; 
 
 class GeologicalPlantController { 
     public function __construct(
@@ -11,76 +14,81 @@ class GeologicalPlantController {
     public function getGeologicalPlantData(string $plantId): void { 
         header('Content-Type: application/json; charset=UTF-8'); 
 
-        $geologicalData = $this->plantServiceFacade->getGeologicalDataByPlantId($plantId); 
+        try {
+            $dto = $this->plantServiceFacade->getGeologicalDataByPlantId($plantId); 
 
-        if(!$geologicalData) { 
-            http_response_code(404); 
-            echo json_encode(["status" => "error", "message" => "Datele geografice nu au fost gasite."]);
-            
-            exit;
+            if (!$dto) { 
+                http_response_code(404); 
+                echo json_encode(new ApiResponseDTO(status: 'error', message: "Datele geologice nu au fost găsite."));
+                exit;
+            }
+
+            http_response_code(200); 
+            echo json_encode(new ApiResponseDTO(status: 'success', data: $dto)); 
+        } catch (Exception $e) {
+            LogService::instance()->error("[ERROR] GET Geological: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Eroare la preluarea datelor geologice."));
         }
-
-        $geologicalPlantDataDTO = GeologicalPlantDataDTO::fromEntity($geologicalData); 
-
-        http_response_code(200); 
-        echo json_encode(["status" => "success", "data" => $geologicalPlantDataDTO]); 
+        exit;
     }
 
     public function createGeologicalPlantData(string $plantId): void { 
+        header('Content-Type: application/json; charset=UTF-8');
+
         $jsonPayload = file_get_contents('php://input');
-        $dateFormular = json_decode($jsonPayload, true) ?? [];
+        $dateFormular = json_decode($jsonPayload, true);
 
-        error_log("[DEBUG] Date Formular Geological (Create)"); 
-        error_log(print_r($dateFormular, true));
-
-        try { 
-            $responseDTO = $this->plantServiceFacade->saveGeologicalData($dateFormular, $plantId); 
-            
-            http_response_code(200);
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode([
-                'success' => true,
-                'message' => 'Datele geologice au fost salvate cu succes.', 
-                "plantId" => $plantId, 
-                "geologicalId" => $responseDTO->dataId 
-            ]);
-        } catch(Exception $e) { 
-            error_log("[ERROR] POST Geo Data Create: " . $e->getMessage());
-            
+        if (empty($dateFormular)) {
             http_response_code(400);
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode([
-                'success' => false,
-                'message' => 'Eroare la salvarea datelor geologice: ' . $e->getMessage()
-            ]); 
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Nu s-au primit date."));
+            exit;
         }
+
+        try {
+            $responseDTO = $this->plantServiceFacade->saveGeologicalData($dateFormular, $plantId);
+            
+            http_response_code(201);
+            echo json_encode(new ApiResponseDTO(
+                status: 'success',
+                data: new CreateDataResponseDTO(
+                    dataId: $responseDTO->dataId,
+                    plantId: $plantId,
+                    message: 'Datele geologice au fost salvate cu succes.'
+                )
+            ));
+        } catch (Exception $e) {
+            LogService::instance()->error("[ERROR] Create Geological: " . $e->getMessage());
+            $code = (str_contains($e->getMessage(), 'Există deja')) ? 409 : 400;
+            http_response_code($code);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
+        }
+        exit;
     }
 
     public function updateGeologicalPlantData(string $plantId): void { 
-        $jsonPayload = file_get_contents('php://input');
-        $dateFormular = json_decode($jsonPayload, true) ?? [];
+        header('Content-Type: application/json; charset=UTF-8');
 
-        error_log("[DEBUG] Date Formular Geological (Update)"); 
-        error_log(print_r($dateFormular, true));
-        
+        $jsonPayload = file_get_contents('php://input');
+        $dateFormular = json_decode($jsonPayload, true);
+
+        if (empty($dateFormular)) {
+            http_response_code(400);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Nu s-au primit date pentru actualizare."));
+            exit;
+        }
+
         try { 
             $this->plantServiceFacade->updateGeologicalData($dateFormular, $plantId); 
             
             http_response_code(200);
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode([
-                'success' => true,
-                'message' => 'Datele geologice au fost actualizate cu succes.'
-            ]);
-        } catch(Exception $e) { 
-            error_log("[ERROR] POST Geo Data Update: " . $e->getMessage());
-            
-            http_response_code(400);
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode([
-                'success' => false,
-                'message' => 'Eroare la actualizarea datelor geologice: ' . $e->getMessage()
-            ]); 
+            echo json_encode(new ApiResponseDTO(status: 'success', message: 'Datele geologice au fost actualizate cu succes.'));
+        } catch (Exception $e) { 
+            LogService::instance()->error("[ERROR] Update Geological: " . $e->getMessage());
+            $code = str_contains($e->getMessage(), 'găsit') ? 404 : 400;
+            http_response_code($code);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
         }
+        exit;
     }
 }

@@ -8,6 +8,8 @@ class TechnicalPlantData {
     private ?float $operationalRiskLevel;
     private array $safetySystems;
     private array $reactorConfigurations = [];
+    private ?string $createdAt;
+    private ?string $updatedAt;
 
     public function __construct(
         string $powerPlantId,
@@ -15,7 +17,9 @@ class TechnicalPlantData {
         ?int $numberOfReactors = null,
         ?float $estimatedEfficiency = null,
         ?float $operationalRiskLevel = null,
-        array $safetySystems = []
+        array $safetySystems = [],
+        ?string $createdAt = null,
+        ?string $updatedAt = null
     ) {
         $this->id = $id ?? bin2hex(random_bytes(16)); 
         $this->powerPlantId = $powerPlantId;
@@ -23,6 +27,8 @@ class TechnicalPlantData {
         $this->estimatedEfficiency = $estimatedEfficiency;
         $this->operationalRiskLevel = $operationalRiskLevel;
         $this->safetySystems = $safetySystems;
+        $this->createdAt = $createdAt;
+        $this->updatedAt = $updatedAt;
     }
 
     public function addReactorConfiguration(ReactorSchema $schema): void {
@@ -90,5 +96,21 @@ class TechnicalPlantData {
 
     public function setSafetySystems(array $safetySystems): void {
         $this->safetySystems = $safetySystems;
+    }
+
+    public function getCreatedAt(): ?string {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(?string $createdAt): void {
+        $this->createdAt = $createdAt;
+    }
+
+    public function getUpdatedAt(): ?string {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?string $updatedAt): void {
+        $this->updatedAt = $updatedAt;
     }
 }

@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../Entities/PlantStatus.php';
 require_once __DIR__ . '/../../Entities/Plant.php'; 
 
 require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php'; 
+require_once __DIR__ . '/../LogService.php';
 
 class DetailsPlantService { 
     private PlantRepositoryFacade $plantRepositoryFacade; 
@@ -17,43 +18,60 @@ class DetailsPlantService {
         $name = $data['name'] ?? ''; 
         $name = ($name !== '') ? $name : null; 
 
-        $country = $data['country'] ?? ''; 
-        $country = ($country !== '') ? $country : null; 
-
-        $latitude = $data['latitude'] ?? ''; 
-        $latitude = ($latitude !== '') ? $latitude : null; 
-
-        $longitude = $data['longitude'] ?? ''; 
-        $longitude = ($longitude !== '') ? $longitude : null;
-
         $status = PlantStatus::DRAFT; 
         $id = generateUUID(); 
+        $createdBy = $_SESSION['user_id'] ?? null;
 
-        $plant = new Plant($country, $id, $name, $status, $latitude, $longitude); 
-        error_log("PLANT: "); 
-        error_log(print_r($plant, true)); 
+        $plant = new Plant($id, $name, $status, $createdBy); 
         $this->plantRepositoryFacade->savePlantDetails($plant); 
 
         return new CreateDataResponseDTO($id); 
     }
 
-    public function updatePlantDetails(array $data, string $id) { 
-        $name = $data['name'] ?? ''; 
-        $country = $data['country'] ?? ''; 
+    public function updateStatus(array $data, string $plantId) { 
+        $this->plantRepositoryFacade->updateStatus($data, $plantId); 
+    }
 
-        $latitude = (isset($data['latitude']) && $data['latitude'] !== '') ? (float) $data['latitude'] : null;         
-        $longitude = (isset($data['longitude']) && $data['longitude'] !== '') ? (float) $data['longitude'] : null;
+    public function updatePlantDetails(array $data, string $id) { 
+        $existing = $this->plantRepositoryFacade->getPlantDetailsById($id);
+        if (!$existing) {
+            throw new Exception("Centrala nu a fost găsită.");
+        }
+        if ($existing->getStatus()->value !== 'DRAFT') {
+            throw new Exception("Nu poți edita o centrală care nu este în status DRAFT.");
+        }
+
+        $name = $data['name'] ?? ''; 
         $status = PlantStatus::DRAFT; 
 
-        $plant = new Plant($country, $id, $name, $status, $latitude, $longitude); 
+        $plant = new Plant($id, $name, $status); 
 
-        error_log("[DEBUG] A power plant was built successfully"); 
-        error_log("[DEBUG]" . print_r($plant, true)); 
+        LogService::instance()->debug("[DEBUG] A power plant was built successfully");
+        LogService::instance()->debug("[DEBUG]" . print_r($plant, true));
         $this->plantRepositoryFacade->updatePlantDetails($plant); 
     }
 
     public function getAllPowerPlants(): array { 
         return $this->plantRepositoryFacade->getAllPowerPlants(); 
+    }
+
+    public function getMyPowerPlants(string $userId): array {
+        return $this->plantRepositoryFacade->findByUser($userId);
+    }
+
+    public function getPlantsByStatus(array $data): array { 
+        $status = PlantStatus::tryFrom($data['status']); 
+    
+        if($status === null) {
+            throw new Exception("Nu exista centrale cu acest status de proiect.");
+        }
+    
+        $powerPlants = $this->plantRepositoryFacade->getPlantsByStatus(['status' => $status->value]); 
+        return $powerPlants; 
+    }
+
+    public function getCountries(): array {
+        return require __DIR__ . '/../../Constants/countries.php';
     }
 
     public function findById(string $plantId) { 

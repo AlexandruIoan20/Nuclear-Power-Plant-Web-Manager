@@ -2,6 +2,9 @@
 
 require_once __DIR__ . '/../../Services/PlantService/BasicPlantService.php'; 
 require_once __DIR__ . '../../../Dto/BasicPlantDataDTO.php'; 
+require_once __DIR__ . '/../../Dto/ApiResponseDTO.php'; 
+require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php'; 
+require_once __DIR__ . '/../../Services/LogService.php'; 
 
 class BasicPlantController { 
     public function __construct(
@@ -15,18 +18,19 @@ class BasicPlantController {
 
         if(!$basicPlantData) { 
             http_response_code(404); 
-            echo json_encode(["status" => "error", "message" => "Datele despre centrala nu au fost gasite"]); 
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Datele despre centrala nu au fost gasite")); 
             exit; 
         }
 
         $basicPlantDataDTO = BasicPlantDataDTO::fromEntity($basicPlantData); 
 
         http_response_code(200); 
-        echo json_encode(["status" => "success", "data" => $basicPlantDataDTO]); 
+        echo json_encode(new ApiResponseDTO(status: 'success', data: $basicPlantDataDTO)); 
         exit; 
     }
 
     public function createBasicPlantData(string $plantId) { 
+        header('Content-Type: application/json; charset=UTF-8');
         $jsonPayload = file_get_contents('php://input');
         $dateFormular = json_decode($jsonPayload, true);
         
@@ -34,33 +38,33 @@ class BasicPlantController {
             $dateFormular = [];
         }
 
-        error_log("[DEBUG] Date Formular decodate din JSON:"); 
-        error_log(print_r($dateFormular, true));
+        LogService::instance()->debug("[DEBUG] Date Formular decodate din JSON:");
+        LogService::instance()->info(print_r($dateFormular, true));
 
         try { 
             $responseDTO = $this->plantServiceFacade->saveBasicData($dateFormular, $plantId); 
             
             http_response_code(200);
-            echo json_encode([
-                'success' => true, 
-                'message' => 'Datele de bază au fost salvate cu succes.',
-                'plantId' => $plantId,  
-                "basicsId" => $responseDTO->dataId
-            ]);
+            echo json_encode(new ApiResponseDTO(
+                status: 'success',
+                data: new CreateDataResponseDTO(
+                    dataId: $responseDTO->dataId,
+                    plantId: $plantId,
+                    message: 'Datele de bază au fost salvate cu succes.'
+                )
+            ));
 
         } catch(Exception $e) { 
-            error_log("[ERROR] POST Basic Data: " . $e->getMessage());
+            LogService::instance()->error("[ERROR] POST Basic Data: " . $e->getMessage());
             
             http_response_code(400);
-            echo json_encode([
-                'success' => false, 
-                'message' => 'Eroare la salvare: ' . $e->getMessage()
-            ]); 
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Eroare la salvare: ' . $e->getMessage())); 
         }
     }
 
 
     public function updateBasicPlantData(string $plantId) { 
+        header('Content-Type: application/json; charset=UTF-8');
         $jsonPayload = file_get_contents('php://input');
         $dateFormular = json_decode($jsonPayload, true);
         
@@ -68,26 +72,20 @@ class BasicPlantController {
             $dateFormular = [];
         }
 
-        error_log("[DEBUG] Date Formular decodate din JSON (Update):"); 
-        error_log(print_r($dateFormular, true));
+        LogService::instance()->debug("[DEBUG] Date Formular decodate din JSON (Update):");
+        LogService::instance()->info(print_r($dateFormular, true));
 
         try { 
             $this->plantServiceFacade->updateBasicData($dateFormular, $plantId); 
             
             http_response_code(200);
-            echo json_encode([
-                'success' => true, 
-                'message' => 'Datele de bază au fost actualizate cu succes.'
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'success', message: 'Datele de bază au fost actualizate cu succes.'));
 
         } catch(Exception $e) { 
-            error_log("[ERROR] POST/PUT Basic Data Update: " . $e->getMessage());
+            LogService::instance()->error("[ERROR] POST/PUT Basic Data Update: " . $e->getMessage());
             
             http_response_code(400);
-            echo json_encode([
-                'success' => false, 
-                'message' => 'Eroare la actualizare: ' . $e->getMessage()
-            ]); 
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Eroare la actualizare: ' . $e->getMessage())); 
         }
     }
 }

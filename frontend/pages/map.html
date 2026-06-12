@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear Plant Control | Hartă</title>
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/navbar.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/buttons.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        .map-layout { display: flex; gap: 24px; align-items: flex-start; }
+        .map-shell { flex: 1; }
+        .map-sidebar { width: 320px; flex-shrink: 0; }
+        .map-list { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+        .map-item { padding: 12px; border: 1px solid var(--border); border-radius: 6px; }
+        .map-item h3 { margin: 0 0 6px; font-size: 1rem; }
+        .map-item-meta { font-size: 0.85rem; color: var(--muted); }
+        .map-item-actions { margin-top: 8px; }
+        .map-empty { padding: 24px; text-align: center; color: var(--muted); }
+        .map-status { margin-top: 8px; font-size: 0.9rem; color: var(--muted); }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <div id="main-navbar"></div>
+        <main class="map-layout">
+            <section class="panel map-shell">
+                
+                <h1>Centrale nucleare</h1>
+                <div id="plants-map" class="leaflet-map" style="height:520px"></div>
+                <p id="map-status" class="map-status"></p>
+            </section>
+
+            <aside class="panel map-sidebar">
+                <div id="map-list" class="map-list"></div>
+            </aside>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="../modules/ui/navbar.js"></script>
+    <script src="../plant-map.js"></script>
+    <script type="module" src="../modules/pages/map.js"></script>
+</body>
+</html>

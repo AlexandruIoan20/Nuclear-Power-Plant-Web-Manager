@@ -24,10 +24,6 @@ class TechnicalPlantService {
             throw new Exception("Există deja date tehnice pentru această centrală. Te rugăm să folosești metoda de UPDATE (PUT/PATCH).");
         }
 
-        $numberOfReactors = (isset($data['numberOfReactors']) && $data['numberOfReactors'] !== '') 
-            ? (int) $data['numberOfReactors'] 
-            : null;
-
         $estimatedEfficiency = (isset($data['estimatedEfficiency']) && $data['estimatedEfficiency'] !== '') 
             ? (float) $data['estimatedEfficiency'] 
             : null;
@@ -40,12 +36,18 @@ class TechnicalPlantService {
             ? $data['reactorConfigurations'] 
             : [];
 
+        $numberOfReactors = count($reactorConfigurations);
+
         $technicalPlantData = new TechnicalPlantData($plantId, null, $numberOfReactors, $estimatedEfficiency, $operationalRiskLevel); 
 
         foreach ($reactorConfigurations as $config) { 
+            $reactorType = ReactorType::tryFrom($config['reactorType']);
+            if (!$reactorType) throw new Exception("Tip reactor invalid: " . ($config['reactorType'] ?? '?'));
+            $coolingType = CoolingType::tryFrom($config['coolingType']);
+            if (!$coolingType) throw new Exception("Tip răcire invalid: " . ($config['coolingType'] ?? '?'));
             $currentReactorSchema = $this->plantRepositoryFacade->getReactorSchemaByDetails(
-                ReactorType::from($config['reactorType'])->value,
-                CoolingType::from($config['coolingType'])->value
+                $reactorType->value,
+                $coolingType->value
             ); 
             $technicalPlantData->addReactorConfiguration($currentReactorSchema); 
         }
@@ -57,9 +59,6 @@ class TechnicalPlantService {
     public function update(array $data, string $plantId): void { 
         $currentPlantData = $this->plantRepositoryFacade->getTechnicalDataByPlantId($plantId); 
 
-        $numberOfReactors = $data['numberOfReactors'] ?? ''; 
-        $numberOfReactors = ($numberOfReactors !== '') ? $numberOfReactors : null; 
-
         $estimatedEfficiency = $data['estimatedEfficiency'] ?? ''; 
         $estimatedEfficiency = ($estimatedEfficiency !== '') ? $estimatedEfficiency : null; 
 
@@ -68,13 +67,19 @@ class TechnicalPlantService {
 
         $reactorConfigurations = $data['reactorConfigurations'] ?? []; 
 
+        $numberOfReactors = count($reactorConfigurations);
+
         $technicalPlantData = new TechnicalPlantData($plantId, $currentPlantData->getId(), $numberOfReactors, $estimatedEfficiency, $operationalRiskLevel); 
 
         foreach ($reactorConfigurations as $config) { 
+            $reactorType = ReactorType::tryFrom($config['reactorType']);
+            if (!$reactorType) throw new Exception("Tip reactor invalid: " . ($config['reactorType'] ?? '?'));
+            $coolingType = CoolingType::tryFrom($config['coolingType']);
+            if (!$coolingType) throw new Exception("Tip răcire invalid: " . ($config['coolingType'] ?? '?'));
             $currentReactorSchema = new ReactorSchema(
                 generateUUID(), 
-                ReactorType::from($config['reactorType']), 
-                CoolingType::from($config['coolingType']), 
+                $reactorType, 
+                $coolingType, 
             ); 
             $technicalPlantData->addReactorConfiguration($currentReactorSchema); 
         }

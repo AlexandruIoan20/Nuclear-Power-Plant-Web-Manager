@@ -4,10 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Date Geologice Centrală</title>
-    <link rel="stylesheet" href="../../../style.css">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/navbar.css">
+    <link rel="stylesheet" href="../../css/layout.css">
+    <link rel="stylesheet" href="../../css/buttons.css">
+    <link rel="stylesheet" href="../../css/responsive.css">
+    <link rel="stylesheet" href="../../css/forms.css">
+    <link rel="stylesheet" href="../../css/wizard-nav.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
     <div class="page-shell">
+        <div id="main-navbar"></div>
         <div id="form-header"></div>
         <main class="form-panel login-card" style="margin: 0 auto;">
             <h2 id="form-title">Date Geologice</h2>
@@ -16,13 +24,29 @@
                 <div class="field-grid">
 
                     <div class="field">
+                        <label for="country">Țară:</label>
+                        <input type="text" id="country" name="country" list="country-list"
+                            placeholder="Tastează pentru a căuta..." />
+                        <datalist id="country-list"></datalist>
+                    </div>
+
+                    <div class="field">
+                        <label for="latitude">Latitudine:</label>
+                        <input type="number" id="latitude" name="latitude" step="any" min="-90" max="90" />
+                    </div>
+
+                    <div class="field">
+                        <label for="longitude">Longitudine:</label>
+                        <input type="number" id="longitude" name="longitude" step="any" min="-180" max="180" />
+                    </div>
+
                     <div class="field">
                         <label for="soil_type">Tip Sol:</label>
                         <select id="soil_type" name="soil_type">
                             <option value="">-- Selectează tipul de sol --</option>
                         </select>
                     </div>
-                    
+
                     <div class="field">
                         <label for="water_source_type">Tip Sursă Apă:</label>
                         <select id="water_source_type" name="water_source_type">
@@ -32,44 +56,50 @@
 
                     <div class="field">
                         <label for="seismic_stability">Stabilitate Seismică (0.00 - 1.00):</label>
-                        <input type="number" id="seismic_stability" name="seismic_stability" step="0.01" min="0" max="1" />
+                        <input type="number" id="seismic_stability" name="seismic_stability" step="any" />
                     </div>
 
                     <div class="field">
                         <label for="flood_risk">Risc Inundații (0.00 - 1.00):</label>
-                        <input type="number" id="flood_risk" name="flood_risk" step="0.01" min="0" max="1" />
+                        <input type="number" id="flood_risk" name="flood_risk" step="any" />
                     </div>
 
                     <div class="field">
                         <label for="groundwater_level">Nivel Apă Freatică (metri):</label>
-                        <input type="number" id="groundwater_level" name="groundwater_level" step="0.1" />
+                        <input type="number" id="groundwater_level" name="groundwater_level" step="any" />
                     </div>
 
                     <div class="field">
                         <label for="water_proximity">Proximitate Apă (km):</label>
-                        <input type="number" id="water_proximity" name="water_proximity" step="0.1" />
+                        <input type="number" id="water_proximity" name="water_proximity" step="any" />
                     </div>
 
                     <div class="field">
                         <label for="water_flow_rate">Debit Apă (m³/s):</label>
-                        <input type="number" id="water_flow_rate" name="water_flow_rate" step="0.1" />
+                        <input type="number" id="water_flow_rate" name="water_flow_rate" step="any" />
                     </div>
 
                     <div class="field">
                         <label for="population_density">Densitate Populație (per km²):</label>
-                        <input type="number" id="population_density" name="population_density" step="0.1" />
+                        <input type="number" id="population_density" name="population_density" step="any" />
                     </div>
 
                     <div class="field">
                         <label for="transport_infrastructure_score">Scor Infrastructură Transport (0.00 - 1.00):</label>
-                        <input type="number" id="transport_infrastructure_score" name="transport_infrastructure_score" step="0.01" min="0" max="1" />
+                        <input type="number" id="transport_infrastructure_score" name="transport_infrastructure_score" step="any" />
                     </div>
 
                     <div class="field">
                         <label for="geological_risk_score">Scor Risc Geologic (0 - 100):</label>
-                        <input type="number" id="geological_risk_score" name="geological_risk_score" step="1" min="0" max="100" />
+                        <input type="number" id="geological_risk_score" name="geological_risk_score" step="any" />
                     </div>
 
+                </div>
+
+                <div class="map-help">
+                    <p class="eyebrow">SELECTEAZĂ PE HARTĂ</p>
+                    <div id="geological-map" style="height:320px; margin-top:12px;"></div>
+                    <p id="geological-map-status" class="map-status"></p>
                 </div>
 
                 <div class="card-actions">
@@ -81,7 +111,9 @@
         </main>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module" src="../../modules/ui/form-header/formHeader.js"></script>
-    <script type="module" src="../../modules/pages/geological.js"></script>
+    <script type="module" src="../../modules/ui/navbar.js"></script>
+    <script type="module" src="../../modules/pages/power-plants/geological.js"></script>
 </body>
 </html>

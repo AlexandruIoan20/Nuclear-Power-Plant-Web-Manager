@@ -1,0 +1,123 @@
+{
+    "PWR": {
+        "estimated_efficiency": {
+            "operator": "lt",
+            "threshold": 35,
+            "formula": "shortfall",
+            "multiplier": 2
+        },
+        "water_proximity": {
+            "operator": "gt",
+            "threshold": 2,
+            "formula": "excess",
+            "multiplier": 3
+        },
+        "water_flow_rate": {
+            "operator": "lt",
+            "threshold": 50,
+            "formula": "fixed",
+            "penalty": 10
+        },
+        "construction_duration_years": {
+            "operator": "gt",
+            "threshold": 12,
+            "formula": "excess",
+            "multiplier": 5
+        },
+        "geological_risk_score": {
+            "operator": "gt",
+            "threshold": 2,
+            "formula": "value_mult",
+            "multiplier": 2.5
+        }
+    },
+    "BWR": {
+        "seismic_stability": {
+            "operator": "lt",
+            "threshold": 6.5,
+            "formula": "shortfall",
+            "multiplier": 4
+        },
+        "population_density": {
+            "operator": "gt",
+            "threshold": 150,
+            "formula": "excess",
+            "multiplier": 0.08
+        },
+        "transport_infrastructure_score": {
+            "operator": "lt",
+            "threshold": 6,
+            "formula": "shortfall",
+            "multiplier": 3.5
+        },
+        "estimated_efficiency": {
+            "operator": "lt",
+            "threshold": 33,
+            "formula": "shortfall",
+            "multiplier": 2,
+            "base": 30
+        },
+        "construction_duration_years": {
+            "operator": "gt",
+            "threshold": 12,
+            "formula": "excess",
+            "multiplier": 4.5
+        }
+    },
+    "PHWR": {
+        "groundwater_level": {
+            "operator": "lt",
+            "threshold": 5,
+            "formula": "fixed",
+            "penalty": 12
+        },
+        "construction_duration_years": {
+            "operator": "gt",
+            "threshold": 12,
+            "formula": "excess",
+            "multiplier": 6
+        },
+        "estimated_efficiency": {
+            "operator": "lt",
+            "threshold": 30,
+            "formula": "shortfall",
+            "multiplier": 2
+        },
+        "seismic_stability": {
+            "operator": "lt",
+            "threshold": 6,
+            "formula": "shortfall",
+            "multiplier": 3.5
+        }
+    },
+    "FBR": {
+        "flood_risk": {
+            "operator": "gt",
+            "threshold": 2,
+            "formula": "excess",
+            "multiplier": 6
+        },
+        "seismic_stability": {
+            "operator": "lt",
+            "threshold": 7,
+            "formula": "shortfall",
+            "multiplier": 5
+        },
+        "estimated_efficiency": {
+            "operator": "lt",
+            "threshold": 38,
+            "formula": "shortfall",
+            "multiplier": 2.5
+        },
+        "construction_duration_years": {
+            "operator": "gt",
+            "threshold": 12,
+            "formula": "excess",
+            "multiplier": 4
+        }
+    },
+    "scoring": {
+        "nsvi_approved_min": 80,
+        "nsvi_review_min": 50
+    }
+}

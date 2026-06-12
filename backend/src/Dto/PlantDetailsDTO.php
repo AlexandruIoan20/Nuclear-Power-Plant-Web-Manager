@@ -1,43 +1,30 @@
 <?php
 
-class PlantDetailsDTO {
-    public string $id;
-    public string $name;
-    public string $country;
-    public ?float $latitude;
-    public ?float $longitude;
+require_once __DIR__ . '/BaseDTO.php';
 
+class PlantDetailsDTO extends BaseDTO {
     public function __construct(
-        string $id,
-        string $name,
-        string $country,
-        ?float $latitude,
-        ?float $longitude
-    ) {
-        $this->id = $id;
-        $this->name = $name;
-        $this->country = $country;
-        $this->latitude = $latitude;
-        $this->longitude = $longitude;
-    }
+        public readonly string $id,
+        public readonly string $name,
+        public readonly ?string $createdBy = null,
+        public readonly ?string $createdAt = null,
+        public readonly ?string $updatedAt = null,
+    ) {}
 
     public static function fromEntity(Plant $plant): self {
         return new self(
-            $plant->getId(),
-            $plant->getName(),
-            $plant->getCountry(),
-            $plant->getLatitude(),
-            $plant->getLongitude()
+            id: $plant->getId(),
+            name: $plant->getName(),
+            createdBy: $plant->getCreatedBy(),
+            createdAt: $plant->getCreatedAt(),
+            updatedAt: $plant->getUpdatedAt()
         );
     }
     
     public static function fromRequest(array $data, string $id = ''): self {
         return new self(
-            $id,
-            $data['name'] ?? '',
-            $data['country'] ?? '',
-            isset($data['latitude']) && $data['latitude'] !== '' ? (float) $data['latitude'] : null,
-            isset($data['longitude']) && $data['longitude'] !== '' ? (float) $data['longitude'] : null
+            id: $id,
+            name: $data['name'] ?? ''
         );
     }
 }

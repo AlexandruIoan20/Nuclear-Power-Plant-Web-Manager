@@ -1,6 +1,7 @@
 <?php 
 
 require_once __DIR__ . '/ScoringStrategy.php'; 
+require_once __DIR__ . '/ConfigHelper.php';
 
 class FbrStrategy implements ScoringStrategy { 
     public function calculate (array $plantData): array { 
@@ -8,14 +9,16 @@ class FbrStrategy implements ScoringStrategy {
         $technicalData = $plantData['technical_data']; 
         $basicData = $plantData['basic_data'];
 
+        $cfg = FeasibilityConfigHelper::get()['FBR'];
+
         $baseScore = 100.0; 
         $deductions = []; 
         $totalPenalty = 0.0; 
 
-        // Verificare deficienta hidrologica critica (???)
+        $check = $cfg['flood_risk'];
         $floodRisk = $geologicalData->getFloodRisk(); 
-        if($floodRisk > 2.0) { 
-            $penalty = ($floodRisk - 2.0) * 6.0; 
+        if($floodRisk !== null && $floodRisk > $check['threshold']) { 
+            $penalty = ($floodRisk - $check['threshold']) * $check['multiplier']; 
             $deductions[] = [ 
                 'parameter' => 'flood_risk',
                 'penalty' => -$penalty, 
@@ -25,12 +28,10 @@ class FbrStrategy implements ScoringStrategy {
             $totalPenalty += $penalty; 
         }
 
-        // Verificare deficienta seismica
-        // Necesita stabilitate perfecta. Orice valoare sub 7.0 este penalizata.
-        
+        $check = $cfg['seismic_stability'];
         $seismicStability = $geologicalData->getSeismicStability(); 
-        if($seismicStability < 7.0) { 
-            $penalty = (7.0 - $seismicStability) * 5.0;     
+        if($seismicStability !== null && $seismicStability < $check['threshold']) { 
+            $penalty = ($check['threshold'] - $seismicStability) * $check['multiplier'];     
             $deductions[] = [
                 'parameter' => 'seismic_stability', 
                 'penalty' => -$penalty, 
@@ -40,23 +41,23 @@ class FbrStrategy implements ScoringStrategy {
             $totalPenalty += $penalty; 
         }
 
-        // Verificare eficienta
+        $check = $cfg['estimated_efficiency'];
         $efficiency = $technicalData->getEstimatedEfficiency(); 
-        if($efficiency < 38.0) { 
-            $penalty = (38.0 - $efficiency) * 2.5;
+        if($efficiency !== null && $efficiency < $check['threshold']) { 
+            $penalty = (($check['base'] ?? $check['threshold']) - $efficiency) * $check['multiplier'];
             $deductions[] = [ 
                 'parameter' => 'estimated_efficiency', 
                 'penalty' => -$penalty, 
-                'reason' => "Eficienta estimata ({$efficiency}) este sub media tehnologica de 38%."
+                'reason' => "Eficienta estimata ({$efficiency}) este sub media tehnologica de {$check['threshold']}%."
             ]; 
 
             $totalPenalty += $penalty; 
         }
 
-        // Verificare economica
+        $check = $cfg['construction_duration_years'];
         $duration = $basicData->getConstructionDurationYears();
-        if ($duration > 6) {
-            $penalty = ($duration - 6) * 4.0; 
+        if ($duration !== null && $duration > $check['threshold']) {
+            $penalty = ($duration - $check['threshold']) * $check['multiplier']; 
             $deductions[] = [
                 'parameter' => 'construction_duration_years',
                 'penalty' => -$penalty, 

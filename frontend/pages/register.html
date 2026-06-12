@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panou Control | Înregistrare</title>
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/navbar.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/buttons.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/forms.css">
+</head>
+<body>
+    <script type="module" src="../modules/pages/register.js"></script>
+    <div id="main-navbar"></div>
+    <div class="page-shell login-layout">
+        <section class="login-card" aria-labelledby="register-title">
+            <p class="eyebrow">CREARE CONT</p>
+            <h1 id="register-title">Creare cont operator</h1>
+            <p>Creează un cont nou pentru a accesa sistemul de monitorizare al centralelor nucleare.</p>
+
+            <div id="register-message" class="footer-note" aria-live="polite"></div>
+
+            <form class="field-grid" id="registerForm" method="post">
+                <div class="field">
+                    <label for="first_name">Prenume</label>
+                    <input id="first_name" name="first_name" type="text" placeholder="Ion" autocomplete="given-name" required>
+                </div>
+                <div class="field">
+                    <label for="last_name">Nume</label>
+                    <input id="last_name" name="last_name" type="text" placeholder="Popescu" autocomplete="family-name" required>
+                </div>
+                <div class="field">
+                    <label for="username">Nume de utilizator</label>
+                    <input id="username" name="username" type="text" placeholder="ion.popescu" autocomplete="username" required>
+                </div>
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" placeholder="ion.popescu@nuclear.ro" autocomplete="email" required>
+                </div>
+                <div class="field">
+                    <label for="password">Parolă</label>
+                    <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="new-password" required>
+                </div>
+                <div class="field">
+                    <label for="password_confirm">Confirmă parolă</label>
+                    <input id="password_confirm" name="password_confirm" type="password" placeholder="••••••••" autocomplete="new-password" required>
+                </div>
+                <div class="button-row">
+                    <input type="submit" value="Creare cont">
+                    <a class="button secondary" href="login.html">Ai deja cont?</a>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <script type="module" src="../modules/ui/navbar.js"></script>
+</body>
+</html>

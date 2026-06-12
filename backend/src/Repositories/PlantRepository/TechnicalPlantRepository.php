@@ -1,5 +1,11 @@
 <?php 
 
+require_once __DIR__ . '/../../Helpers/generateUUID.php';
+require_once __DIR__ . '/../../Entities/ReactorSchema.php';
+require_once __DIR__ . '/../../Entities/CoolingType.php';
+require_once __DIR__ . '/../../Entities/TechnicalPlantData.php';
+require_once __DIR__ . '/../../Services/LogService.php';
+
 class TechnicalPlantRepository { 
     private PDO $pdo; 
 
@@ -21,7 +27,10 @@ class TechnicalPlantRepository {
             $row['id'], 
             $row['number_of_reactors'], 
             $row['estimated_efficiency'], 
-            $row['operational_risk_level']
+            $row['operational_risk_level'],
+            [],
+            $row['created_at'],
+            $row['updated_at']
         ); 
 
         $relationStatement = $this->pdo->prepare("SELECT * FROM reactor_schema JOIN reactor_plant_data ON reactor_schema.id = reactor_plant_data.reactor_schema_id 
@@ -43,16 +52,15 @@ class TechnicalPlantRepository {
     }
     public function save(TechnicalPlantData $technicalPlantData): void { 
         try {
-            error_log("[saveTechnicalData] START");
-            error_log("[saveTechnicalData] TechnicalPlantData: " . print_r($technicalPlantData, true));
-    
-            $this->pdo->beginTransaction();
-            error_log("[saveTechnicalData] Transaction started");
+            LogService::instance()->info("[saveTechnicalData] START");
+            LogService::instance()->info("[saveTechnicalData] TechnicalPlantData: " . print_r($technicalPlantData, true));
     
             $statement = $this->pdo->prepare("INSERT INTO technical_data (
-                    id, power_plant_id, number_of_reactors, estimated_efficiency, operational_risk_level
+                    id, power_plant_id, number_of_reactors, estimated_efficiency, operational_risk_level,
+                    created_at, updated_at
                 ) VALUES (
-                    :id, :power_plant_id, :number_of_reactors, :estimated_efficiency, :operational_risk_level
+                    :id, :power_plant_id, :number_of_reactors, :estimated_efficiency, :operational_risk_level,
+                    NOW(), NOW()
                 )");
     
             $insertParams = [
@@ -62,19 +70,19 @@ class TechnicalPlantRepository {
                 'estimated_efficiency' => $technicalPlantData->getEstimatedEfficiency(), 
                 'operational_risk_level' => $technicalPlantData->getOperationalRiskLevel()
             ];
-            error_log("[saveTechnicalData] INSERT technical_data params: " . print_r($insertParams, true));
+            LogService::instance()->info("[saveTechnicalData] INSERT technical_data params: " . print_r($insertParams, true));
     
             $statement->execute($insertParams);
-            error_log("[saveTechnicalData] technical_data inserted, rowCount: " . $statement->rowCount());
+            LogService::instance()->info("[saveTechnicalData] technical_data inserted, rowCount: " . $statement->rowCount());
     
             $reactorConfigurations = $technicalPlantData->getReactorConfigurations(); 
-            error_log("[saveTechnicalData] reactorConfigurations count: " . count($reactorConfigurations));
-            error_log("[saveTechnicalData] reactorConfigurations raw: " . print_r($reactorConfigurations, true));
+            LogService::instance()->info("[saveTechnicalData] reactorConfigurations count: " . count($reactorConfigurations));
+            LogService::instance()->info("[saveTechnicalData] reactorConfigurations raw: " . print_r($reactorConfigurations, true));
     
             $groupedConfigurations = [];
             foreach ($reactorConfigurations as $index => $config) {
                 $key = $config->getType()->value . '_' . $config->getCooling()->value;
-                error_log("[saveTechnicalData] config[$index] key: $key | type: " . $config->getType()->value . " | cooling: " . $config->getCooling()->value);
+                LogService::instance()->info("[saveTechnicalData] config[$index] key: $key | type: " . $config->getType()->value . " | cooling: " . $config->getCooling()->value);
     
                 if (!isset($groupedConfigurations[$key])) {
                     $groupedConfigurations[$key] = [
@@ -84,15 +92,16 @@ class TechnicalPlantRepository {
                     ];
                 }
                 $groupedConfigurations[$key]['quantity']++;
-                error_log("[saveTechnicalData] config[$index] quantity for key '$key' now: " . $groupedConfigurations[$key]['quantity']);
+                LogService::instance()->info("[saveTechnicalData] config[$index] quantity for key '$key' now: " . $groupedConfigurations[$key]['quantity']);
             }
-            error_log("[saveTechnicalData] groupedConfigurations final: " . print_r($groupedConfigurations, true));
+            LogService::instance()->info("[saveTechnicalData] groupedConfigurations final: " . print_r($groupedConfigurations, true));
     
             $relationalStatement = $this->pdo->prepare("
                     INSERT INTO reactor_plant_data (technical_data_id, reactor_schema_id, number_of_reactors)
                     SELECT :technical_data_id, id, :number_of_reactors 
                     FROM reactor_schema 
                     WHERE reactor_type = :reactor_type AND cooling_type = :cooling_type
+                    LIMIT 1
             ");
     
             foreach ($groupedConfigurations as $key => $group) { 
@@ -102,29 +111,66 @@ class TechnicalPlantRepository {
                     'cooling_type' => $group['cooling'],
                     'number_of_reactors' => $group['quantity']
                 ];
-                error_log("[saveTechnicalData] INSERT reactor_plant_data for key '$key': " . print_r($relationalParams, true));
+                LogService::instance()->info("[saveTechnicalData] INSERT reactor_plant_data for key '$key': " . print_r($relationalParams, true));
     
                 $relationalStatement->execute($relationalParams); 
     
                 $rowCount = $relationalStatement->rowCount();
-                error_log("[saveTechnicalData] reactor_plant_data rowCount for key '$key': $rowCount");
+                LogService::instance()->info("[saveTechnicalData] reactor_plant_data rowCount for key '$key': $rowCount");
     
                 if ($rowCount === 0) {
-                    error_log("[saveTechnicalData] ERROR - reactor_schema not found for type: " . $group['type'] . " | cooling: " . $group['cooling']);
+                    LogService::instance()->error("[saveTechnicalData] ERROR - reactor_schema not found for type: " . $group['type'] . " | cooling: " . $group['cooling']);
                     throw new Exception("Configurația reactorului (" . $group['type'] . " - " . $group['cooling'] . ") nu există în catalog.");
                 }
     
-                error_log("[saveTechnicalData] reactor_plant_data inserted successfully for key '$key'");
+                LogService::instance()->info("[saveTechnicalData] reactor_plant_data inserted successfully for key '$key'");
             }
     
-            $this->pdo->commit();
-            error_log("[saveTechnicalData] Transaction committed - DONE");
+            $plantShort = substr($technicalPlantData->getPowerPlantId(), 0, 8);
+            $seq = 0;
+            $reactorInsert = $this->pdo->prepare("
+                INSERT INTO reactor (
+                    id, power_plant_id, reactor_code, reactor_type, cooling_type,
+                    operational_status, thermal_power_mw, electrical_power_mw,
+                    fuel_cycle_days, current_cycle_day, wear_index, design_lifetime_yr,
+                    created_at
+                ) VALUES (
+                    :id, :power_plant_id, :reactor_code, :reactor_type, :cooling_type,
+                    :operational_status, NULL, NULL,
+                    :fuel_cycle_days, :current_cycle_day, :wear_index, :design_lifetime_yr,
+                    NOW()
+                )
+            ");
+
+            foreach ($groupedConfigurations as $group) {
+                for ($i = 0; $i < $group['quantity']; $i++) {
+                    $seq++;
+                    $reactorInsert->execute([
+                        'id' => generateUUID(),
+                        'power_plant_id' => $technicalPlantData->getPowerPlantId(),
+                        'reactor_code' => 'AUTO-' . $plantShort . '-' . $seq,
+                        'reactor_type' => $group['type'],
+                        'cooling_type' => $group['cooling'],
+                        'operational_status' => 'SHUTDOWN',
+                        'fuel_cycle_days' => 365,
+                        'current_cycle_day' => 0,
+                        'wear_index' => 0.0000,
+                        'design_lifetime_yr' => 40,
+                    ]);
+                }
+            }
+
+            LogService::instance()->info("[saveTechnicalData] DONE");
     
         } catch (Exception $e) { 
-            $this->pdo->rollBack();
-            error_log("[saveTechnicalData] ROLLBACK triggered");
-            error_log("[saveTechnicalData] Eroare la salvare: " . $e->getMessage());
-            error_log("[saveTechnicalData] Stack trace: " . $e->getTraceAsString());
+
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            
+            LogService::instance()->error("[saveTechnicalData] ROLLBACK triggered");
+            LogService::instance()->error("[saveTechnicalData] Eroare la salvare: " . $e->getMessage());
+            LogService::instance()->error("[saveTechnicalData] Stack trace: " . $e->getTraceAsString());
             throw new Exception("Eroare la salvarea datelor tehnice: " . $e->getMessage());
         }
     }
@@ -138,7 +184,8 @@ class TechnicalPlantRepository {
                 SET 
                     number_of_reactors = :number_of_reactors, 
                     estimated_efficiency = :estimated_efficiency, 
-                    operational_risk_level = :operational_risk_level
+                    operational_risk_level = :operational_risk_level,
+                    updated_at = NOW()
                 WHERE id = :id
             "); 
 
@@ -179,6 +226,7 @@ class TechnicalPlantRepository {
                 SELECT :technical_data_id, id, :number_of_reactors 
                 FROM reactor_schema 
                 WHERE reactor_type = :reactor_type AND cooling_type = :cooling_type
+                LIMIT 1
             "); 
 
             foreach ($groupedConfigurations as $group) { 
@@ -194,18 +242,59 @@ class TechnicalPlantRepository {
                 }
             }
 
+            $deleteReactors = $this->pdo->prepare(
+                "DELETE FROM reactor WHERE power_plant_id = :plant_id AND reactor_code LIKE 'AUTO-%'"
+            );
+            $deleteReactors->execute(['plant_id' => $technicalPlantData->getPowerPlantId()]);
+
+            $plantShort = substr($technicalPlantData->getPowerPlantId(), 0, 8);
+            $seq = 0;
+            $reactorInsert = $this->pdo->prepare("
+                INSERT INTO reactor (
+                    id, power_plant_id, reactor_code, reactor_type, cooling_type,
+                    operational_status, thermal_power_mw, electrical_power_mw,
+                    fuel_cycle_days, current_cycle_day, wear_index, design_lifetime_yr,
+                    created_at
+                ) VALUES (
+                    :id, :power_plant_id, :reactor_code, :reactor_type, :cooling_type,
+                    :operational_status, NULL, NULL,
+                    :fuel_cycle_days, :current_cycle_day, :wear_index, :design_lifetime_yr,
+                    NOW()
+                )
+            ");
+
+            foreach ($groupedConfigurations as $group) {
+                for ($i = 0; $i < $group['quantity']; $i++) {
+                    $seq++;
+                    $reactorInsert->execute([
+                        'id' => generateUUID(),
+                        'power_plant_id' => $technicalPlantData->getPowerPlantId(),
+                        'reactor_code' => 'AUTO-' . $plantShort . '-' . $seq,
+                        'reactor_type' => $group['type'],
+                        'cooling_type' => $group['cooling'],
+                        'operational_status' => 'SHUTDOWN',
+                        'fuel_cycle_days' => 365,
+                        'current_cycle_day' => 0,
+                        'wear_index' => 0.0000,
+                        'design_lifetime_yr' => 40,
+                    ]);
+                }
+            }
+
             $this->pdo->commit();
 
         } catch (Exception $e) {
-            $this->pdo->rollBack();
-            error_log("[TechnicalPlantRepository] Eroare la actualizare: " . $e->getMessage());
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            LogService::instance()->error("[TechnicalPlantRepository] Eroare la actualizare: " . $e->getMessage());
             throw new Exception("Eroare la actualizarea datelor tehnice: " . $e->getMessage());
         }
     }
 
     public function getReactorSchemaByDetails(string $reactorType, string $coolingType): ReactorSchema { 
         $statement = $this->pdo->prepare( 
-            "SELECT * FROM reactor_schema WHERE reactor_type = :reactorType AND cooling_type = :coolingType"
+            "SELECT * FROM reactor_schema WHERE reactor_type = :reactorType AND cooling_type = :coolingType LIMIT 1"
         ); 
 
         $statement->execute([

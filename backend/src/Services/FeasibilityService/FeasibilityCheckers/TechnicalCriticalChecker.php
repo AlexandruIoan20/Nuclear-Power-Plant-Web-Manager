@@ -35,10 +35,7 @@ class TechnicalCriticalChecker extends AbstractFeasibilityChecker {
         }
 
         if (!empty($criticalErrors)) {
-            return [
-                'status' => 'REJECTED',
-                'errors' => $criticalErrors
-            ];
+            return ['status' => 'REJECTED', 'errors' => $criticalErrors];
         }
 
         return parent::check($plantData); 

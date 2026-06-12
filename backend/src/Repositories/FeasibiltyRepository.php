@@ -1,5 +1,7 @@
 <?php 
 
+require_once __DIR__ . '/../Services/LogService.php';
+
 class FeasibilityRepository { 
     private PDO $db; 
 
@@ -10,29 +12,29 @@ class FeasibilityRepository {
     public function saveReport(string $powerPlantId, array $reportResult): bool { 
         $status = $reportResult['status']; 
         $score = $reportResult['nsvi_score'] ?? null; 
+        $message = $reportResult['message'] ?? null; 
         $deficienciesJson = isset($reportResult['deficiencies']) ? json_encode($reportResult['deficiencies']) : json_encode([]); 
+        $errorsJson = isset($reportResult['errors']) ? json_encode($reportResult['errors']) : json_encode([]); 
 
         try { 
-            $this->db->beginTransaction(); 
-
             $statement = $this->db->prepare(
-                "INSERT INTO feasibility_reports(power_plant_id, status, nsvi_score, deficiencies) 
-                 VALUES (:plant_id, :status, :score, :deficiencies)"
+                "INSERT INTO feasibility_reports(power_plant_id, status, nsvi_score, message, deficiencies, errors) 
+                 VALUES (:plant_id, :status, :score, :message, :deficiencies, :errors)"
             ); 
 
             $statement->execute([ 
                 ':plant_id' => $powerPlantId, 
                 ':status' => $status, 
                 ':score' => $score, 
-                ':deficiencies' => $deficienciesJson 
+                ':message' => $message, 
+                ':deficiencies' => $deficienciesJson,
+                ':errors' => $errorsJson
             ]); 
 
-            $this->db->commit(); 
             return true;
             
         } catch(PDOException $e) { 
-            $this->db->rollBack(); 
-            error_log("[FeasibilityRepository] Eroare la salvarea raportului: " . $e->getMessage()); 
+            LogService::instance()->error("[FeasibilityRepository] Eroare la salvarea raportului: " . $e->getMessage());
             return false;
         }
     }
@@ -40,7 +42,7 @@ class FeasibilityRepository {
     public function getLatestReportByPlantId(string $powerPlantId): ?array { 
         try { 
             $statement = $this->db->prepare(
-                "SELECT id as report_id, status, nsvi_score, deficiencies, created_at 
+                "SELECT id as report_id, status, nsvi_score, message, deficiencies, errors, created_at 
                  FROM feasibility_reports 
                  WHERE power_plant_id = :plant_id
                  ORDER BY created_at DESC LIMIT 1"
@@ -57,12 +59,13 @@ class FeasibilityRepository {
             }
 
             $report['deficiencies'] = json_decode($report['deficiencies'], true);  
+            $report['errors'] = json_decode($report['errors'], true);  
             $report['nsvi_score'] = $report['nsvi_score'] !== null ? (float) $report['nsvi_score'] : null; 
 
             return $report;
             
         } catch(PDOException $e) { 
-            error_log("[FeasibilityRepository] Eroare la citirea raportului: " . $e->getMessage()); 
+            LogService::instance()->error("[FeasibilityRepository] Eroare la citirea raportului: " . $e->getMessage());
             throw new Exception("Eroare interna la baza de date.");
         }
     }
