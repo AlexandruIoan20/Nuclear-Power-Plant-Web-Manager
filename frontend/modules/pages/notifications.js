@@ -1,7 +1,7 @@
 import { escapeHtml } from '../utils/escapeHtml.js';
 import { notificationService } from '../services/notificationService.js';
-// TODO: Asigură-te că imporți API_BASE și getCsrfToken dacă folosești apeluri fetch directe mai jos
-// import { API_BASE, getCsrfToken } from '../utils/apiConfig.js'; 
+import { getCsrfToken } from '../core/api.js';
+import { API_BASE } from '../config/api.config.js';
 
 function buildAlertCards(container, notifications) {
     if (notifications.length === 0) {
@@ -44,6 +44,15 @@ function buildPlantCards(container, notifications) {
         container.innerHTML = `<p style="color: var(--text-muted); text-align: center;">Nu există notificări de centrale.</p>`;
         return;
     }
+
+    const toolbar = document.createElement("div");
+    toolbar.style.cssText = "display: flex; justify-content: flex-end; margin-bottom: 16px;";
+    const markBtn = document.createElement("button");
+    markBtn.className = "button secondary small";
+    markBtn.textContent = "Mark All as Read";
+    markBtn.addEventListener("click", markAllPlantAsRead);
+    toolbar.appendChild(markBtn);
+    container.appendChild(toolbar);
 
     notifications.forEach(notification => {
         const card = document.createElement("div");
@@ -134,7 +143,6 @@ async function markAllAsRead() {
     if (btn) { btn.disabled = true; btn.textContent = "Se marchează..."; }
     
     try {
-        // Ideal ar fi ca și acest apel să fie mutat în notificationService
         const response = await fetch(`${API_BASE}/alerts/all/read`, {
             method: "PUT",
             headers: { "X-CSRF-Token": await getCsrfToken() },
@@ -147,6 +155,28 @@ async function markAllAsRead() {
         }
         
         await loadCategory("alert");
+    } catch (error) {
+        alert("Eroare: " + error.message);
+    }
+}
+
+async function markAllPlantAsRead() {
+    const btn = document.querySelector("#tab-plant .button.secondary.small");
+    if (btn) { btn.disabled = true; btn.textContent = "Se marchează..."; }
+    
+    try {
+        const response = await fetch(`${API_BASE}/alerts/plant-all/read`, {
+            method: "PUT",
+            headers: { "X-CSRF-Token": await getCsrfToken() },
+            credentials: "include"
+        });
+        
+        if (!response.ok) {
+            const result = await response.json();
+            throw new Error(result.message || `Eroare ${response.status}`);
+        }
+        
+        await loadCategory("plant");
     } catch (error) {
         alert("Eroare: " + error.message);
     }

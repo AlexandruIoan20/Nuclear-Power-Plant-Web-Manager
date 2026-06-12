@@ -7,7 +7,7 @@ class BasicPlantData {
     private string $powerPlantId; 
     private ?float $capacity; 
     private ?int $constructionDurationYears; 
-    private string $description; 
+    private ?string $description; 
     private ?string $createdAt;
     private ?string $updatedAt;
 
@@ -61,11 +61,11 @@ class BasicPlantData {
         $this->constructionDurationYears = $constructionDurationYears;
     }
 
-    public function getDescription(): string {
+    public function getDescription(): ?string {
         return $this->description;
     }
 
-    public function setDescription(string $description): void {
+    public function setDescription(?string $description): void {
         $this->description = $description;
     }
 

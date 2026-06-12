@@ -42,7 +42,7 @@ class PlantServiceFacade {
     public function reopenDraft(string $plantId, string $userId): bool {
         $plant = $this->detailsPlantService->findById($plantId);
         if (!$plant) return false;
-        if ($plant->getStatus()->value !== 'REJECTED') return false;
+        if (!in_array($plant->getStatus()->value, ['REJECTED', 'REVIEW'], true)) return false;
         if ($plant->getCreatedBy() !== $userId) return false;
 
         $this->plantRepositoryFacade->updatePlantStatus($plantId, 'DRAFT');

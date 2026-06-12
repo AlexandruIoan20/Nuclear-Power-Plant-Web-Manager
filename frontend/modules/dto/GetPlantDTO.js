@@ -29,6 +29,6 @@ export function GetPlantDTO(data) {
         estimatedEfficiency: data.technical?.estimatedEfficiency ?? null,
         operationalRiskLevel: data.technical?.operationalRiskLevel ?? null,
         safetySystems: data.technical?.safetySystems ?? [],
-        reactorConfigurations: data.technical?.reactorConfigs ?? [],
+        reactorConfigurations: data.technical?.reactorConfigurations ?? [],
     };
 }

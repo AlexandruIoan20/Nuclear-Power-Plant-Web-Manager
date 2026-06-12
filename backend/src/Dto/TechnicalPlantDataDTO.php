@@ -11,7 +11,7 @@ class TechnicalPlantDataDTO extends BaseDTO {
         public readonly ?float $estimatedEfficiency, 
         public readonly ?float $operationalRiskLevel, 
         public readonly ?array $safetySystems, 
-        public readonly ?array $reactorConfigs,
+        public readonly ?array $reactorConfigurations,
         public readonly ?string $createdAt,
         public readonly ?string $updatedAt
     ) {}
@@ -32,7 +32,7 @@ class TechnicalPlantDataDTO extends BaseDTO {
             estimatedEfficiency: $t->getEstimatedEfficiency(), 
             operationalRiskLevel: $t->getOperationalRiskLevel(), 
             safetySystems: $t->getSafetySystems(), 
-            reactorConfigs: $formattedReactorConfigs,
+            reactorConfigurations: $formattedReactorConfigs,
             createdAt: $t->getCreatedAt(),
             updatedAt: $t->getUpdatedAt()
         ); 

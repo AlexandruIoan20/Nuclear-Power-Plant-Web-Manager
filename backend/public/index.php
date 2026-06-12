@@ -28,6 +28,8 @@ if(!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'OPTIONS', 'HEAD'])) {
     }
 } 
 
+require_once __DIR__ . '/../src/Constants/urls.php';
+
 $allowedOrigins = [
     URL_FRONTEND,
     URL_BACKEND,
@@ -59,7 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/../src/Helpers/TransactionManager.php'; 
 
-require_once __DIR__ . '/../src/Constants/urls.php';
 require_once __DIR__ . '/../src/Router.php';
 require_once __DIR__ . '/../src/Entities/User.php';
 require_once __DIR__ . '/../src/Repositories/UserRepository.php';
@@ -270,7 +271,7 @@ $router->post('/api/power-plants', auth(null, function () use ($plantServiceFaca
 
 $approvalRepository = new ApprovalRepository($pdo);
 $approvalService = new ApprovalService($approvalRepository);
-$approvalController = new ApprovalController($approvalService);
+$approvalController = new ApprovalController($approvalService, $alertService);
 
 $router->patch('/api/power-plants/{id}/submit-review', auth(null, function ($plantId) use ($plantServiceFacade, $alertService) {
     (new DetailsPlantController($plantServiceFacade, $alertService))->submitForReview($plantId);
@@ -495,6 +496,9 @@ $router->get('/logout', function() use ($userService) {
 $router->get('/api/user/status', function() use ($userService) {
     (new UserController($userService))->getUserStatus();
 });
+
+
+$router->post('/api/email/send', auth(null, function () use ($emailController) { $emailController->handleSendEmail(); }));
 
 // --- Dispatch ---
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

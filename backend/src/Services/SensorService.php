@@ -63,34 +63,43 @@ class SensorService {
         $status = isset($data['status']) ? (SensorQuality::tryFrom($data['status'])) ?? SensorQuality::GOOD 
             : SensorQuality::GOOD;
 
-            $sensor = new ReactorSensor(
-                $data['reactorId'],
-                $data['sensorCode'],
-                $sensorType,
-                null, // id se genereaza automat
-                $data['description'] ?? null,
-                $data['locationZone'] ?? null,
-                $data['unitOfMeasure'] ?? null,
-                $data['measurementField'] ?? null,
-                $data['normalMin'] ?? null,
-                $data['normalMax'] ?? null,
-                $data['alarmLow'] ?? null,
-                $data['alarmHigh'] ?? null,
-                $data['alertLow'] ?? null,
-                $data['alertHigh'] ?? null,
-                $data['scramLow'] ?? null,
-                $data['scramHigh'] ?? null,
-                $status,
-                isset($data['isActive']) ? (bool)$data['isActive'] : true,
-                $data['lastCalibration'] ?? null,
-                $data['calibrationDue'] ?? null,
-                $data['currentValue'] ?? null,
-                $data['lastReadingAt'] ?? null
-            );
+        $currentValue = $data['currentValue'] ?? null;
+        if ($currentValue === null) {
+            $normalMin = $data['normalMin'] ?? null;
+            $normalMax = $data['normalMax'] ?? null;
+            if ($normalMin !== null && $normalMax !== null) {
+                $currentValue = ($normalMin + $normalMax) / 2;
+            }
+        }
+
+        $sensor = new ReactorSensor(
+            $data['reactorId'],
+            $data['sensorCode'],
+            $sensorType,
+            null,
+            $data['description'] ?? null,
+            $data['locationZone'] ?? null,
+            $data['unitOfMeasure'] ?? null,
+            $data['measurementField'] ?? null,
+            $data['normalMin'] ?? null,
+            $data['normalMax'] ?? null,
+            $data['alarmLow'] ?? null,
+            $data['alarmHigh'] ?? null,
+            $data['alertLow'] ?? null,
+            $data['alertHigh'] ?? null,
+            $data['scramLow'] ?? null,
+            $data['scramHigh'] ?? null,
+            $status,
+            isset($data['isActive']) ? (bool)$data['isActive'] : true,
+            $data['lastCalibration'] ?? null,
+            $data['calibrationDue'] ?? null,
+            $currentValue,
+            $data['lastReadingAt'] ?? null
+        );
     
-            $this->sensorRepository->save($sensor);
+        $this->sensorRepository->save($sensor);
     
-            return $sensor->getId();
+        return $sensor->getId();
     }
 
     public function updateSensor(string $id, array $data): void { 
@@ -148,7 +157,7 @@ class SensorService {
     }
 
     private function isValidUuid(string $uuid): bool {
-        return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $uuid) === 1;
+        return preg_match('/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i', $uuid) === 1;
     }
 
 

@@ -40,7 +40,7 @@ class ReactorService {
 
     public function createReactor(array $data): string { 
         $this->validateCreationData($data); 
-        $this->ensurePlantApproved($data['powerPlantId']);
+        $this->ensurePlantNotApproved($data['powerPlantId']);
 
         $reactorType = ReactorType::tryFrom($data['reactorType']); 
         $coolingType = CoolingType::tryFrom($data['coolingType']); 
@@ -76,7 +76,6 @@ class ReactorService {
     public function updateReactor(string $id, array $data): void { 
         $reactor = $this->reactorRepository->findById($id); 
         if(!$reactor) throw new Exception("Reactorul cu ID-ul $id nu a fost gasit pentru actualizare."); 
-        $this->ensurePlantApproved($reactor->getPowerPlantId());
 
         if(isset($data['reactorCode'])) { 
             if(empty(trim($data['reactorCode']))) throw new Exception("reactorCode nu poate fi gol"); 
@@ -119,7 +118,7 @@ class ReactorService {
     public function deleteReactor(string $id): void { 
         $reactor = $this->reactorRepository->findById($id); 
         if(!$reactor) throw new Exception("Reactorul cu ID-ul $id nu a fost gasit pentru stergere"); 
-        $this->ensurePlantApproved($reactor->getPowerPlantId()); 
+        $this->ensurePlantNotApproved($reactor->getPowerPlantId()); 
 
         $this->reactorRepository->delete($id); 
     }
@@ -146,15 +145,15 @@ class ReactorService {
         return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $uuid) === 1;
     }
 
-    private function ensurePlantApproved(string $plantId): void {
+    private function ensurePlantNotApproved(string $plantId): void {
         $plant = $this->plantRepositoryFacade->getPlantDetailsById($plantId);
         if (!$plant) {
             throw new Exception("Centrala cu ID-ul $plantId nu a fost găsită.");
         }
 
-        if ($plant->getStatus()->value !== 'APPROVED') {
+        if ($plant->getStatus()->value === 'APPROVED') {
             throw new Exception(
-                "Nu se pot gestiona reactoare decât pe centrale aprobate. " .
+                "Nu se pot gestiona reactoare pe o centrală deja aprobată. " .
                 "Statusul curent al centralei: " . $plant->getStatus()->value
             );
         }

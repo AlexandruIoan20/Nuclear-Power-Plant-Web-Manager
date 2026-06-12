@@ -80,7 +80,14 @@ class AlertController {
             if ($id === 'all') {
                 $this->alertService->dismissAllAlerts();
                 LogService::instance()->info("[ALERT] Toate alertele au fost marcate ca citite.");
-                echo json_encode(['status' => 'success', 'message' => 'Toate alertele au fost marcate ca citite.']);
+                echo json_encode(['status' => 'success', 'message' => 'Toate alertele senzori au fost marcate ca citite.']);
+                return;
+            }
+
+            if ($id === 'plant-all') {
+                $this->alertService->dismissAllPlantEvents();
+                LogService::instance()->info("[ALERT] Toate evenimentele de centrale au fost marcate ca citite.");
+                echo json_encode(['status' => 'success', 'message' => 'Toate notificările de centrale au fost marcate ca citite.']);
                 return;
             }
 

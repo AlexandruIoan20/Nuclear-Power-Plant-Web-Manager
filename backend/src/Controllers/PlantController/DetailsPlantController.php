@@ -34,7 +34,7 @@ class DetailsPlantController {
         } 
         $dto = GetPlantDTO::fromServiceArray($plant);
     
-        echo json_encode($dto);
+        echo json_encode(new ApiResponseDTO(status: 'success', data: $dto));
     }
 
     public function getPlantDetails(string $id) { 
@@ -77,11 +77,6 @@ class DetailsPlantController {
         header('Content-Type: application/json; charset=UTF-8');
 
         $plants = $this->plantServiceFacade->getAllPowerPlants();
-
-        if (!AuthHelper::isAuthenticated()) {
-            $plants = array_values(array_filter($plants, fn($p) => ($p['status'] ?? '') === 'APPROVED'));
-        }
-
         $payload = array_map(fn($plant) => PlantListDTO::fromDbArray($plant), $plants);
 
         http_response_code(200);
@@ -137,8 +132,6 @@ class DetailsPlantController {
         header('Content-Type: application/json; charset=UTF-8');
 
         $plants = $this->plantServiceFacade->getAllPowerPlants();
-        $plants = array_values(array_filter($plants, fn($p) => ($p['status'] ?? '') === 'APPROVED'));
-
         $dtos = array_map(fn($plant) => PlantMapDTO::fromDbArray($plant), $plants);
 
         http_response_code(200);
@@ -269,7 +262,7 @@ class DetailsPlantController {
 
             if (!$result) {
                 http_response_code(400);
-                echo json_encode(new ApiResponseDTO(status: 'error', message: 'Nu se poate redeschide centrala. Statusul curent trebuie să fie REJECTED.'));
+                echo json_encode(new ApiResponseDTO(status: 'error', message: 'Nu se poate redeschide centrala. Statusul curent trebuie să fie REJECTED sau REVIEW.'));
                 exit;
             }
 

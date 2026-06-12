@@ -7,7 +7,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const statPending = document.getElementById("stat-pending");
 
     try {
-        const plants = await adminApprovalService.getPendingApprovals();
+        const result = await adminApprovalService.getPendingApprovals();
+        const plants = result.data ?? [];
         tableBody.innerHTML = "";
 
         statPending.textContent = plants.length < 10 ? `0${plants.length}` : plants.length;

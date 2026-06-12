@@ -59,11 +59,11 @@ document.addEventListener("DOMContentLoaded", async() => {
     
             try { 
                 const response = await powerPlantService.createBasics(dto, plantId); 
-                saveHeaderState({ basicsId: response.basicsId }); 
+                saveHeaderState({ basicsId: response.data.dataId }); 
                 showSuccess(statusElement, "Datele au fost salvate cu succes!"); 
 
-                window.history.replaceState({}, '', `?id=${response.plantId}&basicsId=${response.basicsId}`)
-                window.location.href = `/pages/power-plants/geological.html?id=${response.plantId}`;
+                window.history.replaceState({}, '', `?id=${response.data.plantId}&basicsId=${response.data.dataId}`)
+                window.location.href = `/pages/power-plants/geological.html?id=${response.data.plantId}`;
 
                 form.reset(); 
             } catch(error) { 

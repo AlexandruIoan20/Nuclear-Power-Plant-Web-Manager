@@ -32,18 +32,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     let plantStatus = null;
     try {
         const plantData = await powerPlantService.getPlant(plantId);
-        plantStatus = plantData.details?.status || null;
+        plantStatus = plantData.data?.details?.status || null;
     } catch (err) {
         showError(statusElement, "Nu s-a putut verifica statusul centralei.");
         disableForm();
         return;
     }
 
-    if (plantStatus !== 'APPROVED') {
-        const labels = { DRAFT: 'în lucru', REVIEW: 'în verificare', REJECTED: 'respinsă' };
+    if (plantStatus === 'APPROVED') {
         showError(statusElement,
-            'Nu se pot crea reactoare pe o centrală ' + (labels[plantStatus] || plantStatus) + '. ' +
-            'Statusul centralei trebuie să fie APPROVED.');
+            'Nu se mai pot adăuga reactoare pe o centrală deja aprobată.');
         disableForm();
         return;
     }
