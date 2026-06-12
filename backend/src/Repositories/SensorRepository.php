@@ -97,33 +97,6 @@ class SensorRepository {
         return array_map(fn($row) => $this->mapRowToEntity($row), $rows);
     }
 
-    private function mapRowToEntity(array $row): ReactorSensor {
-        return new ReactorSensor(
-            $row['reactor_id'],
-            $row['sensor_code'],
-            SensorType::from($row['sensor_type']),
-            $row['id'],
-            $row['description'],
-            $row['location_zone'],
-            $row['unit_of_measure'],
-            $row['measurement_field'],
-            $row['normal_min'] !== null ? (float)$row['normal_min'] : null,
-            $row['normal_max'] !== null ? (float)$row['normal_max'] : null,
-            $row['alarm_low'] !== null ? (float)$row['alarm_low'] : null,
-            $row['alarm_high'] !== null ? (float)$row['alarm_high'] : null,
-            $row['alert_low'] !== null ? (float)$row['alert_low'] : null,
-            $row['alert_high'] !== null ? (float)$row['alert_high'] : null,
-            $row['scram_low'] !== null ? (float)$row['scram_low'] : null,
-            $row['scram_high'] !== null ? (float)$row['scram_high'] : null,
-            isset($row['status']) ? SensorQuality::from($row['status']) : SensorQuality::GOOD,
-            $row['is_active'] ?? true,
-            $row['last_calibration'],
-            $row['calibration_due'],
-            $row['current_value'] !== null ? (float)$row['current_value'] : null,
-            $row['last_reading_at']
-        );
-    }
-
     public function updateCurrentValue(string $sensorId, float $value) { 
         $statement = $this->db->prepare("UPDATE reactor_sensors SET current_value = :current_value, last_reading_at = CURRENT_TIMESTAMP WHERE id = :sensor_id"); 
         $statement->execute([
@@ -215,5 +188,32 @@ class SensorRepository {
             'last_reading_at' => $s->getLastReadingAt(),
             'created_at' => $s->getCreatedAt(),
         ];
+    }
+
+    private function mapRowToEntity(array $row): ReactorSensor {
+        return new ReactorSensor(
+            $row['reactor_id'],
+            $row['sensor_code'],
+            SensorType::from($row['sensor_type']),
+            $row['id'],
+            $row['description'],
+            $row['location_zone'],
+            $row['unit_of_measure'],
+            $row['measurement_field'],
+            $row['normal_min'] !== null ? (float)$row['normal_min'] : null,
+            $row['normal_max'] !== null ? (float)$row['normal_max'] : null,
+            $row['alarm_low'] !== null ? (float)$row['alarm_low'] : null,
+            $row['alarm_high'] !== null ? (float)$row['alarm_high'] : null,
+            $row['alert_low'] !== null ? (float)$row['alert_low'] : null,
+            $row['alert_high'] !== null ? (float)$row['alert_high'] : null,
+            $row['scram_low'] !== null ? (float)$row['scram_low'] : null,
+            $row['scram_high'] !== null ? (float)$row['scram_high'] : null,
+            isset($row['status']) ? SensorQuality::from($row['status']) : SensorQuality::GOOD,
+            $row['is_active'] ?? true,
+            $row['last_calibration'],
+            $row['calibration_due'],
+            $row['current_value'] !== null ? (float)$row['current_value'] : null,
+            $row['last_reading_at']
+        );
     }
 }

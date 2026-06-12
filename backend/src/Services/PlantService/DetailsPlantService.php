@@ -54,11 +54,15 @@ class DetailsPlantService {
         return $this->plantRepositoryFacade->getAllPowerPlants(); 
     }
 
+    public function getMyPowerPlants(string $userId): array {
+        return $this->plantRepositoryFacade->findByUser($userId);
+    }
+
     public function getPlantsByStatus(array $data): array { 
         $status = PlantStatus::tryFrom($data['status']); 
     
         if($status === null) {
-            return ["success" => false, "message" => "Nu exista centrale cu acest status de proiect."];
+            throw new Exception("Nu exista centrale cu acest status de proiect.");
         }
     
         $powerPlants = $this->plantRepositoryFacade->getPlantsByStatus(['status' => $status->value]); 

@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../Services/EmailService.php';
+require_once __DIR__ . '/../Dto/ApiResponseDTO.php';
 
 class EmailController {
 
@@ -23,10 +24,7 @@ class EmailController {
 
         if (empty($formData['to_email']) || empty($formData['message'])) {
             http_response_code(400);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Incomplete data for sending email. Fields to_email and message are required.'
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Incomplete data for sending email. Fields to_email and message are required.'));
             exit;
         }
 
@@ -34,20 +32,14 @@ class EmailController {
             $this->emailService->sendAlert($formData);
 
             http_response_code(200);
-            echo json_encode([
-                'success' => true,
-                'message' => 'The email notification has been successfully dispatched.'
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'success', message: 'The email notification has been successfully dispatched.'));
             exit;
 
         } catch (Exception $e) {
             LogService::instance()->error("[ERROR] POST Send Email: " . $e->getMessage());
 
             http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Error processing email: ' . $e->getMessage()
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Error processing email: ' . $e->getMessage()));
             exit;
         }
     }

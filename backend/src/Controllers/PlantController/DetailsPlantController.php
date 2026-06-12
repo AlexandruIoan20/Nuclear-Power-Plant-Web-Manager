@@ -3,6 +3,12 @@
 require_once __DIR__ . '/../../Dto/PlantDTO.php';
 require_once __DIR__ . '/../../Dto/PlantDetailsDTO.php'; 
 require_once __DIR__ . '/../../Dto/GetPlantDTO.php';  
+require_once __DIR__ . '/../../Dto/PlantListDTO.php';
+require_once __DIR__ . '/../../Dto/PlantMapDTO.php';
+require_once __DIR__ . '/../../Dto/PlantStatusListDTO.php';
+require_once __DIR__ . '/../../Dto/CoordinatesPreviewResponseDTO.php';
+require_once __DIR__ . '/../../Dto/GeoLocationPreviewDTO.php';
+require_once __DIR__ . '/../../Dto/ApiResponseDTO.php';
 
 class DetailsPlantController { 
     public function __construct(
@@ -24,7 +30,7 @@ class DetailsPlantController {
     
         $plant = $this->plantServiceFacade->getCompletePlantProfile($id);
         if(!$plant || !$plant['details']) { 
-            echo json_encode(["status" => "error", "message" => "Centrala nu a fost gasita"]); 
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Centrala nu a fost gasita")); 
             exit; 
         } 
         $dto = GetPlantDTO::fromServiceArray($plant);
@@ -39,14 +45,32 @@ class DetailsPlantController {
 
         if(!$plant) { 
             http_response_code(404); 
-            echo json_encode(["status" => "error", "message" => "Centrala nu a fost găsită."]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Centrala nu a fost găsită."));
             exit; 
         }
 
         $plantDTO = PlantDetailsDTO::fromEntity($plant);
 
         http_response_code(200);
-        echo json_encode(["status" => "success", "data" => $plantDTO]);
+        echo json_encode(new ApiResponseDTO(status: 'success', data: $plantDTO));
+        exit;
+    }
+
+    public function getMyPowerPlants(): void {
+        header('Content-Type: application/json; charset=UTF-8');
+
+        $userId = AuthHelper::getCurrentUserId();
+        if (!$userId) {
+            http_response_code(401);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Neautorizat.'));
+            exit;
+        }
+
+        $plants = $this->plantServiceFacade->getMyPowerPlants($userId);
+        $payload = array_map(fn($plant) => PlantListDTO::fromDbArray($plant), $plants);
+
+        http_response_code(200);
+        echo json_encode(new ApiResponseDTO(status: 'success', data: $payload));
         exit;
     }
 
@@ -59,24 +83,10 @@ class DetailsPlantController {
             $plants = array_values(array_filter($plants, fn($p) => ($p['status'] ?? '') === 'APPROVED'));
         }
 
-        $payload = [];
-
-        foreach ($plants as $plant) {
-            $payload[] = [
-                'id' => $plant['id'],
-                'name' => $plant['name'] ?? 'Fără nume',
-                'country' => $plant['country'] ?? 'Nespecificată',
-                'latitude' => $plant['latitude'] !== null ? (float)$plant['latitude'] : 0.0,
-                'longitude' => $plant['longitude'] !== null ? (float)$plant['longitude'] : 0.0,
-                'status' => $plant['status'],
-                'created_by' => $plant['created_by'],
-                'created_at' => $plant['created_at'],
-                'updated_at' => $plant['updated_at']
-            ];
-        }
+        $payload = array_map(fn($plant) => PlantListDTO::fromDbArray($plant), $plants);
 
         http_response_code(200);
-        echo json_encode(["status" => "success", "data" => $payload]);
+        echo json_encode(new ApiResponseDTO(status: 'success', data: $payload));
         exit;
     }
 
@@ -85,26 +95,8 @@ class DetailsPlantController {
         header('Content-Type: application/json; charset=UTF-8');
 
         $plants = $this->plantServiceFacade->getAllPowerPlants();
-        $payload = [];
 
-        foreach ($plants as $plant) {
-            $status = $plant['status'] ?? '';
-            if (strtoupper($status) !== 'REVIEW') {
-                continue;
-            }
-
-            $payload[] = [
-                'id' => $plant['id'],
-                'name' => $plant['name'] ?? 'Fără nume',
-                'country' => $plant['country'] ?? 'Nespecificată',
-                'latitude' => $plant['latitude'] !== null ? (float)$plant['latitude'] : 0.0,
-                'longitude' => $plant['longitude'] !== null ? (float)$plant['longitude'] : 0.0,
-                'status' => $status,
-                'created_by' => $plant['created_by'],
-                'created_at' => $plant['created_at'],
-                'updated_at' => $plant['updated_at']
-            ];
-        }
+        $payload = array_map(fn($plant) => PlantListDTO::fromDbArray($plant), array_filter($plants, fn($p) => strtoupper($p['status'] ?? '') === 'REVIEW'));
 
         http_response_code(200);
         echo json_encode($payload);
@@ -118,7 +110,7 @@ class DetailsPlantController {
     
         if (!$status) {
             http_response_code(400);
-            echo json_encode(["status" => "error", "message" => "Parametrul 'status' lipseste"]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Parametrul 'status' lipseste"));
             return;
         }
 
@@ -134,23 +126,14 @@ class DetailsPlantController {
             $powerPlants = $this->plantServiceFacade->getPlantsByStatus($data); 
             LogService::instance()->info("powerPlants in controller:  " . print_r($powerPlants, true));
 
-            $dtos = array_map(function($plant) {
-                return [
-                    'id' => $plant['id'],
-                    'name' => $plant['name'],
-                    'status' => $plant['status'],
-                    'created_by' => $plant['created_by'],
-                    'created_at' => $plant['created_at'],
-                    'updated_at' => $plant['updated_at'],
-                ];
-            }, $powerPlants);
+            $dtos = array_map(fn($plant) => PlantStatusListDTO::fromDbArray($plant), $powerPlants);
             
             http_response_code(200); 
-            echo json_encode(["status" => "success", "data" => $dtos]); 
+echo json_encode(new ApiResponseDTO(status: 'success', data: $dtos));
         } catch(Exception $e) { 
             LogService::instance()->error("[ERROR] GET Plants By Status: " . $e->getMessage());
             http_response_code(500);
-            echo json_encode(["status" => "error", "message" => "Eroare la cautarea dupa status: " . $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Eroare la cautarea dupa status: " . $e->getMessage()));
         }
     }
     
@@ -161,29 +144,10 @@ class DetailsPlantController {
         $plants = $this->plantServiceFacade->getAllPowerPlants();
         $plants = array_values(array_filter($plants, fn($p) => ($p['status'] ?? '') === 'APPROVED'));
 
-        $dtos = array_map(function ($plant) {
-            $hasCoordinates = $plant['latitude'] !== null && $plant['longitude'] !== null;
-
-            return [
-                'id' => $plant['id'],
-                'name' => $plant['name'],
-                'country' => $plant['country'],
-                'latitude' => $plant['latitude'],
-                'longitude' => $plant['longitude'],
-                'status' => $plant['status'],
-                'created_by' => $plant['created_by'],
-                'created_at' => $plant['created_at'],
-                'updated_at' => $plant['updated_at'],
-                'has_coordinates' => $hasCoordinates,
-                'coordinates_label' => $hasCoordinates ? number_format((float)$plant['latitude'], 6, '.', '') . ', ' . number_format((float)$plant['longitude'], 6, '.', '') : 'Fără coordonate',
-                'popup_title' => $plant['name'] ?: 'Centrală',
-                'popup_subtitle' => $plant['country'] ?: 'Țară nespecificată',
-                'edit_url' => '/pages/power-plants/finish.html?id=' . urlencode($plant['id']),
-            ];
-        }, $plants);
+        $dtos = array_map(fn($plant) => PlantMapDTO::fromDbArray($plant), $plants);
 
         http_response_code(200);
-        echo json_encode(["status" => "success", "data" => $dtos]);
+        echo json_encode(new ApiResponseDTO(status: 'success', data: $dtos));
         exit;
     }
 
@@ -197,7 +161,7 @@ class DetailsPlantController {
         
         if (empty($dateFormular)) {
             http_response_code(400); 
-            echo json_encode(["status" => "error", "message" => "Nu s-au primit date."]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Nu s-au primit date."));
             exit;
         }
 
@@ -205,12 +169,12 @@ class DetailsPlantController {
             $responseDTO = $this->plantServiceFacade->savePlantDetails($dateFormular); 
             
             http_response_code(201); 
-            echo json_encode(["status" => "success", "message" => "Centrala a fost salvată cu succes.", "plantId" => $responseDTO->dataId ]);
+            echo json_encode(["status" => "success", "message" => "Centrala a fost salvată cu succes.", "plantId" => $responseDTO->dataId]);
             exit; 
         } catch(Exception $e) { 
             LogService::instance()->error("[ERROR] Save Plant: " . $e->getMessage());
             http_response_code(500); 
-            echo json_encode(["status" => "error", "message" => "Eroare la salvare: " . $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Eroare la salvare: " . $e->getMessage()));
             exit;
         }
     }
@@ -225,7 +189,7 @@ class DetailsPlantController {
         
         if (empty($dateFormular)) {
             http_response_code(400); 
-            echo json_encode(["status" => "error", "message" => "Nu s-au primit date."]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Nu s-au primit date."));
             exit;
         }
 
@@ -233,22 +197,16 @@ class DetailsPlantController {
             $verified = $this->plantServiceFacade->updateStatus($dateFormular, $plantId);  
             
             if(!$verified) { 
-                echo json_encode([
-                    "status" => "error", 
-                    "message" => "Eroare la actualizarea statusului"
-                ]); 
+                echo json_encode(new ApiResponseDTO(status: 'error', message: "Eroare la actualizarea statusului")); 
 
                 exit; 
             } 
 
-            echo json_encode([ 
-                "status" => "success", 
-                "message" => "Status actualizat cu succes"
-            ]); 
+            echo json_encode(new ApiResponseDTO(status: 'success', message: "Status actualizat cu succes")); 
         } catch(Exception $e) { 
             LogService::instance()->error("[ERROR] Update Plant: " . $e->getMessage());
             http_response_code(500);
-            echo json_encode(["status" => "error", "message" => "Eroare la actualizare statusului: " . $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Eroare la actualizare statusului: " . $e->getMessage()));
             exit;
         }
     }
@@ -259,7 +217,7 @@ class DetailsPlantController {
         $userId = AuthHelper::getCurrentUserId();
         if (!$userId) {
             http_response_code(401);
-            echo json_encode(['status' => 'error', 'message' => 'Neautorizat.']);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Neautorizat.'));
             exit;
         }
 
@@ -268,22 +226,16 @@ class DetailsPlantController {
 
             if (!$result) {
                 http_response_code(400);
-                echo json_encode([
-                    'status' => 'error',
-                    'message' => 'Nu se poate trimite spre verificare. ' .
-                        'Verificați: statusul să fie DRAFT, datele să fie complete și să fiți proprietarul.'
-                ]);
+                echo json_encode(new ApiResponseDTO(status: 'error', message: 'Nu se poate trimite spre verificare. ' .
+                    'Verificați: statusul să fie DRAFT, datele să fie complete și să fiți proprietarul.'));
                 exit;
             }
 
-            echo json_encode([
-                'status' => 'success',
-                'message' => 'Centrala a fost trimisă spre verificare (status REVIEW).'
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'success', message: 'Centrala a fost trimisă spre verificare (status REVIEW).'));
         } catch (Exception $e) {
             LogService::instance()->error("[ERROR] Submit Review: " . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => 'Eroare: ' . $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Eroare: ' . $e->getMessage()));
         }
     }
 
@@ -293,7 +245,7 @@ class DetailsPlantController {
         $userId = AuthHelper::getCurrentUserId();
         if (!$userId) {
             http_response_code(401);
-            echo json_encode(['status' => 'error', 'message' => 'Neautorizat.']);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Neautorizat.'));
             exit;
         }
 
@@ -302,21 +254,15 @@ class DetailsPlantController {
 
             if (!$result) {
                 http_response_code(400);
-                echo json_encode([
-                    'status' => 'error',
-                    'message' => 'Nu se poate redeschide centrala. Statusul curent trebuie să fie REJECTED.'
-                ]);
+                echo json_encode(new ApiResponseDTO(status: 'error', message: 'Nu se poate redeschide centrala. Statusul curent trebuie să fie REJECTED.'));
                 exit;
             }
 
-            echo json_encode([
-                'status' => 'success',
-                'message' => 'Centrala a fost redeschisă (status DRAFT).'
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'success', message: 'Centrala a fost redeschisă (status DRAFT).'));
         } catch (Exception $e) {
             LogService::instance()->error("[ERROR] Reopen Draft: " . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => 'Eroare: ' . $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Eroare: ' . $e->getMessage()));
         }
     }
 
@@ -330,7 +276,7 @@ class DetailsPlantController {
 
         if (empty($dateFormular)) {
             http_response_code(400);
-            echo json_encode(["status" => "error", "message" => "Date incomplete pentru actualizare."]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Date incomplete pentru actualizare."));
             exit;
         }
 
@@ -338,12 +284,12 @@ class DetailsPlantController {
             $this->plantServiceFacade->updatePlantDetails($dateFormular, $id); 
             
             http_response_code(200); 
-            echo json_encode(["status" => "success", "message" => "Detaliile au fost actualizate cu succes."]);
+            echo json_encode(new ApiResponseDTO(status: 'success', message: "Detaliile au fost actualizate cu succes."));
             exit; 
         } catch(Exception $e) { 
             LogService::instance()->error("[ERROR] Update Plant: " . $e->getMessage());
             http_response_code(500);
-            echo json_encode(["status" => "error", "message" => "Eroare la actualizare: " . $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: "Eroare la actualizare: " . $e->getMessage()));
             exit;
         }
     }
@@ -357,7 +303,7 @@ class DetailsPlantController {
 
         if (!$body || !isset($body['latitude']) || !isset($body['longitude'])) {
             http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Payload invalid.']);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Payload invalid.'));
             exit;
         }
 
@@ -366,7 +312,7 @@ class DetailsPlantController {
 
         if ($lat === false || $lon === false) {
             http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Coordonate invalide.']);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Coordonate invalide.'));
             exit;
         }
 
@@ -404,33 +350,15 @@ class DetailsPlantController {
         }
 
         // Pre-compute all geological fields from coordinates
-        $geoPreview = [];
         try {
-            $geoPreview = $this->plantServiceFacade->previewGeologicalLocation($latNorm, $lonNorm);
+            $geoPreviewDTO = $this->plantServiceFacade->previewGeologicalLocation($latNorm, $lonNorm);
         } catch (Throwable $e) {
             LogService::instance()->error("[PREVIEW ERROR] Nu am putut calcula datele geologice: " . $e->getMessage());
+            $geoPreviewDTO = new GeoLocationPreviewDTO();
         }
 
         http_response_code(200);
-        echo json_encode([
-            'status' => 'success',
-            'data' => [
-                'latitude' => $latNorm,
-                'longitude' => $lonNorm,
-                'coordinates_label' => $label,
-                'country' => $country,
-                'soilType' => $geoPreview['soilType'] ?? null,
-                'waterSourceType' => $geoPreview['waterSourceType'] ?? null,
-                'seismicStability' => $geoPreview['seismicStability'] ?? null,
-                'floodRisk' => $geoPreview['floodRisk'] ?? null,
-                'groundwaterLevel' => $geoPreview['groundwaterLevel'] ?? null,
-                'waterProximity' => $geoPreview['waterProximity'] ?? null,
-                'waterFlowRate' => $geoPreview['waterFlowRate'] ?? null,
-                'populationDensity' => $geoPreview['populationDensity'] ?? null,
-                'transportInfrastructureScore' => $geoPreview['transportInfrastructureScore'] ?? null,
-                'message' => 'Locație validată rapid.'
-            ]
-        ]);
+        echo json_encode(new ApiResponseDTO(status: 'success', data: CoordinatesPreviewResponseDTO::fromGeoPreview($latNorm, $lonNorm, $label, $country, $geoPreviewDTO)));
         exit;
     }
 }

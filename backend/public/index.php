@@ -203,6 +203,10 @@ $router->get('/api/power-plants', function () use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->getPowerPlantsList();
 });
 
+$router->get('/api/power-plants/my', auth(null, function() use ($plantServiceFacade) {
+    (new DetailsPlantController($plantServiceFacade))->getMyPowerPlants();
+}));
+
 $router->get('/api/power-plants/filter', function () use ($plantServiceFacade) { 
     (new DetailsPlantController($plantServiceFacade))->getPlantsByStatus(); 
 }); 

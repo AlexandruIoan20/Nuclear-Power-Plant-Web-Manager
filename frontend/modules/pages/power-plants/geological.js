@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const statusElement = document.getElementById("status-message"); 
 
     if(!plantId) { 
-        showError(statusElement, "ID centrala lipsa in URL"); 
+        showError(statusElement, "ID centrală lipsește din URL"); 
         return; 
     }
 
@@ -156,7 +156,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 form.reset(); 
             } catch(error) { 
                 logger.error(error.message); 
-                showError(statusElement, "Eroare la adaugarea informatiilor despre centrala.")  
+                showError(statusElement, "Eroare la adăugarea informațiilor despre centrală.")  
             }
         }); 
     } else { 
@@ -185,7 +185,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 showSuccess(statusElement, "Datele au fost actualizate cu succes!"); 
             } catch(error) { 
                 logger.error(error.message); 
-                showError(statusElement, "Eroare la actualizarea informatiilor despre centrala.") 
+                showError(statusElement, "Eroare la actualizarea informațiilor despre centrală.") 
             }
         })
     }

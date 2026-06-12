@@ -1,28 +1,31 @@
 <?php 
 
-class SensorListDTO {
-    public string $id;
-    public string $reactorId;
-    public string $sensorCode;
-    public string $sensorType;
-    public string $status;
-    public ?float $currentValue;
-    public ?string $unitOfMeasure;
-    public bool $isActive;
-    public ?string $lastReadingAt;
+require_once __DIR__ . '/BaseDTO.php';
+
+class SensorListDTO extends BaseDTO {
+    public function __construct(
+        public readonly string $id,
+        public readonly string $reactorId,
+        public readonly string $sensorCode,
+        public readonly string $sensorType,
+        public readonly string $status,
+        public readonly ?float $currentValue = null,
+        public readonly ?string $unitOfMeasure = null,
+        public readonly bool $isActive = false,
+        public readonly ?string $lastReadingAt = null,
+    ) {}
 
     public static function fromEntity(ReactorSensor $s): self {
-        $dto = new self();
-        $dto->id = $s->getId();
-        $dto->reactorId = $s->getReactorId();
-        $dto->sensorCode = $s->getSensorCode();
-        $dto->sensorType = $s->getSensorType()->value;
-        $dto->status = $s->getStatus()->value;
-        $dto->currentValue = $s->getCurrentValue();
-        $dto->unitOfMeasure = $s->getUnitOfMeasure();
-        $dto->isActive = $s->getIsActive();
-        $dto->lastReadingAt = $s->getLastReadingAt();
-        
-        return $dto;
+        return new self(
+            id: $s->getId(),
+            reactorId: $s->getReactorId(),
+            sensorCode: $s->getSensorCode(),
+            sensorType: $s->getSensorType()->value,
+            status: $s->getStatus()->value,
+            currentValue: $s->getCurrentValue(),
+            unitOfMeasure: $s->getUnitOfMeasure(),
+            isActive: $s->getIsActive(),
+            lastReadingAt: $s->getLastReadingAt(),
+        );
     }
 }

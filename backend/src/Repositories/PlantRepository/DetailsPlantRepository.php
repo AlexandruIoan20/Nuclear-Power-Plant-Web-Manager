@@ -36,6 +36,35 @@ class DetailsPlantRepository {
         return $powerPlants; 
     }
 
+    public function findByUser(string $userId): array {
+        $statement = $this->db->prepare("
+            SELECT p.id, p.name, p.status,
+                   p.created_by, p.created_at, p.updated_at,
+                   g.country, g.latitude, g.longitude
+            FROM power_plants p
+            LEFT JOIN geological_data g ON p.id = g.power_plant_id
+            WHERE p.created_by = :userId
+        ");
+        $statement->execute(['userId' => $userId]);
+        $powerPlants = [];
+
+        while($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+            $powerPlants[] = [
+                'id' => $row['id'],
+                'name' => $row['name'],
+                'country' => $row['country'],
+                'latitude' => $row['latitude'],
+                'longitude' => $row['longitude'],
+                'status' => $row['status'],
+                'created_by' => $row['created_by'],
+                'created_at' => $row['created_at'],
+                'updated_at' => $row['updated_at'],
+            ];
+        }
+
+        return $powerPlants;
+    }
+
     public function getPlantsByStatus(array $data): array { 
         $status = PlantStatus::from($data['status']); 
         $powerPlants = []; 

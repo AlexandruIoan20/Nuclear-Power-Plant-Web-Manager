@@ -1,24 +1,27 @@
 <?php
 
-class ReactorListDTO {
-    public string $id;
-    public string $reactorCode;
-    public string $reactorType;
-    public string $coolingType;
-    public string $operationalStatus;
-    public ?float $thermalPowerMw;
-    public ?float $electricalPowerMw;
+require_once __DIR__ . '/BaseDTO.php';
+
+class ReactorListDTO extends BaseDTO {
+    public function __construct(
+        public readonly string $id,
+        public readonly string $reactorCode,
+        public readonly string $reactorType,
+        public readonly string $coolingType,
+        public readonly string $operationalStatus,
+        public readonly ?float $thermalPowerMw = null,
+        public readonly ?float $electricalPowerMw = null,
+    ) {}
 
     public static function fromEntity(Reactor $r): self {
-        $dto = new self();
-        $dto->id = $r->getId();
-        $dto->reactorCode = $r->getReactorCode();
-        $dto->reactorType = $r->getReactorType()->value;
-        $dto->coolingType = $r->getCoolingType()->value;
-        $dto->operationalStatus = $r->getOperationalStatus()->value;
-        $dto->thermalPowerMw = $r->getThermalPowerMw();
-        $dto->electricalPowerMw = $r->getElectricalPowerMw();
-        
-        return $dto;
+        return new self(
+            id: $r->getId(),
+            reactorCode: $r->getReactorCode(),
+            reactorType: $r->getReactorType()->value,
+            coolingType: $r->getCoolingType()->value,
+            operationalStatus: $r->getOperationalStatus()->value,
+            thermalPowerMw: $r->getThermalPowerMw(),
+            electricalPowerMw: $r->getElectricalPowerMw(),
+        );
     }
 }

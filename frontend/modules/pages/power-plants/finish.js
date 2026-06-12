@@ -22,7 +22,7 @@ function isComplete(dto) {
 
 document.addEventListener("DOMContentLoaded", async () => { 
     if(!plantId) { 
-        alert("Centrala nu a fost gasita."); 
+        alert("Centrala nu a fost găsită."); 
         return; 
     }
 
@@ -127,6 +127,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     } catch(error) {    
         logger.error(error.message);
-        alert("A aparut o eroare in preluarea informatiilor despre centrala");  
+        alert("A apărut o eroare în preluarea informațiilor despre centrală");  
     }
 })

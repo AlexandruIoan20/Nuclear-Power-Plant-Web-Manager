@@ -12,7 +12,8 @@ export const powerPlantService = {
     submitForReview: (plantId) => api.patch(`/power-plants/${plantId}/submit-review`),
     reopenDraft: (plantId) => api.patch(`/power-plants/${plantId}/reopen`),
 
-    getAll: () => api.get("/power-plants"), 
+    getAll: () => api.get("/power-plants"),
+    getMyPlants: () => api.get("/power-plants/my"), 
     getPlantDetails: (plantId) => api.get(`/power-plants/${plantId}/details`), 
     getPlant: (plantId) => api.get(`/power-plants/${plantId}`), 
     getPlantsByStatus: (status) => api.get(`/power-plants/filter?status=${status}`), 

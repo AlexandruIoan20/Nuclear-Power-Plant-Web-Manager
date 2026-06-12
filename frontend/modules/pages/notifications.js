@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         ${escapeHtml(notification.message)}
                     </div>
                     <div class="notification-meta" style="margin-top: 8px;">
-                        TYPE: ${escapeHtml(notification.type)} | ROLE CLEARANCE: ${escapeHtml(notification.target_role)}
+                        TIP: ${escapeHtml(notification.type)} | ROL: ${escapeHtml(notification.target_role)}
                     </div>
                 `;
                 container.appendChild(card);
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         errorMessage.style.display = "block";
-        errorMessage.innerHTML = `<strong>Eroare comunicație:</strong> ${escapeHtml(error.message || 'Eroare necunoscuta')}`;
+        errorMessage.innerHTML = `<strong>Eroare comunicație:</strong> ${escapeHtml(error.message || 'Eroare necunoscută')}`;
         console.error("Eroare fetch notificări:", error);
     }
 });

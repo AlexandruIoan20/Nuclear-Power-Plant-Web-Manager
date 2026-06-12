@@ -33,7 +33,7 @@ export function populatePlantPage(rawData) {
     setText('plant-description', dto.description);
     setText('plant-capacity', dto.capacity, ' MW');
     setText('plant-efficiency', dto.estimatedEfficiency, '%');
-    setText('plant-duration', dto.constructionDurationYears, ' YRS');
+    setText('plant-duration', dto.constructionDurationYears, ' Ani');
 
     setText('soil-type', dto.soilType);
     setText('seismic-stability', dto.seismicStability);
@@ -69,7 +69,7 @@ export function populatePlantPage(rawData) {
             td.colSpan = 2;
             td.className = 'empty-state';
             td.style.textAlign = 'center';
-            td.textContent = 'NO CONFIGURATIONS DETECTED.';
+            td.textContent = 'Nicio configurație detectată.';
             tr.appendChild(td);
             tbody.appendChild(tr);
         }

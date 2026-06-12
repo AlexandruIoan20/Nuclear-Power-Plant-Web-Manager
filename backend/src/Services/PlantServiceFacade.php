@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../Dto/CreateDataResponseDTO.php';
 require_once __DIR__ . '/../Dto/GeologicalPlantDataDTO.php';
+require_once __DIR__ . '/../Dto/GeoLocationPreviewDTO.php';
 
 class PlantServiceFacade {
     private DetailsPlantService $detailsPlantService;
@@ -49,6 +50,10 @@ class PlantServiceFacade {
 
     public function getAllPowerPlants(): array {
         return $this->detailsPlantService->getAllPowerPlants();
+    }
+
+    public function getMyPowerPlants(string $userId): array {
+        return $this->detailsPlantService->getMyPowerPlants($userId);
     }
 
   
@@ -111,7 +116,7 @@ class PlantServiceFacade {
     }
 
     // Geological
-    public function previewGeologicalLocation(float $lat, float $lon): array {
+    public function previewGeologicalLocation(float $lat, float $lon): GeoLocationPreviewDTO {
         return $this->geologicalPlantService->runAutoGeolocation($lat, $lon);
     }
 

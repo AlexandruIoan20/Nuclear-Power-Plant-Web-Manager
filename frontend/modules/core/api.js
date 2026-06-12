@@ -43,7 +43,7 @@ async function request(method, endpoint, body = null) {
     const data = await parseResponseBody(response);
 
     if(!response.ok) {
-        const message = data?.message || response.statusText || 'Eroare necunoscuta';
+        const message = data?.message || response.statusText || 'Eroare necunoscută';
         logger.error(`API ${method} ${endpoint} esuata`, { status: response.status, message });
         throw { 
             status: response.status,

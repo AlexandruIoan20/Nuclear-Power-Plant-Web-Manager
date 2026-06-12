@@ -54,6 +54,10 @@ class PlantRepositoryFacade {
         return $this->detailsPlantRepository->findAll();
     }
 
+    public function findByUser(string $userId): array {
+        return $this->detailsPlantRepository->findByUser($userId);
+    }
+
     public function getPlantsByStatus(array $data): array { 
         return $this->detailsPlantRepository->getPlantsByStatus($data); 
     }

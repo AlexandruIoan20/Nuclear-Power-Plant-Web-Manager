@@ -56,7 +56,7 @@ function showContent() {
 function setOnline(online) {
     const ind = el('connection-indicator');
     ind.className = online ? 'online' : 'offline';
-    el('connection-text').textContent = online ? 'Live' : 'Deconectat';
+    el('connection-text').textContent = online ? 'Activ' : 'Deconectat';
 }
 
 function setLastUpdate(ts) {

@@ -1,55 +1,57 @@
 <?php
 
-class SensorDetailsDTO {
-    public string $id;
-    public string $reactorId;
-    public string $sensorCode;
-    public string $sensorType;
-    public ?string $description;
-    public ?string $locationZone;
-    public ?string $unitOfMeasure;
-    public ?float $normalMin;
-    public ?float $normalMax;
-    public ?float $alarmLow;
-    public ?float $alarmHigh;
-    public ?float $alertLow;
-    public ?float $alertHigh;
-    public ?float $scramLow;
-    public ?float $scramHigh;
-    public string $status;
-    public bool $isActive;
-    public ?string $lastCalibration;
-    public ?string $calibrationDue;
-    public ?float $currentValue;
-    public ?string $lastReadingAt;
-    public ?string $createdAt;
+require_once __DIR__ . '/BaseDTO.php';
+
+class SensorDetailsDTO extends BaseDTO {
+    public function __construct(
+        public readonly string $id,
+        public readonly string $reactorId,
+        public readonly string $sensorCode,
+        public readonly string $sensorType,
+        public readonly ?string $description = null,
+        public readonly ?string $locationZone = null,
+        public readonly ?string $unitOfMeasure = null,
+        public readonly ?float $normalMin = null,
+        public readonly ?float $normalMax = null,
+        public readonly ?float $alarmLow = null,
+        public readonly ?float $alarmHigh = null,
+        public readonly ?float $alertLow = null,
+        public readonly ?float $alertHigh = null,
+        public readonly ?float $scramLow = null,
+        public readonly ?float $scramHigh = null,
+        public readonly string $status,
+        public readonly bool $isActive = false,
+        public readonly ?string $lastCalibration = null,
+        public readonly ?string $calibrationDue = null,
+        public readonly ?float $currentValue = null,
+        public readonly ?string $lastReadingAt = null,
+        public readonly ?string $createdAt = null,
+    ) {}
 
     public static function fromEntity(ReactorSensor $s): self {
-        $dto = new self();
-        $dto->id = $s->getId();
-        $dto->reactorId = $s->getReactorId();
-        $dto->sensorCode = $s->getSensorCode();
-        $dto->sensorType = $s->getSensorType()->value;
-        $dto->description = $s->getDescription();
-        $dto->locationZone = $s->getLocationZone();
-        $dto->unitOfMeasure = $s->getUnitOfMeasure();
-        $dto->normalMin = $s->getNormalMin();
-        $dto->normalMax = $s->getNormalMax();
-        $dto->alarmLow = $s->getAlarmLow();
-        $dto->alarmHigh = $s->getAlarmHigh();
-        $dto->alertLow = $s->getAlertLow();
-        $dto->alertHigh = $s->getAlertHigh();
-        $dto->scramLow = $s->getScramLow();
-        $dto->scramHigh = $s->getScramHigh();
-        $dto->status = $s->getStatus()->value;
-        $dto->isActive = $s->getIsActive();
-        $dto->lastCalibration = $s->getLastCalibration();
-        $dto->calibrationDue = $s->getCalibrationDue();
-        $dto->currentValue = $s->getCurrentValue();
-        $dto->lastReadingAt = $s->getLastReadingAt();
-        $dto->createdAt = $s->getCreatedAt();
-        
-        return $dto;
+        return new self(
+            id: $s->getId(),
+            reactorId: $s->getReactorId(),
+            sensorCode: $s->getSensorCode(),
+            sensorType: $s->getSensorType()->value,
+            description: $s->getDescription(),
+            locationZone: $s->getLocationZone(),
+            unitOfMeasure: $s->getUnitOfMeasure(),
+            normalMin: $s->getNormalMin(),
+            normalMax: $s->getNormalMax(),
+            alarmLow: $s->getAlarmLow(),
+            alarmHigh: $s->getAlarmHigh(),
+            alertLow: $s->getAlertLow(),
+            alertHigh: $s->getAlertHigh(),
+            scramLow: $s->getScramLow(),
+            scramHigh: $s->getScramHigh(),
+            status: $s->getStatus()->value,
+            isActive: $s->getIsActive(),
+            lastCalibration: $s->getLastCalibration(),
+            calibrationDue: $s->getCalibrationDue(),
+            currentValue: $s->getCurrentValue(),
+            lastReadingAt: $s->getLastReadingAt(),
+            createdAt: $s->getCreatedAt(),
+        );
     }
 }
-?>

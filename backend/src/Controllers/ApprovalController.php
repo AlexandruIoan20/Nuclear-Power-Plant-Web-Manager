@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../Services/ApprovalService.php';
+require_once __DIR__ . '/../Dto/ApiResponseDTO.php';
 
 class ApprovalController {
     private ApprovalService $approvalService;
@@ -15,7 +16,7 @@ class ApprovalController {
         $cleanPlantId = trim((string)$plantId);
         if (empty($cleanPlantId)) {
             http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'ID-ul centralei lipsește.']);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'ID-ul centralei lipsește.'));
             exit;
         }
 
@@ -24,7 +25,7 @@ class ApprovalController {
 
         if (!in_array($newStatus, ['APPROVED', 'REJECTED'], true)) {
             http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Statusul solicitat este invalid. Trebuie să fie APPROVED sau REJECTED.']);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: 'Statusul solicitat este invalid. Trebuie să fie APPROVED sau REJECTED.'));
             exit;
         }
 
@@ -36,15 +37,12 @@ class ApprovalController {
             }
 
             http_response_code(200);
-            echo json_encode([
-                'status' => 'success',
-                'message' => 'Statusul centralei a fost actualizat cu succes în: ' . $newStatus
-            ]);
+            echo json_encode(new ApiResponseDTO(status: 'success', message: 'Statusul centralei a fost actualizat cu succes în: ' . $newStatus));
             exit;
         } catch (Exception $e) {
             LogService::instance()->error("[STATUS UPDATE ERROR] Eșec la modificarea centralei {$cleanPlantId}: " . $e->getMessage());
             http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+            echo json_encode(new ApiResponseDTO(status: 'error', message: $e->getMessage()));
             exit;
         }
     }

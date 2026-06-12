@@ -1,6 +1,8 @@
 <?php
 
-class FeasibilityReportDTO implements JsonSerializable {
+require_once __DIR__ . '/BaseDTO.php';
+
+class FeasibilityReportDTO extends BaseDTO {
     public function __construct(
         public readonly ?string $reportId,
         public readonly string  $status,

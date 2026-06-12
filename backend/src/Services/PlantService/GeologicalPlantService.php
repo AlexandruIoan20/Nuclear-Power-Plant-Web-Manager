@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../Entities/SoilType.php';
 require_once __DIR__ . '/../../Entities/WaterSourceType.php';
 require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php';
 require_once __DIR__ . '/../../Dto/GeologicalPlantDataDTO.php';
+require_once __DIR__ . '/../../Dto/GeoLocationPreviewDTO.php';
 
 class GeologicalPlantService { 
     private PlantRepositoryFacade $plantRepositoryFacade; 
@@ -22,7 +23,7 @@ class GeologicalPlantService {
         return GeologicalPlantDataDTO::fromEntity($entity);
     }
 
-    public function runAutoGeolocation(float $lat, float $lon): array {
+    public function runAutoGeolocation(float $lat, float $lon): GeoLocationPreviewDTO {
         $latNorm = round($lat, 6);
         $lonNorm = round($lon, 6);
 
@@ -149,7 +150,27 @@ class GeologicalPlantService {
             LogService::instance()->error("[SOILGRIDS SERVICE ERROR] SoilGrids a crăpat: " . $e->getMessage());
         }
 
-        return $result;
+        return new GeoLocationPreviewDTO(
+            soilType: self::stringifyEnum($result['soilType']),
+            waterSourceType: self::stringifyEnum($result['waterSourceType']),
+            seismicStability: $result['seismicStability'],
+            floodRisk: $result['floodRisk'],
+            groundwaterLevel: $result['groundwaterLevel'],
+            waterProximity: $result['waterProximity'],
+            waterFlowRate: $result['waterFlowRate'],
+            populationDensity: $result['populationDensity'],
+            transportInfrastructureScore: $result['transportInfrastructureScore'],
+        );
+    }
+
+    private static function stringifyEnum(mixed $value): ?string {
+        if ($value === null || is_string($value)) {
+            return $value;
+        }
+        if (is_object($value) && enum_exists($value::class)) {
+            return $value instanceof \BackedEnum ? $value->value : $value->name;
+        }
+        return (string) $value;
     }
 
     public function save(array $data, string $plantId): CreateDataResponseDTO { 
@@ -218,15 +239,19 @@ class GeologicalPlantService {
         if ($latitude !== null && $longitude !== null) {
             $autoResult = $this->runAutoGeolocation($latitude, $longitude);
 
-            if ($soilType === null) $soilType = $autoResult['soilType'];
-            if ($seismicStability === null) $seismicStability = $autoResult['seismicStability'];
-            if ($floodRisk === null) $floodRisk = $autoResult['floodRisk'];
-            if ($groundwaterLevel === null) $groundwaterLevel = $autoResult['groundwaterLevel'];
-            if ($waterProximity === null) $waterProximity = $autoResult['waterProximity'];
-            if ($waterFlowRate === null) $waterFlowRate = $autoResult['waterFlowRate'];
-            if ($populationDensity === null) $populationDensity = $autoResult['populationDensity'];
-            if ($transportInfrastructureScore === null) $transportInfrastructureScore = $autoResult['transportInfrastructureScore'];
-            if ($waterSourceType === null) $waterSourceType = $autoResult['waterSourceType'];
+            if ($soilType === null && $autoResult->soilType !== null) {
+                $soilType = SoilType::tryFrom($autoResult->soilType);
+            }
+            if ($waterSourceType === null && $autoResult->waterSourceType !== null) {
+                $waterSourceType = WaterSourceType::tryFrom($autoResult->waterSourceType);
+            }
+            if ($seismicStability === null) $seismicStability = $autoResult->seismicStability;
+            if ($floodRisk === null) $floodRisk = $autoResult->floodRisk;
+            if ($groundwaterLevel === null) $groundwaterLevel = $autoResult->groundwaterLevel;
+            if ($waterProximity === null) $waterProximity = $autoResult->waterProximity;
+            if ($waterFlowRate === null) $waterFlowRate = $autoResult->waterFlowRate;
+            if ($populationDensity === null) $populationDensity = $autoResult->populationDensity;
+            if ($transportInfrastructureScore === null) $transportInfrastructureScore = $autoResult->transportInfrastructureScore;
         }
 
         $geologicalPlantData = new GeologicalPlantData(

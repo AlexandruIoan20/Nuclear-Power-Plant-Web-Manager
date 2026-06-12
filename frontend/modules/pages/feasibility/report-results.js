@@ -25,7 +25,7 @@ function hideLoading() {
 
 document.addEventListener("DOMContentLoaded", async () => { 
     if(!plantId) { 
-        alert("Centrala nu a fost gasita."); 
+        alert("Centrala nu a fost găsită."); 
         return; 
     }
 
@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         logger.info({ response }); 
         if(!response.success) { 
             hideLoading(); 
-            alert("A aparut o problema la cautarea raportului"); 
+            alert("A apărut o problemă la căutarea raportului"); 
             return; 
         }
 
@@ -50,6 +50,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch(error) {    
         hideLoading(); 
         logger.error(error.message); 
-        alert("A aparut o eroare la cautarea raportului"); 
+        alert("A apărut o eroare la căutarea raportului"); 
     }
 }); 

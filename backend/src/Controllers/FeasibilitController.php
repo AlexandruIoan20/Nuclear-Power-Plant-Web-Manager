@@ -1,5 +1,7 @@
 <?php 
 
+require_once __DIR__ . '/../Dto/ApiResponseDTO.php';
+
 class FeasibilityController { 
     private FeasibilityService $feasibilityService; 
 
@@ -12,10 +14,10 @@ class FeasibilityController {
 
         LogService::instance()->info("[FeasibilityController] Incepe generare raport pentru plantId={$powerPlantId}");
         $response = $this->feasibilityService->generateAndSaveReport($powerPlantId); 
-        $statusCode = $response['success'] ? 200 : 400; 
+        $statusCode = $response->status === 'success' ? 200 : 400; 
         http_response_code($statusCode); 
 
-        LogService::instance()->info("[FeasibilityController] Rezultat generare plantId={$powerPlantId} success=" . ($response['success'] ? 'true' : 'false') . " message=" . ($response['message'] ?? 'null'));
+        LogService::instance()->info("[FeasibilityController] Rezultat generare plantId={$powerPlantId} success=" . $response->status . " message=" . ($response->message ?? 'null'));
         echo json_encode($response); 
     }
 
@@ -24,7 +26,7 @@ class FeasibilityController {
 
         LogService::instance()->info("[FeasibilityController] Citire raport pentru plantId={$powerPlantId}");
         $response = $this->feasibilityService->getFeasibilityReport($powerPlantId); 
-        $statusCode = $response['success'] ? 200 : 404; 
+        $statusCode = $response->status === 'success' ? 200 : 404; 
         http_response_code($statusCode); 
 
         echo json_encode($response); 

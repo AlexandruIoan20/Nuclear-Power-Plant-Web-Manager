@@ -52,7 +52,7 @@ function renderTable(users) {
     `).join('');
 
     container.innerHTML = `
-        <h1>Registered Users</h1>
+        <h1>Utilizatori Înregistrați</h1>
         <div class="table-shell">
             <table>
                 <thead>

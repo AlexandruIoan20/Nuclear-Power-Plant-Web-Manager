@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById("reactor-configurations-container"); 
 
     if(!plantId) { 
-        showError(statusElement, "ID centrala lipsa din URL."); 
+        showError(statusElement, "ID centrală lipsește din URL."); 
         return; 
     }
 
@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         } catch (error) { 
             logger.error(error.message);
-            showError(statusElement, "Eroare la incarcarea datelor tehnice");  
+            showError(statusElement, "Eroare la încărcarea datelor tehnice");  
         }
     }
 
@@ -142,7 +142,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             try { 
                 const response = await powerPlantService.createTechnical(dto, plantId); 
                 saveHeaderState({ technicalId: response.technicalId }); 
-                showSuccess(statusElement, "Datele technice au fost salvate cu succes!"); 
+                showSuccess(statusElement, "Datele tehnice au fost salvate cu succes!"); 
 
                 window.history.replaceState({}, "", `?id=${response.plantId}&technicalId=${response.technicalId}`); 
                 window.location.href = `/pages/power-plants/finish.html?id=${response.plantId}`; 
@@ -171,7 +171,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 showSuccess(statusElement, "Datele tehnice au fost salvate cu succes!"); 
             } catch(error) { 
                 logger.error(error.message); 
-                showError(statusElement, "Eroare la actualizarea datelor tehnnice."); 
+                showError(statusElement, "Eroare la actualizarea datelor tehnice."); 
             }
         })
     }
