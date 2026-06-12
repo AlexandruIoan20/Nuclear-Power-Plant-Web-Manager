@@ -140,6 +140,7 @@ class SensorRepository {
                     description = :description,
                     location_zone = :location_zone,
                     unit_of_measure = :unit_of_measure,
+                    measurement_field = :measurement_field,
                     normal_min = :normal_min,
                     normal_max = :normal_max,
                     alarm_low = :alarm_low,
@@ -167,6 +168,7 @@ class SensorRepository {
         $sql = "INSERT INTO reactor_sensors (
                     id, reactor_id, sensor_code, sensor_type,
                     description, location_zone, unit_of_measure,
+                    measurement_field,
                     normal_min, normal_max, alarm_low, alarm_high,
                     alert_low, alert_high, scram_low, scram_high,
                     status, is_active, last_calibration, calibration_due,
@@ -174,6 +176,7 @@ class SensorRepository {
                 ) VALUES (
                     :id, :reactor_id, :sensor_code, :sensor_type,
                     :description, :location_zone, :unit_of_measure,
+                    :measurement_field,
                     :normal_min, :normal_max, :alarm_low, :alarm_high,
                     :alert_low, :alert_high, :scram_low, :scram_high,
                     :status, :is_active, :last_calibration, :calibration_due,

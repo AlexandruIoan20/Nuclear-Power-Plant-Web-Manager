@@ -5,9 +5,10 @@ require_once __DIR__ . '/../src/Constants/urls.php';
 ini_set('session.gc_maxlifetime', 3600);
 ini_set('session.cookie_lifetime', 3600);
 
+// SameSite=Lax is sufficient because frontend (port 5500) and backend (port 8081)
+// are same-site (same host, different ports). No Secure flag needed over HTTP for development.
 session_start([
-    'cookie_samesite' => 'None', 
-    'cookie_secure' => true,    
+    'cookie_samesite' => 'Lax',
     'cookie_httponly' => true,
 ]);
 
@@ -135,6 +136,12 @@ require_once __DIR__ . '/../src/Controllers/NotificationController.php';
 require_once __DIR__ . '/../src/Services/LogService.php';
 require_once __DIR__ . '/../src/Controllers/LogController.php';
 
+require_once __DIR__ . '/../src/Services/PlantService/PlantExportImportService.php';
+require_once __DIR__ . '/../src/Controllers/PlantController/ImportExportController.php';
+
+require_once __DIR__ . '/../src/Services/StatsService.php';
+require_once __DIR__ . '/../src/Controllers/StatsController.php';
+
 // Database configuration
 $host     = getenv('DB_HOST')     ?: 'db';
 $port     = getenv('DB_PORT')     ?: '5432';
@@ -181,6 +188,12 @@ $sensorRepository = new SensorRepository($pdo);
 $sensorTemplateRepository = new SensorTemplateRepository($pdo); 
 $sensorService = new SensorService($sensorRepository, $sensorTemplateRepository, $reactorRepository); 
 $sensorController = new SensorController($sensorService); 
+
+$plantExportImportService = new PlantExportImportService($pdo);
+$importExportController = new ImportExportController($plantExportImportService);
+
+$statsService = new StatsService($pdo);
+$statsController = new StatsController($statsService);
 
 LogService::init($pdo);
 
@@ -261,6 +274,22 @@ $router->get('/api/power-plants/pending-approvals', auth(null, function() use ($
     (new DetailsPlantController($plantServiceFacade))->getPendingApprovalsList(); 
 }));
 
+$router->get('/api/power-plants/export/csv', auth(null, function () use ($importExportController) {
+    $importExportController->exportMultipleCsv();
+}));
+
+$router->get('/api/power-plants/export', auth(null, function () use ($importExportController) {
+    $importExportController->exportMultiple();
+}));
+
+$router->get('/api/power-plants/{id}/export/csv', auth(null, function ($id) use ($importExportController) {
+    $importExportController->exportSingleCsv($id);
+}));
+
+$router->get('/api/power-plants/{id}/export', auth(null, function ($id) use ($importExportController) {
+    $importExportController->exportSingle($id);
+}));
+
 $router->get('/api/power-plants/{id}', function ($id) use ($plantServiceFacade) { 
     (new DetailsPlantController($plantServiceFacade))->getPlant($id); 
 }); 
@@ -282,6 +311,23 @@ $router->post('/api/power-plants/coordinates-preview', function () use ($plantSe
 
 $router->post('/api/power-plants', auth(null, function () use ($plantServiceFacade) {
     (new DetailsPlantController($plantServiceFacade))->handleSavePlantDetails();
+}));
+
+$router->post('/api/power-plants/import/batch', auth(null, function () use ($importExportController) {
+    $importExportController->importMultiple();
+}));
+
+$router->post('/api/power-plants/import', auth(null, function () use ($importExportController) {
+    $importExportController->importSingle();
+}));
+
+// --- Statistics ---
+$router->get('/api/stats', auth(null, function () use ($statsController) {
+    $statsController->getAll();
+}));
+
+$router->get('/api/stats/measurements', auth(null, function () use ($statsController) {
+    $statsController->getMeasurements();
 }));
 
 $router->patch('/api/power-plants/{id}/status', auth(null, function ($plantId) use ($plantServiceFacade){ 
