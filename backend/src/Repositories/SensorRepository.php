@@ -211,7 +211,7 @@ class SensorRepository {
             'scram_low' => $s->getScramLow(),
             'scram_high' => $s->getScramHigh(),
             'status' => $s->getStatus()->value,
-            'is_active' => $s->getIsActive(),
+            'is_active' => $s->getIsActive() ? 1 : 0,
             'last_calibration' => $s->getLastCalibration(),
             'calibration_due' => $s->getCalibrationDue(),
             'current_value' => $s->getCurrentValue(),

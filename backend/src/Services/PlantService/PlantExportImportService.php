@@ -308,15 +308,30 @@ class PlantExportImportService {
     // ==================== IMPORT JSON ====================
 
     public function importPlant(array $data): string {
-        return $this->doImportPlant($data);
+        $this->db->beginTransaction();
+        try {
+            $result = $this->doImportPlant($data);
+            $this->db->commit();
+            return $result;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
     }
 
     public function importPlants(array $data): array {
         $ids = [];
-        foreach ($data as $plantData) {
-            $ids[] = $this->doImportPlant($plantData);
+        $this->db->beginTransaction();
+        try {
+            foreach ($data as $plantData) {
+                $ids[] = $this->doImportPlant($plantData);
+            }
+            $this->db->commit();
+            return $ids;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
         }
-        return $ids;
     }
 
     private function doImportPlant(array $data): string {

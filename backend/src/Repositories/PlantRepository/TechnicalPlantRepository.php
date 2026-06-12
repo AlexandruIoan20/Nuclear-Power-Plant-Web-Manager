@@ -49,9 +49,6 @@ class TechnicalPlantRepository {
             LogService::instance()->info("[saveTechnicalData] START");
             LogService::instance()->info("[saveTechnicalData] TechnicalPlantData: " . print_r($technicalPlantData, true));
     
-            $this->pdo->beginTransaction();
-            LogService::instance()->info("[saveTechnicalData] Transaction started");
-    
             $statement = $this->pdo->prepare("INSERT INTO technical_data (
                     id, power_plant_id, number_of_reactors, estimated_efficiency, operational_risk_level,
                     created_at, updated_at
@@ -122,12 +119,9 @@ class TechnicalPlantRepository {
                 LogService::instance()->info("[saveTechnicalData] reactor_plant_data inserted successfully for key '$key'");
             }
     
-            $this->pdo->commit();
-            LogService::instance()->info("[saveTechnicalData] Transaction committed - DONE");
+            LogService::instance()->info("[saveTechnicalData] DONE");
     
         } catch (Exception $e) { 
-            $this->pdo->rollBack();
-            LogService::instance()->error("[saveTechnicalData] ROLLBACK triggered");
             LogService::instance()->error("[saveTechnicalData] Eroare la salvare: " . $e->getMessage());
             LogService::instance()->error("[saveTechnicalData] Stack trace: " . $e->getTraceAsString());
             throw new Exception("Eroare la salvarea datelor tehnice: " . $e->getMessage());

@@ -6,6 +6,20 @@
     <title>Import Plants</title>
     <link rel="stylesheet" href="../../style.css">
     <script src="../../modules/config/globals.js"></script>
+    <style>
+        .import-panel { max-width: 640px; margin: 0 auto; }
+        .import-panel p { margin-bottom: 16px; color: var(--text-muted); }
+        .import-panel .field { margin-bottom: 16px; }
+        .import-panel .preview { margin-bottom: 16px; }
+        .import-panel .preview h3 { margin-bottom: 8px; }
+        .import-panel .preview ul { margin-bottom: 16px; }
+        .import-panel .result { margin-bottom: 12px; }
+        .import-panel .result-links { margin-top: 8px; }
+        .import-panel .result-links a { display: block; }
+        .import-panel .error { color: var(--danger); margin-top: 12px; }
+        .import-panel .button { padding: 6px 14px; font-size: 0.82rem; }
+        .import-panel #import-status { margin-left: 12px; }
+    </style>
 </head>
 <body>
     <div class="page-shell">
@@ -16,36 +30,34 @@
                 <strong>Import Plants</strong>
             </div>
             <div class="nav-links">
-                <a class="button secondary" href="/pages/power-plants/list.html">← Back to List</a>
+                <a class="button secondary" href="/pages/power-plants/list.html">Back</a>
             </div>
         </div>
 
-        <div class="panel" style="max-width: 640px; margin: 0 auto;">
+        <div class="panel import-panel">
             <h2 style="margin-bottom: 16px;">Upload JSON File</h2>
-            <p style="margin-bottom: 16px; color: var(--text-muted);">
-                Select a JSON file exported from the system. The file should contain an object with a <code>plants</code> array, or a single plant object.
-            </p>
+            <p>Select a JSON file exported from the system.</p>
 
-            <div class="field" style="margin-bottom: 16px;">
+            <div class="field">
                 <label for="file-input">Choose JSON file</label>
                 <input type="file" id="file-input" accept=".json" />
             </div>
 
-            <div id="preview-area" style="display: none; margin-bottom: 16px;">
-                <h3 style="margin-bottom: 8px;">Plants to import:</h3>
-                <ul id="plant-preview-list" style="margin-bottom: 16px;"></ul>
+            <div class="preview" id="preview-area" style="display: none;">
+                <h3>Plants to import:</h3>
+                <ul id="plant-preview-list"></ul>
                 <button class="button" id="btn-confirm-import" disabled>Confirm Import</button>
-                <span id="import-status" style="margin-left: 12px;"></span>
+                <span id="import-status"></span>
             </div>
 
-            <div id="result-area" style="display: none;">
-                <h3 style="margin-bottom: 8px;">Import Result</h3>
-                <div id="result-message" style="margin-bottom: 12px;"></div>
-                <div id="result-links"></div>
+            <div class="result" id="result-area" style="display: none;">
+                <h3>Import Result</h3>
+                <div id="result-message"></div>
+                <div class="result-links" id="result-links"></div>
                 <button class="button secondary" id="btn-import-another" style="margin-top: 12px;">Import Another</button>
             </div>
 
-            <div id="error-area" style="display: none; color: var(--danger); margin-top: 12px;"></div>
+            <div class="error" id="error-area" style="display: none;"></div>
         </div>
     </div>
 
