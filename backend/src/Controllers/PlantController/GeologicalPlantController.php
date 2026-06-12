@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../Services/PlantServiceFacade.php';
 require_once __DIR__ . '/../../Dto/GeologicalPlantDataDTO.php'; 
 require_once __DIR__ . '/../../Dto/ApiResponseDTO.php'; 
 require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php'; 
+require_once __DIR__ . '/../../Services/LogService.php'; 
 
 class GeologicalPlantController { 
     public function __construct(

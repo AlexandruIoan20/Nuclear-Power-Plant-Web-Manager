@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../Dto/PlantMapDTO.php';
 require_once __DIR__ . '/../../Dto/PlantStatusListDTO.php';
 require_once __DIR__ . '/../../Dto/CoordinatesPreviewResponseDTO.php';
 require_once __DIR__ . '/../../Dto/ApiResponseDTO.php';
+require_once __DIR__ . '/../../Services/LogService.php'; 
 
 class DetailsPlantController { 
     public function __construct(

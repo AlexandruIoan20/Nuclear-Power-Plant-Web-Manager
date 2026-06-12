@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../Entities/WaterSourceType.php';
 require_once __DIR__ . '/../../Dto/CreateDataResponseDTO.php';
 require_once __DIR__ . '/../../Dto/GeologicalPlantDataDTO.php';
 require_once __DIR__ . '/../../Dto/GeoLocationPreviewDTO.php';
+require_once __DIR__ . '/../LogService.php';
 
 class GeologicalPlantService { 
     private PlantRepositoryFacade $plantRepositoryFacade; 

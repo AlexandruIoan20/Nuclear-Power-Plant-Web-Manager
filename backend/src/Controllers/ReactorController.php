@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../Services/ReactorService.php';
 require_once __DIR__ . '/../Services/SensorService.php';
 require_once __DIR__ . '/../Dto/ApiResponseDTO.php';
+require_once __DIR__ . '/../Services/LogService.php';
 
 class ReactorController { 
     private ReactorService $reactorService; 

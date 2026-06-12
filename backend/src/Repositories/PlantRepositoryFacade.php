@@ -1,5 +1,12 @@
 <?php
 
+require_once __DIR__ . '/../Services/LogService.php';
+require_once __DIR__ . '/../Entities/Plant.php';
+require_once __DIR__ . '/../Entities/BasicPlantData.php';
+require_once __DIR__ . '/../Entities/GeologicalPlantData.php';
+require_once __DIR__ . '/../Entities/TechnicalPlantData.php';
+require_once __DIR__ . '/../Entities/ReactorSchema.php';
+
 class PlantRepositoryFacade { 
     private DetailsPlantRepository $detailsPlantRepository;
     private BasicPlantRepository $basicPlantRepository;

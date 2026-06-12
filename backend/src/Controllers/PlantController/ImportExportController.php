@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../../Services/PlantService/PlantExportImportService.php';
+require_once __DIR__ . '/../../Services/LogService.php'; 
 
 class ImportExportController {
     private PlantExportImportService $service;

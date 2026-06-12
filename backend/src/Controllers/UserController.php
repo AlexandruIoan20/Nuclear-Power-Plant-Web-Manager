@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../Constants/urls.php';
 require_once __DIR__ . '/../Dto/UserDTO.php';
 require_once __DIR__ . '/../Dto/ApiResponseDTO.php';
+require_once __DIR__ . '/../Services/LogService.php';
 
 class UserController { 
     private UserService $userService; 
