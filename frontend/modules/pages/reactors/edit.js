@@ -37,6 +37,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         populateSelect("reactorType", ReactorType, d.reactorType ?? "");
         populateSelect("coolingType", CoolingType, d.coolingType ?? "");
+        document.getElementById("reactorType").disabled = true;
+        document.getElementById("coolingType").disabled = true;
         populateSelect("operationalStatus", ReactorOperationalStatus, d.operationalStatus ?? "");
 
         document.getElementById("thermalPowerMw").value = d.thermalPowerMw ?? "";
@@ -62,8 +64,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         const formData = {
             powerPlantId: plantId,
             reactorCode: document.getElementById("reactorCode").value,
-            reactorType: document.getElementById("reactorType").value,
-            coolingType: document.getElementById("coolingType").value,
+            reactorType: document.getElementById("reactorType").disabled ? undefined : document.getElementById("reactorType").value,
+            coolingType: document.getElementById("coolingType").disabled ? undefined : document.getElementById("coolingType").value,
             operationalStatus: document.getElementById("operationalStatus").value,
             thermalPowerMw: document.getElementById("thermalPowerMw").value,
             electricalPowerMw: document.getElementById("electricalPowerMw").value,

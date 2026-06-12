@@ -174,7 +174,7 @@ $emailController = new EmailController($emailService);
 $alertRepository = new AlertRepository($pdo);
 $alertService = new AlertService($alertRepository, $emailService);
 
-$rssService = new RssService($plantServiceFacade);
+$rssService = new RssService($pdo);
 $rssController = new RssController($rssService);    
 
 $userRepository = new UserRepository($pdo);
