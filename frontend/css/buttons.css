@@ -42,6 +42,7 @@ input[type="submit"]:hover {
 }
 
 /* ─── Action groups ─── */
+.toolbar
 .hero-actions,
 .card-actions,
 .button-row {
@@ -49,6 +50,11 @@ input[type="submit"]:hover {
     flex-wrap: wrap;
     gap: 12px;
     margin-top: 22px;
+}
+
+.toolbar .button, 
+.toolbar button { 
+    width: auto; 
 }
 
 .button-row input[type="submit"],

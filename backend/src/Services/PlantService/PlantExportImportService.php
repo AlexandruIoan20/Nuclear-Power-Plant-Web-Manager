@@ -160,7 +160,8 @@ class PlantExportImportService {
 
     public function exportPlantCsv(string $plantId): string {
         $data = $this->exportPlantJson($plantId);
-        return $this->generateCsvZip($data['plants']);
+        
+        return $this->generateCsvZip([$data]); 
     }
 
     public function exportPlantsCsv(?array $plantIds = null): string {
