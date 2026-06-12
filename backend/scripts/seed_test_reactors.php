@@ -10,7 +10,9 @@ $dbname   = getenv('DB_NAME');
 $username = getenv('DB_USER');
 $password = getenv('DB_PASSWORD');
 
-$dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
+// $dsn = "pgsql:host=$host;port=$port;dbname=$dbname"; // dev
+$dsn = "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require"; // prod
+
 $pdo = new PDO($dsn, $username, $password, [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 ]);
