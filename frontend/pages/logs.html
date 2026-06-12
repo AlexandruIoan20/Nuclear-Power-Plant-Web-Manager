@@ -295,7 +295,13 @@
             body.scrollTop = body.scrollHeight;
             scrollIndicator.classList.remove('visible');
         });
-        levelFilter.addEventListener('change', function () { stopPolling(); render(); startPolling(); });
+        levelFilter.addEventListener('change', function () {
+            stopPolling();
+            allLogs = [];
+            lastId = null;
+            render();
+            startPolling();
+        });
         searchInput.addEventListener('input', function () { render(); });
         clearBtn.addEventListener('click', function () { allLogs = []; lastId = null; render(); stopPolling(); startPolling(); });
         document.addEventListener('DOMContentLoaded', function () { startPolling(); });

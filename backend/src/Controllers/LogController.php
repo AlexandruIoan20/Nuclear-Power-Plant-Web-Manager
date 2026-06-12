@@ -20,7 +20,7 @@ class LogController {
 
         try {
             if ($afterId !== null) {
-                $logs = LogService::instance()->getRepository()->findAfter($afterId, $limit);
+                $logs = LogService::instance()->getRepository()->findAfter($afterId, $limit, $level ? strtoupper($level) : null);
                 $total = LogService::instance()->getRepository()->countByLevel($level ? strtoupper($level) : null);
             } else {
                 $logs = LogService::instance()->getRepository()->findRecent($limit, $level ? strtoupper($level) : null, $offset);
