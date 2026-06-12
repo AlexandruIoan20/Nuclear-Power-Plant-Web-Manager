@@ -24,7 +24,13 @@ class AlertController {
         try {
             $input = json_decode(file_get_contents('php://input'), true);
             $this->alertService->processSensorData($input);
-            
+
+            LogService::instance()->info(
+                "Semnal senzor procesat: " . ($input['sensor_code'] ?? 'unknown'),
+                ['plant_id' => $input['plant_id'] ?? null],
+                $input['plant_id'] ?? null
+            );
+
             http_response_code(200);
             echo json_encode(new ApiResponseDTO(status: 'success', message: 'Semnalul senzorului a fost procesat.'));
         } catch (\Throwable $e) {
@@ -71,7 +77,23 @@ class AlertController {
                 exit;
             }
 
+            if ($id === 'all') {
+                $this->alertService->dismissAllAlerts();
+                LogService::instance()->info("[ALERT] Toate alertele au fost marcate ca citite.");
+                echo json_encode(['status' => 'success', 'message' => 'Toate alertele au fost marcate ca citite.']);
+                return;
+            }
+
+            if (str_starts_with($id, 'approval_')) {
+                $plantId = substr($id, 9);
+                $this->alertService->dismissApproval($plantId);
+                LogService::instance()->info("[ALERT] Solicitare ascunsă pentru planta {$plantId}.");
+                echo json_encode(['status' => 'success', 'message' => 'Solicitarea a fost ascunsă.']);
+                return;
+            }
+
             $this->alertService->dismissAlert($id);
+            LogService::instance()->info("[ALERT] Alertă {$id} marcată ca citită.");
             echo json_encode(new ApiResponseDTO(status: 'success'));
         } catch (\Throwable $e) {
             LogService::instance()->error("[ALERT PUT ERROR] " . $e->getMessage());

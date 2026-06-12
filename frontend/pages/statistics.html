@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistici - Nuclear Plant Control</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="../modules/config/globals.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .stats-page {
+            padding: 24px 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .stats-page h1 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            color: var(--gold);
+        }
+        .stats-page p.sub {
+            color: var(--muted);
+            margin-bottom: 24px;
+            font-size: 0.92rem;
+        }
+
+        /* Tabs */
+        .tab-bar {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid #333;
+            margin-bottom: 24px;
+        }
+        .tab-bar button {
+            background: transparent;
+            border: none;
+            padding: 12px 28px;
+            font-size: 0.95rem;
+            color: #888;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: color 0.15s, border-color 0.15s;
+            font-family: inherit;
+        }
+        .tab-bar button:hover {
+            color: #ccc;
+        }
+        .tab-bar button.active {
+            color: var(--gold);
+            border-bottom-color: var(--gold);
+        }
+        .tab-panel {
+            display: none;
+        }
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* KPI row */
+        .kpi-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .kpi-card {
+            background: #16162a;
+            border: 1px solid #2a2a4a;
+            border-radius: 8px;
+            padding: 16px 24px;
+            min-width: 140px;
+            flex: 1;
+        }
+        .kpi-card .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--green);
+        }
+        .kpi-card .kpi-label {
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Chart grid */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .chart-grid .full {
+            grid-column: 1 / -1;
+        }
+        .chart-box {
+            background: #16162a;
+            border: 1px solid #2a2a4a;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .chart-box h3 {
+            font-size: 0.95rem;
+            color: #aaa;
+            margin-bottom: 8px;
+            padding-left: 4px;
+        }
+        .chart-box .chart-container {
+            width: 100%;
+            height: 260px;
+        }
+        .chart-box .chart-container.tall {
+            height: 340px;
+        }
+
+        .reload-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .reload-bar .last-update {
+            font-size: 0.78rem;
+            color: #666;
+        }
+        .reload-bar .badge {
+            font-size: 0.72rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: #2a2a4a;
+            color: #888;
+        }
+
+        /* selector row */
+        .selector-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .selector-row label {
+            color: #aaa;
+            font-size: 0.85rem;
+        }
+        .selector-row select {
+            background: #16162a;
+            color: #ddd;
+            border: 1px solid #333;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        /* recent alerts table */
+        .stats-table-shell {
+            overflow-x: auto;
+        }
+        .stats-table-shell table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+        .stats-table-shell th {
+            text-align: left;
+            padding: 8px 12px;
+            color: #888;
+            border-bottom: 1px solid #2a2a4a;
+            font-weight: 500;
+        }
+        .stats-table-shell td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #1e1e3a;
+            color: #ccc;
+        }
+        .stats-table-shell tr:hover td {
+            background: #1e1e3a;
+        }
+        .severity-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 800px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+            .tab-bar button {
+                padding: 10px 14px;
+                font-size: 0.82rem;
+            }
+            .kpi-card {
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="main-navbar"></div>
+    <main class="stats-page">
+        <h1>Statistici</h1>
+        <p class="sub">Date agregate despre centrale, reactoare și senzori</p>
+
+        <div class="reload-bar">
+            <span class="badge" id="stats-interval-badge">Se actualizează la 30s</span>
+            <span class="last-update" id="stats-last-update"></span>
+        </div>
+        <div id="stats-error" style="display:none;background:#2a0a0a;border:1px solid #dc3545;border-radius:6px;padding:12px 16px;margin-bottom:16px;color:#f88;"></div>
+        <div id="stats-loading" style="padding:12px 16px;margin-bottom:16px;color:#888;">Se încarcă datele...</div>
+
+        <div class="tab-bar" role="tablist">
+            <button class="active" data-tab="plants" role="tab">Centrale</button>
+            <button data-tab="reactors" role="tab">Reactoare</button>
+            <button data-tab="sensors" role="tab">Senzori</button>
+            <button data-tab="alerts" role="tab">Alerte</button>
+        </div>
+
+        <!-- PLANTS TAB -->
+        <div class="tab-panel active" id="tab-plants" role="tabpanel">
+            <div class="kpi-row" id="plants-kpi"></div>
+            <div class="chart-grid">
+                <div class="chart-box">
+                    <h3>Status</h3>
+                    <div class="chart-container" id="chart-plants-status"></div>
+                </div>
+                <div class="chart-box">
+                    <h3>Țări</h3>
+                    <div class="chart-container" id="chart-plants-country"></div>
+                </div>
+                <div class="chart-box full">
+                    <h3>Centrale create pe lună</h3>
+                    <div class="chart-container tall" id="chart-plants-monthly"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REACTORS TAB -->
+        <div class="tab-panel" id="tab-reactors" role="tabpanel">
+            <div class="kpi-row" id="reactors-kpi"></div>
+            <div class="chart-grid">
+                <div class="chart-box">
+                    <h3>Tip reactor</h3>
+                    <div class="chart-container" id="chart-reactors-type"></div>
+                </div>
+                <div class="chart-box">
+                    <h3>Răcire</h3>
+                    <div class="chart-container" id="chart-reactors-cooling"></div>
+                </div>
+                <div class="chart-box">
+                    <h3>Status operational</h3>
+                    <div class="chart-container" id="chart-reactors-status"></div>
+                </div>
+                <div class="chart-box">
+                    <h3>Putere termică medie</h3>
+                    <div class="chart-container" id="chart-reactors-power"></div>
+                </div>
+                <div class="chart-box full">
+                    <h3>Măsurători orare</h3>
+                    <div class="selector-row">
+                        <label for="reactor-select">Reactor:</label>
+                        <select id="reactor-select">
+                            <option value="">Toate reactoarele</option>
+                        </select>
+                        <label for="hours-select">Interval:</label>
+                        <select id="hours-select">
+                            <option value="6">6 ore</option>
+                            <option value="12">12 ore</option>
+                            <option value="24" selected>24 ore</option>
+                            <option value="48">48 ore</option>
+                            <option value="72">72 ore</option>
+                        </select>
+                    </div>
+                    <div class="chart-container tall" id="chart-reactors-hourly"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SENSORS TAB -->
+        <div class="tab-panel" id="tab-sensors" role="tabpanel">
+            <div class="kpi-row" id="sensors-kpi"></div>
+            <div class="chart-grid">
+                <div class="chart-box">
+                    <h3>Tip senzor</h3>
+                    <div class="chart-container" id="chart-sensors-type"></div>
+                </div>
+                <div class="chart-box">
+                    <h3>Status senzor</h3>
+                    <div class="chart-container" id="chart-sensors-status"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ALERTS TAB -->
+        <div class="tab-panel" id="tab-alerts" role="tabpanel">
+            <div class="kpi-row" id="alerts-kpi"></div>
+            <div class="chart-grid">
+                <div class="chart-box">
+                    <h3>Severitate</h3>
+                    <div class="chart-container" id="chart-alerts-severity"></div>
+                </div>
+                <div class="chart-box">
+                    <h3>Tip alertă</h3>
+                    <div class="chart-container" id="chart-alerts-type"></div>
+                </div>
+                <div class="chart-box full">
+                    <h3>Alerte ultimele 30 zile</h3>
+                    <div class="chart-container tall" id="chart-alerts-daily"></div>
+                </div>
+                <div class="chart-box full">
+                    <h3>Alerte recente</h3>
+                    <div class="stats-table-shell" id="alerts-recent-table">
+                        <p style="color:#666;padding:12px;">Se încarcă...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="../modules/ui/navbar.js"></script>
+    <script type="module" src="../modules/pages/statistics/index.js"></script>
+</body>
+</html>

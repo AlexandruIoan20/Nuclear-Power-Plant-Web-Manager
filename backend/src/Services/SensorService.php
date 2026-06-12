@@ -34,6 +34,8 @@ class SensorService {
                 return; 
             }
 
+            $codes = array_map(fn($t) => $t->getSensorCode(), $templates);
+            $this->sensorRepository->deleteByReactorAndCodes($reactorId, $codes);
             $this->sensorRepository->insertBulk($reactorId, $templates);
         } catch(Exception $e) { 
             LogService::instance()->error("[ERROR] Populate Reactor Sensors: " . $e->getMessage());

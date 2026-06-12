@@ -31,5 +31,13 @@ export const powerPlantService = {
     // Technical 
     getTechnical: (plantId) => api.get(`/power-plants/${plantId}/technical`), 
     createTechnical: (formData, plantId) => api.post(`/power-plants/${plantId}/technical`, TechnicalDataRequestDTO(formData)), 
-    updateTechnical: (formData, plantId) => api.put(`/power-plants/${plantId}/technical`, TechnicalDataRequestDTO(formData)) 
+    updateTechnical: (formData, plantId) => api.put(`/power-plants/${plantId}/technical`, TechnicalDataRequestDTO(formData)), 
+
+    // Import / Export 
+    exportPlantJson: (plantId) => api.download(`/power-plants/${plantId}/export`),
+    exportAllPlantsJson: () => api.download(`/power-plants/export`),
+    exportPlantCsv: (plantId) => api.download(`/power-plants/${plantId}/export/csv`),
+    exportAllPlantsCsv: () => api.download(`/power-plants/export/csv`),
+    importPlant: (data) => api.post(`/power-plants/import`, data),
+    importPlants: (data) => api.post(`/power-plants/import/batch`, data),
 };  

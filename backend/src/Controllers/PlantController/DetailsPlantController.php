@@ -12,8 +12,13 @@ require_once __DIR__ . '/../../Dto/ApiResponseDTO.php';
 
 class DetailsPlantController { 
     public function __construct(
-        private PlantServiceFacade $plantServiceFacade
+        private PlantServiceFacade $plantServiceFacade,
+        private ?AlertRepository $alertRepository = null
     ) {}
+
+    public function setAlertRepository(AlertRepository $repo): void {
+        $this->alertRepository = $repo;
+    }
 
     public function getCountries() { 
         header('Content-Type: application/json; charset=UTF-8');
@@ -201,6 +206,28 @@ echo json_encode(new ApiResponseDTO(status: 'success', data: $dtos));
 
                 exit; 
             } 
+
+            if ($this->alertRepository) {
+                $newStatus = $dateFormular['status'] ?? '';
+                $plant = $this->plantServiceFacade->getPlantDetailsById($plantId);
+                $plantName = $plant ? $plant->getName() : $plantId;
+                $type = match (strtoupper($newStatus)) {
+                    'APPROVED' => 'PLANT_APPROVED',
+                    'REJECTED' => 'PLANT_REJECTED',
+                    default => 'PLANT_STATUS_CHANGE',
+                };
+                $this->alertRepository->savePlantEvent(
+                    $plantId,
+                    $type,
+                    "Centrala \"{$plantName}\" a fost actualizată la statusul: {$newStatus}"
+                );
+            }
+
+            LogService::instance()->info(
+                "[PLANT] Status actualizat: {$plantId} → {$newStatus}",
+                null,
+                $plantId
+            );
 
             echo json_encode(new ApiResponseDTO(status: 'success', message: "Status actualizat cu succes")); 
         } catch(Exception $e) { 

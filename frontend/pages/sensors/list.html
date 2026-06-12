@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Senzori Reactor</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../modules/config/globals.js"></script>
+    <style>
+        .sensor-status-badge {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 2px 7px;
+            border-radius: 3px;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--muted);
+            white-space: nowrap;
+        }
+        .sensor-status-badge.GOOD        { color: #6fa87c; border-color: rgba(111,168,124,0.35); }
+        .sensor-status-badge.SUSPECT     { color: #a89050; border-color: rgba(168,144,80,0.35); }
+        .sensor-status-badge.BAD         { color: #a85858; border-color: rgba(168,88,88,0.4); }
+        .sensor-status-badge.MAINTENANCE { color: #787878; border-color: rgba(120,120,120,0.3); }
+        .sensor-status-badge.SIMULATED   { color: #507898; border-color: rgba(80,120,152,0.35); }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <div id="main-navbar"></div>
+
+        <div class="results-meta" style="margin-bottom: 16px;">
+            <div>Total senzori: <span id="results-count">—</span></div>
+            <span id="reactor-info" style="display:none;"></span>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+            <button class="button" id="btn-populate" type="button">Populează din Template</button>
+            <button class="button" id="btn-create" type="button">+ Adaugă Senzor</button>
+            <button class="button secondary" id="btn-back-reactor" type="button">← Înapoi la Reactor</button>
+        </div>
+
+        <div class="table-shell">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cod Senzor</th>
+                        <th>Tip</th>
+                        <th>Descriere</th>
+                        <th>Valoare</th>
+                        <th>Status</th>
+                        <th>Activ</th>
+                        <th>Acțiuni</th>
+                    </tr>
+                </thead>
+                <tbody id="sensors-tbody">
+                    <tr class="state-row">
+                        <td colspan="7">
+                            <span class="spinner-inline"></span> Se încarcă senzorii...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="status-message" style="margin-top: 18px;"></div>
+    </div>
+
+    <script type="module" src="../../modules/pages/sensors/list.js"></script>
+    <script type="module" src="../../modules/ui/navbar.js"></script>
+</body>
+</html>

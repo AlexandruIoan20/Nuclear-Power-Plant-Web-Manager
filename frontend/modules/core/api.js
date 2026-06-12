@@ -55,10 +55,35 @@ async function request(method, endpoint, body = null) {
     return data; 
 }
 
+async function downloadBlob(endpoint) {
+    logger.info(`API GET ${endpoint} (download)`);
+    const response = await fetch(`${API_BASE}${endpoint}`, { credentials: 'include' });
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        logger.error(`API download ${endpoint} esuata`, { status: response.status, message: data.message });
+        throw { status: response.status, message: data.message };
+    }
+
+    const blob = await response.blob();
+    const disposition = response.headers.get('Content-Disposition') || '';
+    const match = disposition.match(/filename="?(.+?)"?$/);
+    const filename = match ? match[1] : 'download';
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
 export const api = { 
     get: (url) => request("GET", url), 
     post: (url, body) => request("POST", url, body), 
     put: (url, body) => request("PUT", url, body), 
     patch: (url, body) => request("PATCH", url, body), 
-    delete: (url) => request("DELETE", url)
+    delete: (url) => request("DELETE", url),
+    download: (url) => downloadBlob(url),
 }; 

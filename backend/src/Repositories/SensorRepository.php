@@ -113,6 +113,7 @@ class SensorRepository {
                     description = :description,
                     location_zone = :location_zone,
                     unit_of_measure = :unit_of_measure,
+                    measurement_field = :measurement_field,
                     normal_min = :normal_min,
                     normal_max = :normal_max,
                     alarm_low = :alarm_low,
@@ -140,6 +141,7 @@ class SensorRepository {
         $sql = "INSERT INTO reactor_sensors (
                     id, reactor_id, sensor_code, sensor_type,
                     description, location_zone, unit_of_measure,
+                    measurement_field,
                     normal_min, normal_max, alarm_low, alarm_high,
                     alert_low, alert_high, scram_low, scram_high,
                     status, is_active, last_calibration, calibration_due,
@@ -147,6 +149,7 @@ class SensorRepository {
                 ) VALUES (
                     :id, :reactor_id, :sensor_code, :sensor_type,
                     :description, :location_zone, :unit_of_measure,
+                    :measurement_field,
                     :normal_min, :normal_max, :alarm_low, :alarm_high,
                     :alert_low, :alert_high, :scram_low, :scram_high,
                     :status, :is_active, :last_calibration, :calibration_due,
@@ -160,6 +163,13 @@ class SensorRepository {
     public function delete(string $id): void {
         $stmt = $this->db->prepare("DELETE FROM reactor_sensors WHERE id = :id");
         $stmt->execute(['id' => $id]);
+    }
+
+    public function deleteByReactorAndCodes(string $reactorId, array $codes): void {
+        if (empty($codes)) return;
+        $placeholders = implode(', ', array_fill(0, count($codes), '?'));
+        $stmt = $this->db->prepare("DELETE FROM reactor_sensors WHERE reactor_id = ? AND sensor_code IN ($placeholders)");
+        $stmt->execute(array_merge([$reactorId], $codes));
     }
 
     private function extractParameters(ReactorSensor $s): array {
@@ -181,7 +191,7 @@ class SensorRepository {
             'scram_low' => $s->getScramLow(),
             'scram_high' => $s->getScramHigh(),
             'status' => $s->getStatus()->value,
-            'is_active' => $s->getIsActive(),
+            'is_active' => $s->getIsActive() ? 1 : 0,
             'last_calibration' => $s->getLastCalibration(),
             'calibration_due' => $s->getCalibrationDue(),
             'current_value' => $s->getCurrentValue(),

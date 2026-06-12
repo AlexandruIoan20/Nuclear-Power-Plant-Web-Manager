@@ -33,7 +33,6 @@ class AlertService {
         $alert = new Alert($plantId, $type, $message);
         $this->alertRepository->save($alert);
 
-     
         $ownerEmail = $this->alertRepository->getPlantOwnerEmail($plantId);
         $targetEmail = $ownerEmail ?? 'admin@nuclear.ro'; // Fallback curent
 
@@ -50,5 +49,13 @@ class AlertService {
 
     public function dismissAlert(string $alertId): void {
         $this->alertRepository->markAsRead($alertId);
+    }
+
+    public function dismissAllAlerts(): void {
+        $this->alertRepository->markAllAsRead();
+    }
+
+    public function dismissApproval(string $plantId): void {
+        $this->alertRepository->dismissApproval($plantId);
     }
 }

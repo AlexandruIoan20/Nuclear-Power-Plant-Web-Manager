@@ -15,7 +15,13 @@
 </head>
 <body>
     <div class="page-shell">
-        <div id = "main-navbar"></div>
+        <div id="main-navbar"></div>
+
+        <div class="toolbar">
+            <button class="button secondary" id="btn-import">Import</button>
+            <button class="button secondary" id="btn-export-all-json">Export JSON</button>
+            <button class="button secondary" id="btn-export-all-csv">Export CSV</button>
+        </div>
 
         <div class="filter-bar">
             <div class="field">
@@ -41,7 +47,7 @@
                         <th data-col="country">Țară <span class="sort-icon">↕</span></th>
                         <th data-col="coords">Coordonate</th>
                         <th data-col="status">Status <span class="sort-icon">↕</span></th>
-                        <th></th>
+                        <th>Acțiuni</th>
                     </tr>
                 </thead>
                 <tbody id="plants-tbody">

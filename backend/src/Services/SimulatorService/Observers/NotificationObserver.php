@@ -10,6 +10,9 @@ class NotificationObserver implements ObserverInterface {
     private EmailService $emailService;
     private AlertRepository $alertRepository;
 
+    private const DEBOUNCE_SECONDS = 300;
+    private array $lastEmailTime = [];
+
     public function __construct(EmailService $emailService, AlertRepository $alertRepository) {
         $this->emailService = $emailService;
         $this->alertRepository = $alertRepository;
@@ -19,6 +22,13 @@ class NotificationObserver implements ObserverInterface {
         if ($event->getSeverity() !== 'EMERGENCY') {
             return;
         }
+
+        $key = $event->getReactorId() . '|' . $event->getSeverity();
+        $now = time();
+        if (isset($this->lastEmailTime[$key]) && ($now - $this->lastEmailTime[$key]) < self::DEBOUNCE_SECONDS) {
+            return;
+        }
+        $this->lastEmailTime[$key] = $now;
 
         $ownerEmail = $this->alertRepository->getPlantOwnerEmail($event->getPlantId());
         $targetEmail = $ownerEmail ?? getenv('ALERT_EMAIL_FALLBACK') ?: 'admin@nuclear.ro';
@@ -39,6 +49,12 @@ class NotificationObserver implements ObserverInterface {
                 'subject' => $subject,
                 'message' => $message,
             ]);
+            LogService::instance()->critical(
+                "[SCRAM] Email trimis la {$targetEmail} — reactor {$event->getReactorId()} | senzor: {$sensor->getSensorCode()} ({$sensor->getSensorType()->value}) = {$event->getValue()}{$unit}",
+                ['value' => $event->getValue(), 'threshold' => $event->getThreshold(), 'target_email' => $targetEmail],
+                $event->getPlantId(),
+                $event->getReactorId()
+            );
         } catch (\Throwable $e) {
             LogService::instance()->error("[SCRAM EMAIL] Eroare trimitere email: " . $e->getMessage());
         }

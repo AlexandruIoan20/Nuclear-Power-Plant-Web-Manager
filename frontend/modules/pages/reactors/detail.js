@@ -169,6 +169,12 @@ document.addEventListener('DOMContentLoaded', () => {
             : '/pages/reactors/edit.html?reactorId=' + reactorId;
     });
 
+    el('btn-sensors').addEventListener('click', () => {
+        window.location.href = plantId
+            ? '/pages/sensors/list.html?reactorId=' + reactorId + '&plantId=' + plantId
+            : '/pages/sensors/list.html?reactorId=' + reactorId;
+    });
+
     loadReactor();
 });
 

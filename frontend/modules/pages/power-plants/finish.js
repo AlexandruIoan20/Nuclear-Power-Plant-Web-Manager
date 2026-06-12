@@ -1,35 +1,58 @@
-import { powerPlantService } from '../../services/powerPlantService.js'; 
-import { feasibilityReportService } from '../../services/feasibilityReportService.js'; 
+import { powerPlantService } from '../../services/powerPlantService.js';
+import { feasibilityReportService } from '../../services/feasibilityReportService.js';
+import { UpdatePlantStatusRequestDTO } from '../../dto/UpdatePlanStatusRequestDTO.js';
 import { getQueryParam } from '../../utils/urlHelper.js';
-import { saveHeaderState, clearHeaderState } from '../../ui/form-header/formHeaderState.js'; 
-import { renderHeader } from '../../ui/form-header/formHeader.js'; 
+import { saveHeaderState, clearHeaderState } from '../../ui/form-header/formHeaderState.js';
+import { renderHeader } from '../../ui/form-header/formHeader.js';
 import { populatePlantPage } from '../../ui/power-plants/plantPageRenderer.js';
 import { logger } from '../../core/logger.js';
 
-const plantId = getQueryParam("id"); 
+const plantId = getQueryParam("id");
+
 
 function isComplete(dto) {
     const ignored = ['id', 'basicId', 'geologicalId', 'technicalId', "safetySystems"];
-    
+
     return Object.entries(dto).every(([key, value]) => {
         if (ignored.includes(key)) return true;
-        
         if (Array.isArray(value)) return value.length > 0;
-        
         return value !== null && value !== undefined && value !== '';
     });
 }
 
-document.addEventListener("DOMContentLoaded", async () => { 
-    if(!plantId) { 
-        alert("Centrala nu a fost găsită."); 
-        return; 
+
+document.addEventListener("DOMContentLoaded", async () => {
+    if (!plantId) {
+        alert("Centrala nu a fost găsită.");
+        return;
     }
 
-    try { 
-        const rawData = await powerPlantService.getPlant(plantId); 
-        logger.info({ rawData }); 
-        populatePlantPage(rawData); 
+    const btnExportJson = document.getElementById('btn-export-json');
+    if (btnExportJson) {
+        btnExportJson.addEventListener('click', async () => {
+            try {
+                await powerPlantService.exportPlantJson(plantId);
+            } catch (e) {
+                alert('Export error: ' + (e.message || 'Unknown error'));
+            }
+        });
+    }
+
+    const btnExportCsv = document.getElementById('btn-export-csv');
+    if (btnExportCsv) {
+        btnExportCsv.addEventListener('click', async () => {
+            try {
+                await powerPlantService.exportPlantCsv(plantId);
+            } catch (e) {
+                alert('Export error: ' + (e.message || 'Unknown error'));
+            }
+        });
+    }
+
+    try {
+        const rawData = await powerPlantService.getPlant(plantId);
+        logger.info({ rawData });
+        populatePlantPage(rawData);
 
         if (rawData.details) {
             saveHeaderState({
@@ -41,7 +64,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         const status = rawData.details?.status || 'DRAFT';
-        const verifyButton = document.getElementById("btn-verify"); 
+        const verifyButton = document.getElementById("btn-verify");
+        const originalBtnText = verifyButton.textContent; 
         const container = document.querySelector('.nav-links');
 
         let statusMsg = document.getElementById('status-message');
@@ -54,41 +78,47 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         if (status === 'DRAFT') {
-            if (isComplete(rawData)) { 
-                verifyButton.disabled = false; 
+            if (isComplete(rawData)) {
+                verifyButton.disabled = false;
                 verifyButton.style.display = 'inline-block';
                 statusMsg.textContent = '';
-            } else { 
-                verifyButton.disabled = true; 
+            } else {
+                verifyButton.disabled = true;
                 verifyButton.style.display = 'inline-block';
                 statusMsg.textContent = 'Completați toate datele pentru a putea trimite spre verificare.';
                 statusMsg.style.color = 'var(--yellow)';
             }
 
-            verifyButton.addEventListener("click", async () => { 
-                verifyButton.disabled = true; 
-                verifyButton.textContent = "Se generează raportul..."; 
-                try { 
-                    const response = await feasibilityReportService.createReport(plantId); 
-                    logger.info({ response }); 
+            verifyButton.addEventListener("click", async () => {
+                verifyButton.disabled = true;
+                verifyButton.textContent = "Se generează raportul...";
+                
+                try {
+                    const response = await feasibilityReportService.createReport(plantId);
+                    logger.info({ response });
 
-                    if (response.success) { 
-                        verifyButton.textContent = "Se actualizează statusul..."; 
-                        await powerPlantService.submitForReview(plantId); 
-                        clearHeaderState(); 
-                        window.location.href = `/pages/feasibility/report-results.html?id=${plantId}`; 
-                    } else { 
-                        verifyButton.disabled = false; 
-                        verifyButton.textContent = "VERIFICĂ"; 
-                        alert(response.message || "Eroare la generarea raportului."); 
-                    } 
-                } catch (error) { 
-                    logger.error(error.message); 
-                    verifyButton.disabled = false; 
-                    verifyButton.textContent = "VERIFICĂ"; 
-                    alert("Eroare la generarea raportului."); 
-                } 
-            }); 
+                    if (response.success) {
+                        verifyButton.textContent = "Se actualizează statusul...";
+                        try {
+                            await powerPlantService.submitForReview(plantId);
+                        } catch (error) {
+                            logger.info(error.message);
+                        }
+                        
+                        clearHeaderState();
+                        window.location.href = `/pages/feasibility/report-results.html?id=${plantId}`;
+                    } else {
+                        verifyButton.disabled = false;
+                        verifyButton.textContent = originalBtnText;
+                        alert(response.message || "Eroare la generarea raportului.");
+                    }
+                } catch (error) {
+                    logger.error(error.message);
+                    verifyButton.disabled = false;
+                    verifyButton.textContent = originalBtnText;
+                    alert("Eroare la generarea raportului.");
+                }
+            });
         } else if (status === 'REVIEW') {
             verifyButton.style.display = 'none';
             statusMsg.textContent = 'Centrala este în așteptarea validării de către un administrator.';
@@ -125,8 +155,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
             });
         }
-    } catch(error) {    
+    } catch(error) {
         logger.error(error.message);
-        alert("A apărut o eroare în preluarea informațiilor despre centrală");  
+        alert("A apărut o eroare în preluarea informațiilor despre centrală.");
     }
-})
+});
