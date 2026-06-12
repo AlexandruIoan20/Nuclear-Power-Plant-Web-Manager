@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<title>Specificarea Cerințelor Software (SRS) — Nuclear Power Plant Web Manager</title>
+<style>
+  body { font-family: 'Times New Roman', Times, serif; max-width: 900px; margin: 2em auto; padding: 0 1.5em; line-height: 1.6; color: #222; }
+  h1, h2, h3, h4 { font-family: 'Segoe UI', Arial, sans-serif; color: #1a3c6e; margin-top: 1.8em; }
+  h1 { border-bottom: 2px solid #1a3c6e; padding-bottom: 0.3em; }
+  h2 { border-bottom: 1px solid #ccc; padding-bottom: 0.2em; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+  td, th { border: 1px solid #999; padding: 6px 10px; text-align: left; }
+  th { background: #eef; }
+  code { background: #f4f4f4; padding: 1px 4px; border-radius: 3px; font-size: 0.9em; }
+  pre { background: #f8f8f8; border: 1px solid #ddd; padding: 1em; overflow-x: auto; }
+  .toc { background: #f9f9f9; border: 1px solid #ddd; padding: 1em 2em; margin: 1em 0; }
+  .toc li { margin: 0.3em 0; }
+  .status-draft { color: #856404; background: #fff3cd; padding: 2px 8px; border-radius: 3px; }
+  .status-ok { color: #155724; background: #d4edda; padding: 2px 8px; border-radius: 3px; }
+  .priority-high { color: #721c24; background: #f8d7da; padding: 2px 8px; border-radius: 3px; }
+  .priority-med { color: #856404; background: #fff3cd; padding: 2px 8px; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<h1>Specificarea Cerințelor Software (SRS)</h1>
+<h2>Nuclear Power Plant Web Manager</h2>
+<p><strong>Versiune:</strong> 1.0 &mdash; <strong>Data:</strong> 13 Iunie 2026</p>
+<p><strong>Autori:</strong> Mogos Paul, Moraru Ioan Alexandru, AlexandruIoan20</p>
+<p><strong>Standard:</strong> IEEE 830-1998</p>
+
+<hr>
+
+<div class="toc">
+<h3>Cuprins</h3>
+<ol>
+  <li><a href="#s1">Introducere</a>
+    <ol>
+      <li><a href="#s11">Scop</a></li>
+      <li><a href="#s12">Convenții</a></li>
+      <li><a href="#s13">Public țintă</a></li>
+      <li><a href="#s14">Domeniu de aplicare</a></li>
+      <li><a href="#s15">Referințe</a></li>
+    </ol>
+  </li>
+  <li><a href="#s2">Descriere generală</a>
+    <ol>
+      <li><a href="#s21">Perspectiva produsului</a></li>
+      <li><a href="#s22">Funcționalități generale</a></li>
+      <li><a href="#s23">Caracteristici utilizatori</a></li>
+      <li><a href="#s24">Constrângeri</a></li>
+      <li><a href="#s25">Ipoteze și dependențe</a></li>
+    </ol>
+  </li>
+  <li><a href="#s3">Cerințe specifice</a>
+    <ol>
+      <li><a href="#s31">Cerințe funcționale</a></li>
+      <li><a href="#s32">Cerințe de interfață externă</a></li>
+      <li><a href="#s33">Cerințe de performanță</a></li>
+      <li><a href="#s34">Cerințe de securitate</a></li>
+      <li><a href="#s35">Atribute de calitate</a></li>
+    </ol>
+  </li>
+  <li><a href="#s4">Anexe</a></li>
+</ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s1">1. Introducere</h2>
+
+<h3 id="s11">1.1 Scop</h3>
+<p>
+Acest document specifică cerințele software pentru platforma web <strong>Nuclear Power Plant Web Manager</strong>,
+un sistem integrat de gestionare a centralelor nucleare, incluzând înregistrarea centralelor, studiul de fezabilitate,
+administrarea reactoarelor, monitorizarea în timp real a senzorilor, generarea de alerte și statistici,
+precum și administrarea utilizatorilor. Sistemul este conceput pentru a fi utilizat de ingineri nucleari,
+operatori și administratori.
+</p>
+
+<h3 id="s12">1.2 Convenții</h3>
+<p>
+În acest document, cuvântul „sistem" se referă la aplicația Nuclear Power Plant Web Manager.
+Cerințele funcționale sunt notate cu <strong>RF-</strong> urmat de un număr, iar cele nefuncționale cu <strong>RNF-</strong>.
+Termenii „utilizator" și „operator" se referă la persoanele fizice care interacționează cu sistemul.
+</p>
+
+<h3 id="s13">1.3 Public țintă</h3>
+<ul>
+  <li><strong>Dezvoltatori</strong> — pentru implementarea și mentenanța sistemului</li>
+  <li><strong>Ingineri nucleari / operatori</strong> — utilizatori principali ai platformei</li>
+  <li><strong>Administratori</strong> — gestionarea utilizatorilor și aprobarea centralelor</li>
+  <li><strong>Evaluatori academici</strong> — pentru verificarea conformității cu cerințele proiectului</li>
+</ul>
+
+<h3 id="s14">1.4 Domeniu de aplicare</h3>
+<p>
+Sistemul acoperă următoarele domenii funcționale:
+</p>
+<ul>
+  <li>Înregistrarea și autentificarea utilizatorilor</li>
+  <li>Gestionarea centralelor nucleare (date de bază, geologice, tehnice)</li>
+  <li>Studiul de fezabilitate cu algoritm decizional (NSVI)</li>
+  <li>Procesul de aprobare a centralelor de către administratori</li>
+  <li>CRUD pentru reactoare și senzori</li>
+  <li>Monitorizare în timp real a senzorilor via SSE</li>
+  <li>Simulator de senzori cu comportament fizic per tip de reactor</li>
+  <li>Sistem de alerte și notificări (email, notificări in-app)</li>
+  <li>Statistici și diagrame (D3.js)</li>
+  <li>Harta interactivă a centralelor (Leaflet.js)</li>
+  <li>Import/export date (JSON individual, JSON batch, CSV, ZIP)</li>
+  <li>Flux RSS pentru centrale</li>
+  <li>Administrarea utilizatorilor</li>
+</ul>
+
+<h3 id="s15">1.5 Referințe</h3>
+<ul>
+  <li>IEEE Std 830-1998 — IEEE Recommended Practice for Software Requirements Specifications</li>
+  <li>Documentația PHPMailer v6.x</li>
+  <li>Documentația PostgreSQL 15</li>
+  <li>Documentația D3.js v7</li>
+  <li>Documentația Leaflet.js 1.9.4</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="s2">2. Descriere generală</h2>
+
+<h3 id="s21">2.1 Perspectiva produsului</h3>
+<p>
+Nuclear Power Plant Web Manager este o aplicație web de sine-stătătoare, construită pe o arhitectură
+client-server fără framework-uri. Sistemul este compus din:
+</p>
+<ul>
+  <li><strong>Backend:</strong> PHP 8.4 cu Apache, PostgreSQL 15, arhitectură stratificată (Controller → Service → Repository → Entity)</li>
+  <li><strong>Frontend:</strong> HTML5, CSS3, JavaScript Vanilla (ES Modules), Leaflet.js, D3.js</li>
+  <li><strong>Infrastructură:</strong> Docker Compose (5 servicii: web, simulator, aggregator, cleanup, PostgreSQL)</li>
+</ul>
+
+<p>Sistemul comunică printr-o interfață REST API cu protecție CSRF (token în sesiune)
+și autentificare bazată pe sesiuni PHP. Fluxul de date în timp real este realizat prin Server-Sent Events (SSE).</p>
+
+<h3 id="s22">2.2 Funcționalități generale</h3>
+<table>
+  <tr><th>ID</th><th>Funcționalitate</th><th>Descriere</th></tr>
+  <tr><td>F01</td><td>Autentificare și înregistrare</td><td>Sistem complet de login/register cu sesiuni, roluri (ADMIN, ENGINEER, OPERATOR)</td></tr>
+  <tr><td>F02</td><td>Gestionare centrale</td><td>Creare, editare, vizualizare centrale cu date de bază, geologice, tehnice</td></tr>
+  <tr><td>F03</td><td>Studiu de fezabilitate</td><td>Generare raport NSVI cu algoritm decizional pe baza datelor introduse</td></tr>
+  <tr><td>F04</td><td>Aprobare centrale</td><td>Workflow DRAFT → REVIEW → APPROVED/REJECTED cu administrare</td></tr>
+  <tr><td>F05</td><td>Gestionare reactoare</td><td>CRUD reactoare cu tipuri (PWR, BWR, PHWR, FBR) și sisteme de răcire</td></tr>
+  <tr><td>F06</td><td>Gestionare senzori</td><td>CRUD senzori, populare din template-uri per tip reactor, 12 tipuri de senzori</td></tr>
+  <tr><td>F07</td><td>Monitorizare timp real</td><td>Stream SSE pentru actualizarea valorilor senzorilor la 3 secunde</td></tr>
+  <tr><td>F08</td><td>Simulator senzori</td><td>Generator de valori cu 12 strategii, comportament fizic per reactor (Template Method)</td></tr>
+  <tr><td>F09</td><td>Sistem alerte</td><td>Alerte cu severități (SCRAM, ALARMĂ, ALERTĂ, WARNING, INFO), notificări email</td></tr>
+  <tr><td>F10</td><td>Statistici</td><td>Dashboard cu KPI-uri, diagrame (bar, donut, grouped bar), măsurători orare</td></tr>
+  <tr><td>F11</td><td>Hartă interactivă</td><td>Hartă Leaflet cu localizarea centralelor, date geografice</td></tr>
+  <tr><td>F12</td><td>Import/Export</td><td>Export JSON/CSV individual și în batch, import JSON, arhivare ZIP</td></tr>
+  <tr><td>F13</td><td>Flux RSS</td><td>Feed RSS pentru centrale nucleare</td></tr>
+  <tr><td>F14</td><td>Administrare utilizatori</td><td>Listare, editare rol, ștergere utilizatori de către ADMIN</td></tr>
+  <tr><td>F15</td><td>Jurnalizare</td><td>Sistem de logging cu nivele (DEBUG..CRITICAL), context JSON, filtrări</td></tr>
+</table>
+
+<h3 id="s23">2.3 Caracteristici utilizatori</h3>
+<table>
+  <tr><th>Rol</th><th>Permisiuni</th></tr>
+  <tr><td><strong>ADMIN</strong></td><td>Aprobă/respinge centrale, administrează utilizatori, vede log-uri, acces complet la toate funcționalitățile</td></tr>
+  <tr><td><strong>ENGINEER</strong></td><td>Creează/editează centrale și reactoare, vede rapoarte, gestionează senzori</td></tr>
+  <tr><td><strong>OPERATOR</strong></td><td>Monitorizează reactoare în timp real, vede alerte și notificări</td></tr>
+</table>
+
+<h3 id="s24">2.4 Constrângeri</h3>
+<ul>
+  <li>Nu se utilizează framework-uri web (nici client, nici server)</li>
+  <li>Baza de date: PostgreSQL 15</li>
+  <li>Serviciul web: Apache 2.4 + mod_php 8.4</li>
+  <li>Containerizare: Docker Compose</li>
+  <li>Responsive design</li>
+  <li>Protecție împotriva SQL injection, XSS, CSRF</li>
+</ul>
+
+<h3 id="s25">2.5 Ipoteze și dependențe</h3>
+<ul>
+  <li>Se presupune existența unei conexiuni stabile la rețea</li>
+  <li>Dependențe externe: serviciu SMTP (Mailtrap), API de geocodare (OpenStreetMap/Nominatim)</li>
+  <li>Dependențe CDN: D3.js v7, Leaflet.js 1.9.4</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="s3">3. Cerințe specifice</h2>
+
+<h3 id="s31">3.1 Cerințe funcționale</h3>
+
+<h4>3.1.1 Autentificare și utilizatori</h4>
+<table>
+  <tr><th>ID</th><th>Cerință</th><th>Prioritate</th></tr>
+  <tr><td>RF-01</td><td>Sistemul trebuie să permită înregistrarea utilizatorilor cu username, nume, email, parolă</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-02</td><td>Sistemul trebuie să permită autentificarea prin sesiuni PHP</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-03</td><td>Sistemul trebuie să suporte 3 roluri: ADMIN, ENGINEER, OPERATOR</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-04</td><td>Sistemul trebuie să permită administratorilor listarea, modificarea rolului și ștergerea utilizatorilor</td><td><span class="priority-med">Medie</span></td></tr>
+</table>
+
+<h4>3.1.2 Gestionare centrale</h4>
+<table>
+  <tr><th>ID</th><th>Cerință</th><th>Prioritate</th></tr>
+  <tr><td>RF-05</td><td>Sistemul trebuie să permită crearea unei centrale cu denumire și date de bază (capacitate, durată construcție, descriere)</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-06</td><td>Sistemul trebuie să permită introducerea datelor geologice (țară, coordonate, tip sol, risc seismic, risc inundații etc.)</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-07</td><td>Sistemul trebuie să permită introducerea datelor tehnice (eficiență, risc operațional, configurații reactoare)</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-08</td><td>Sistemul trebuie să permită editarea datelor introduse</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-09</td><td>Sistemul trebuie să suporte un workflow de status: DRAFT → REVIEW → APPROVED / REJECTED</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-10</td><td>Sistemul trebuie să permită retragerea din verificare și redeschiderea proiectelor respinse</td><td><span class="priority-med">Medie</span></td></tr>
+</table>
+
+<h4>3.1.3 Studiu de fezabilitate</h4>
+<table>
+  <tr><th>ID</th><th>Cerință</th><th>Prioritate</th></tr>
+  <tr><td>RF-11</td><td>Sistemul trebuie să genereze un raport de fezabilitate folosind un algoritm decizional (NSVI)</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-12</td><td>Algoritmul trebuie să includă verificări geologice critice, tehnice și un sistem de scor per tip de reactor</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-13</td><td>Raportul trebuie să includă deficiențe, erori, scor NSVI și un mesaj</td><td><span class="priority-high">Ridicată</span></td></tr>
+</table>
+
+<h4>3.1.4 Gestionare reactoare</h4>
+<table>
+  <tr><th>ID</th><th>Cerință</th><th>Prioritate</th></tr>
+  <tr><td>RF-14</td><td>Sistemul trebuie să permită CRUD pentru reactoare asociate unei centrale</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-15</td><td>Tipurile de reactor suportate: PWR, BWR, PHWR, FBR</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-16</td><td>Tipurile de răcire suportate: 7 sisteme (Once-through, Natural Draft, Mechanical Draft, Dry, Hybrid, Cooling Pond etc.)</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-17</td><td>Statusurile operaționale: SHUTDOWN, COLD_STANDBY, HOT_STANDBY, STARTUP, POWER_ASCENT, FULL_POWER, PARTIAL_POWER, PLANNED_OUTAGE, UNPLANNED_OUTAGE, EMERGENCY_SHUTDOWN</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-18</td><td>Pe o centrală APPROVED nu se mai pot adăuga reactoare noi, dar cele existente pot fi editate</td><td><span class="priority-med">Medie</span></td></tr>
+</table>
+
+<h4>3.1.5 Senzori și monitorizare</h4>
+<table>
+  <tr><th>ID</th><th>Cerință</th><th>Prioritate</th></tr>
+  <tr><td>RF-19</td><td>Sistemul trebuie să permită popularea automată a senzorilor din template-uri per tip de reactor</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-20</td><td>Tipurile de senzori suportate: 12 tipuri (termocuplu, traductor presiune, detector neutroni, debitmetru, monitor radiații, senzor vibrații, senzor nivel, monitor activitate, senzor seismic, detector hidrogen, poziție vană, turație pompă)</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-21</td><td>Sistemul trebuie să furnizeze un stream SSE cu valorile actualizate ale senzorilor la fiecare 3 secunde</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-22</td><td>Valorile senzorilor trebuie actualizate de un simulator separat, cu comportament fizic diferențiat per tip reactor</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-23</td><td>Generatorii de valori trebuie să implementeze 12 strategii diferite conform tipurilor de senzori</td><td><span class="priority-high">Ridicată</span></td></tr>
+</table>
+
+<h4>3.1.6 Alerte și notificări</h4>
+<table>
+  <tr><th>ID</th><th>Cerință</th><th>Prioritate</th></tr>
+  <tr><td>RF-24</td><td>Sistemul trebuie să genereze alerte când valorile senzorilor depășesc pragurile configurate</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-25</td><td>Alertele trebuie să aibă severități: SCRAM, ALARMĂ, ALERTĂ, WARNING, INFO</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-26</td><td>Sistemul trebuie să trimită notificări email pentru evenimente critice</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-27</td><td>Sistemul trebuie să afișeze notificări tip toast în aplicație</td><td><span class="priority-med">Medie</span></td></tr>
+  <tr><td>RF-28</td><td>Utilizatorii trebuie să poată marca alertele ca citite</td><td><span class="priority-med">Medie</span></td></tr>
+</table>
+
+<h4>3.1.7 Statistici și hartă</h4>
+<table>
+  <tr><th>ID</th><th>Cerință</th><th>Prioritate</th></tr>
+  <tr><td>RF-29</td><td>Sistemul trebuie să afișeze un dashboard cu statistici (KPI-uri, diagrame D3.js)</td><td><span class="priority-med">Medie</span></td></tr>
+  <tr><td>RF-30</td><td>Statisticile trebuie să includă date despre centrale, reactoare, senzori și alerte</td><td><span class="priority-med">Medie</span></td></tr>
+  <tr><td>RF-31</td><td>Sistemul trebuie să afișeze o hartă interactivă cu localizarea centralelor</td><td><span class="priority-med">Medie</span></td></tr>
+  <tr><td>RF-32</td><td>Măsurătorile orare trebuie agregate și afișate într-un grafic</td><td><span class="priority-med">Medie</span></td></tr>
+</table>
+
+<h4>3.1.8 Import/Export</h4>
+<table>
+  <tr><th>ID</th><th>Cerință</th><th>Prioritate</th></tr>
+  <tr><td>RF-33</td><td>Sistemul trebuie să permită exportul centralelor în format JSON (individual și batch)</td><td><span class="priority-med">Medie</span></td></tr>
+  <tr><td>RF-34</td><td>Sistemul trebuie să permită exportul în format CSV</td><td><span class="priority-med">Medie</span></td></tr>
+  <tr><td>RF-35</td><td>Sistemul trebuie să permită importul centralelor din JSON (individual și batch)</td><td><span class="priority-med">Medie</span></td></tr>
+  <tr><td>RF-36</td><td>Exportul multiplu trebuie să genereze o arhivă ZIP</td><td><span class="priority-low">Scăzută</span></td></tr>
+</table>
+
+<h4>3.1.9 RSS și jurnalizare</h4>
+<table>
+  <tr><th>ID</th><th>Cerință</th><th>Prioritate</th></tr>
+  <tr><td>RF-37</td><td>Sistemul trebuie să ofere un flux RSS pentru centrale</td><td><span class="priority-low">Scăzută</span></td></tr>
+  <tr><td>RF-38</td><td>Sistemul trebuie să jurnalizeze toate acțiunile importante cu niveluri de severitate</td><td><span class="priority-high">Ridicată</span></td></tr>
+  <tr><td>RF-39</td><td>Log-urile trebuie să fie accesibile doar administratorilor</td><td><span class="priority-high">Ridicată</span></td></tr>
+</table>
+
+<h3 id="s32">3.2 Cerințe de interfață externă</h3>
+
+<h4>3.2.1 Interfață utilizator</h4>
+<ul>
+  <li>Interfață web responsive, cu temă întunecată</li>
+  <li>Navigare prin bara de navigare superioară cu link-uri diferențiate per rol</li>
+  <li>Formulare multi-pagina cu wizard pentru crearea centralelor</li>
+  <li>Tabel interactiv pentru listarea centralelor, reactoarelor și senzorilor</li>
+  <li>Diagrame D3.js pentru statistici</li>
+  <li>Hartă Leaflet.js cu markeri pentru centrale</li>
+  <li>Notificări tip toast pentru alerte</li>
+</ul>
+
+<h4>3.2.2 Interfață API</h4>
+<ul>
+  <li>API RESTful cu răspunsuri JSON</li>
+  <li>67 de rute API documentate în index.php</li>
+  <li>Protecție CSRF prin token în header</li>
+  <li>Autentificare prin sesiuni PHP cu cookie SameSite=Lax</li>
+  <li>CORS configurat pentru originile locale (localhost:5500, localhost:8081)</li>
+</ul>
+
+<h4>3.2.3 Interfață cu servicii externe</h4>
+<ul>
+  <li>SMTP prin PHPMailer (Mailtrap pentru dezvoltare)</li>
+  <li>API de geocodare OpenStreetMap/Nominatim pentru completare coordonate</li>
+  <li>CDN: D3.js v7, Leaflet.js 1.9.4</li>
+</ul>
+
+<h3 id="s33">3.3 Cerințe de performanță</h3>
+<ul>
+  <li><strong>RNF-01:</strong> Stream-ul SSE trebuie să actualizeze valorile senzorilor la maxim 3 secunde</li>
+  <li><strong>RNF-02:</strong> Simulatorul trebuie să proceseze toate reactoarele într-un ciclu de 3 secunde</li>
+  <li><strong>RNF-03:</strong> Agregarea măsurătorilor orare trebuie realizată la fiecare 60 de secunde</li>
+  <li><strong>RNF-04:</strong> Sistemul trebuie să suporte minim 10 utilizatori concurenți</li>
+  <li><strong>RNF-05:</strong> Timpul de răspuns pentru API-uri CRUD trebuie să fie sub 500ms</li>
+</ul>
+
+<h3 id="s34">3.4 Cerințe de securitate</h3>
+<ul>
+  <li><strong>RNF-06:</strong> Autentificare obligatorie pentru toate acțiunile exceptând login, register și rutele publice</li>
+  <li><strong>RNF-07:</strong> Protecție CSRF prin token de sesiune pentru toate operațiile non-GET</li>
+  <li><strong>RNF-08:</strong> Role-based access control (ADMIN, ENGINEER, OPERATOR)</li>
+  <li><strong>RNF-09:</strong> Prevenire XSS prin escaparea output-ului HTML</li>
+  <li><strong>RNF-10:</strong> Prevenire SQL injection prin PDO prepared statements</li>
+  <li><strong>RNF-11:</strong> Parole stocate hash (bcrypt implicit)</li>
+  <li><strong>RNF-12:</strong> Cookie-uri de sesiune cu flag httponly și SameSite=Lax</li>
+</ul>
+
+<h3 id="s35">3.5 Atribute de calitate</h3>
+<ul>
+  <li><strong>Disponibilitate:</strong> Sistemul trebuie să fie disponibil 24/7 cu restart automat al containerelor</li>
+  <li><strong>Mentenabilitate:</strong> Arhitectură stratificată cu separarea responsabilităților (Controller → Service → Repository)</li>
+  <li><strong>Portabilitate:</strong> Containerizare Docker, deploy pe orice sistem cu Docker Engine</li>
+  <li><strong>Fiabilitate:</strong> Simulatorul folosește Observer Pattern pentru notificări, fără pierderi de evenimente</li>
+  <li><strong>Uzabilitate:</strong> Interfață intuitivă cu ghidare pas cu pas pentru crearea centralelor</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="s4">4. Anexe</h2>
+
+<h3>A.1 Glosar</h3>
+<table>
+  <tr><th>Termen</th><th>Definiție</th></tr>
+  <tr><td>NSVI</td><td>Nuclear Safety Viability Index — scor de fezabilitate (0-100)</td></tr>
+  <tr><td>SSE</td><td>Server-Sent Events — tehnologie de streaming unidirecțional server → client</td></tr>
+  <tr><td>SCRAM</td><td>Oprire de urgență a reactorului nuclear</td></tr>
+  <tr><td>PWR</td><td>Pressurized Water Reactor</td></tr>
+  <tr><td>BWR</td><td>Boiling Water Reactor</td></tr>
+  <tr><td>PHWR</td><td>Pressurized Heavy Water Reactor (CANDU)</td></tr>
+  <tr><td>FBR</td><td>Fast Breeder Reactor</td></tr>
+  <tr><td>DTO</td><td>Data Transfer Object</td></tr>
+  <tr><td>Facade</td><td>Pattern structural care expune o interfață unificată</td></tr>
+  <tr><td>Observer</td><td>Pattern comportamental pentru notificarea abonaților</td></tr>
+  <tr><td>Template Method</td><td>Pattern comportamental care definește scheletul unui algoritm</td></tr>
+  <tr><td>Strategy</td><td>Pattern comportamental pentru alegerea algoritmului la runtime</td></tr>
+</table>
+
+<h3>A.2 Diagrama arhitecturală (C4 Context)</h3>
+<p>Sistemul se încadrează în arhitectura C4 la nivelul Context și Container:</p>
+<ul>
+  <li><strong>Context:</strong> Utilizatori (Engineer, Operator, Admin) → Sistem Nuclear Power Plant Web Manager → Servicii externe (SMTP, OpenStreetMap, CDN)</li>
+  <li><strong>Containere:</strong> Frontend Web (HTML/CSS/JS) → Backend API (PHP/Apache) → Baza de date (PostgreSQL) + Servicii suport (Simulator, Aggregator, Cleanup)</li>
+</ul>
+
+<h3>A.3 Diagrama ER (nivel înalt)</h3>
+<p>Tabelul central <code>power_plants</code> se leagă la:</p>
+<ul>
+  <li><code>basic_data</code> (1:1)</li>
+  <li><code>geological_data</code> (1:1)</li>
+  <li><code>technical_data</code> (1:1) → <code>reactor_plant_data</code> → <code>reactor_schema</code></li>
+  <li><code>reactor</code> (1:N) → <code>reactor_sensors</code> (1:N) → <code>sensor_readings</code> (1:N)</li>
+  <li><code>measurements</code> (1:N per reactor) și <code>measurements_hourly</code></li>
+  <li><code>alerts</code> (1:N per plant)</li>
+  <li><code>feasibility_reports</code> (1:N)</li>
+  <li><code>control_rods</code> (1:N per reactor)</li>
+</ul>
+
+<p style="margin-top: 2em; text-align: center; color: #666; font-size: 0.9em;">
+Acest document este licențiat sub <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+</p>
+
+</body>
+</html>
