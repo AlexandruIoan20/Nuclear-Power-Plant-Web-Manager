@@ -503,7 +503,14 @@ $router->get('/api/user/status', function() use ($userService) {
 $router->post('/api/email/send', auth(null, function () use ($emailController) { $emailController->handleSendEmail(); }));
 
 // --- Dispatch ---
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$method = $_SERVER['REQUEST_METHOD'];
+$rawUri = $_SERVER['REQUEST_URI'] ?? '/';
+$uri = parse_url($rawUri, PHP_URL_PATH);
 
-$router->dispatch($method, $uri); 
+// Forțăm un string valid dacă parse_url eșuează
+if ($uri === null || $uri === false) {
+    $uri = '/';
+}
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+$router->dispatch($method, $uri);
