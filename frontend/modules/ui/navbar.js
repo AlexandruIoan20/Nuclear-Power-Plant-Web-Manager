@@ -1,4 +1,4 @@
-import { API_BASE, BACKEND_BASE } from '../config/api.config.js';
+import { API_BASE, FRONTEND_BASE } from '../config/api.config.js';
 import './alertPopup.js';
 
 const currentPath = window.location.pathname;
@@ -35,7 +35,7 @@ function renderTopbar(el, links, user) {
     let userHtml = '';
     if (user) {
         userHtml = `
-            <a href="${BACKEND_BASE}/logout" class="button secondary" style="width:auto;padding:6px 12px;font-size:0.78rem;">Deconectare</a>
+            <a href="${FRONTEND_BASE}/logout" class="button secondary" style="width:auto;padding:6px 12px;font-size:0.78rem;">Deconectare</a>
         `;
     }
 
@@ -48,7 +48,7 @@ function renderTopbar(el, links, user) {
             <nav class="nav-links" id="navbar-links" aria-label="Navigare principală" style="flex-wrap:nowrap;">
                 ${linksHtml}
                 ${adminLink}
-                <a href="${BACKEND_BASE}/api/rss/power-plants" target="_blank" title="Flux RSS centrale nucleare" style="display:inline-flex;align-items:center;gap:4px;color:var(--orange,#f60);text-decoration:none;font-size:0.82rem;">
+                <a href="${API_BASE}/rss/power-plants" target="_blank" title="Flux RSS centrale nucleare" style="display:inline-flex;align-items:center;gap:4px;color:var(--orange,#f60);text-decoration:none;font-size:0.82rem;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="18" r="3"/><path d="M4 11a9 9 0 0 1 9 9h-3a6 6 0 0 0-6-6v-3zm0-7a16 16 0 0 1 16 16h-3a13 13 0 0 0-13-13v-3z"/></svg>
                     RSS
                 </a>
