@@ -56,6 +56,7 @@ CREATE TABLE measurements (
     efficiency DECIMAL(6,4),
     wear_delta DECIMAL(8,6),
     level_reactor_vessel DECIMAL(8,2),
+    vibration DECIMAL(8,4),
     CONSTRAINT fk_measurements_reactor
         FOREIGN KEY (reactor_id) REFERENCES reactor(id)
         ON DELETE CASCADE
