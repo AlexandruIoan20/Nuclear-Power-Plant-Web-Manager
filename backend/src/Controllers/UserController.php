@@ -189,22 +189,23 @@ class UserController {
     }
 
     public function handleLogout(): void {
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            $cookieParams = session_get_cookie_params();
-            setcookie(
-                session_name(),
-                '',
-                time() - 42000,
-                $cookieParams['path'],
-                $cookieParams['domain'],
-                $cookieParams['secure'],
-                $cookieParams['httponly']
-            );
+        $_SESSION = [];
+    
+        if (ini_get("session.use_cookies")) {
+            setcookie(session_name(), '', [
+                'expires'  => time() - 42000,
+                'path'     => '/',
+                'secure'   => true,
+                'httponly' => true,
+                'samesite' => 'None'
+            ]);
         }
-
+    
         session_destroy();
-        $locationString = "Location: " . URL_FRONTEND . "/pages/login.html"; 
-        header($locationString, true, 302);
+    
+        http_response_code(200);
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'success', 'message' => 'Delogare reușită']);
         exit;
     }
 
