@@ -1,4 +1,4 @@
-import { API_BASE, BACKEND_BASE } from '../config/api.config.js';
+import { API_BASE, BACKEND_BASE, FRONTEND_BASE } from '../config/api.config.js';
 import './alertPopup.js';
 
 const currentPath = window.location.pathname;
