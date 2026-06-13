@@ -1,3 +1,3 @@
-export const API_BASE = "http://localhost:8081/api"
-export const BACKEND_BASE = "http://localhost:8081"
-export const FRONTEND_BASE = "http://localhost:5500"
+export const API_BASE = "https://nuclear-api-wfrs.onrender.com/api"
+export const BACKEND_BASE = "https://nuclear-api-wfrs.onrender.com/"
+export const FRONTEND_BASE = "https://nuclear-front.vercel.app"
