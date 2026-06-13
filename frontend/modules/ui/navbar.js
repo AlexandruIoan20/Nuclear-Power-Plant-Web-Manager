@@ -1,4 +1,4 @@
-import { API_BASE, FRONTEND_BASE } from '../config/api.config.js';
+import { API_BASE, BACKEND_BASE } from '../config/api.config.js';
 import './alertPopup.js';
 
 const currentPath = window.location.pathname;
@@ -35,7 +35,7 @@ function renderTopbar(el, links, user) {
     let userHtml = '';
     if (user) {
         userHtml = `
-            <a href="${FRONTEND_BASE}/logout" class="button secondary" style="width:auto;padding:6px 12px;font-size:0.78rem;">Deconectare</a>
+            <a href="#" id="logout-action" class="button secondary" style="width:auto;padding:6px 12px;font-size:0.78rem;">Deconectare</a>
         `;
     }
 
@@ -62,6 +62,26 @@ function renderTopbar(el, links, user) {
     if (toggle && navLinks) {
         toggle.addEventListener('click', () => {
             navLinks.classList.toggle('nav-links--open');
+        });
+    }
+
+    const logoutAction = document.getElementById('logout-action');
+    if (logoutAction) {
+        logoutAction.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            try {
+                const response = await fetch(`${BACKEND_BASE}/logout`, {
+                    method: 'GET',
+                    credentials: 'include' 
+                });
+
+                if (response.ok) {
+                    window.location.href = `${FRONTEND_BASE}/pages/login.html`;
+                }
+            } catch (error) {
+                console.error('Eroare la delogare:', error);
+            }
         });
     }
 }
