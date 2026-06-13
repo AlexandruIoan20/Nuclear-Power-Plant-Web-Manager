@@ -130,7 +130,8 @@ $dbname   = getenv('DB_NAME');
 $username = getenv('DB_USER');
 $password = getenv('DB_PASSWORD');
 
-$dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
+// $dsn = "pgsql:host=$host;port=$port;dbname=$dbname"; //dev
+$dsn = "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require"; //production 
 
 try {
     $pdo = new PDO($dsn, $username, $password, [
