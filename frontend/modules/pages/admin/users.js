@@ -41,7 +41,7 @@ function renderTable(users) {
         <tr>
             <td>${escapeHtml(user.id)}</td>
             <td>${escapeHtml(user.username)}</td>
-            <td>${escapeHtml(user.first_name)} ${escapeHtml(user.last_name)}</td>
+            <td>${escapeHtml(user.firstName)} ${escapeHtml(user.lastName)}</td>
             <td>${escapeHtml(user.email)}</td>
             <td>${escapeHtml(user.role)}</td>
             <td class="actions-cell">
