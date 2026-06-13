@@ -1,4 +1,4 @@
 <?php 
 
-define('URL_FRONTEND', 'http://localhost:5500');
-define('URL_BACKEND', 'http://localhost:8081');
+define('URL_FRONTEND', 'https://nuclear-front.vercel.app');
+define('URL_BACKEND', 'https://nuclear-api-wfrs.onrender.com');
