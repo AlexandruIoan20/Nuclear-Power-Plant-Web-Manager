@@ -2,13 +2,42 @@
 
 require_once __DIR__ . '/../src/Constants/urls.php'; 
 
+$allowedOrigins = [
+    URL_FRONTEND,
+    URL_BACKEND,
+    'http://127.0.0.1:5500',
+    'http://localhost:5500'
+];
+
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+if ($origin) {
+    $isAllowed = in_array($origin, $allowedOrigins, true) || preg_match('/\.vercel\.app$/', $origin);
+    
+    if ($isAllowed) {
+        header("Access-Control-Allow-Origin: $origin");
+        header("Access-Control-Allow-Credentials: true");
+    } else {
+        http_response_code(403);
+        die(json_encode(["status" => "error", "message" => "Origin not allowed"]));
+    }
+}
+
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-Token");
+header("Access-Control-Expose-Headers: Location");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
 ini_set('session.gc_maxlifetime', 3600);
 ini_set('session.cookie_lifetime', 3600);
 
-// SameSite=Lax is sufficient because frontend (port 5500) and backend (port 8081)
-// are same-site (same host, different ports). No Secure flag needed over HTTP for development.
 session_start([
-    'cookie_samesite' => 'Lax',
+    'cookie_samesite' => 'None',
+    'cookie_secure'   => true, 
     'cookie_httponly' => true,
 ]);
 
@@ -19,6 +48,7 @@ if(empty($_SESSION['csrf_token'])) {
 if(!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'OPTIONS', 'HEAD'])) { 
     $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     $skipCsrf = $requestPath === '/api/logs/frontend';
+    
     if (!$skipCsrf) {
         $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''; 
         if(empty($token) || !hash_equals($_SESSION['csrf_token'], $token)) { 
@@ -30,38 +60,7 @@ if(!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'OPTIONS', 'HEAD'])) {
     }
 } 
 
-require_once __DIR__ . '/../src/Constants/urls.php';
-
-$allowedOrigins = [
-    URL_FRONTEND,
-    URL_BACKEND,
-    'http://127.0.0.1:5500',
-];
-
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-
-if ($origin) {
-    $isAllowed = in_array($origin, $allowedOrigins, true);
-    if ($isAllowed) {
-        header("Access-Control-Allow-Origin: $origin");
-        header("Access-Control-Allow-Credentials: true");
-    } else {
-        http_response_code(403);
-        die();
-    }
-}
-
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-Token");
-header("Access-Control-Expose-Headers: Location");
-
-// Handle preflight requests
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
-
-require_once __DIR__ . '/../src/Helpers/TransactionManager.php'; 
+require_once __DIR__ . '/../src/Helpers/TransactionManager.php';
 
 require_once __DIR__ . '/../src/Router.php';
 require_once __DIR__ . '/../src/Entities/User.php';
