@@ -506,7 +506,6 @@ $router->post('/api/email/send', auth(null, function () use ($emailController) {
 $rawUri = $_SERVER['REQUEST_URI'] ?? '/';
 $uri = parse_url($rawUri, PHP_URL_PATH);
 
-// Forțăm un string valid dacă parse_url eșuează
 if ($uri === null || $uri === false) {
     $uri = '/';
 }
