@@ -2,7 +2,15 @@
 
 require_once __DIR__ . '/AbstractFeasibilityChecker.php'; 
 
+/**
+ * Checker din lant care verifica sa nu existe probleme critice privind datele tehnice ale centralei 
+ */
 class TechnicalCriticalChecker extends AbstractFeasibilityChecker { 
+    /**
+     * Implementarea functiei check ce cauta erori critice in datele tehnice. 
+     * 
+     * @return array Apelul urmatorului checker | Statusul de eroare daca gaseste erori critice
+     */
     public function check(array $plantData): array { 
         $criticalErrors = []; 
         $technicalData = $plantData['technical_data'] ?? null; 

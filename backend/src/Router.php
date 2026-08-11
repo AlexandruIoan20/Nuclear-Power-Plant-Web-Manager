@@ -1,5 +1,9 @@
 <?php 
 
+/**
+ *  Clasa wrapper pentru managementul requesturilor primite. 
+ * 
+ */
 class Router { 
     private array $routes = []; 
 
@@ -23,6 +27,15 @@ class Router {
         $this->routes[] = ['method' => "DELETE", 'uri' => $uri, 'action' => $action]; 
     }
 
+    /**
+     *  Functie ce prelucreaza requestul primit de la frontend pentru a putea fi rulat de server. 
+     * 
+     *  Cauta o ruta corespunzatoare metodei HTTP si URI-ului primit. Daca ruta contine parametrii dinamici, acestia sunt extrasi 
+     *  si transmisi catre callback-ul asociat. 
+     * 
+     * @param string $requestMethod metoda HTTP a cererii 
+     * @param string $requestUri URI-ul cererii care trebuie curatat
+     */
     public function dispatch(string $requestMethod, string $requestUri): void {
         foreach ($this->routes as $route) {
             $pattern = preg_replace('/\{([a-zA-Z0-9\-]+)\}/', '([a-zA-Z0-9_.\-]+)', $route['uri']);

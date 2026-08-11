@@ -2,6 +2,9 @@
 
 require_once __DIR__ . '/../../../Entities/ReactorSensor.php';
 
+/**
+ * Clasa ce reprezinta evenimentul de incalcarea a unei valori de catre un senzor 
+ */
 class ViolationEvent {
     private string $severity;
     private float $value;

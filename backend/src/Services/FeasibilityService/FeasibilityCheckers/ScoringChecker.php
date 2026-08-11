@@ -9,7 +9,17 @@ require_once __DIR__ . '/Strategies/ConfigHelper.php';
 require_once __DIR__ . '/../../../Entities/PlantStatus.php'; 
 require_once __DIR__ . '/../../../Entities/ReactorType.php'; 
 
+/** 
+ * Ultimul checker al lantului ce reprezinta algoritmul de scoring al centralei. 
+ */
 class ScoringChecker extends AbstractFeasibilityChecker { 
+    /**
+     * Implementarea functiei de verificare. 
+     * 
+     * In functie de fiecare reactor si de tipul acestuia este aplicata o strategie de scoring. 
+     * In final este calculat scorul si toate deficientele pe care proiectul de centrala le are. 
+     * Pe baza scorului se ia o decizie. 
+     */
     public function check(array $plantData): array { 
         $schemas = $plantData['reactor_schemas']; 
          

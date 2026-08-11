@@ -5,8 +5,19 @@ require_once __DIR__ . '/../../../Entities/CoolingType.php';
 require_once __DIR__ . '/../../../Entities/WaterSourceType.php'; 
 require_once __DIR__ . '/AbstractFeasibilityChecker.php'; 
 
+/**
+ * Checker din lant care verifica sa nu existe probleme critice de pozitionare a centralei
+ */
 class GeologicalCriticalChecker extends AbstractFeasibilityChecker { 
+    /**
+     * Implementarea functiei check ce cauta erori critice in datele geografice. 
+     * 
+     * @return array Apelul urmatorului checker | Statusul de eroare daca gaseste erori critice
+     */
     public function check(array $plantData): array { 
+        /**
+         *  @var array $criticalErrors array de erori critice ce apar in raport / e ignorat daca ramane gol 
+         */
         $criticalErrors = []; 
         $geologicalData = $plantData['geological_data'] ?? null; 
         $schemas = $plantData['reactor_schemas'] ?? []; 

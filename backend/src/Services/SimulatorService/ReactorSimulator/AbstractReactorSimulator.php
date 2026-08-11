@@ -12,6 +12,10 @@ require_once __DIR__ . '/../Observers/SubjectTrait.php';
 require_once __DIR__ . '/../Observers/ViolationEvent.php';
 require_once __DIR__ . '/../../../Services/LogService.php';
 
+/**
+ * Clasa abstracta ce reprezinta modelul de design pattern Strategy implementat pentru 
+ * generarea valorilor in functie de tipul reactorului
+ */
 abstract class AbstractReactorSimulator {
     use SubjectTrait;
 
@@ -35,6 +39,15 @@ abstract class AbstractReactorSimulator {
         $this->wearCalculator = new ReactorWearCalculator();
     }
 
+    /** 
+     * Implementare a deign patternului Template Method 
+     * 
+     * Justificare: fiecare senzor are pasi structurati pe care trebuie sa ii respecte pentru a genera masuratori 
+     * 
+     * @param string $reactorId ID-ul reactorului pentru care trebuie preluati senzorii si generati valori 
+     * 
+     * @return void 
+     */
     final public function tick(string $reactorId): void {
         $reactor = $this->reactorRepository->findById($reactorId);
         if (!$reactor) return;

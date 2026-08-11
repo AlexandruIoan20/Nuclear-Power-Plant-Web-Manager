@@ -5,8 +5,14 @@ require_once __DIR__ . '/../../../../Entities/Reactor.php';
 require_once __DIR__ . '/../../../../Entities/ReactorSensor.php';
 require_once __DIR__ . '/../../../../Entities/SensorType.php';
 
-class MeasurementBuilder {
 
+/**
+ * Clasa de tip Builder necesara pentru initializarea obiectelor de tip Measurements
+ * 
+ * Importanta: Measurements este un obiect complex ce are o logica de construire
+ * ce poate justifica folosirea acestui design pattern 
+ */
+class MeasurementBuilder {
     public function build(array $newValues, array $sensors, Reactor $reactor): Measurement {
         $measurement = new Measurement($reactor->getId());
 

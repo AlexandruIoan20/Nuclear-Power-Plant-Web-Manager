@@ -4,6 +4,15 @@ require_once __DIR__ . '/SensorGeneratorStrategy.php';
 require_once __DIR__ . '/../../../Entities/ReactorSensor.php';
 
 abstract class AbstractSensorGeneratorStrategy implements SensorGeneratorStrategy {
+    /**
+     * Genereaza un numar aleator cu distributie normala. 
+     * 
+     * Folosita pentru a genera zgomot real din senzori. 
+     * 
+     * @param float $mean valoarea medie in jurul careia oscileaza rezultatul
+     * @param float $stdDev intensitatea variatiei (zgomotului)
+     * @return float valoare generata conform distributiei normale
+     */
     protected function gaussianRandom(float $mean, float $stdDev): float {
         $u1 = mt_rand(1, PHP_INT_MAX) / PHP_INT_MAX;
         $u2 = mt_rand(1, PHP_INT_MAX) / PHP_INT_MAX;

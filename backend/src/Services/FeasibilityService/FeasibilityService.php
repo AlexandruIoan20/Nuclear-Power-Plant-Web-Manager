@@ -4,12 +4,19 @@ require_once __DIR__ . '/../../Dto/FeasibilityReportDTO.php';
 require_once __DIR__ . '/../../Dto/ApiResponseDTO.php'; 
 require_once __DIR__ . '/../../Helpers/TransactionManager.php'; 
 
-class FeasibilityService
-{
+/**
+ *  Clasa de tip Service ce este responsabila cu generarea de rapoarte de fezabilitate pe baza
+ *  informatiile introduse de catre operator. 
+ */
+class FeasibilityService {
     private PlantRepositoryFacade $plantRepositoryFacade;
-    private AbstractFeasibilityChecker $checker;
     private FeasibilityRepository $feasibilityRepository;
     private TransactionManager $transactionManager; 
+
+    /**
+     *  @var AbstractFeasibilityChecker $checker Clasa abstracta ce este reprezentarea design patternului Chain of Responsibility
+     */
+    private AbstractFeasibilityChecker $checker;
 
     public function __construct(
         PlantRepositoryFacade $plantRepositoryFacade,
@@ -23,6 +30,16 @@ class FeasibilityService
         $this->transactionManager = $transactionManager; 
     }
 
+    /**
+     * Functie ce se ocupa cu generarea rapoartelor de fezabilitate. 
+     * 
+     * Porneste o tranzactie si se asigura ca exista centrala si ca este valida pentru generare. 
+     * Mai apoi genereaza raportul si opreste tranzactia. 
+     * 
+     * @param string $powerPlantId ID-ul centralei pentru care se face raportul 
+     * 
+     * @return ApiResponseDTO 
+     */
     public function generateAndSaveReport(string $powerPlantId): ApiResponseDTO
     {
         try {
